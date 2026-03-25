@@ -5,12 +5,12 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:minimal_saas_template/screens/subscription_screen.dart';
-import 'package:minimal_saas_template/providers/subscription_provider.dart';
-import 'package:minimal_saas_template/providers/auth_provider.dart' as app;
-import 'package:minimal_saas_template/services/api_service.dart';
-import 'package:minimal_saas_template/services/payment_service.dart';
-import 'package:minimal_saas_template/services/auth_service.dart';
+import 'package:train_with_joe/screens/subscription_screen.dart';
+import 'package:train_with_joe/providers/subscription_provider.dart';
+import 'package:train_with_joe/providers/auth_provider.dart' as app;
+import 'package:train_with_joe/services/api_service.dart';
+import 'package:train_with_joe/services/payment_service.dart';
+import 'package:train_with_joe/services/auth_service.dart';
 
 @GenerateMocks([ApiService, PaymentService, AuthService])
 import 'payment_completion_ui_update.property.test.mocks.dart';

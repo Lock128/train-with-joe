@@ -15,7 +15,7 @@ export class HomeComponent {
   message = '';
   isSuccess = false;
   currentYear = new Date().getFullYear();
-  registerUrl = 'https://app.example.com/register'; // Update with actual Flutter app URL
+  registerUrl = 'https://app.train-with-joe.com/register'; // Update with actual Flutter app URL
 
   async joinWaitlist() {
     if (!this.validateEmail(this.email)) {

@@ -1,4 +1,4 @@
-/* Global styles with Nexus Share branding - Matching join_page */
+/* Global styles with Train with Joe branding - Matching join_page */
 
 /* CSS Reset */
 * {
@@ -7,7 +7,7 @@
   box-sizing: border-box;
 }
 
-/* Nexus Share Color Palette - Matching join_page exactly */
+/* Train with Joe Color Palette - Matching join_page exactly */
 :root {
   /* Primary Brand Colors - Matching join_page blue theme */
   --color-primary: #1E88E5;

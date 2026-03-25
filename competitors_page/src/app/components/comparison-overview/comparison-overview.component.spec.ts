@@ -7,7 +7,7 @@ import * as fc from 'fast-check';
 
 import { ComparisonOverviewComponent } from './comparison-overview.component';
 import { CompetitorDataService } from '../../services/competitor-data.service';
-import type { CompetitorData, NexusShareData, FeatureStatus } from '../../models/competitor.interface';
+import type { CompetitorData, TrainWithJoeData, FeatureStatus } from '../../models/competitor.interface';
 
 describe('ComparisonOverviewComponent', () => {
   let component: ComparisonOverviewComponent;
@@ -49,7 +49,7 @@ describe('ComparisonOverviewComponent', () => {
     },
   ];
 
-  const mockNexusShareData: NexusShareData = {
+  const mockTrainWithJoeData: TrainWithJoeData = {
     uniqueFeatures: ['AI-powered content enhancement'],
     pricing: [
       {
@@ -57,7 +57,7 @@ describe('ComparisonOverviewComponent', () => {
         price: 0,
         billing: 'monthly',
         features: ['3 social platforms'],
-        limitations: ['Nexus Share branding'],
+        limitations: ['Train with Joe branding'],
       },
       {
         name: 'Pro',
@@ -72,7 +72,7 @@ describe('ComparisonOverviewComponent', () => {
   beforeEach(async () => {
     const mockCompetitorDataService = {
       loadCompetitorData: vi.fn(),
-      getNexusShareData: vi.fn(),
+      getTrainWithJoeData: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -96,7 +96,7 @@ describe('ComparisonOverviewComponent', () => {
 
     // Setup default mock responses
     competitorDataService.loadCompetitorData.mockReturnValue(Promise.resolve(mockCompetitorData));
-    competitorDataService.getNexusShareData.mockReturnValue(mockNexusShareData);
+    competitorDataService.getTrainWithJoeData.mockReturnValue(mockTrainWithJoeData);
   });
 
   it('should create', () => {
@@ -109,7 +109,7 @@ describe('ComparisonOverviewComponent', () => {
 
       expect(competitorDataService.loadCompetitorData).toHaveBeenCalled();
       expect(component.competitors).toEqual(mockCompetitorData);
-      expect(component.nexusShareData).toEqual(mockNexusShareData);
+      expect(component.trainWithJoeData).toEqual(mockTrainWithJoeData);
     });
 
     it('should handle loading errors', async () => {
@@ -137,7 +137,7 @@ describe('ComparisonOverviewComponent', () => {
     });
 
     it('should calculate savings correctly', () => {
-      component.nexusShareData = mockNexusShareData;
+      component.trainWithJoeData = mockTrainWithJoeData;
       const competitor = mockCompetitorData[0];
 
       // Add a paid tier to test savings calculation
@@ -160,7 +160,7 @@ describe('ComparisonOverviewComponent', () => {
      * Feature: competitor-comparison-pages, Property 1: Visual emphasis and highlighting consistency
      * Validates: Requirements 1.2, 3.2, 3.3
      */
-    it.skip('should maintain consistent visual emphasis for Nexus Share advantages across all feature comparisons', () => {
+    it.skip('should maintain consistent visual emphasis for Train with Joe advantages across all feature comparisons', () => {
       fc.assert(
         fc.property(
           // Generate random feature status combinations
@@ -177,7 +177,7 @@ describe('ComparisonOverviewComponent', () => {
           }),
           (nexusFeatures) => {
             // Set up component with generated features
-            component.nexusShareFeatures = nexusFeatures as any;
+            component.trainWithJoeFeatures = nexusFeatures as any;
 
             // Test that each feature gets consistent visual treatment
             component.featureList.forEach((feature) => {
@@ -278,16 +278,16 @@ describe('ComparisonOverviewComponent', () => {
     });
 
     /**
-     * Property test for Nexus Share highlighting consistency
-     * Ensures Nexus Share advantages are consistently highlighted
+     * Property test for Train with Joe highlighting consistency
+     * Ensures Train with Joe advantages are consistently highlighted
      */
-    it.skip('should consistently highlight Nexus Share advantages with special styling', () => {
+    it.skip('should consistently highlight Train with Joe advantages with special styling', () => {
       fc.assert(
         fc.property(fc.constantFrom('full', 'partial', 'premium', 'none'), (nexusFeatureStatus) => {
-          // Test that Nexus Share features get special visual treatment
+          // Test that Train with Joe features get special visual treatment
           const cssClass = component.getFeatureClass(nexusFeatureStatus as FeatureStatus);
 
-          // Nexus Share should always get consistent CSS class structure
+          // Train with Joe should always get consistent CSS class structure
           expect(cssClass).toBe(`feature-${nexusFeatureStatus}`);
 
           // The CSS class should be suitable for special styling
@@ -327,7 +327,7 @@ describe('ComparisonOverviewComponent', () => {
           (competitors) => {
             // Set up component with generated competitors
             component.competitors = competitors as any;
-            component.nexusShareData = mockNexusShareData;
+            component.trainWithJoeData = mockTrainWithJoeData;
 
             // Test that conversion opportunities are available
 
@@ -339,13 +339,13 @@ describe('ComparisonOverviewComponent', () => {
               expect(savings).toBeGreaterThanOrEqual(0);
             });
 
-            // 2. Nexus Share pricing should be available for conversion
-            expect(component.nexusShareData).toBeTruthy();
-            expect(component.nexusShareData!.pricing).toBeTruthy();
-            expect(component.nexusShareData!.pricing.length).toBeGreaterThan(0);
+            // 2. Train with Joe pricing should be available for conversion
+            expect(component.trainWithJoeData).toBeTruthy();
+            expect(component.trainWithJoeData!.pricing).toBeTruthy();
+            expect(component.trainWithJoeData!.pricing.length).toBeGreaterThan(0);
 
             // 3. Each pricing tier should have clear features for conversion
-            component.nexusShareData!.pricing.forEach((tier) => {
+            component.trainWithJoeData!.pricing.forEach((tier) => {
               expect(tier.name).toBeTruthy();
               expect(typeof tier.price).toBe('number');
               expect(tier.features).toBeTruthy();
@@ -353,8 +353,8 @@ describe('ComparisonOverviewComponent', () => {
             });
 
             // 4. Unique features should be highlighted for conversion
-            expect(component.nexusShareData!.uniqueFeatures).toBeTruthy();
-            expect(component.nexusShareData!.uniqueFeatures.length).toBeGreaterThan(0);
+            expect(component.trainWithJoeData!.uniqueFeatures).toBeTruthy();
+            expect(component.trainWithJoeData!.uniqueFeatures.length).toBeGreaterThan(0);
           },
         ),
         { numRuns: 100 },
@@ -406,7 +406,7 @@ describe('ComparisonOverviewComponent', () => {
             }));
 
             component.competitors = competitors as any;
-            component.nexusShareData = mockNexusShareData;
+            component.trainWithJoeData = mockTrainWithJoeData;
 
             // Test that conversion opportunities are consistently available
 

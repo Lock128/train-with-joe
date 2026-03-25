@@ -19,7 +19,7 @@ export interface OGMetaConfig {
   providedIn: 'root',
 })
 export class OGMetaService {
-  private readonly baseUrl = 'https://nexus-share.com/cards';
+  private readonly baseUrl = 'https://train-with-joe.com/cards';
   private readonly defaultImage = `${this.baseUrl}/assets/images/og-profile.png`;
 
   constructor(
@@ -45,14 +45,14 @@ export class OGMetaService {
     this.updateMetaTag('og:image', config.image || this.defaultImage, 'property');
     this.updateMetaTag('og:image:width', '1200', 'property');
     this.updateMetaTag('og:image:height', '630', 'property');
-    this.updateMetaTag('og:site_name', 'Nexus Share', 'property');
+    this.updateMetaTag('og:site_name', 'Train with Joe', 'property');
 
     // Twitter Card tags
     this.updateMetaTag('twitter:card', 'summary_large_image');
     this.updateMetaTag('twitter:title', config.title);
     this.updateMetaTag('twitter:description', config.description);
     this.updateMetaTag('twitter:image', config.image || this.defaultImage);
-    this.updateMetaTag('twitter:site', '@nexus_share');
+    this.updateMetaTag('twitter:site', '@train_with_joe');
 
     // Profile-specific tags
     if (config.username) {
@@ -84,7 +84,7 @@ export class OGMetaService {
    * Update leaderboard meta tags
    */
   updateLeaderboardMeta(leaderboardType: string, period: string): void {
-    const title = `${leaderboardType} Leaderboard - ${period} | Nexus Share`;
+    const title = `${leaderboardType} Leaderboard - ${period} | Train with Joe`;
     const description = `View the top performers in ${leaderboardType.toLowerCase()} for ${period.toLowerCase()}. See who's leading in social media automation.`;
 
     this.updateProfileCardMeta({
@@ -148,7 +148,7 @@ export class OGMetaService {
    */
   resetToDefaults(): void {
     this.updateProfileCardMeta({
-      title: 'Nexus Share Profile Cards - Social Media Statistics',
+      title: 'Train with Joe Profile Cards - Social Media Statistics',
       description:
         'View detailed social media statistics and achievements. Track posts, engagement streaks, and AI usage across multiple platforms.',
       type: 'website',

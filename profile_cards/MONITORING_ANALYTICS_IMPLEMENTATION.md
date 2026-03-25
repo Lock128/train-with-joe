@@ -16,7 +16,7 @@ The implementation includes:
 
 The card generator Lambda function now publishes the following custom metrics to CloudWatch:
 
-**Namespace**: `NexusShare/ProfileCards`
+**Namespace**: `TrainWithJoe/ProfileCards`
 
 **Metrics**:
 - `ProfileCardsGenerated` (Count): Number of profile cards successfully generated
@@ -66,7 +66,7 @@ For production environment, alarms send notifications to an SNS topic. Configure
 - `createCloudWatchAlarms()`: Creates alarms for monitoring
 
 **Permissions**:
-The Lambda function has been granted `cloudwatch:PutMetricData` permission with a condition that restricts it to the `NexusShare/ProfileCards` namespace.
+The Lambda function has been granted `cloudwatch:PutMetricData` permission with a condition that restricts it to the `TrainWithJoe/ProfileCards` namespace.
 
 ## Frontend Analytics (Task 7.2)
 
@@ -182,7 +182,7 @@ This can be implemented to:
 
 1. Navigate to CloudWatch Console
 2. Select "Metrics" → "All metrics"
-3. Choose "NexusShare/ProfileCards" namespace
+3. Choose "TrainWithJoe/ProfileCards" namespace
 4. View metrics by environment dimension
 
 ### CloudWatch Logs
@@ -226,7 +226,7 @@ To view alarm status:
 2. Check CloudWatch metrics:
    ```bash
    aws cloudwatch get-metric-statistics \
-     --namespace NexusShare/ProfileCards \
+     --namespace TrainWithJoe/ProfileCards \
      --metric-name ProfileCardsGenerated \
      --dimensions Name=Environment,Value=sandbox \
      --start-time 2024-01-01T00:00:00Z \
@@ -249,9 +249,9 @@ Example log:
   "namespace": "ProfileCards",
   "userId": "user-123",
   "timestamp": "2024-01-15T10:30:00.000Z",
-  "referrer": "https://nexus-share.com",
+  "referrer": "https://train-with-joe.com",
   "userAgent": "Mozilla/5.0...",
-  "url": "https://cards.nexus-share.com/user-123"
+  "url": "https://cards.train-with-joe.com/user-123"
 }
 ```
 
@@ -301,7 +301,7 @@ To enable automatic capture of frontend analytics events, configure CloudWatch R
 
 1. Check Lambda execution logs for errors
 2. Verify IAM permissions for `cloudwatch:PutMetricData`
-3. Ensure namespace is exactly `NexusShare/ProfileCards`
+3. Ensure namespace is exactly `TrainWithJoe/ProfileCards`
 
 ### Alarms Not Triggering
 

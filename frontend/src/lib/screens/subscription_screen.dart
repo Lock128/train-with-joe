@@ -272,7 +272,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Subscription'),
+        title: const Text('Learning Plans'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/home'),
@@ -389,7 +389,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     ] else ...[
                       // No active subscription - show plans
                       const Text(
-                        'Choose a Plan',
+                        'Choose Your Learning Plan',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -414,12 +414,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       // Basic plan
                       _buildPlanCard(
                         context,
-                        title: 'Basic Plan',
+                        title: 'Explorer Plan',
                         price: '\$9.99/month',
                         features: const [
-                          'Access to all features',
-                          'Email support',
-                          'Regular updates',
+                          'Access to vocabulary games',
+                          'Daily word challenges',
+                          'Progress tracking',
                         ],
                         planId: 'basic-monthly',
                         isPopular: false,
@@ -429,13 +429,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       // Pro plan
                       _buildPlanCard(
                         context,
-                        title: 'Pro Plan',
+                        title: 'Champion Plan',
                         price: '\$19.99/month',
                         features: const [
-                          'All Basic features',
-                          'Priority support',
-                          'Advanced analytics',
-                          'Custom integrations',
+                          'All Explorer features',
+                          'Advanced word lists',
+                          'Parent dashboard',
+                          'Unlimited practice sessions',
                         ],
                         planId: 'pro-monthly',
                         isPopular: true,

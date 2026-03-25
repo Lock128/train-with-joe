@@ -183,10 +183,10 @@ class _MyAppState extends State<MyApp> {
       child: Consumer<app.AuthProvider>(
         builder: (context, authProvider, _) {
           return MaterialApp.router(
-            title: 'Minimal SaaS Template',
+            title: 'Train with Joe',
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.blue,
+                seedColor: Colors.orange,
                 brightness: Brightness.light,
               ),
               useMaterial3: true,

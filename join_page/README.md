@@ -1,6 +1,6 @@
 # Join Page - Angular Landing Page
 
-This is the landing page for the minimal SaaS template, built with Angular 20+ standalone components.
+This is the landing page for Train with Joe, built with Angular 20+ standalone components.
 
 ## Features
 

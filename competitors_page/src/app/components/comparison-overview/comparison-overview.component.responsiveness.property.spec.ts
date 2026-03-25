@@ -23,7 +23,7 @@ describe('ComparisonOverviewComponent - Responsiveness Property Tests', () => {
     // Create mock services
     mockCompetitorDataService = {
       loadCompetitorData: () => Promise.resolve([]),
-      getNexusShareData: () => null,
+      getTrainWithJoeData: () => null,
       clearData: () => {},
     };
 

@@ -5,7 +5,7 @@ import * as fc from 'fast-check';
 import { FeatureMatrixComponent } from './feature-matrix.component';
 import type {
   CompetitorData,
-  NexusShareData,
+  TrainWithJoeData,
   FeatureComparison,
   FeatureStatus,
 } from '../../models/competitor.interface';
@@ -57,7 +57,7 @@ describe('FeatureMatrixComponent - Property Tests', () => {
     lastUpdated: fc.constant('2024-12-30'),
   }) as fc.Arbitrary<CompetitorData>;
 
-  const nexusShareArb = fc.record({
+  const trainWithJoeArb = fc.record({
     uniqueFeatures: fc.array(fc.string({ minLength: 1, maxLength: 100 }), { minLength: 1, maxLength: 10 }),
     pricing: fc.array(
       fc.record({
@@ -69,7 +69,7 @@ describe('FeatureMatrixComponent - Property Tests', () => {
       }),
       { minLength: 1, maxLength: 2 },
     ),
-  }) as fc.Arbitrary<NexusShareData>;
+  }) as fc.Arbitrary<TrainWithJoeData>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -90,14 +90,14 @@ describe('FeatureMatrixComponent - Property Tests', () => {
     fc.assert(
       fc.property(
         fc.array(competitorArb, { minLength: 1, maxLength: 5 }),
-        nexusShareArb,
+        trainWithJoeArb,
         fc.boolean(),
-        (competitors, nexusShare, highlightNexusShare) => {
+        (competitors, trainWithJoe, highlightTrainWithJoe) => {
           // Arrange
           component.competitors = competitors;
-          component.nexusShare = nexusShare;
+          component.trainWithJoe = trainWithJoe;
           component.showTooltips = true; // Enable tooltips for this test
-          component.highlightNexusShare = highlightNexusShare;
+          component.highlightTrainWithJoe = highlightTrainWithJoe;
 
           fixture.detectChanges();
 
@@ -151,31 +151,35 @@ describe('FeatureMatrixComponent - Property Tests', () => {
    */
   it.skip('should provide consistent and informative tooltip content for all features', () => {
     fc.assert(
-      fc.property(fc.array(competitorArb, { minLength: 1, maxLength: 3 }), nexusShareArb, (competitors, nexusShare) => {
-        // Arrange
-        component.competitors = competitors;
-        component.nexusShare = nexusShare;
-        component.showTooltips = true;
+      fc.property(
+        fc.array(competitorArb, { minLength: 1, maxLength: 3 }),
+        trainWithJoeArb,
+        (competitors, trainWithJoe) => {
+          // Arrange
+          component.competitors = competitors;
+          component.trainWithJoe = trainWithJoe;
+          component.showTooltips = true;
 
-        fixture.detectChanges();
+          fixture.detectChanges();
 
-        // Act & Assert
-        component.featureDefinitions.forEach((feature) => {
-          // Each feature should have a non-empty description
-          const description = component.getFeatureDescription(feature.key);
-          expect(description).toBe(feature.description);
-          expect(description.length).toBeGreaterThan(10); // Meaningful description
+          // Act & Assert
+          component.featureDefinitions.forEach((feature) => {
+            // Each feature should have a non-empty description
+            const description = component.getFeatureDescription(feature.key);
+            expect(description).toBe(feature.description);
+            expect(description.length).toBeGreaterThan(10); // Meaningful description
 
-          // Each feature should have a proper display name
-          const displayName = component.getFeatureDisplayName(feature.key);
-          expect(displayName).toBe(feature.displayName);
-          expect(displayName.length).toBeGreaterThan(0);
-          expect(displayName).not.toBe(feature.key); // Should be human-readable, not just the key
+            // Each feature should have a proper display name
+            const displayName = component.getFeatureDisplayName(feature.key);
+            expect(displayName).toBe(feature.displayName);
+            expect(displayName.length).toBeGreaterThan(0);
+            expect(displayName).not.toBe(feature.key); // Should be human-readable, not just the key
 
-          // Display name should not contain underscores (should be formatted)
-          expect(displayName).not.toContain('_');
-        });
-      }),
+            // Display name should not contain underscores (should be formatted)
+            expect(displayName).not.toContain('_');
+          });
+        },
+      ),
       { numRuns: 100 },
     );
   });
@@ -187,41 +191,45 @@ describe('FeatureMatrixComponent - Property Tests', () => {
    */
   it.skip('should maintain proper accessibility for all interactive tooltip elements', () => {
     fc.assert(
-      fc.property(fc.array(competitorArb, { minLength: 1, maxLength: 4 }), nexusShareArb, (competitors, nexusShare) => {
-        // Arrange
-        component.competitors = competitors;
-        component.nexusShare = nexusShare;
-        component.showTooltips = true;
+      fc.property(
+        fc.array(competitorArb, { minLength: 1, maxLength: 4 }),
+        trainWithJoeArb,
+        (competitors, trainWithJoe) => {
+          // Arrange
+          component.competitors = competitors;
+          component.trainWithJoe = trainWithJoe;
+          component.showTooltips = true;
 
-        fixture.detectChanges();
+          fixture.detectChanges();
 
-        // Act & Assert
-        const tooltipTriggers = fixture.debugElement.queryAll(By.css('.tooltip-trigger'));
+          // Act & Assert
+          const tooltipTriggers = fixture.debugElement.queryAll(By.css('.tooltip-trigger'));
 
-        tooltipTriggers.forEach((trigger, index) => {
-          const triggerElement = trigger.nativeElement as HTMLButtonElement;
-          const featureKey = component.featureDefinitions[index].key;
-          const displayName = component.getFeatureDisplayName(featureKey);
+          tooltipTriggers.forEach((trigger, index) => {
+            const triggerElement = trigger.nativeElement as HTMLButtonElement;
+            const featureKey = component.featureDefinitions[index].key;
+            const displayName = component.getFeatureDisplayName(featureKey);
 
-          // Should have proper ARIA label
-          const ariaLabel = triggerElement.getAttribute('aria-label');
-          expect(ariaLabel).toBeTruthy();
-          expect(ariaLabel).toContain('Learn more about');
-          expect(ariaLabel).toContain(displayName);
+            // Should have proper ARIA label
+            const ariaLabel = triggerElement.getAttribute('aria-label');
+            expect(ariaLabel).toBeTruthy();
+            expect(ariaLabel).toContain('Learn more about');
+            expect(ariaLabel).toContain(displayName);
 
-          // Should be a button element for keyboard accessibility
-          expect(triggerElement.tagName.toLowerCase()).toBe('button');
-          expect(triggerElement.type).toBe('button');
+            // Should be a button element for keyboard accessibility
+            expect(triggerElement.tagName.toLowerCase()).toBe('button');
+            expect(triggerElement.type).toBe('button');
 
-          // Should be focusable
-          expect(triggerElement.tabIndex).not.toBe(-1);
+            // Should be focusable
+            expect(triggerElement.tabIndex).not.toBe(-1);
 
-          // Should have visual indicator
-          const tooltipIcon = trigger.query(By.css('.tooltip-icon'));
-          expect(tooltipIcon).toBeTruthy();
-          expect(tooltipIcon.nativeElement.getAttribute('aria-hidden')).toBe('true');
-        });
-      }),
+            // Should have visual indicator
+            const tooltipIcon = trigger.query(By.css('.tooltip-icon'));
+            expect(tooltipIcon).toBeTruthy();
+            expect(tooltipIcon.nativeElement.getAttribute('aria-hidden')).toBe('true');
+          });
+        },
+      ),
       { numRuns: 100 },
     );
   });
@@ -235,12 +243,12 @@ describe('FeatureMatrixComponent - Property Tests', () => {
     fc.assert(
       fc.property(
         fc.array(competitorArb, { minLength: 1, maxLength: 3 }),
-        nexusShareArb,
+        trainWithJoeArb,
         fc.array(fc.constantFrom(...component.featureDefinitions.map((f) => f.key)), { minLength: 1, maxLength: 5 }),
-        (competitors, nexusShare, featureKeysToTest) => {
+        (competitors, trainWithJoe, featureKeysToTest) => {
           // Arrange
           component.competitors = competitors;
-          component.nexusShare = nexusShare;
+          component.trainWithJoe = trainWithJoe;
           component.showTooltips = true;
 
           fixture.detectChanges();
@@ -286,27 +294,31 @@ describe('FeatureMatrixComponent - Property Tests', () => {
    */
   it.skip('should not render interactive tooltip elements when tooltips are disabled', () => {
     fc.assert(
-      fc.property(fc.array(competitorArb, { minLength: 1, maxLength: 4 }), nexusShareArb, (competitors, nexusShare) => {
-        // Arrange
-        component.competitors = competitors;
-        component.nexusShare = nexusShare;
-        component.showTooltips = false; // Disable tooltips
+      fc.property(
+        fc.array(competitorArb, { minLength: 1, maxLength: 4 }),
+        trainWithJoeArb,
+        (competitors, trainWithJoe) => {
+          // Arrange
+          component.competitors = competitors;
+          component.trainWithJoe = trainWithJoe;
+          component.showTooltips = false; // Disable tooltips
 
-        fixture.detectChanges();
+          fixture.detectChanges();
 
-        // Act & Assert
-        // No tooltip triggers should be rendered when tooltips are disabled
-        const tooltipTriggers = fixture.debugElement.queryAll(By.css('.tooltip-trigger'));
-        expect(tooltipTriggers.length).toBe(0);
+          // Act & Assert
+          // No tooltip triggers should be rendered when tooltips are disabled
+          const tooltipTriggers = fixture.debugElement.queryAll(By.css('.tooltip-trigger'));
+          expect(tooltipTriggers.length).toBe(0);
 
-        // No tooltip content should be rendered
-        const tooltipContent = fixture.debugElement.queryAll(By.css('.tooltip-content'));
-        expect(tooltipContent.length).toBe(0);
+          // No tooltip content should be rendered
+          const tooltipContent = fixture.debugElement.queryAll(By.css('.tooltip-content'));
+          expect(tooltipContent.length).toBe(0);
 
-        // Feature names should still be displayed
-        const featureNames = fixture.debugElement.queryAll(By.css('.feature-name'));
-        expect(featureNames.length).toBe(component.featureDefinitions.length);
-      }),
+          // Feature names should still be displayed
+          const featureNames = fixture.debugElement.queryAll(By.css('.feature-name'));
+          expect(featureNames.length).toBe(component.featureDefinitions.length);
+        },
+      ),
       { numRuns: 100 },
     );
   });

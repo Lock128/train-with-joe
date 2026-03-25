@@ -1,5 +1,5 @@
-name: minimal_saas_template
-description: A minimal SaaS template with Flutter frontend and AWS backend
+name: train_with_joe
+description: Train with Joe - A fun vocabulary training app for kids
 version: 1.0.0+1
 
 environment:

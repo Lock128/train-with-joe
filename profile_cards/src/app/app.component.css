@@ -1,4 +1,4 @@
-/* Global app styles with Nexus Share branding - Matching join_page */
+/* Global app styles with Train with Joe branding - Matching join_page */
 .app-container {
   min-height: 100vh;
   display: flex;
@@ -11,7 +11,7 @@
   background: linear-gradient(135deg, rgba(30, 136, 229, 0.02), rgba(100, 181, 246, 0.03));
 }
 
-/* Footer with Nexus Share branding - Matching join_page */
+/* Footer with Train with Joe branding - Matching join_page */
 .app-footer {
   background: #F5F5F5;
   border-top: 1px solid #E0E0E0;

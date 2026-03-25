@@ -79,7 +79,7 @@ export class BaseStack extends Stack {
     frontendClient: UserPoolClient;
   } {
     const userPool = new UserPool(this, 'UserPool', {
-      userPoolName: `MinimalSaaS-${namespace}`,
+      userPoolName: `TrainWithJoe-${namespace}`,
       selfSignUpEnabled: true,
       removalPolicy: RemovalPolicy.DESTROY, // for development only
       standardAttributes: {
@@ -124,7 +124,7 @@ export class BaseStack extends Stack {
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
               <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #1976d2; margin-bottom: 10px;">Minimal SaaS</h1>
+                <h1 style="color: #1976d2; margin-bottom: 10px;">Train with Joe</h1>
                 <p style="font-size: 18px; color: #666;">Verification Code</p>
               </div>
               
@@ -140,14 +140,14 @@ export class BaseStack extends Stack {
               
               <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
               <p style="font-size: 12px; color: #666; text-align: center;">
-                This is an automated message from Minimal SaaS.<br>
+                This is an automated message from Train with Joe.<br>
                 Please do not reply to this email.
               </p>
             </div>
           </body>
         </html>
       `,
-      emailSubject: 'Your Minimal SaaS verification code',
+      emailSubject: 'Your Train with Joe verification code',
     };
 
     // Configure password policy
@@ -174,7 +174,7 @@ export class BaseStack extends Stack {
       },
       removalPolicy: RemovalPolicy.DESTROY,
       stream: StreamViewType.NEW_AND_OLD_IMAGES,
-      tableName: `minimal-saas-users-${namespace}`,
+      tableName: `train-with-joe-users-${namespace}`,
     });
 
     // Add GSI for email lookup
@@ -198,7 +198,7 @@ export class BaseStack extends Stack {
       },
       removalPolicy: RemovalPolicy.DESTROY,
       stream: StreamViewType.NEW_AND_OLD_IMAGES,
-      tableName: `minimal-saas-subscriptions-${namespace}`,
+      tableName: `train-with-joe-subscriptions-${namespace}`,
     });
 
     // Add GSI for userId lookup
@@ -214,7 +214,7 @@ export class BaseStack extends Stack {
   }
 
   createAssetsBucket(namespace: string): Bucket {
-    const domainName = namespace === 'prod' ? 'minimal-saas.com' : `${namespace}.minimal-saas.com`;
+    const domainName = namespace === 'prod' ? 'train-with-joe.com' : `${namespace}.train-with-joe.com`;
     const allowedOrigins = [`https://${domainName}`];
     if (namespace !== 'prod') {
       allowedOrigins.push('http://localhost:*');

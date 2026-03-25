@@ -6,7 +6,7 @@ import { PricingTableComponent } from './pricing-table.component';
 import { FeatureMatrixComponent } from '../feature-matrix/feature-matrix.component';
 import type {
   CompetitorData,
-  NexusShareData,
+  TrainWithJoeData,
   PricingTier,
   FeatureComparison,
   FeatureStatus,
@@ -62,10 +62,10 @@ describe('Responsive Design Property Tests', () => {
     lastUpdated: fc.constant('2024-12-30'),
   }) as fc.Arbitrary<CompetitorData>;
 
-  const nexusShareArb = fc.record({
+  const trainWithJoeArb = fc.record({
     uniqueFeatures: fc.array(fc.string({ minLength: 10, maxLength: 100 }), { minLength: 1, maxLength: 5 }),
     pricing: fc.array(pricingTierArb, { minLength: 1, maxLength: 3 }),
-  }) as fc.Arbitrary<NexusShareData>;
+  }) as fc.Arbitrary<TrainWithJoeData>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -91,14 +91,14 @@ describe('Responsive Design Property Tests', () => {
     fc.assert(
       fc.property(
         fc.array(competitorArb, { minLength: 1, maxLength: 6 }),
-        nexusShareArb,
+        trainWithJoeArb,
         fc.boolean(),
         fc.boolean(),
-        (competitors, nexusShare, showNexusShare, highlightSavings) => {
+        (competitors, trainWithJoe, showTrainWithJoe, highlightSavings) => {
           // Arrange
           pricingComponent.competitors = competitors;
-          pricingComponent.nexusShare = nexusShare;
-          pricingComponent.showNexusShare = showNexusShare;
+          pricingComponent.trainWithJoe = trainWithJoe;
+          pricingComponent.showTrainWithJoe = showTrainWithJoe;
           pricingComponent.highlightSavings = highlightSavings;
 
           pricingFixture.detectChanges();
@@ -109,7 +109,7 @@ describe('Responsive Design Property Tests', () => {
 
           // Table should have proper structure
           const tableHeaders = pricingFixture.debugElement.queryAll(By.css('.pricing-table thead th'));
-          const expectedColumns = 1 + (showNexusShare ? 1 : 0) + competitors.length; // plan + nexus + competitors
+          const expectedColumns = 1 + (showTrainWithJoe ? 1 : 0) + competitors.length; // plan + nexus + competitors
           expect(tableHeaders.length).toBe(expectedColumns);
 
           // Mobile structure should exist
@@ -118,7 +118,7 @@ describe('Responsive Design Property Tests', () => {
 
           // Mobile cards should exist for all platforms
           const mobilePlatformCards = pricingFixture.debugElement.queryAll(By.css('.mobile-platform-card'));
-          const expectedMobileCards = (showNexusShare ? 1 : 0) + competitors.length;
+          const expectedMobileCards = (showTrainWithJoe ? 1 : 0) + competitors.length;
           expect(mobilePlatformCards.length).toBe(expectedMobileCards);
 
           // Each mobile card should have proper structure
@@ -155,15 +155,15 @@ describe('Responsive Design Property Tests', () => {
     fc.assert(
       fc.property(
         fc.array(competitorArb, { minLength: 1, maxLength: 5 }),
-        nexusShareArb,
+        trainWithJoeArb,
         fc.boolean(),
         fc.boolean(),
-        (competitors, nexusShare, showTooltips, highlightNexusShare) => {
+        (competitors, trainWithJoe, showTooltips, highlightTrainWithJoe) => {
           // Arrange
           featureComponent.competitors = competitors;
-          featureComponent.nexusShare = nexusShare;
+          featureComponent.trainWithJoe = trainWithJoe;
           featureComponent.showTooltips = showTooltips;
-          featureComponent.highlightNexusShare = highlightNexusShare;
+          featureComponent.highlightTrainWithJoe = highlightTrainWithJoe;
 
           featureFixture.detectChanges();
 
@@ -173,7 +173,7 @@ describe('Responsive Design Property Tests', () => {
 
           // Table should have proper responsive structure
           const tableHeaders = featureFixture.debugElement.queryAll(By.css('.feature-matrix-table thead th'));
-          const expectedColumns = 1 + (highlightNexusShare ? 1 : 0) + competitors.length; // features + nexus + competitors
+          const expectedColumns = 1 + (highlightTrainWithJoe ? 1 : 0) + competitors.length; // features + nexus + competitors
           expect(tableHeaders.length).toBe(expectedColumns);
 
           // Feature rows should exist for all features
@@ -198,7 +198,7 @@ describe('Responsive Design Property Tests', () => {
 
             // Should have competitors in mobile view
             const mobileCompetitors = group.queryAll(By.css('.mobile-competitor'));
-            const expectedMobileCompetitors = (highlightNexusShare ? 1 : 0) + competitors.length;
+            const expectedMobileCompetitors = (highlightTrainWithJoe ? 1 : 0) + competitors.length;
             expect(mobileCompetitors.length).toBe(expectedMobileCompetitors);
           });
 
@@ -221,59 +221,63 @@ describe('Responsive Design Property Tests', () => {
    */
   it.skip('should adapt content presentation for different viewport constraints', () => {
     fc.assert(
-      fc.property(fc.array(competitorArb, { minLength: 1, maxLength: 4 }), nexusShareArb, (competitors, nexusShare) => {
-        // Test both components
-        const components = [
-          { component: pricingComponent, fixture: pricingFixture },
-          { component: featureComponent, fixture: featureFixture },
-        ];
+      fc.property(
+        fc.array(competitorArb, { minLength: 1, maxLength: 4 }),
+        trainWithJoeArb,
+        (competitors, trainWithJoe) => {
+          // Test both components
+          const components = [
+            { component: pricingComponent, fixture: pricingFixture },
+            { component: featureComponent, fixture: featureFixture },
+          ];
 
-        components.forEach(({ component, fixture }) => {
-          // Arrange
-          component.competitors = competitors;
-          component.nexusShare = nexusShare;
+          components.forEach(({ component, fixture }) => {
+            // Arrange
+            component.competitors = competitors;
+            component.trainWithJoe = trainWithJoe;
 
-          fixture.detectChanges();
+            fixture.detectChanges();
 
-          // Act & Assert - Check for responsive elements
-          const scrollContainers = fixture.debugElement.queryAll(By.css('[class*="scroll-container"]'));
+            // Act & Assert - Check for responsive elements
+            const scrollContainers = fixture.debugElement.queryAll(By.css('[class*="scroll-container"]'));
 
-          // Should have horizontal scroll containers for wide tables
-          if (scrollContainers.length > 0) {
-            scrollContainers.forEach((container) => {
-              const element = container.nativeElement as HTMLElement;
-              // Should have overflow-x auto or scroll for horizontal scrolling
-              const computedStyle = getComputedStyle(element);
-              expect(['auto', 'scroll', 'visible']).toContain(computedStyle.overflowX);
+            // Should have horizontal scroll containers for wide tables
+            if (scrollContainers.length > 0) {
+              scrollContainers.forEach((container) => {
+                const element = container.nativeElement as HTMLElement;
+                // Should have overflow-x auto or scroll for horizontal scrolling
+                const computedStyle = getComputedStyle(element);
+                expect(['auto', 'scroll', 'visible']).toContain(computedStyle.overflowX);
+              });
+            }
+
+            // Should have mobile-specific elements or responsive design
+            const mobileElements = fixture.debugElement.queryAll(
+              By.css('[class*="mobile-"], .responsive-table, .table-responsive'),
+            );
+            // Mobile elements are optional - responsive design might use different approaches
+            // Verify mobile elements are properly structured if present
+            if (mobileElements.length > 0) {
+              expect(mobileElements.length).toBeGreaterThan(0);
+            }
+
+            // Should have proper ARIA labels for accessibility
+            const tables = fixture.debugElement.queryAll(By.css('table[role="table"]'));
+            tables.forEach((table) => {
+              const ariaLabel = table.nativeElement.getAttribute('aria-label');
+              expect(ariaLabel).toBeTruthy();
+              expect(ariaLabel.length).toBeGreaterThan(0);
             });
-          }
 
-          // Should have mobile-specific elements or responsive design
-          const mobileElements = fixture.debugElement.queryAll(
-            By.css('[class*="mobile-"], .responsive-table, .table-responsive'),
-          );
-          // Mobile elements are optional - responsive design might use different approaches
-          // Verify mobile elements are properly structured if present
-          if (mobileElements.length > 0) {
-            expect(mobileElements.length).toBeGreaterThan(0);
-          }
-
-          // Should have proper ARIA labels for accessibility
-          const tables = fixture.debugElement.queryAll(By.css('table[role="table"]'));
-          tables.forEach((table) => {
-            const ariaLabel = table.nativeElement.getAttribute('aria-label');
-            expect(ariaLabel).toBeTruthy();
-            expect(ariaLabel.length).toBeGreaterThan(0);
+            // Headers should have proper scope attributes
+            const tableHeaders = fixture.debugElement.queryAll(By.css('th[scope]'));
+            tableHeaders.forEach((header) => {
+              const scope = header.nativeElement.getAttribute('scope');
+              expect(['col', 'row']).toContain(scope);
+            });
           });
-
-          // Headers should have proper scope attributes
-          const tableHeaders = fixture.debugElement.queryAll(By.css('th[scope]'));
-          tableHeaders.forEach((header) => {
-            const scope = header.nativeElement.getAttribute('scope');
-            expect(['col', 'row']).toContain(scope);
-          });
-        });
-      }),
+        },
+      ),
       { numRuns: 5 },
     );
   });
@@ -285,80 +289,84 @@ describe('Responsive Design Property Tests', () => {
    */
   it.skip('should handle competitor logos responsively across all configurations', () => {
     fc.assert(
-      fc.property(fc.array(competitorArb, { minLength: 1, maxLength: 5 }), nexusShareArb, (competitors, nexusShare) => {
-        // Test pricing component
-        pricingComponent.competitors = competitors;
-        pricingComponent.nexusShare = nexusShare;
-        pricingFixture.detectChanges();
+      fc.property(
+        fc.array(competitorArb, { minLength: 1, maxLength: 5 }),
+        trainWithJoeArb,
+        (competitors, trainWithJoe) => {
+          // Test pricing component
+          pricingComponent.competitors = competitors;
+          pricingComponent.trainWithJoe = trainWithJoe;
+          pricingFixture.detectChanges();
 
-        // Desktop logos in pricing table
-        const pricingDesktopLogos = pricingFixture.debugElement.queryAll(By.css('.platform-logo'));
-        expect(pricingDesktopLogos.length).toBe(competitors.length);
+          // Desktop logos in pricing table
+          const pricingDesktopLogos = pricingFixture.debugElement.queryAll(By.css('.platform-logo'));
+          expect(pricingDesktopLogos.length).toBe(competitors.length);
 
-        pricingDesktopLogos.forEach((logo) => {
-          const imgElement = logo.nativeElement as HTMLImageElement;
+          pricingDesktopLogos.forEach((logo) => {
+            const imgElement = logo.nativeElement as HTMLImageElement;
 
-          // Should have proper alt text
-          expect(imgElement.alt).toBeTruthy();
-          expect(imgElement.alt).toContain('logo');
+            // Should have proper alt text
+            expect(imgElement.alt).toBeTruthy();
+            expect(imgElement.alt).toContain('logo');
 
-          // Should have loading="lazy" for performance
-          expect(imgElement.loading).toBe('lazy');
+            // Should have loading="lazy" for performance
+            expect(imgElement.loading).toBe('lazy');
 
-          // Should have proper src
-          expect(imgElement.src).toBeTruthy();
-        });
+            // Should have proper src
+            expect(imgElement.src).toBeTruthy();
+          });
 
-        // Mobile logos in pricing table
-        const pricingMobileLogos = pricingFixture.debugElement.queryAll(By.css('.mobile-platform-logo'));
-        expect(pricingMobileLogos.length).toBe(competitors.length);
+          // Mobile logos in pricing table
+          const pricingMobileLogos = pricingFixture.debugElement.queryAll(By.css('.mobile-platform-logo'));
+          expect(pricingMobileLogos.length).toBe(competitors.length);
 
-        pricingMobileLogos.forEach((logo) => {
-          const imgElement = logo.nativeElement as HTMLImageElement;
+          pricingMobileLogos.forEach((logo) => {
+            const imgElement = logo.nativeElement as HTMLImageElement;
 
-          // Should have proper alt text
-          expect(imgElement.alt).toBeTruthy();
-          expect(imgElement.alt).toContain('logo');
+            // Should have proper alt text
+            expect(imgElement.alt).toBeTruthy();
+            expect(imgElement.alt).toContain('logo');
 
-          // Should have loading="lazy" for performance
-          expect(imgElement.loading).toBe('lazy');
-        });
+            // Should have loading="lazy" for performance
+            expect(imgElement.loading).toBe('lazy');
+          });
 
-        // Test feature matrix component
-        featureComponent.competitors = competitors;
-        featureComponent.nexusShare = nexusShare;
-        featureFixture.detectChanges();
+          // Test feature matrix component
+          featureComponent.competitors = competitors;
+          featureComponent.trainWithJoe = trainWithJoe;
+          featureFixture.detectChanges();
 
-        // Desktop logos in feature matrix
-        const featureDesktopLogos = featureFixture.debugElement.queryAll(By.css('.competitor-logo'));
-        expect(featureDesktopLogos.length).toBe(competitors.length);
+          // Desktop logos in feature matrix
+          const featureDesktopLogos = featureFixture.debugElement.queryAll(By.css('.competitor-logo'));
+          expect(featureDesktopLogos.length).toBe(competitors.length);
 
-        featureDesktopLogos.forEach((logo) => {
-          const imgElement = logo.nativeElement as HTMLImageElement;
+          featureDesktopLogos.forEach((logo) => {
+            const imgElement = logo.nativeElement as HTMLImageElement;
 
-          // Should have proper alt text
-          expect(imgElement.alt).toBeTruthy();
-          expect(imgElement.alt).toContain('logo');
+            // Should have proper alt text
+            expect(imgElement.alt).toBeTruthy();
+            expect(imgElement.alt).toContain('logo');
 
-          // Should have loading="lazy" for performance
-          expect(imgElement.loading).toBe('lazy');
-        });
+            // Should have loading="lazy" for performance
+            expect(imgElement.loading).toBe('lazy');
+          });
 
-        // Mobile logos in feature matrix
-        const featureMobileLogos = featureFixture.debugElement.queryAll(By.css('.mobile-competitor-logo'));
-        expect(featureMobileLogos.length).toBe(competitors.length);
+          // Mobile logos in feature matrix
+          const featureMobileLogos = featureFixture.debugElement.queryAll(By.css('.mobile-competitor-logo'));
+          expect(featureMobileLogos.length).toBe(competitors.length);
 
-        featureMobileLogos.forEach((logo) => {
-          const imgElement = logo.nativeElement as HTMLImageElement;
+          featureMobileLogos.forEach((logo) => {
+            const imgElement = logo.nativeElement as HTMLImageElement;
 
-          // Should have proper alt text
-          expect(imgElement.alt).toBeTruthy();
-          expect(imgElement.alt).toContain('logo');
+            // Should have proper alt text
+            expect(imgElement.alt).toBeTruthy();
+            expect(imgElement.alt).toContain('logo');
 
-          // Should have loading="lazy" for performance
-          expect(imgElement.loading).toBe('lazy');
-        });
-      }),
+            // Should have loading="lazy" for performance
+            expect(imgElement.loading).toBe('lazy');
+          });
+        },
+      ),
       { numRuns: 10 },
     );
   });
@@ -370,58 +378,62 @@ describe('Responsive Design Property Tests', () => {
    */
   it.skip('should maintain text readability across all content configurations', () => {
     fc.assert(
-      fc.property(fc.array(competitorArb, { minLength: 1, maxLength: 3 }), nexusShareArb, (competitors, nexusShare) => {
-        // Test pricing component text readability
-        pricingComponent.competitors = competitors;
-        pricingComponent.nexusShare = nexusShare;
-        pricingFixture.detectChanges();
+      fc.property(
+        fc.array(competitorArb, { minLength: 1, maxLength: 3 }),
+        trainWithJoeArb,
+        (competitors, trainWithJoe) => {
+          // Test pricing component text readability
+          pricingComponent.competitors = competitors;
+          pricingComponent.trainWithJoe = trainWithJoe;
+          pricingFixture.detectChanges();
 
-        // Check pricing text elements
-        const priceAmounts = pricingFixture.debugElement.queryAll(By.css('.price-amount, .mobile-price-amount'));
-        priceAmounts.forEach((priceElement) => {
-          const text = priceElement.nativeElement.textContent.trim();
-          expect(text.length).toBeGreaterThan(0);
+          // Check pricing text elements
+          const priceAmounts = pricingFixture.debugElement.queryAll(By.css('.price-amount, .mobile-price-amount'));
+          priceAmounts.forEach((priceElement) => {
+            const text = priceElement.nativeElement.textContent.trim();
+            expect(text.length).toBeGreaterThan(0);
 
-          // Price text should be properly formatted
-          if (text !== 'Free') {
-            expect(text).toMatch(/^\$\d+/); // Should start with currency symbol and number
-          }
-        });
+            // Price text should be properly formatted
+            if (text !== 'Free') {
+              expect(text).toMatch(/^\$\d+/); // Should start with currency symbol and number
+            }
+          });
 
-        // Feature and limitation text should be readable
-        const featureTexts = pricingFixture.debugElement.queryAll(By.css('.feature-item, .mobile-feature-item'));
-        featureTexts.forEach((featureElement) => {
-          const text = featureElement.nativeElement.textContent.trim();
-          expect(text.length).toBeGreaterThan(0);
-          expect(text.length).toBeLessThan(200); // Reasonable length for readability
-        });
+          // Feature and limitation text should be readable
+          const featureTexts = pricingFixture.debugElement.queryAll(By.css('.feature-item, .mobile-feature-item'));
+          featureTexts.forEach((featureElement) => {
+            const text = featureElement.nativeElement.textContent.trim();
+            expect(text.length).toBeGreaterThan(0);
+            expect(text.length).toBeLessThan(200); // Reasonable length for readability
+          });
 
-        // Test feature matrix text readability
-        featureComponent.competitors = competitors;
-        featureComponent.nexusShare = nexusShare;
-        featureFixture.detectChanges();
+          // Test feature matrix text readability
+          featureComponent.competitors = competitors;
+          featureComponent.trainWithJoe = trainWithJoe;
+          featureFixture.detectChanges();
 
-        // Feature names should be readable
-        const featureNames = featureFixture.debugElement.queryAll(By.css('.feature-name, .mobile-feature-name'));
-        featureNames.forEach((nameElement) => {
-          const text = nameElement.nativeElement.textContent.trim();
-          expect(text.length).toBeGreaterThan(0);
-          expect(text.length).toBeLessThan(100); // Reasonable length for feature names
+          // Feature names should be readable
+          const featureNames = featureFixture.debugElement.queryAll(By.css('.feature-name, .mobile-feature-name'));
+          featureNames.forEach((nameElement) => {
+            const text = nameElement.nativeElement.textContent.trim();
+            expect(text.length).toBeGreaterThan(0);
+            expect(text.length).toBeLessThan(100); // Reasonable length for feature names
 
-          // Should not contain underscores (should be formatted)
-          expect(text).not.toContain('_');
-        });
+            // Should not contain underscores (should be formatted)
+            expect(text).not.toContain('_');
+          });
 
-        // Competitor names should be readable
-        const competitorNames = featureFixture.debugElement.queryAll(
-          By.css('.competitor-name, .mobile-competitor-name'),
-        );
-        competitorNames.forEach((nameElement) => {
-          const text = nameElement.nativeElement.textContent.trim();
-          expect(text.length).toBeGreaterThan(0);
-          expect(text.length).toBeLessThan(50); // Reasonable length for competitor names
-        });
-      }),
+          // Competitor names should be readable
+          const competitorNames = featureFixture.debugElement.queryAll(
+            By.css('.competitor-name, .mobile-competitor-name'),
+          );
+          competitorNames.forEach((nameElement) => {
+            const text = nameElement.nativeElement.textContent.trim();
+            expect(text.length).toBeGreaterThan(0);
+            expect(text.length).toBeLessThan(50); // Reasonable length for competitor names
+          });
+        },
+      ),
       { numRuns: 5 },
     );
   });
@@ -433,52 +445,56 @@ describe('Responsive Design Property Tests', () => {
    */
   it.skip('should provide properly sized interactive elements for touch interfaces', () => {
     fc.assert(
-      fc.property(fc.array(competitorArb, { minLength: 1, maxLength: 3 }), nexusShareArb, (competitors, nexusShare) => {
-        // Test pricing component interactive elements
-        pricingComponent.competitors = competitors;
-        pricingComponent.nexusShare = nexusShare;
-        pricingComponent.showAnnualPricing = true;
-        pricingFixture.detectChanges();
+      fc.property(
+        fc.array(competitorArb, { minLength: 1, maxLength: 3 }),
+        trainWithJoeArb,
+        (competitors, trainWithJoe) => {
+          // Test pricing component interactive elements
+          pricingComponent.competitors = competitors;
+          pricingComponent.trainWithJoe = trainWithJoe;
+          pricingComponent.showAnnualPricing = true;
+          pricingFixture.detectChanges();
 
-        // Billing toggle buttons should be touch-friendly
-        const toggleButtons = pricingFixture.debugElement.queryAll(By.css('.toggle-button'));
-        if (toggleButtons.length > 0) {
-          toggleButtons.forEach((button) => {
-            const buttonElement = button.nativeElement as HTMLButtonElement;
+          // Billing toggle buttons should be touch-friendly
+          const toggleButtons = pricingFixture.debugElement.queryAll(By.css('.toggle-button'));
+          if (toggleButtons.length > 0) {
+            toggleButtons.forEach((button) => {
+              const buttonElement = button.nativeElement as HTMLButtonElement;
 
-            // Should be a button element
-            expect(buttonElement.tagName.toLowerCase()).toBe('button');
+              // Should be a button element
+              expect(buttonElement.tagName.toLowerCase()).toBe('button');
+
+              // Should have proper ARIA attributes
+              expect(buttonElement.getAttribute('aria-pressed')).toBeTruthy();
+
+              // Should be focusable
+              expect(buttonElement.tabIndex).not.toBe(-1);
+            });
+          }
+
+          // Test feature matrix interactive elements
+          featureComponent.competitors = competitors;
+          featureComponent.trainWithJoe = trainWithJoe;
+          featureComponent.showTooltips = true;
+          featureFixture.detectChanges();
+
+          // Tooltip triggers should be touch-friendly
+          const tooltipTriggers = featureFixture.debugElement.queryAll(By.css('.tooltip-trigger'));
+          tooltipTriggers.forEach((trigger) => {
+            const triggerElement = trigger.nativeElement as HTMLButtonElement;
+
+            // Should be a button element for accessibility
+            expect(triggerElement.tagName.toLowerCase()).toBe('button');
+            expect(triggerElement.type).toBe('button');
 
             // Should have proper ARIA attributes
-            expect(buttonElement.getAttribute('aria-pressed')).toBeTruthy();
+            expect(triggerElement.getAttribute('aria-label')).toBeTruthy();
 
             // Should be focusable
-            expect(buttonElement.tabIndex).not.toBe(-1);
+            expect(triggerElement.tabIndex).not.toBe(-1);
           });
-        }
-
-        // Test feature matrix interactive elements
-        featureComponent.competitors = competitors;
-        featureComponent.nexusShare = nexusShare;
-        featureComponent.showTooltips = true;
-        featureFixture.detectChanges();
-
-        // Tooltip triggers should be touch-friendly
-        const tooltipTriggers = featureFixture.debugElement.queryAll(By.css('.tooltip-trigger'));
-        tooltipTriggers.forEach((trigger) => {
-          const triggerElement = trigger.nativeElement as HTMLButtonElement;
-
-          // Should be a button element for accessibility
-          expect(triggerElement.tagName.toLowerCase()).toBe('button');
-          expect(triggerElement.type).toBe('button');
-
-          // Should have proper ARIA attributes
-          expect(triggerElement.getAttribute('aria-label')).toBeTruthy();
-
-          // Should be focusable
-          expect(triggerElement.tabIndex).not.toBe(-1);
-        });
-      }),
+        },
+      ),
       { numRuns: 5 },
     );
   });

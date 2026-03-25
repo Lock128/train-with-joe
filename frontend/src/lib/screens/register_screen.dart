@@ -66,13 +66,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       // App branding
                       Icon(
-                        Icons.person_add_outlined,
+                        Icons.school,
                         size: 80,
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 32),
                       const Text(
-                        'Create Account',
+                        'Join Train with Joe!',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -81,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Sign up to get started',
+                        'Start your vocabulary adventure',
                         style: TextStyle(
                           fontSize: 16,
                           color: theme.colorScheme.onSurface.withOpacity(0.6),

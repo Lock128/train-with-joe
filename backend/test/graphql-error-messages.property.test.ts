@@ -6,7 +6,7 @@ import { APIStack } from '../lib/api-stack';
 
 /**
  * Property-Based Tests for GraphQL Error Messages
- * Feature: minimal-saas-template
+ * Feature: train-with-joe
  */
 
 describe('Property 2: GraphQL Error Message Descriptiveness', () => {

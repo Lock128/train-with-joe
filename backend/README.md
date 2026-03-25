@@ -1,6 +1,6 @@
 # Backend
 
-Serverless AWS backend for the Minimal SaaS Template, built with AWS CDK (TypeScript). Provides authentication, a GraphQL API, subscription/payment processing, and AI content generation.
+Serverless AWS backend for Train with Joe, built with AWS CDK (TypeScript). Provides authentication, a GraphQL API, subscription/payment processing, and AI content generation.
 
 ## Architecture
 

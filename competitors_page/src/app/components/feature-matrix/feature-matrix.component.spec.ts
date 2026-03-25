@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { ChangeDetectorRef } from '@angular/core';
 import { describe, expect, beforeEach } from 'vitest';
 import { FeatureMatrixComponent } from './feature-matrix.component';
-import type { CompetitorData, NexusShareData } from '../../models/competitor.interface';
+import type { CompetitorData, TrainWithJoeData } from '../../models/competitor.interface';
 
 describe('FeatureMatrixComponent', () => {
   let component: FeatureMatrixComponent;
@@ -75,7 +75,7 @@ describe('FeatureMatrixComponent', () => {
     },
   ];
 
-  const mockNexusShare: NexusShareData = {
+  const mockTrainWithJoe: TrainWithJoeData = {
     uniqueFeatures: ['AI content enhancement', 'Advanced mention resolution'],
     pricing: [
       {
@@ -83,7 +83,7 @@ describe('FeatureMatrixComponent', () => {
         price: 0,
         billing: 'monthly',
         features: ['3 platforms', 'AI enhancement'],
-        limitations: ['Nexus Share branding'],
+        limitations: ['Train with Joe branding'],
       },
     ],
   };
@@ -96,7 +96,7 @@ describe('FeatureMatrixComponent', () => {
     fixture = TestBed.createComponent(FeatureMatrixComponent);
     component = fixture.componentInstance;
     component.competitors = mockCompetitors;
-    component.nexusShare = mockNexusShare;
+    component.trainWithJoe = mockTrainWithJoe;
   });
 
   it('should create', () => {
@@ -110,7 +110,7 @@ describe('FeatureMatrixComponent', () => {
     expect(table).toBeTruthy();
 
     const headerCells = fixture.debugElement.queryAll(By.css('thead th'));
-    // Should have feature column + nexus share + 2 competitors = 4 columns
+    // Should have feature column + train with joe + 2 competitors = 4 columns
     expect(headerCells.length).toBe(4);
 
     const featureRows = fixture.debugElement.queryAll(By.css('tbody tr'));
@@ -163,17 +163,17 @@ describe('FeatureMatrixComponent', () => {
     expect(component.getFeatureStatusLabel('none')).toBe('Not supported');
   });
 
-  it('should highlight Nexus Share advantages', () => {
+  it('should highlight Train with Joe advantages', () => {
     fixture.detectChanges();
 
-    // AI content generation should be a Nexus Share advantage
-    expect(component.isNexusShareAdvantage('aiContentGeneration')).toBe(true);
+    // AI content generation should be a Train with Joe advantage
+    expect(component.isTrainWithJoeAdvantage('aiContentGeneration')).toBe(true);
 
-    // Mention resolution should be a Nexus Share advantage
-    expect(component.isNexusShareAdvantage('mentionResolution')).toBe(true);
+    // Mention resolution should be a Train with Joe advantage
+    expect(component.isTrainWithJoeAdvantage('mentionResolution')).toBe(true);
 
     // Analytics should not be an advantage (we have partial, others have full)
-    expect(component.isNexusShareAdvantage('analytics')).toBe(false);
+    expect(component.isTrainWithJoeAdvantage('analytics')).toBe(false);
   });
 
   it('should show tooltips when enabled', () => {
@@ -233,7 +233,7 @@ describe('FeatureMatrixComponent', () => {
     expect(mobileFeatureGroups.length).toBe(component.featureDefinitions.length);
 
     const mobileCompetitors = fixture.debugElement.queryAll(By.css('.mobile-competitor'));
-    // Should have nexus share + competitors for each feature
+    // Should have train with joe + competitors for each feature
     expect(mobileCompetitors.length).toBeGreaterThan(0);
   });
 
@@ -263,36 +263,36 @@ describe('FeatureMatrixComponent', () => {
     expect(component.getFeatureDisplayName('multiPlatformPosting')).toBe(multiPlatformFeature!.displayName);
   });
 
-  it('should handle Nexus Share highlighting toggle', () => {
+  it('should handle Train with Joe highlighting toggle', () => {
     // Initialize with some test data
     component.competitors = mockCompetitors;
-    component.nexusShare = mockNexusShare;
+    component.trainWithJoe = mockTrainWithJoe;
 
     // Test with highlighting enabled
-    component.highlightNexusShare = true;
+    component.highlightTrainWithJoe = true;
     fixture.detectChanges();
 
-    let nexusShareHeaders = fixture.debugElement.queryAll(By.css('.nexus-share-header'));
-    expect(nexusShareHeaders.length).toBe(1);
+    let trainWithJoeHeaders = fixture.debugElement.queryAll(By.css('.train-with-joe-header'));
+    expect(trainWithJoeHeaders.length).toBe(1);
 
     // Test with highlighting disabled
-    component.highlightNexusShare = false;
+    component.highlightTrainWithJoe = false;
     // Force change detection for OnPush strategy
     fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
     fixture.detectChanges();
 
-    nexusShareHeaders = fixture.debugElement.queryAll(By.css('.nexus-share-header'));
-    expect(nexusShareHeaders.length).toBe(0);
+    trainWithJoeHeaders = fixture.debugElement.queryAll(By.css('.train-with-joe-header'));
+    expect(trainWithJoeHeaders.length).toBe(0);
   });
 
   it('should apply nexus-advantage class to appropriate rows', () => {
-    component.highlightNexusShare = true;
+    component.highlightTrainWithJoe = true;
     fixture.detectChanges();
 
     const advantageRows = fixture.debugElement.queryAll(By.css('.nexus-advantage'));
     expect(advantageRows.length).toBeGreaterThan(0);
 
-    // Should highlight rows where Nexus Share has unique advantages
+    // Should highlight rows where Train with Joe has unique advantages
     // (aiContentGeneration and mentionResolution based on our mock data)
     expect(advantageRows.length).toBeGreaterThanOrEqual(2);
   });

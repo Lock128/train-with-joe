@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the testing setup and test files for the Nexus Share Profile Cards Angular application.
+This document describes the testing setup and test files for the Train with Joe Profile Cards Angular application.
 
 ## Test Files
 
@@ -72,7 +72,7 @@ module.exports = function (config) {
 ```json
 {
   "projects": {
-    "nexus-share-profile-cards": {
+    "train-with-joe-profile-cards": {
       "architect": {
         "test": {
           "builder": "@angular-devkit/build-angular:karma",

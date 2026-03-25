@@ -43,7 +43,7 @@ describe('BaseStack CDK Integration Tests', () => {
 
     // Verify Cognito user pool exists
     template.hasResourceProperties('AWS::Cognito::UserPool', {
-      UserPoolName: 'MinimalSaaS-test',
+      UserPoolName: 'TrainWithJoe-test',
       AutoVerifiedAttributes: ['email'],
       Policies: {
         PasswordPolicy: {
@@ -75,7 +75,7 @@ describe('BaseStack CDK Integration Tests', () => {
 
     // Verify users table exists with correct configuration
     template.hasResourceProperties('AWS::DynamoDB::Table', {
-      TableName: 'minimal-saas-users-test',
+      TableName: 'train-with-joe-users-test',
       BillingMode: 'PAY_PER_REQUEST',
       KeySchema: [
         {
@@ -92,7 +92,7 @@ describe('BaseStack CDK Integration Tests', () => {
     const templateJson = template.toJSON();
     const usersTables = Object.values(templateJson.Resources).filter(
       (resource: any) =>
-        resource.Type === 'AWS::DynamoDB::Table' && resource.Properties.TableName === 'minimal-saas-users-test',
+        resource.Type === 'AWS::DynamoDB::Table' && resource.Properties.TableName === 'train-with-joe-users-test',
     );
 
     expect(usersTables.length).toBe(1);
@@ -120,7 +120,7 @@ describe('BaseStack CDK Integration Tests', () => {
 
     // Verify subscriptions table exists with correct configuration
     template.hasResourceProperties('AWS::DynamoDB::Table', {
-      TableName: 'minimal-saas-subscriptions-test',
+      TableName: 'train-with-joe-subscriptions-test',
       BillingMode: 'PAY_PER_REQUEST',
       KeySchema: [
         {
@@ -137,7 +137,8 @@ describe('BaseStack CDK Integration Tests', () => {
     const templateJson = template.toJSON();
     const subscriptionsTables = Object.values(templateJson.Resources).filter(
       (resource: any) =>
-        resource.Type === 'AWS::DynamoDB::Table' && resource.Properties.TableName === 'minimal-saas-subscriptions-test',
+        resource.Type === 'AWS::DynamoDB::Table' &&
+        resource.Properties.TableName === 'train-with-joe-subscriptions-test',
     );
 
     expect(subscriptionsTables.length).toBe(1);

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "nexus-share-profile-cards": {
+    "train-with-joe-profile-cards": {
       "projectType": "application",
       "root": "",
       "sourceRoot": "src",
@@ -76,17 +76,17 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "buildTarget": "nexus-share-profile-cards:build"
+            "buildTarget": "train-with-joe-profile-cards:build"
           },
           "configurations": {
             "sandbox": {
-              "buildTarget": "nexus-share-profile-cards:build:sandbox"
+              "buildTarget": "train-with-joe-profile-cards:build:sandbox"
             },
             "beta": {
-              "buildTarget": "nexus-share-profile-cards:build:beta"
+              "buildTarget": "train-with-joe-profile-cards:build:beta"
             },
             "production": {
-              "buildTarget": "nexus-share-profile-cards:build:production"
+              "buildTarget": "train-with-joe-profile-cards:build:production"
             }
           }
         }

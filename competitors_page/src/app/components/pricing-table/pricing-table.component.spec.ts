@@ -2,7 +2,7 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { PricingTableComponent } from './pricing-table.component';
-import type { CompetitorData, NexusShareData } from '../../models/competitor.interface';
+import type { CompetitorData, TrainWithJoeData } from '../../models/competitor.interface';
 
 describe('PricingTableComponent', () => {
   let component: PricingTableComponent;
@@ -56,7 +56,7 @@ describe('PricingTableComponent', () => {
     },
   ];
 
-  const mockNexusShare: NexusShareData = {
+  const mockTrainWithJoe: TrainWithJoeData = {
     uniqueFeatures: ['AI content enhancement', 'Advanced mention resolution'],
     pricing: [
       {
@@ -64,7 +64,7 @@ describe('PricingTableComponent', () => {
         price: 0,
         billing: 'monthly',
         features: ['3 platforms', 'AI enhancement', 'Basic analytics'],
-        limitations: ['Nexus Share branding'],
+        limitations: ['Train with Joe branding'],
       },
       {
         name: 'Pro',
@@ -91,7 +91,7 @@ describe('PricingTableComponent', () => {
     fixture = TestBed.createComponent(PricingTableComponent);
     component = fixture.componentInstance;
     component.competitors = mockCompetitors;
-    component.nexusShare = mockNexusShare;
+    component.trainWithJoe = mockTrainWithJoe;
   });
 
   it('should create', () => {
@@ -105,7 +105,7 @@ describe('PricingTableComponent', () => {
     expect(table).toBeTruthy();
 
     const headerCells = fixture.debugElement.queryAll(By.css('thead th'));
-    // Should have plan column + nexus share + 1 competitor = 3 columns
+    // Should have plan column + train with joe + 1 competitor = 3 columns
     expect(headerCells.length).toBe(3);
 
     const pricingRows = fixture.debugElement.queryAll(By.css('tbody tr'));
@@ -146,38 +146,38 @@ describe('PricingTableComponent', () => {
   });
 
   it('should get pricing for specific billing cycle', () => {
-    const monthlyTiers = component.getPricingForBilling(mockNexusShare.pricing, 'monthly');
+    const monthlyTiers = component.getPricingForBilling(mockTrainWithJoe.pricing, 'monthly');
     expect(monthlyTiers.length).toBe(2);
     expect(monthlyTiers.every((tier) => tier.billing === 'monthly')).toBe(true);
 
-    const annualTiers = component.getPricingForBilling(mockNexusShare.pricing, 'annual');
+    const annualTiers = component.getPricingForBilling(mockTrainWithJoe.pricing, 'annual');
     expect(annualTiers.length).toBe(1);
     expect(annualTiers.every((tier) => tier.billing === 'annual')).toBe(true);
   });
 
   it('should find lowest and highest price tiers', () => {
-    const lowestMonthly = component.getLowestPriceTier(mockNexusShare.pricing, 'monthly');
+    const lowestMonthly = component.getLowestPriceTier(mockTrainWithJoe.pricing, 'monthly');
     expect(lowestMonthly?.price).toBe(0);
     expect(lowestMonthly?.name).toBe('Free');
 
-    const highestMonthly = component.getHighestPriceTier(mockNexusShare.pricing, 'monthly');
+    const highestMonthly = component.getHighestPriceTier(mockTrainWithJoe.pricing, 'monthly');
     expect(highestMonthly?.price).toBe(15);
     expect(highestMonthly?.name).toBe('Pro');
   });
 
-  it('should get comparable Nexus Share tier', () => {
+  it('should get comparable Train with Joe tier', () => {
     const bufferFreeTier = mockCompetitors[0].pricing[0]; // Free tier
-    const comparableTier = component.getComparableNexusShareTier(bufferFreeTier);
+    const comparableTier = component.getComparableTrainWithJoeTier(bufferFreeTier);
 
     expect(comparableTier).toBeTruthy();
     expect(comparableTier?.price).toBe(0); // Should match free tier
   });
 
-  it('should determine if Nexus Share offers better value', () => {
+  it('should determine if Train with Joe offers better value', () => {
     const bufferEssentialsTier = mockCompetitors[0].pricing[1]; // $6/month
-    const isBetterValue = component.isNexusShareBetterValue(bufferEssentialsTier);
+    const isBetterValue = component.isTrainWithJoeBetterValue(bufferEssentialsTier);
 
-    // Nexus Share Free tier (0) vs Buffer Essentials ($6) - better value
+    // Train with Joe Free tier (0) vs Buffer Essentials ($6) - better value
     expect(isBetterValue).toBe(true);
   });
 
@@ -191,25 +191,25 @@ describe('PricingTableComponent', () => {
   });
 
   it('should get tier by name and billing cycle', () => {
-    const freeTier = component.getTierByName(mockNexusShare.pricing, 'Free', 'monthly');
+    const freeTier = component.getTierByName(mockTrainWithJoe.pricing, 'Free', 'monthly');
     expect(freeTier).toBeTruthy();
     expect(freeTier?.name).toBe('Free');
     expect(freeTier?.billing).toBe('monthly');
 
-    const nonExistentTier = component.getTierByName(mockNexusShare.pricing, 'Enterprise', 'monthly');
+    const nonExistentTier = component.getTierByName(mockTrainWithJoe.pricing, 'Enterprise', 'monthly');
     expect(nonExistentTier).toBeNull();
   });
 
   it('should check for limitations correctly', () => {
-    const freeTier = mockNexusShare.pricing[0];
-    const proTier = mockNexusShare.pricing[1];
+    const freeTier = mockTrainWithJoe.pricing[0];
+    const proTier = mockTrainWithJoe.pricing[1];
 
     expect(component.hasLimitations(freeTier)).toBe(true);
     expect(component.hasLimitations(proTier)).toBe(false);
   });
 
   it('should count features and limitations', () => {
-    const freeTier = mockNexusShare.pricing[0];
+    const freeTier = mockTrainWithJoe.pricing[0];
 
     expect(component.getFeatureCount(freeTier)).toBe(3);
     expect(component.getLimitationCount(freeTier)).toBe(1);
@@ -272,7 +272,7 @@ describe('PricingTableComponent', () => {
     expect(mobilePricing).toBeTruthy();
 
     const mobilePlatformCards = fixture.debugElement.queryAll(By.css('.mobile-platform-card'));
-    // Should have nexus share + competitors
+    // Should have train with joe + competitors
     expect(mobilePlatformCards.length).toBe(mockCompetitors.length + 1);
   });
 
@@ -296,20 +296,20 @@ describe('PricingTableComponent', () => {
     expect(table).toBeTruthy();
   });
 
-  it('should handle missing Nexus Share data gracefully', () => {
-    component.nexusShare = null;
+  it('should handle missing Train with Joe data gracefully', () => {
+    component.trainWithJoe = null;
     fixture.detectChanges();
 
     expect(() => fixture.detectChanges()).not.toThrow();
 
-    const nexusShareCells = fixture.debugElement.queryAll(By.css('.nexus-share-cell'));
+    const trainWithJoeCells = fixture.debugElement.queryAll(By.css('.train-with-joe-cell'));
     // Should still render cells but with "Not available" content
-    expect(nexusShareCells.length).toBeGreaterThanOrEqual(0);
+    expect(trainWithJoeCells.length).toBeGreaterThanOrEqual(0);
   });
 
   it('should track items correctly for performance optimization', () => {
     const competitor = mockCompetitors[0];
-    const tier = mockNexusShare.pricing[0];
+    const tier = mockTrainWithJoe.pricing[0];
 
     expect(component.trackByCompetitor(0, competitor)).toBe(competitor.slug);
     expect(component.trackByTier(0, 'Free')).toBe('Free');

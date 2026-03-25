@@ -18,12 +18,12 @@
             <th class="feature-column-header" scope="col">
               <span class="header-text">Features</span>
             </th>
-            <!-- Nexus Share Column (if highlighting enabled) -->
-            <th *ngIf="highlightNexusShare" 
-                class="competitor-column-header nexus-share-header" 
+            <!-- Train with Joe Column (if highlighting enabled) -->
+            <th *ngIf="highlightTrainWithJoe" 
+                class="competitor-column-header train-with-joe-header" 
                 scope="col">
               <div class="competitor-header-content">
-                <span class="competitor-name">Nexus Share</span>
+                <span class="competitor-name">Train with Joe</span>
                 <span class="competitor-badge" aria-label="Our platform">Our Platform</span>
               </div>
             </th>
@@ -46,7 +46,7 @@
         <tbody>
           <tr *ngFor="let feature of featureDefinitions; trackBy: trackByFeature" 
               class="feature-row"
-              [class.nexus-advantage]="highlightNexusShare && isNexusShareAdvantage(feature.key)">
+              [class.nexus-advantage]="highlightTrainWithJoe && isTrainWithJoeAdvantage(feature.key)">
             
             <!-- Feature Name Column -->
             <td class="feature-name-cell" scope="row">
@@ -83,17 +83,17 @@
               </div>
             </td>
 
-            <!-- Nexus Share Feature Status -->
-            <td *ngIf="highlightNexusShare" 
-                class="feature-status-cell nexus-share-cell"
-                [class]="getFeatureStatusClass(getNexusShareFeatureStatus(feature.key))">
+            <!-- Train with Joe Feature Status -->
+            <td *ngIf="highlightTrainWithJoe" 
+                class="feature-status-cell train-with-joe-cell"
+                [class]="getFeatureStatusClass(getTrainWithJoeFeatureStatus(feature.key))">
               <div class="feature-status-content">
                 <span class="feature-icon" 
-                      [attr.aria-label]="getFeatureStatusLabel(getNexusShareFeatureStatus(feature.key))">
-                  {{ getFeatureStatusIcon(getNexusShareFeatureStatus(feature.key)) }}
+                      [attr.aria-label]="getFeatureStatusLabel(getTrainWithJoeFeatureStatus(feature.key))">
+                  {{ getFeatureStatusIcon(getTrainWithJoeFeatureStatus(feature.key)) }}
                 </span>
                 <span class="feature-status-text sr-only">
-                  {{ getFeatureStatusLabel(getNexusShareFeatureStatus(feature.key)) }}
+                  {{ getFeatureStatusLabel(getTrainWithJoeFeatureStatus(feature.key)) }}
                 </span>
               </div>
             </td>
@@ -151,20 +151,20 @@
       </div>
       
       <div class="mobile-feature-comparisons">
-        <!-- Nexus Share Mobile -->
-        <div *ngIf="highlightNexusShare" 
-             class="mobile-competitor nexus-share-mobile"
-             [class]="getFeatureStatusClass(getNexusShareFeatureStatus(feature.key))">
+        <!-- Train with Joe Mobile -->
+        <div *ngIf="highlightTrainWithJoe" 
+             class="mobile-competitor train-with-joe-mobile"
+             [class]="getFeatureStatusClass(getTrainWithJoeFeatureStatus(feature.key))">
           <div class="mobile-competitor-header">
-            <span class="mobile-competitor-name">Nexus Share</span>
+            <span class="mobile-competitor-name">Train with Joe</span>
             <span class="mobile-competitor-badge">Our Platform</span>
           </div>
           <div class="mobile-feature-status">
             <span class="mobile-feature-icon">
-              {{ getFeatureStatusIcon(getNexusShareFeatureStatus(feature.key)) }}
+              {{ getFeatureStatusIcon(getTrainWithJoeFeatureStatus(feature.key)) }}
             </span>
             <span class="mobile-feature-label">
-              {{ getFeatureStatusLabel(getNexusShareFeatureStatus(feature.key)) }}
+              {{ getFeatureStatusLabel(getTrainWithJoeFeatureStatus(feature.key)) }}
             </span>
           </div>
         </div>

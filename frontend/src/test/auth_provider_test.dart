@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:minimal_saas_template/providers/auth_provider.dart' as app;
-import 'package:minimal_saas_template/services/auth_service.dart';
+import 'package:train_with_joe/providers/auth_provider.dart' as app;
+import 'package:train_with_joe/services/auth_service.dart';
 
 import 'auth_provider_test.mocks.dart';
 

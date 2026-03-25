@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:minimal_saas_template/main.dart';
+import 'package:train_with_joe/main.dart';
 
 void main() {
   testWidgets('App initializes without crashing', (WidgetTester tester) async {

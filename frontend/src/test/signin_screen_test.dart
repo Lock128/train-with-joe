@@ -5,9 +5,9 @@ import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:minimal_saas_template/screens/signin_screen.dart';
-import 'package:minimal_saas_template/providers/auth_provider.dart' as app;
-import 'package:minimal_saas_template/services/auth_service.dart';
+import 'package:train_with_joe/screens/signin_screen.dart';
+import 'package:train_with_joe/providers/auth_provider.dart' as app;
+import 'package:train_with_joe/services/auth_service.dart';
 
 import 'signin_screen_test.mocks.dart';
 

@@ -1,7 +1,7 @@
 import { OnInit } from '@angular/core';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import type { CompetitorData, PricingTier, NexusShareData, BillingCycle } from '../../models/competitor.interface';
+import type { CompetitorData, PricingTier, TrainWithJoeData, BillingCycle } from '../../models/competitor.interface';
 
 /**
  * Pricing table component for displaying responsive pricing comparison table
@@ -17,8 +17,8 @@ import type { CompetitorData, PricingTier, NexusShareData, BillingCycle } from '
 })
 export class PricingTableComponent implements OnInit {
   @Input() competitors: CompetitorData[] = [];
-  @Input() nexusShare: NexusShareData | null = null;
-  @Input() showNexusShare: boolean = true;
+  @Input() trainWithJoe: TrainWithJoeData | null = null;
+  @Input() showTrainWithJoe: boolean = true;
   @Input() highlightSavings: boolean = true;
   @Input() showAnnualPricing: boolean = true;
   @Input() currency: string = '€';
@@ -73,50 +73,50 @@ export class PricingTableComponent implements OnInit {
   }
 
   /**
-   * Calculate cost savings compared to Nexus Share
+   * Calculate cost savings compared to Train with Joe
    * Implements requirement 4.2: Calculate and highlight potential cost savings
    */
-  calculateSavings(competitorPrice: number, nexusSharePrice: number): number {
-    return Math.max(0, competitorPrice - nexusSharePrice);
+  calculateSavings(competitorPrice: number, trainWithJoePrice: number): number {
+    return Math.max(0, competitorPrice - trainWithJoePrice);
   }
 
   /**
    * Calculate percentage savings
    */
-  calculateSavingsPercentage(competitorPrice: number, nexusSharePrice: number): number {
+  calculateSavingsPercentage(competitorPrice: number, trainWithJoePrice: number): number {
     if (competitorPrice === 0) return 0;
-    const savings = this.calculateSavings(competitorPrice, nexusSharePrice);
+    const savings = this.calculateSavings(competitorPrice, trainWithJoePrice);
     return Math.round((savings / competitorPrice) * 100);
   }
 
   /**
-   * Get Nexus Share pricing for comparison
+   * Get Train with Joe pricing for comparison
    */
-  getNexusSharePricing(billing: BillingCycle): PricingTier[] {
-    if (!this.nexusShare) return [];
-    return this.getPricingForBilling(this.nexusShare.pricing, billing);
+  getTrainWithJoePricing(billing: BillingCycle): PricingTier[] {
+    if (!this.trainWithJoe) return [];
+    return this.getPricingForBilling(this.trainWithJoe.pricing, billing);
   }
 
   /**
-   * Get comparable Nexus Share tier for cost comparison
+   * Get comparable Train with Joe tier for cost comparison
    * Matches based on price range or feature similarity
    */
-  getComparableNexusShareTier(competitorTier: PricingTier): PricingTier | null {
-    const nexusShareTiers = this.getNexusSharePricing(competitorTier.billing);
-    if (nexusShareTiers.length === 0) return null;
+  getComparableTrainWithJoeTier(competitorTier: PricingTier): PricingTier | null {
+    const trainWithJoeTiers = this.getTrainWithJoePricing(competitorTier.billing);
+    if (trainWithJoeTiers.length === 0) return null;
 
-    // If competitor has custom pricing, return highest Nexus Share tier
+    // If competitor has custom pricing, return highest Train with Joe tier
     if (typeof competitorTier.price !== 'number') {
-      return nexusShareTiers[nexusShareTiers.length - 1];
+      return trainWithJoeTiers[trainWithJoeTiers.length - 1];
     }
 
     // If competitor is free, compare with free tier
     if (competitorTier.price === 0) {
-      return nexusShareTiers.find((tier) => tier.price === 0) || nexusShareTiers[0];
+      return trainWithJoeTiers.find((tier) => tier.price === 0) || trainWithJoeTiers[0];
     }
 
     // Otherwise, find the closest price tier
-    return nexusShareTiers.reduce((closest, current) => {
+    return trainWithJoeTiers.reduce((closest, current) => {
       if (typeof current.price !== 'number') return closest;
       const currentDiff = Math.abs((current.price as number) - (competitorTier.price as number));
       const closestDiff =
@@ -128,11 +128,11 @@ export class PricingTableComponent implements OnInit {
   }
 
   /**
-   * Check if Nexus Share offers better value for a given tier
-   * Implements requirement 4.2: Highlight cost savings with Nexus Share
+   * Check if Train with Joe offers better value for a given tier
+   * Implements requirement 4.2: Highlight cost savings with Train with Joe
    */
-  isNexusShareBetterValue(competitorTier: PricingTier): boolean {
-    const comparableTier = this.getComparableNexusShareTier(competitorTier);
+  isTrainWithJoeBetterValue(competitorTier: PricingTier): boolean {
+    const comparableTier = this.getComparableTrainWithJoeTier(competitorTier);
     if (!comparableTier) return false;
 
     // Can't compare custom pricing
@@ -140,7 +140,7 @@ export class PricingTableComponent implements OnInit {
       return false;
     }
 
-    // Better value if Nexus Share is cheaper or same price with more features
+    // Better value if Train with Joe is cheaper or same price with more features
     if (comparableTier.price < competitorTier.price) return true;
 
     // If same price, compare feature count (rough heuristic)
@@ -192,9 +192,9 @@ export class PricingTableComponent implements OnInit {
   getAllTierNames(): string[] {
     const tierNames = new Set<string>();
 
-    // Add Nexus Share tier names
-    if (this.nexusShare) {
-      this.nexusShare.pricing.forEach((tier) => tierNames.add(tier.name));
+    // Add Train with Joe tier names
+    if (this.trainWithJoe) {
+      this.trainWithJoe.pricing.forEach((tier) => tierNames.add(tier.name));
     }
 
     // Add competitor tier names
@@ -261,8 +261,8 @@ export class PricingTableComponent implements OnInit {
    * Check if billing cycle has any pricing data
    */
   hasPricingForBilling(billing: BillingCycle): boolean {
-    // Check Nexus Share
-    if (this.nexusShare && this.getPricingForBilling(this.nexusShare.pricing, billing).length > 0) {
+    // Check Train with Joe
+    if (this.trainWithJoe && this.getPricingForBilling(this.trainWithJoe.pricing, billing).length > 0) {
       return true;
     }
 

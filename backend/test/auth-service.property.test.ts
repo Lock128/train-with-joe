@@ -12,7 +12,7 @@ import {
 
 /**
  * Property-Based Tests for Authentication Service
- * Feature: minimal-saas-template
+ * Feature: train-with-joe
  */
 
 const cognitoMock = mockClient(CognitoIdentityProviderClient);

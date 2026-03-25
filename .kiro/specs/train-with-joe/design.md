@@ -1,8 +1,8 @@
-# Design Document: Minimal SaaS Template
+# Design Document: Train with Joe
 
 ## Overview
 
-The minimal SaaS template provides a production-ready foundation for building Flutter-based SaaS applications with AWS backend infrastructure. The design is based on the proven nexus-share architecture but stripped down to essential components only.
+The Train with Joe provides a production-ready foundation for building Flutter-based SaaS applications with AWS backend infrastructure. The design is based on the proven train-with-joe architecture but stripped down to essential components only.
 
 ### System Architecture
 
@@ -791,7 +791,7 @@ After analyzing all acceptance criteria, I identified the following testable pro
 **Property-Based Testing**:
 - Library: fast-check for TypeScript
 - Minimum iterations: 100 per property test
-- Test tagging: `Feature: minimal-saas-template, Property {number}: {description}`
+- Test tagging: `Feature: train-with-joe, Property {number}: {description}`
 - Focus areas: All 28 correctness properties defined above
 
 **Property Test Examples**:

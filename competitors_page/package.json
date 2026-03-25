@@ -1,7 +1,7 @@
 {
   "name": "competitors-page",
   "version": "1.0.0",
-  "description": "SaaS Template competitor comparison pages",
+  "description": "Train with Joe competitor comparison pages",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

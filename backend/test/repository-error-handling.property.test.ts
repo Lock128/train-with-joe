@@ -7,7 +7,7 @@ import { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand, DeleteCo
 
 /**
  * Property-Based Tests for Repository Error Handling
- * Feature: minimal-saas-template
+ * Feature: train-with-joe
  * **Validates: Requirements 4.6**
  */
 

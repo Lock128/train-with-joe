@@ -5,7 +5,7 @@ import type {
   CompetitorData,
   FeatureComparison,
   FeatureStatus,
-  NexusShareData,
+  TrainWithJoeData,
 } from '../../models/competitor.interface';
 
 /**
@@ -22,9 +22,9 @@ import type {
 })
 export class FeatureMatrixComponent implements OnInit {
   @Input() competitors: CompetitorData[] = [];
-  @Input() nexusShare: NexusShareData | null = null;
+  @Input() trainWithJoe: TrainWithJoeData | null = null;
   @Input() showTooltips: boolean = true;
-  @Input() highlightNexusShare: boolean = true;
+  @Input() highlightTrainWithJoe: boolean = true;
 
   // Feature definitions with display names and descriptions for tooltips
   featureDefinitions = [
@@ -137,12 +137,12 @@ export class FeatureMatrixComponent implements OnInit {
   }
 
   /**
-   * Get Nexus Share feature status for comparison
+   * Get Train with Joe feature status for comparison
    */
-  getNexusShareFeatureStatus(featureKey: keyof FeatureComparison): FeatureStatus {
-    // For Nexus Share, we'll define our feature support levels
+  getTrainWithJoeFeatureStatus(featureKey: keyof FeatureComparison): FeatureStatus {
+    // For Train with Joe, we'll define our feature support levels
     // This could be moved to configuration in the future
-    const nexusShareFeatures: FeatureComparison = {
+    const trainWithJoeFeatures: FeatureComparison = {
       multiPlatformPosting: 'full',
       aiContentGeneration: 'full', // Our unique advantage
       scheduling: 'full',
@@ -154,26 +154,26 @@ export class FeatureMatrixComponent implements OnInit {
       socialListening: 'none', // Not currently supported
     };
 
-    return nexusShareFeatures[featureKey];
+    return trainWithJoeFeatures[featureKey];
   }
 
   /**
-   * Check if Nexus Share has an advantage for this feature
-   * Implements requirement 3.3: Highlight unique Nexus Share features
+   * Check if Train with Joe has an advantage for this feature
+   * Implements requirement 3.3: Highlight unique Train with Joe features
    */
-  isNexusShareAdvantage(featureKey: keyof FeatureComparison): boolean {
-    const nexusShareStatus = this.getNexusShareFeatureStatus(featureKey);
+  isTrainWithJoeAdvantage(featureKey: keyof FeatureComparison): boolean {
+    const trainWithJoeStatus = this.getTrainWithJoeFeatureStatus(featureKey);
 
-    // Nexus Share has an advantage if it has full support and others don't,
+    // Train with Joe has an advantage if it has full support and others don't,
     // or if it's one of our unique features
     const uniqueFeatures: (keyof FeatureComparison)[] = ['aiContentGeneration', 'mentionResolution'];
 
-    if (uniqueFeatures.includes(featureKey) && nexusShareStatus === 'full') {
+    if (uniqueFeatures.includes(featureKey) && trainWithJoeStatus === 'full') {
       return true;
     }
 
     // Check if we have better support than competitors
-    if (nexusShareStatus === 'full') {
+    if (trainWithJoeStatus === 'full') {
       const competitorStatuses = this.competitors.map((c) => c.features[featureKey]);
       return competitorStatuses.every((status) => status !== 'full');
     }

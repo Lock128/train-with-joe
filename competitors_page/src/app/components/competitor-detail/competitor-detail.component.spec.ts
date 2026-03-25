@@ -7,7 +7,12 @@ import * as fc from 'fast-check';
 
 import { CompetitorDetailComponent } from './competitor-detail.component';
 import { CompetitorDataService } from '../../services/competitor-data.service';
-import type { CompetitorData, NexusShareData, PricingTier, FeatureComparison } from '../../models/competitor.interface';
+import type {
+  CompetitorData,
+  TrainWithJoeData,
+  PricingTier,
+  FeatureComparison,
+} from '../../models/competitor.interface';
 
 describe('CompetitorDetailComponent', () => {
   let component: CompetitorDetailComponent;
@@ -50,17 +55,17 @@ describe('CompetitorDetailComponent', () => {
     lastUpdated: fc.date({ min: new Date('2020-01-01'), max: new Date() }).map((d) => d.toISOString().split('T')[0]),
   }) as fc.Arbitrary<CompetitorData>;
 
-  const nexusShareDataArb = fc.record({
+  const trainWithJoeDataArb = fc.record({
     uniqueFeatures: fc.array(fc.string({ minLength: 10, maxLength: 100 }), { minLength: 1, maxLength: 10 }),
     pricing: fc.array(pricingTierArb, { minLength: 1, maxLength: 3 }),
-  }) as fc.Arbitrary<NexusShareData>;
+  }) as fc.Arbitrary<TrainWithJoeData>;
 
   beforeEach(async () => {
     const competitorDataServiceSpy = vi.fn();
     competitorDataServiceSpy.getAllCompetitors = vi.fn();
     competitorDataServiceSpy.loadCompetitorData = vi.fn();
     competitorDataServiceSpy.getCompetitorBySlug = vi.fn();
-    competitorDataServiceSpy.getNexusShareData = vi.fn();
+    competitorDataServiceSpy.getTrainWithJoeData = vi.fn();
     competitorDataServiceSpy.isDataOutdated = vi.fn();
 
     const routerSpy = vi.fn();
@@ -95,24 +100,26 @@ describe('CompetitorDetailComponent', () => {
      * **Feature: competitor-comparison-pages, Property 2: Comprehensive pricing display**
      *
      * For any pricing comparison table, all platforms should display current pricing for both free and paid tiers,
-     * include feature limitations, show annual vs monthly options where available, and calculate accurate cost savings with Nexus Share
+     * include feature limitations, show annual vs monthly options where available, and calculate accurate cost savings with Train with Joe
      */
-    it.skip('should calculate accurate monthly savings for any competitor and Nexus Share pricing data', () => {
+    it.skip('should calculate accurate monthly savings for any competitor and Train with Joe pricing data', () => {
       fc.assert(
         fc.property(
           competitorDataArb,
-          nexusShareDataArb,
-          (competitorData: CompetitorData, nexusShareData: NexusShareData) => {
+          trainWithJoeDataArb,
+          (competitorData: CompetitorData, trainWithJoeData: TrainWithJoeData) => {
             // Setup component with test data
             component.competitor = competitorData;
-            component.nexusShare = nexusShareData;
+            component.trainWithJoe = trainWithJoeData;
 
             // Calculate expected savings manually
             const competitorPrice =
               competitorData.pricing.length > 1 ? competitorData.pricing[1].price : competitorData.pricing[0].price;
-            const nexusSharePrice =
-              nexusShareData.pricing.length > 1 ? nexusShareData.pricing[1].price : nexusShareData.pricing[0].price;
-            const expectedMonthlySavings = Math.max(0, competitorPrice - nexusSharePrice);
+            const trainWithJoePrice =
+              trainWithJoeData.pricing.length > 1
+                ? trainWithJoeData.pricing[1].price
+                : trainWithJoeData.pricing[0].price;
+            const expectedMonthlySavings = Math.max(0, competitorPrice - trainWithJoePrice);
             const expectedAnnualSavings = expectedMonthlySavings * 12;
 
             // Test monthly savings calculation
@@ -138,11 +145,11 @@ describe('CompetitorDetailComponent', () => {
     it('should handle edge cases in pricing calculations', () => {
       // Test with null competitor data
       component.competitor = null;
-      component.nexusShare = null;
+      component.trainWithJoe = null;
       expect(component.calculateMonthlySavings()).toBe(0);
       expect(component.calculateAnnualSavings()).toBe(0);
 
-      // Test with valid competitor but null nexusShare
+      // Test with valid competitor but null trainWithJoe
       const validCompetitor: CompetitorData = {
         name: 'Test',
         slug: 'test',
@@ -176,13 +183,13 @@ describe('CompetitorDetailComponent', () => {
       };
 
       component.competitor = validCompetitor;
-      component.nexusShare = null;
+      component.trainWithJoe = null;
       expect(component.calculateMonthlySavings()).toBe(0);
       expect(component.calculateAnnualSavings()).toBe(0);
 
-      // Test with null competitor but valid nexusShare
+      // Test with null competitor but valid trainWithJoe
       component.competitor = null;
-      component.nexusShare = {
+      component.trainWithJoe = {
         uniqueFeatures: ['AI enhancement'],
         pricing: [
           {
@@ -202,11 +209,11 @@ describe('CompetitorDetailComponent', () => {
       fc.assert(
         fc.property(
           competitorDataArb,
-          nexusShareDataArb,
-          (competitorData: CompetitorData, nexusShareData: NexusShareData) => {
+          trainWithJoeDataArb,
+          (competitorData: CompetitorData, trainWithJoeData: TrainWithJoeData) => {
             // Setup component
             component.competitor = competitorData;
-            component.nexusShare = nexusShareData;
+            component.trainWithJoe = trainWithJoeData;
 
             // Verify competitor pricing data completeness
             expect(competitorData.pricing.length).toBeGreaterThan(0);
@@ -218,9 +225,9 @@ describe('CompetitorDetailComponent', () => {
               expect(tier.limitations).toBeDefined();
             });
 
-            // Verify Nexus Share pricing data completeness
-            expect(nexusShareData.pricing.length).toBeGreaterThan(0);
-            nexusShareData.pricing.forEach((tier) => {
+            // Verify Train with Joe pricing data completeness
+            expect(trainWithJoeData.pricing.length).toBeGreaterThan(0);
+            trainWithJoeData.pricing.forEach((tier) => {
               expect(tier.name).toBeTruthy();
               expect(tier.price).toBeGreaterThanOrEqual(0);
               expect(['monthly', 'annual']).toContain(tier.billing);
@@ -231,11 +238,11 @@ describe('CompetitorDetailComponent', () => {
             // Verify pricing data structure is valid for calculations
             // (removed overly strict assertions about free/low-cost tiers as they don't reflect real-world scenarios)
             const competitorPrices = competitorData.pricing.map((tier) => tier.price);
-            const nexusSharePrices = nexusShareData.pricing.map((tier) => tier.price);
+            const trainWithJoePrices = trainWithJoeData.pricing.map((tier) => tier.price);
 
             // All prices should be non-negative numbers
             expect(competitorPrices.every((price) => price >= 0)).toBe(true);
-            expect(nexusSharePrices.every((price) => price >= 0)).toBe(true);
+            expect(trainWithJoePrices.every((price) => price >= 0)).toBe(true);
           },
         ),
         { numRuns: 100 },

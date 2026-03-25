@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:minimal_saas_template/services/payment_service.dart';
+import 'package:train_with_joe/services/payment_service.dart';
 
 /// Widget Tests for PlatformPaymentService
 /// 

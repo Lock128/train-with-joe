@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kiri_check/kiri_check.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:minimal_saas_template/services/payment_service.dart';
-import 'package:minimal_saas_template/services/api_service.dart';
-import 'package:minimal_saas_template/providers/subscription_provider.dart';
+import 'package:train_with_joe/services/payment_service.dart';
+import 'package:train_with_joe/services/api_service.dart';
+import 'package:train_with_joe/providers/subscription_provider.dart';
 
 @GenerateMocks([ApiService, PaymentService])
 import 'subscription_purchase_redirect.property.test.mocks.dart';

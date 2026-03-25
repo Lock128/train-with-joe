@@ -1,5 +1,5 @@
 {
-  "name": "minimal-saas-template",
+  "name": "train-with-joe",
   "version": "0.1.0",
   "bin": {
     "backend": "backend/bin/backend.js"

@@ -67,7 +67,7 @@ describe('APIStack CDK Integration Tests', () => {
 
     // Verify AppSync API exists
     template.hasResourceProperties('AWS::AppSync::GraphQLApi', {
-      Name: 'minimal-saas-api-test',
+      Name: 'train-with-joe-api-test',
       XrayEnabled: true,
       AuthenticationType: 'AMAZON_COGNITO_USER_POOLS',
     });

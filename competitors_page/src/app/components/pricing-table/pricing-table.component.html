@@ -33,12 +33,12 @@
             <th class="plan-column-header" scope="col">
               <span class="header-text">Plans</span>
             </th>
-            <!-- Nexus Share Column -->
-            <th *ngIf="showNexusShare" 
-                class="platform-column-header nexus-share-header" 
+            <!-- Train with Joe Column -->
+            <th *ngIf="showTrainWithJoe" 
+                class="platform-column-header train-with-joe-header" 
                 scope="col">
               <div class="platform-header-content">
-                <span class="platform-name">Nexus Share</span>
+                <span class="platform-name">Train with Joe</span>
                 <span class="platform-badge">Our Platform</span>
               </div>
             </th>
@@ -69,11 +69,11 @@
               </div>
             </td>
 
-            <!-- Nexus Share Pricing -->
-            <td *ngIf="showNexusShare" 
-                class="pricing-cell nexus-share-cell">
+            <!-- Train with Joe Pricing -->
+            <td *ngIf="showTrainWithJoe" 
+                class="pricing-cell train-with-joe-cell">
               <div class="pricing-content" 
-                   *ngIf="getTierByName(nexusShare?.pricing || [], tierName, selectedBillingCycle) as nexusTier; else noNexusTier">
+                   *ngIf="getTierByName(trainWithJoe?.pricing || [], tierName, selectedBillingCycle) as nexusTier; else noNexusTier">
                 <div class="price-display">
                   <span class="price-amount">{{ formatPrice(nexusTier.price, selectedBillingCycle) }}</span>
                   <span *ngIf="selectedBillingCycle === 'annual' && isNumericPrice(nexusTier.price) && nexusTier.price > 0" 
@@ -123,7 +123,7 @@
             <!-- Competitor Pricing -->
             <td *ngFor="let competitor of competitors; trackBy: trackByCompetitor" 
                 class="pricing-cell"
-                [class.better-value]="highlightSavings && getTierByName(competitor.pricing, tierName, selectedBillingCycle) && isNexusShareBetterValue(getTierByName(competitor.pricing, tierName, selectedBillingCycle)!)">
+                [class.better-value]="highlightSavings && getTierByName(competitor.pricing, tierName, selectedBillingCycle) && isTrainWithJoeBetterValue(getTierByName(competitor.pricing, tierName, selectedBillingCycle)!)">
               <div class="pricing-content" 
                    *ngIf="getTierByName(competitor.pricing, tierName, selectedBillingCycle) as competitorTier; else noCompetitorTier">
                 <div class="price-display">
@@ -136,9 +136,9 @@
                 
                 <!-- Cost Savings Badge -->
                 <div class="savings-badge-container" 
-                     *ngIf="highlightSavings && showNexusShare && isNumericPrice(competitorTier.price) && isNexusShareBetterValue(competitorTier)">
+                     *ngIf="highlightSavings && showTrainWithJoe && isNumericPrice(competitorTier.price) && isTrainWithJoeBetterValue(competitorTier)">
                   <div class="savings-badge" 
-                       *ngIf="getComparableNexusShareTier(competitorTier) as nexusComparable">
+                       *ngIf="getComparableTrainWithJoeTier(competitorTier) as nexusComparable">
                     <span class="savings-amount">
                       Save {{ currency }}{{ calculateSavings(competitorTier.price, nexusComparable.price) }}
                     </span>
@@ -194,15 +194,15 @@
 
   <!-- Pricing Summary Cards (Mobile-Friendly) -->
   <div class="mobile-pricing" aria-label="Mobile pricing comparison">
-    <!-- Nexus Share Mobile Card -->
-    <div *ngIf="showNexusShare" class="mobile-platform-card nexus-share-mobile">
+    <!-- Train with Joe Mobile Card -->
+    <div *ngIf="showTrainWithJoe" class="mobile-platform-card train-with-joe-mobile">
       <div class="mobile-platform-header">
-        <h4 class="mobile-platform-name">Nexus Share</h4>
+        <h4 class="mobile-platform-name">Train with Joe</h4>
         <span class="mobile-platform-badge">Our Platform</span>
       </div>
       
       <div class="mobile-pricing-tiers">
-        <div *ngFor="let tier of getNexusSharePricing(selectedBillingCycle); trackBy: trackByPricingTier" 
+        <div *ngFor="let tier of getTrainWithJoePricing(selectedBillingCycle); trackBy: trackByPricingTier" 
              class="mobile-tier-card">
           <div class="mobile-tier-header">
             <h5 class="mobile-tier-name">{{ tier.name }}</h5>
@@ -254,7 +254,7 @@
       <div class="mobile-pricing-tiers">
         <div *ngFor="let tier of getPricingForBilling(competitor.pricing, selectedBillingCycle); trackBy: trackByPricingTier" 
              class="mobile-tier-card"
-             [class.better-value-mobile]="highlightSavings && isNumericPrice(tier.price) && isNexusShareBetterValue(tier)">
+             [class.better-value-mobile]="highlightSavings && isNumericPrice(tier.price) && isTrainWithJoeBetterValue(tier)">
           <div class="mobile-tier-header">
             <h5 class="mobile-tier-name">{{ tier.name }}</h5>
             <div class="mobile-price-display">
@@ -267,7 +267,7 @@
             
             <!-- Mobile Savings Badge -->
             <div class="mobile-savings-badge" 
-                 *ngIf="highlightSavings && showNexusShare && isNumericPrice(tier.price) && isNexusShareBetterValue(tier) && getComparableNexusShareTier(tier) as nexusComparable">
+                 *ngIf="highlightSavings && showTrainWithJoe && isNumericPrice(tier.price) && isTrainWithJoeBetterValue(tier) && getComparableTrainWithJoeTier(tier) as nexusComparable">
               <span class="mobile-savings-text">
                 Save {{ currency }}{{ calculateSavings(tier.price, nexusComparable.price) }}
                 <span *ngIf="calculateSavingsPercentage(tier.price, nexusComparable.price) > 0">

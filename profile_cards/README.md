@@ -160,9 +160,9 @@ Build output will be in the `dist/` directory.
 The app supports multiple environments:
 
 - **Local**: Development with mock data
-- **Sandbox**: Testing environment at `cards.sandbox.nexus-share.com`
-- **Beta**: Staging environment at `cards.beta.nexus-share.com`
-- **Production**: Live environment at `cards.nexus-share.com`
+- **Sandbox**: Testing environment at `cards.sandbox.train-with-joe.com`
+- **Beta**: Staging environment at `cards.beta.train-with-joe.com`
+- **Production**: Live environment at `cards.train-with-joe.com`
 
 ## Deployment
 
@@ -183,7 +183,7 @@ No authentication is required - all data is public.
 
 ### Color Palette
 
-The app uses the Nexus Share brand colors defined in CSS variables:
+The app uses the Train with Joe brand colors defined in CSS variables:
 
 - **Primary**: `#4f46e5` (Indigo)
 - **Primary Dark**: `#4338ca`
@@ -210,7 +210,7 @@ All components follow a mobile-first responsive design approach with:
 
 Place branding assets in `src/assets/images/`:
 
-- `logo.svg` - Nexus Share logo
+- `logo.svg` - Train with Joe logo
 - `og-default.png` - Default Open Graph image (1200x630px)
 - `og-profile-{userId}.png` - User-specific OG images (generated dynamically)
 
@@ -401,7 +401,7 @@ After deployment, verify:
 **Solutions**:
 ```bash
 # Check if user data exists in S3
-aws s3 ls s3://nexus-share-profile-cards-<env>/users/<userId>.json
+aws s3 ls s3://train-with-joe-profile-cards-<env>/users/<userId>.json
 
 # Manually trigger card generation
 aws lambda invoke \
@@ -454,7 +454,7 @@ aws dynamodb describe-table \
 **Solutions**:
 ```bash
 # Check S3 bucket contents
-aws s3 ls s3://nexus-share-profile-cards-<env>/ --recursive
+aws s3 ls s3://train-with-joe-profile-cards-<env>/ --recursive
 
 # Invalidate CloudFront cache completely
 aws cloudfront create-invalidation \
@@ -466,7 +466,7 @@ aws cloudfront create-invalidation \
 
 # Verify CORS configuration
 aws s3api get-bucket-cors \
-  --bucket nexus-share-profile-cards-<env>
+  --bucket train-with-joe-profile-cards-<env>
 ```
 
 ### Card Generation Lambda Timeout
@@ -570,7 +570,7 @@ aws cloudfront get-distribution-config \
 
 # Verify S3 bucket policy allows OAI
 aws s3api get-bucket-policy \
-  --bucket nexus-share-profile-cards-<env>
+  --bucket train-with-joe-profile-cards-<env>
 
 # Check CloudFront behaviors
 aws cloudfront get-distribution-config \
@@ -623,7 +623,7 @@ aws cloudwatch get-metric-statistics \
 ```bash
 # Enable S3 access logging
 aws s3api put-bucket-logging \
-  --bucket nexus-share-profile-cards-<env> \
+  --bucket train-with-joe-profile-cards-<env> \
   --bucket-logging-status file://logging.json
 
 # View access logs
@@ -668,4 +668,4 @@ For issues or questions:
 
 ## License
 
-Copyright © 2025 Nexus Share. All rights reserved.
+Copyright © 2025 Train with Joe. All rights reserved.

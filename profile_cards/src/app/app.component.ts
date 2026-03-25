@@ -10,6 +10,6 @@ import { NavHeaderComponent } from './components/nav-header/nav-header.component
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  title = 'Nexus Share Profile Cards';
+  title = 'Train with Joe Profile Cards';
   currentYear = new Date().getFullYear();
 }

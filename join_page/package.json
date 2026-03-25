@@ -1,5 +1,5 @@
 {
-  "name": "minimal-saas-join",
+  "name": "train-with-joe-join",
   "version": "1.0.0",
   "scripts": {
     "build": "ng build --configuration production --base-href /",

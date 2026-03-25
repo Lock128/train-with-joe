@@ -52,7 +52,7 @@ describe('CompetitorDataService', () => {
     lastUpdated: '2024-12-30',
   };
 
-  const mockNexusShareData = {
+  const mockTrainWithJoeData = {
     uniqueFeatures: [
       'AI-powered content enhancement via Amazon Bedrock',
       'Advanced mention resolution across platforms',
@@ -64,14 +64,14 @@ describe('CompetitorDataService', () => {
         price: 0,
         billing: 'monthly' as BillingCycle,
         features: ['3 social platforms (X, LinkedIn, Bluesky)', 'AI content enhancement', 'Advanced scheduling'],
-        limitations: ['Nexus Share branding'],
+        limitations: ['Train with Joe branding'],
       },
     ],
   };
 
   const mockConfiguration: CompetitorConfiguration = {
     competitors: [mockCompetitorData],
-    nexusShare: mockNexusShareData,
+    trainWithJoe: mockTrainWithJoeData,
   };
 
   beforeEach(async () => {
@@ -437,7 +437,7 @@ describe('CompetitorDataService', () => {
       service.clearData();
 
       expect(service.getAllCompetitors()).toEqual([]);
-      expect(service.getNexusShareData()).toBeNull();
+      expect(service.getTrainWithJoeData()).toBeNull();
     });
   });
 
@@ -491,11 +491,11 @@ describe('CompetitorDataService', () => {
       });
     });
 
-    it('should emit nexus share data changes', () => {
+    it('should emit train with joe data changes', () => {
       return new Promise<void>((done) => {
-        service.nexusShare$.subscribe((nexusShare) => {
-          if (nexusShare) {
-            expect(nexusShare).toEqual(mockNexusShareData);
+        service.trainWithJoe$.subscribe((trainWithJoe) => {
+          if (trainWithJoe) {
+            expect(trainWithJoe).toEqual(mockTrainWithJoeData);
             done();
           }
         });
@@ -578,7 +578,7 @@ describe('CompetitorDataService', () => {
             // Missing required fields
           },
         ],
-        nexusShare: null, // Missing nexusShare data
+        trainWithJoe: null, // Missing trainWithJoe data
       };
 
       const validation = service.validateConfigurationComprehensive(invalidConfig);

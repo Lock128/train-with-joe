@@ -1,6 +1,6 @@
-# Minimal SaaS Template - Flutter Frontend
+# Train with Joe - Flutter Frontend
 
-A cross-platform Flutter application for web, iOS, and Android with AWS Amplify integration.
+A cross-platform Flutter application for vocabulary training, supporting web, iOS, and Android with AWS Amplify integration.
 
 ## Features
 

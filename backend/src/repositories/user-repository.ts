@@ -14,7 +14,7 @@ export class UserRepository {
   private constructor() {
     const client = new DynamoDBClient({});
     this.dynamoClient = DynamoDBDocumentClient.from(client);
-    this.tableName = process.env.USERS_TABLE_NAME || 'minimal-saas-users-sandbox';
+    this.tableName = process.env.USERS_TABLE_NAME || 'train-with-joe-users-sandbox';
   }
 
   public static getInstance(): UserRepository {

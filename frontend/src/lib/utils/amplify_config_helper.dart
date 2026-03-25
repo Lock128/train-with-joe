@@ -9,14 +9,14 @@ class AmplifyConfigHelper {
   /// - [identityPoolId]: Cognito Identity Pool ID
   /// - [region]: AWS Region (e.g., 'us-east-1')
   /// - [apiEndpoint]: AppSync GraphQL API endpoint URL
-  /// - [apiName]: Name for the API configuration (default: 'minimalSaasApi')
+  /// - [apiName]: Name for the API configuration (default: 'trainWithJoeApi')
   static String generateConfig({
     required String userPoolId,
     required String appClientId,
     required String identityPoolId,
     required String region,
     required String apiEndpoint,
-    String apiName = 'minimalSaasApi',
+    String apiName = 'trainWithJoeApi',
   }) {
     return '''
 {

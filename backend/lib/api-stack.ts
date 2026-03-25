@@ -38,7 +38,7 @@ export class APIStack extends cdk.Stack {
 
     // Create AppSync GraphQL API
     const api = new GraphqlApi(this, `api-${namespace}`, {
-      name: `minimal-saas-api-${namespace}`,
+      name: `train-with-joe-api-${namespace}`,
       schema: SchemaFile.fromAsset(path.join(__dirname, '../src/gql-schemas/schema.graphql')),
       xrayEnabled: true,
       logConfig: {

@@ -25,7 +25,7 @@ export class DistributionStack extends cdk.Stack {
 
     // Create CloudFront distribution
     this.distribution = new Distribution(this, `Distribution-${namespace}`, {
-      comment: `Minimal SaaS Template ${namespace} - Frontend Distribution`,
+      comment: `Train with Joe ${namespace} - Frontend Distribution`,
       defaultBehavior: {
         origin: frontendOrigin,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,

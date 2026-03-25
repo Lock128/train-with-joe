@@ -1,4 +1,4 @@
-// Amplify configuration for minimal SaaS template
+// Amplify configuration for Train with Joe
 // This file should be generated or updated with actual AWS resource IDs after deployment
 
 const String amplifyconfig = '''
@@ -49,7 +49,7 @@ const String amplifyconfig = '''
     "api": {
         "plugins": {
             "awsAPIPlugin": {
-                "minimalSaasApi": {
+                "trainWithJoeApi": {
                     "endpointType": "GraphQL",
                     "endpoint": "https://localhost:3000/graphql",
                     "region": "REPLACE_WITH_REGION",

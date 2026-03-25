@@ -1,6 +1,6 @@
 # Competitor Comparison Pages
 
-This Angular application provides competitor comparison pages for the SaaS template, showcasing advantages over competing tools.
+This Angular application provides competitor comparison pages for the Train with Joe, showcasing advantages over competing tools.
 
 ## Development
 

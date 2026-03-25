@@ -25,7 +25,7 @@ describe('ComparisonOverviewComponent Navigation Property Tests', () => {
   beforeEach(async () => {
     const competitorDataSpy = vi.fn();
     competitorDataSpy.loadCompetitorData = vi.fn();
-    competitorDataSpy.getNexusShareData = vi.fn();
+    competitorDataSpy.getTrainWithJoeData = vi.fn();
     competitorDataSpy.getAllCompetitors = vi.fn();
 
     const ogMetaSpy = vi.fn();
@@ -97,14 +97,14 @@ describe('ComparisonOverviewComponent Navigation Property Tests', () => {
 
       // Setup mock data
       mockCompetitorDataService.loadCompetitorData.mockReturnValue(Promise.resolve(testCompetitors));
-      mockCompetitorDataService.getNexusShareData.mockReturnValue({
+      mockCompetitorDataService.getTrainWithJoeData.mockReturnValue({
         uniqueFeatures: ['AI content generation'],
         pricing: [{ name: 'Free', price: 0, billing: 'monthly', features: ['All features'], limitations: [] }],
       });
 
       // Set component data directly to avoid router rendering issues
       component.competitors = testCompetitors;
-      component.nexusShareData = {
+      component.trainWithJoeData = {
         uniqueFeatures: ['AI content generation'],
         pricing: [{ name: 'Free', price: 0, billing: 'monthly', features: ['All features'], limitations: [] }],
       };
@@ -164,14 +164,14 @@ describe('ComparisonOverviewComponent Navigation Property Tests', () => {
 
             // Setup mock data
             mockCompetitorDataService.loadCompetitorData.mockReturnValue(Promise.resolve(competitors));
-            mockCompetitorDataService.getNexusShareData.mockReturnValue({
+            mockCompetitorDataService.getTrainWithJoeData.mockReturnValue({
               uniqueFeatures: ['AI features'],
               pricing: [{ name: 'Free', price: 0, billing: 'monthly', features: ['Basic'], limitations: [] }],
             });
 
             // Set component data directly for synchronous testing
             component.competitors = competitors;
-            component.nexusShareData = {
+            component.trainWithJoeData = {
               uniqueFeatures: ['AI features'],
               pricing: [{ name: 'Free', price: 0, billing: 'monthly', features: ['Basic'], limitations: [] }],
             };
@@ -224,7 +224,7 @@ describe('ComparisonOverviewComponent Navigation Property Tests', () => {
 
       // Set component data directly to avoid router issues
       component.competitors = testCompetitors;
-      component.nexusShareData = {
+      component.trainWithJoeData = {
         uniqueFeatures: ['AI'],
         pricing: [{ name: 'Free', price: 0, billing: 'monthly', features: ['All'], limitations: [] }],
       };
@@ -237,7 +237,7 @@ describe('ComparisonOverviewComponent Navigation Property Tests', () => {
       expect(component.competitors[0].name).toBe('Buffer');
 
       // Assert - Navigation data should be properly structured
-      expect(component.nexusShareData).toBeTruthy('Nexus Share data should be available for navigation');
+      expect(component.trainWithJoeData).toBeTruthy('Train with Joe data should be available for navigation');
     });
   });
 });

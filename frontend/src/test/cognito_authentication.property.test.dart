@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kiri_check/kiri_check.dart';
-import 'package:minimal_saas_template/services/auth_service.dart';
+import 'package:train_with_joe/services/auth_service.dart';
 
 /// **Validates: Requirements 6.4**
 /// 

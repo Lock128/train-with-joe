@@ -6,7 +6,7 @@ import { APIStack } from '../lib/api-stack';
 
 /**
  * Property-Based Tests for GraphQL Response Format
- * Feature: minimal-saas-template
+ * Feature: train-with-joe
  *
  * These tests validate that the GraphQL API conforms to the GraphQL specification
  * for response format across all valid queries.

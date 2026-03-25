@@ -8,14 +8,14 @@
       "userId": "user1",
       "displayName": "AI Researcher",
       "value": 25,
-      "profileCardUrl": "https://cards.nexus-share.com/user1"
+      "profileCardUrl": "https://cards.train-with-joe.com/user1"
     },
     {
       "rank": 2,
       "userId": "user2",
       "displayName": "Data Scientist",
       "value": 18,
-      "profileCardUrl": "https://cards.nexus-share.com/user2"
+      "profileCardUrl": "https://cards.train-with-joe.com/user2"
     }
   ]
 }

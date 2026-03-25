@@ -2,11 +2,11 @@
 
 ## Introduction
 
-This document defines requirements for a minimal SaaS template based on the nexus-share architecture. The template provides a foundation for building Flutter-based SaaS applications with AWS backend infrastructure, including authentication, data storage, GraphQL API, and multiple Angular-based landing pages. The template is designed to be minimal yet complete, providing only essential components needed for a working SaaS application that can be extended.
+This document defines requirements for a Train with Joe based on the train-with-joe architecture. The template provides a foundation for building Flutter-based SaaS applications with AWS backend infrastructure, including authentication, data storage, GraphQL API, and multiple Angular-based landing pages. The template is designed to be minimal yet complete, providing only essential components needed for a working SaaS application that can be extended.
 
 ## Glossary
 
-- **Template_System**: The complete minimal SaaS template including backend, frontend, and landing pages
+- **Template_System**: The complete Train with Joe including backend, frontend, and landing pages
 - **Backend_Infrastructure**: AWS CDK-based infrastructure including AppSync, Lambda, DynamoDB, Cognito, Bedrock, and CloudFront
 - **Flutter_Frontend**: Cross-platform application built with Flutter 3.8+ supporting web, iOS, and Android platforms
 - **Landing_Page**: Angular 20+ standalone page for user registration and marketing

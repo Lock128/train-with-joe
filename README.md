@@ -1,10 +1,10 @@
-# Minimal SaaS Template
+# Train with Joe
 
-A production-ready foundation for building Flutter-based SaaS applications with AWS backend infrastructure.
+A fun vocabulary training app for kids, built with Flutter and AWS backend infrastructure.
 
 ## Overview
 
-This template provides essential components for a working SaaS application:
+Train with Joe helps kids learn vocabulary through fun interactive exercises and games. The app provides:
 - **Backend**: AWS CDK infrastructure with Cognito, DynamoDB, AppSync GraphQL API, Lambda, Bedrock AI, and CloudFront
 - **Frontend**: Flutter cross-platform app (web, iOS, Android) with Amplify integration
 - **Landing Pages**: Angular 20+ standalone pages for marketing and user profiles
@@ -107,6 +107,8 @@ flutter build web --release     # Production build
 - User authentication (email/password via Cognito)
 - GraphQL API for data operations
 - User profile management
+- Vocabulary games and daily word challenges
+- Progress tracking and achievements
 - Subscription management (Stripe, App Store, Play Store)
 - AI content enhancement (Amazon Bedrock)
 - Multi-platform support (web, iOS, Android)
@@ -127,7 +129,7 @@ Environment-specific configuration is managed through:
 
 ## Testing
 
-The template includes comprehensive testing infrastructure:
+The app includes comprehensive testing infrastructure:
 - Unit tests for backend services and repositories
 - Property-based tests using fast-check
 - Integration tests for API endpoints

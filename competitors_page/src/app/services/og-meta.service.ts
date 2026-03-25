@@ -30,9 +30,9 @@ export class OGMetaService {
    * Update meta tags for comparison overview page
    */
   updateComparisonOverviewMeta(): void {
-    const title = 'Nexus Share vs Competitors - Complete Social Media Management Comparison';
+    const title = 'Train with Joe vs Competitors - Complete Social Media Management Comparison';
     const description =
-      'Compare Nexus Share with Buffer, Hootsuite, Later, and other social media management tools. See features, pricing, and why Nexus Share offers the best AI-powered automation.';
+      'Compare Train with Joe with Buffer, Hootsuite, Later, and other social media management tools. See features, pricing, and why Train with Joe offers the best AI-powered automation.';
     const keywords = [
       'social media management comparison',
       'Buffer alternative',
@@ -59,11 +59,11 @@ export class OGMetaService {
    * Update meta tags for individual competitor comparison page
    */
   updateCompetitorComparisonMeta(competitor: CompetitorData): void {
-    const title = `Nexus Share vs ${competitor.name} - Detailed Feature & Pricing Comparison`;
-    const description = `Compare Nexus Share with ${competitor.name}. See detailed feature comparison, pricing analysis, and why users are switching to Nexus Share's AI-powered social media automation.`;
+    const title = `Train with Joe vs ${competitor.name} - Detailed Feature & Pricing Comparison`;
+    const description = `Compare Train with Joe with ${competitor.name}. See detailed feature comparison, pricing analysis, and why users are switching to Train with Joe's AI-powered social media automation.`;
     const keywords = [
       `${competitor.name} alternative`,
-      `Nexus Share vs ${competitor.name}`,
+      `Train with Joe vs ${competitor.name}`,
       'social media management comparison',
       'AI content generation',
       'social media automation',
@@ -129,7 +129,7 @@ export class OGMetaService {
       this.updateMetaTag('og:image:width', '1200', 'property');
       this.updateMetaTag('og:image:height', '630', 'property');
     }
-    this.updateMetaTag('og:site_name', 'Nexus Share', 'property');
+    this.updateMetaTag('og:site_name', 'Train with Joe', 'property');
 
     // Twitter Card tags
     this.updateMetaTag('twitter:card', 'summary_large_image');
@@ -142,11 +142,11 @@ export class OGMetaService {
     if (image) {
       this.updateMetaTag('twitter:image', image);
     }
-    this.updateMetaTag('twitter:site', '@nexus_share');
+    this.updateMetaTag('twitter:site', '@train_with_joe');
 
     // Additional SEO meta tags
     this.updateMetaTag('robots', 'index, follow');
-    this.updateMetaTag('author', 'Nexus Share');
+    this.updateMetaTag('author', 'Train with Joe');
     this.updateMetaTag('viewport', 'width=device-width, initial-scale=1');
   }
 
@@ -170,10 +170,10 @@ export class OGMetaService {
       image: image,
       mainEntity: {
         '@type': 'SoftwareApplication',
-        name: 'Nexus Share',
+        name: 'Train with Joe',
         applicationCategory: 'BusinessApplication',
         description: 'AI-powered social media management and automation platform',
-        url: 'https://nexus-share.com',
+        url: 'https://train-with-joe.com',
         offers: {
           '@type': 'Offer',
           price: '0',
@@ -211,8 +211,8 @@ export class OGMetaService {
       image: image,
       mainEntity: {
         '@type': 'ComparisonTable',
-        name: `${competitor.name} vs Nexus Share Comparison`,
-        description: `Detailed comparison between ${competitor.name} and Nexus Share social media management platforms`,
+        name: `${competitor.name} vs Train with Joe Comparison`,
+        description: `Detailed comparison between ${competitor.name} and Train with Joe social media management platforms`,
         about: [
           {
             '@type': 'SoftwareApplication',
@@ -223,8 +223,8 @@ export class OGMetaService {
           },
           {
             '@type': 'SoftwareApplication',
-            name: 'Nexus Share',
-            url: 'https://nexus-share.com',
+            name: 'Train with Joe',
+            url: 'https://train-with-joe.com',
             description: 'AI-powered social media management and automation platform',
             applicationCategory: 'BusinessApplication',
             offers: {

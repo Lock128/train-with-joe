@@ -116,7 +116,7 @@ describe('User Journey Integration Tests', () => {
       getAllCompetitors: vi.fn(),
       getCompetitorBySlug: vi.fn(),
       getOverallDataFreshness: vi.fn(),
-      getNexusShareData: vi.fn(),
+      getTrainWithJoeData: vi.fn(),
       isDataOutdated: vi.fn(),
       competitors$: {
         pipe: vi.fn().mockReturnValue({
@@ -186,7 +186,7 @@ describe('User Journey Integration Tests', () => {
       averageDataAge: 0,
       needsUpdateCount: 0,
     });
-    competitorDataService.getNexusShareData.mockReturnValue({
+    competitorDataService.getTrainWithJoeData.mockReturnValue({
       uniqueFeatures: ['AI Content Generation', 'Mention Resolution'],
       pricing: [
         {

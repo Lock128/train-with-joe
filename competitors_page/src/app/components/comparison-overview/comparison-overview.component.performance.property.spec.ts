@@ -6,7 +6,7 @@ import { ComparisonOverviewComponent } from './comparison-overview.component';
 import { CompetitorDataService } from '../../services/competitor-data.service';
 import { OGMetaService } from '../../services/og-meta.service';
 import { AnalyticsService } from '../../services/analytics.service';
-import type { CompetitorData, NexusShareData } from '../../models/competitor.interface';
+import type { CompetitorData, TrainWithJoeData } from '../../models/competitor.interface';
 import * as fc from 'fast-check';
 
 /**
@@ -53,7 +53,7 @@ describe('ComparisonOverviewComponent - Performance Property Tests', () => {
     },
   ];
 
-  const mockNexusShareData: NexusShareData = {
+  const mockTrainWithJoeData: TrainWithJoeData = {
     uniqueFeatures: ['AI-powered content enhancement'],
     pricing: [
       {
@@ -61,7 +61,7 @@ describe('ComparisonOverviewComponent - Performance Property Tests', () => {
         price: 0,
         billing: 'monthly',
         features: ['AI content enhancement'],
-        limitations: ['Nexus Share branding'],
+        limitations: ['Train with Joe branding'],
       },
     ],
   };
@@ -69,7 +69,7 @@ describe('ComparisonOverviewComponent - Performance Property Tests', () => {
   beforeEach(async () => {
     const competitorDataServiceSpy = vi.fn();
     competitorDataServiceSpy.loadCompetitorData = vi.fn();
-    competitorDataServiceSpy.getNexusShareData = vi.fn();
+    competitorDataServiceSpy.getTrainWithJoeData = vi.fn();
 
     const ogMetaServiceSpy = vi.fn();
     ogMetaServiceSpy.updateComparisonOverviewMeta = vi.fn();
@@ -93,7 +93,7 @@ describe('ComparisonOverviewComponent - Performance Property Tests', () => {
     mockCompetitorDataService = TestBed.inject(CompetitorDataService) as any;
 
     mockCompetitorDataService.loadCompetitorData.mockReturnValue(Promise.resolve(mockCompetitors));
-    mockCompetitorDataService.getNexusShareData.mockReturnValue(mockNexusShareData);
+    mockCompetitorDataService.getTrainWithJoeData.mockReturnValue(mockTrainWithJoeData);
   });
 
   /**

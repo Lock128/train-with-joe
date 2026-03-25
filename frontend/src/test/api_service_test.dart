@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:minimal_saas_template/services/api_service.dart';
+import 'package:train_with_joe/services/api_service.dart';
 
 /// Widget tests for ApiService
 /// 

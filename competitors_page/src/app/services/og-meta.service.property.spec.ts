@@ -52,7 +52,7 @@ describe('OGMetaService Property Tests', () => {
 
     if (!Object.prototype.hasOwnProperty.call(window, 'mockLocation')) {
       Object.defineProperty(window, 'mockLocation', {
-        value: { href: 'https://nexus-share.com/compare/test' },
+        value: { href: 'https://train-with-joe.com/compare/test' },
         writable: true,
         configurable: true,
       });
@@ -105,7 +105,7 @@ describe('OGMetaService Property Tests', () => {
 
             // Assert - Title should be set
             expect(titleService.setTitle).toHaveBeenCalledWith(
-              expect.stringMatching(/Nexus Share.*Competitors.*Comparison/i),
+              expect.stringMatching(/Train with Joe.*Competitors.*Comparison/i),
             );
 
             // Assert - Essential meta tags should be present
@@ -333,7 +333,7 @@ describe('OGMetaService Property Tests', () => {
           const imageUrl = service.generateCompetitorImageUrl(competitorSlug);
 
           // Assert - URL should be properly formatted
-          expect(imageUrl).toMatch(/^https:\/\/nexus-share\.com\/compare\/api\/og-image\?/);
+          expect(imageUrl).toMatch(/^https:\/\/train-with-joe\.com\/compare\/api\/og-image\?/);
           expect(imageUrl).toContain(`competitor=${competitorSlug}`);
           expect(imageUrl).toContain('type=competitor');
         }),

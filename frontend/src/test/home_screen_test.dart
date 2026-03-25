@@ -5,11 +5,11 @@ import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:minimal_saas_template/screens/home_screen.dart';
-import 'package:minimal_saas_template/providers/auth_provider.dart' as app;
-import 'package:minimal_saas_template/providers/user_provider.dart';
-import 'package:minimal_saas_template/services/auth_service.dart';
-import 'package:minimal_saas_template/services/api_service.dart';
+import 'package:train_with_joe/screens/home_screen.dart';
+import 'package:train_with_joe/providers/auth_provider.dart' as app;
+import 'package:train_with_joe/providers/user_provider.dart';
+import 'package:train_with_joe/services/auth_service.dart';
+import 'package:train_with_joe/services/api_service.dart';
 
 import 'home_screen_test.mocks.dart';
 

@@ -4,10 +4,10 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:minimal_saas_template/screens/subscription_screen.dart';
-import 'package:minimal_saas_template/providers/subscription_provider.dart';
-import 'package:minimal_saas_template/services/api_service.dart';
-import 'package:minimal_saas_template/services/payment_service.dart';
+import 'package:train_with_joe/screens/subscription_screen.dart';
+import 'package:train_with_joe/providers/subscription_provider.dart';
+import 'package:train_with_joe/services/api_service.dart';
+import 'package:train_with_joe/services/payment_service.dart';
 
 import 'subscription_screen_test.mocks.dart';
 

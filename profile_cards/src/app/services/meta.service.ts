@@ -6,8 +6,8 @@ import type { ProfileCardData } from '../models/profile-card.model';
   providedIn: 'root',
 })
 export class MetaService {
-  private readonly defaultTitle = 'Nexus Share Profile Cards';
-  private readonly defaultDescription = 'View user statistics and achievements on Nexus Share';
+  private readonly defaultTitle = 'Train with Joe Profile Cards';
+  private readonly defaultDescription = 'View user statistics and achievements on Train with Joe';
   private readonly defaultImage = '/assets/images/og-default.png';
 
   constructor(
@@ -26,7 +26,7 @@ export class MetaService {
   }
 
   setProfileCardTags(profileData: ProfileCardData, userId: string): void {
-    const title = `${profileData.displayName}'s Nexus Share Profile`;
+    const title = `${profileData.displayName}'s Train with Joe Profile`;
     const description = `${profileData.metrics.uniquePosts} unique posts (${profileData.metrics.totalPostsAcrossNetworks} total across networks) published on ${profileData.metrics.connectedPlatforms} platforms. ${profileData.metrics.currentStreak} day current streak.`;
     const image = `/assets/images/og-profile-${userId}.png`; // Dynamic OG image (future enhancement)
     const url = `${window.location.origin}/${userId}`;
@@ -42,8 +42,8 @@ export class MetaService {
   }
 
   setLeaderboardTags(): void {
-    const title = 'Most Active Users - Nexus Share';
-    const description = 'Top contributors on Nexus Share by unique posts, total posts across networks, and AI usage';
+    const title = 'Most Active Users - Train with Joe';
+    const description = 'Top contributors on Train with Joe by unique posts, total posts across networks, and AI usage';
     const image = this.defaultImage;
     const url = `${window.location.origin}/leaderboard`;
 

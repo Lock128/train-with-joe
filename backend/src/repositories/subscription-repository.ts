@@ -21,7 +21,7 @@ export class SubscriptionRepository {
   private constructor() {
     const client = new DynamoDBClient({});
     this.dynamoClient = DynamoDBDocumentClient.from(client);
-    this.tableName = process.env.SUBSCRIPTIONS_TABLE_NAME || 'minimal-saas-subscriptions-sandbox';
+    this.tableName = process.env.SUBSCRIPTIONS_TABLE_NAME || 'train-with-joe-subscriptions-sandbox';
   }
 
   public static getInstance(): SubscriptionRepository {

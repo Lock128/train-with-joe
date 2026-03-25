@@ -112,7 +112,7 @@ describe('Competitor Comparison E2E Integration Tests', () => {
     competitorDataServiceSpy.getAllCompetitors = vi.fn();
     competitorDataServiceSpy.getCompetitorBySlug = vi.fn();
     competitorDataServiceSpy.getOverallDataFreshness = vi.fn();
-    competitorDataServiceSpy.getNexusShareData = vi.fn();
+    competitorDataServiceSpy.getTrainWithJoeData = vi.fn();
     competitorDataServiceSpy.isDataOutdated = vi.fn();
     competitorDataServiceSpy.competitors$ = {
       pipe: vi.fn().mockReturnValue({
@@ -172,7 +172,7 @@ describe('Competitor Comparison E2E Integration Tests', () => {
       averageDataAge: 0,
       needsUpdateCount: 0,
     });
-    competitorDataService.getNexusShareData.mockReturnValue({
+    competitorDataService.getTrainWithJoeData.mockReturnValue({
       uniqueFeatures: ['AI Content Generation', 'Mention Resolution'],
       pricing: [
         {

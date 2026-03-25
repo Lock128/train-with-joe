@@ -7,7 +7,7 @@ import * as fc from 'fast-check';
 import { ComparisonOverviewComponent } from './comparison-overview.component';
 import { CompetitorDataService } from '../../services/competitor-data.service';
 import { OGMetaService } from '../../services/og-meta.service';
-import type { CompetitorData, NexusShareData } from '../../models/competitor.interface';
+import type { CompetitorData, TrainWithJoeData } from '../../models/competitor.interface';
 
 describe('ComparisonOverviewComponent - Search and Filter Property Tests', () => {
   let component: ComparisonOverviewComponent;
@@ -69,9 +69,15 @@ describe('ComparisonOverviewComponent - Search and Filter Property Tests', () =>
     },
   ];
 
-  const mockNexusShareData: NexusShareData = {
+  const mockTrainWithJoeData: TrainWithJoeData = {
     pricing: [
-      { name: 'Free', price: 0, billing: 'monthly', features: ['3 platforms'], limitations: ['Nexus Share branding'] },
+      {
+        name: 'Free',
+        price: 0,
+        billing: 'monthly',
+        features: ['3 platforms'],
+        limitations: ['Train with Joe branding'],
+      },
       { name: 'Pro', price: 15, billing: 'monthly', features: ['Unlimited platforms'], limitations: [] },
     ],
     uniqueFeatures: [
@@ -84,7 +90,7 @@ describe('ComparisonOverviewComponent - Search and Filter Property Tests', () =>
   beforeEach(async () => {
     const competitorDataServiceSpy = jasmine.createSpyObj('CompetitorDataService', [
       'loadCompetitorData',
-      'getNexusShareData',
+      'getTrainWithJoeData',
     ]);
     const ogMetaServiceSpy = jasmine.createSpyObj('OGMetaService', ['updateComparisonOverviewMeta']);
 
@@ -102,7 +108,7 @@ describe('ComparisonOverviewComponent - Search and Filter Property Tests', () =>
     mockOGMetaService = TestBed.inject(OGMetaService) as jasmine.SpyObj<OGMetaService>;
 
     mockCompetitorDataService.loadCompetitorData.and.returnValue(Promise.resolve(mockCompetitors));
-    mockCompetitorDataService.getNexusShareData.and.returnValue(mockNexusShareData);
+    mockCompetitorDataService.getTrainWithJoeData.and.returnValue(mockTrainWithJoeData);
   });
 
   /**
