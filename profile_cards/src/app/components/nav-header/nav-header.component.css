@@ -1,0 +1,116 @@
+/* Navigation Header with Nexus Share Branding - Matching join_page */
+.nav-header {
+  background: linear-gradient(135deg, #0D47A1, #1E88E5, #26C6DA);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.nav-brand:hover {
+  opacity: 0.8;
+}
+
+.brand-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  display: none;
+}
+
+.brand-text.fallback {
+  display: block;
+  color: white;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.nav-link {
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.nav-link.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-cta {
+  padding: 12px 24px;
+  background: white;
+  color: #1E88E5;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-cta:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn-cta:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 12px 16px;
+  }
+
+  .brand-logo {
+    height: 40px;
+  }
+
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+  }
+
+  .btn-cta {
+    padding: 10px 20px;
+    font-size: 0.875rem;
+  }
+}

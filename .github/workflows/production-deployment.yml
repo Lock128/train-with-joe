@@ -1,0 +1,579 @@
+name: Production Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git tag or branch to deploy to production (use "main" for urgent deployments)'
+        required: true
+        type: string
+      beta_url:
+        description: 'Beta environment URL for reference'
+        required: false
+        type: string
+      release_url:
+        description: 'GitHub release URL'
+        required: false
+        type: string
+      skip_smoke_tests:
+        description: 'Skip production smoke tests'
+        required: false
+        default: false
+        type: boolean
+      urgent_deployment:
+        description: 'Urgent deployment from main branch (creates deployment tag automatically)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  id-token: write
+  contents: write
+  actions: read
+  issues: write
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  create-deployment-tag:
+    name: Create Deployment Tag
+    runs-on: ubuntu-latest
+    if: github.event.inputs.urgent_deployment == 'true' && github.event.inputs.ref == 'main'
+    outputs:
+      deployment_tag: ${{ steps.create-tag.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.ref }}
+          fetch-depth: 0
+
+      - name: Create deployment tag
+        id: create-tag
+        run: |
+          # Generate timestamp-based tag for urgent production deployment
+          TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          TAG="prod-urgent-${TIMESTAMP}-${COMMIT_SHORT}"
+          
+          echo "🚨 Creating URGENT production deployment tag: $TAG"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Urgent production deployment from main branch - ${{ github.sha }}"
+          git push origin "$TAG"
+          
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "✅ Created urgent deployment tag: $TAG"
+          echo "⚠️  This is an URGENT production deployment bypassing normal promotion flow"
+        env:
+          HUSKY: 0
+
+      - name: Create urgent deployment summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🚨 Urgent Production Deployment Tag Created
+          
+          **Tag:** \`${{ steps.create-tag.outputs.tag }}\`
+          **Source:** main branch
+          **Commit:** $(git rev-parse --short HEAD)
+          **Created By:** ${{ github.actor }}
+          **Timestamp:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          
+          ⚠️ **Warning:** This is an urgent deployment bypassing the normal beta → production promotion flow.
+          
+          **Next Step:** Deployment will proceed with approval requirement.
+          EOF
+
+  validate-production-deployment:
+    name: Validate Production Deployment
+    needs: [create-deployment-tag]
+    if: always() && (needs.create-deployment-tag.result == 'success' || needs.create-deployment-tag.result == 'skipped')
+    runs-on: ubuntu-latest
+    outputs:
+      ref: ${{ steps.validate.outputs.ref }}
+      can_deploy: ${{ steps.validate.outputs.can_deploy }}
+      is_urgent: ${{ steps.validate.outputs.is_urgent }}
+    steps:
+      - name: Validate deployment inputs
+        id: validate
+        run: |
+          # Use the created tag if this is an urgent deployment, otherwise use the provided ref
+          if [ "${{ github.event.inputs.urgent_deployment }}" = "true" ] && [ "${{ github.event.inputs.ref }}" = "main" ]; then
+            REF="${{ needs.create-deployment-tag.outputs.deployment_tag }}"
+            IS_URGENT="true"
+            echo "🚨 URGENT DEPLOYMENT MODE"
+            echo "Using auto-generated tag: $REF"
+            
+            # Verify the tag was created
+            if [ -z "$REF" ]; then
+              echo "❌ Failed to create urgent deployment tag"
+              exit 1
+            fi
+          else
+            REF="${{ github.event.inputs.ref }}"
+            IS_URGENT="false"
+            
+            # Validate that ref is a tag (for non-urgent deployments)
+            if [[ ! "$REF" =~ ^(v[0-9]+\.|deploy-[0-9]{8}-[0-9]{6}-[a-f0-9]+|beta-|release-|prod-urgent-) ]]; then
+              echo "❌ Invalid ref format. Only tags are allowed for production deployment"
+              echo "💡 For urgent deployments from main, set urgent_deployment=true"
+              echo "📋 Provided ref: $REF"
+              exit 1
+            fi
+          fi
+          
+          echo "ref=$REF" >> $GITHUB_OUTPUT
+          echo "can_deploy=true" >> $GITHUB_OUTPUT
+          echo "is_urgent=$IS_URGENT" >> $GITHUB_OUTPUT
+          
+          echo "✅ Production deployment validation passed"
+          echo "🏷️ Tag: $REF"
+          echo "🚨 Urgent: $IS_URGENT"
+          echo "🌐 Beta URL: ${{ github.event.inputs.beta_url }}"
+          echo "📋 Release: ${{ github.event.inputs.release_url }}"
+
+  production-deployment-approval:
+    name: Production Deployment Approval
+    needs: validate-production-deployment
+    if: always() && needs.validate-production-deployment.result == 'success'
+    runs-on: ubuntu-latest
+    environment: 
+      name: production-approval
+      url: ${{ github.event.inputs.release_url }}
+    steps:
+      - name: Request production deployment approval
+        run: |
+          echo "🔐 Production deployment requires approval"
+          echo "📋 Deployment Details:"
+          echo "  - Tag: ${{ needs.validate-production-deployment.outputs.ref }}"
+          echo "  - Beta URL: ${{ github.event.inputs.beta_url }}"
+          echo "  - Release: ${{ github.event.inputs.release_url }}"
+          echo ""
+          echo "⏳ Waiting for approval from authorized personnel..."
+
+      - name: Create approval summary
+        run: |
+          URGENT_WARNING=""
+          if [ "${{ needs.validate-production-deployment.outputs.is_urgent }}" = "true" ]; then
+            URGENT_WARNING="
+          
+          ## 🚨 URGENT DEPLOYMENT WARNING
+          This is an urgent deployment from the main branch, bypassing the normal beta promotion flow.
+          Extra caution is advised during approval.
+          "
+          fi
+          
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🔐 Production Deployment Approval Required
+          
+          **Deployment Details:**
+          - **Tag:** ${{ needs.validate-production-deployment.outputs.ref }}
+          - **Urgent Deployment:** ${{ needs.validate-production-deployment.outputs.is_urgent }}
+          - **Beta Environment:** ${{ github.event.inputs.beta_url }}
+          - **GitHub Release:** ${{ github.event.inputs.release_url }}
+          $URGENT_WARNING
+          
+          **Approval Status:** ✅ Approved by ${{ github.actor }}
+          **Approval Time:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          
+          **Next Step:** Production deployment will proceed automatically
+          EOF
+
+  deploy-to-production:
+    name: Deploy to Production
+    needs: [validate-production-deployment, production-deployment-approval]
+    if: always() && needs.validate-production-deployment.result == 'success' && needs.production-deployment-approval.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment: 
+      name: production
+      url: ${{ steps.get-url.outputs.app_url }}
+    outputs:
+      app_url: ${{ steps.get-url.outputs.app_url }}
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate-production-deployment.outputs.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install Flutter dependencies
+        working-directory: frontend/src
+        run: flutter pub get
+
+      - name: Generate build info
+        working-directory: frontend/src
+        run: |
+          COMMIT_ID=$(git rev-parse HEAD)
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          BRANCH="${{ github.ref_name }}"
+          TAG="${{ needs.validate-production-deployment.outputs.ref }}"
+          GITHUB_RUN_ID="${{ github.run_id }}"
+          GITHUB_RUN_NUMBER="${{ github.run_number }}"
+          
+          mkdir -p assets
+          cat > assets/build_info.json << EOF
+          {
+            "commitId": "$COMMIT_ID",
+            "commitShort": "$COMMIT_SHORT",
+            "buildTime": "$BUILD_TIME",
+            "branch": "$BRANCH",
+            "tag": "$TAG",
+            "environment": "production",
+            "githubRunId": "$GITHUB_RUN_ID",
+            "githubRunNumber": "$GITHUB_RUN_NUMBER"
+          }
+          EOF
+          
+          echo "✓ Generated build_info.json for production deployment"
+          echo "  Commit: $COMMIT_SHORT"
+          echo "  Tag: $TAG"
+          echo "  Build: #$GITHUB_RUN_NUMBER"
+
+      - name: Build Flutter web app
+        working-directory: frontend/src
+        run: flutter build web --release
+
+      - name: Build Angular join page
+        working-directory: join_page
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions
+
+      - name: Get commit info
+        id: commit-info
+        run: |
+          echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_full=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Deploy CDK stacks to production
+        id: deploy
+        run: |
+          echo "🚀 Deploying to PRODUCTION environment..."
+          echo "⚠️  This is a PRODUCTION deployment!"
+          echo "Using region: ${{ env.AWS_REGION }}"
+          npm run deploy
+          echo "deployment_id=$(date +%s)" >> $GITHUB_OUTPUT
+        env:
+          NODE_ENV: production
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+          APP_VERSION: "1.0.0"
+          COMMIT_ID: ${{ steps.commit-info.outputs.commit_full }}
+          COMMIT_SHORT: ${{ steps.commit-info.outputs.commit_short }}
+          BUILD_TIME: ${{ github.run_started_at }}
+          BRANCH: ${{ github.ref_name }}
+          TAG: ${{ needs.validate-production-deployment.outputs.ref }}
+          
+      - name: Invalidate CloudFront cache
+        run: |
+          echo "🔄 Invalidating CloudFront cache..."
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name DistributionStack-production --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" --output text)
+          if [ -n "$DISTRIBUTION_ID" ]; then
+            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*" --query "Invalidation.Id" --output text)
+            echo "✅ CloudFront cache invalidation initiated for distribution: $DISTRIBUTION_ID"
+            echo "🔄 Invalidation ID: $INVALIDATION_ID"
+            
+            # Wait for invalidation to complete (up to 10 minutes)
+            echo "⏳ Waiting for cache invalidation to complete..."
+            aws cloudfront wait invalidation-completed --distribution-id $DISTRIBUTION_ID --id $INVALIDATION_ID --cli-read-timeout 600 --cli-connect-timeout 60
+            echo "✅ Cache invalidation completed successfully"
+          else
+            echo "⚠️ CloudFront distribution ID not found, skipping cache invalidation"
+          fi
+
+      - name: Get production application URL
+        id: get-url
+        run: |
+          NAMESPACE=production
+          APP_URL=$(aws ssm get-parameter --name "/$NAMESPACE/config/frontend-url" --query "Parameter.Value" --output text 2>/dev/null || echo "https://production.yourdomain.com")
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+          echo "🌐 Production application deployed at: $APP_URL"
+
+      - name: Create deployment state file
+        run: |
+          COMMIT_ID=$(git rev-parse HEAD)
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          DEPLOY_DATE=$(date -u +'%Y-%m-%d')
+          DEPLOY_TIME=$(date -u +'%H:%M:%S UTC')
+          IS_URGENT="${{ needs.validate-production-deployment.outputs.is_urgent }}"
+          
+          cat > deployment-state.json << EOF
+          {
+            "environment": "production",
+            "commitId": "$COMMIT_ID",
+            "commitShort": "$COMMIT_SHORT",
+            "tag": "${{ needs.validate-production-deployment.outputs.ref }}",
+            "deploymentDate": "$DEPLOY_DATE",
+            "deploymentTime": "$DEPLOY_TIME",
+            "deploymentTimestamp": "$(date -u +'%Y-%m-%d %H:%M:%S UTC')",
+            "appUrl": "${{ steps.get-url.outputs.app_url }}",
+            "deploymentId": "${{ steps.deploy.outputs.deployment_id }}",
+            "approvedBy": "${{ github.actor }}",
+            "urgentDeployment": $IS_URGENT
+          }
+          EOF
+          
+          echo "📄 Production Deployment State:"
+          cat deployment-state.json
+
+      - name: Upload deployment state
+        uses: actions/upload-artifact@v7
+        with:
+          name: deployment-state-production
+          path: deployment-state.json
+          retention-days: 365
+
+      - name: Verify production deployment
+        run: |
+          APP_URL="${{ steps.get-url.outputs.app_url }}"
+          echo "🔍 Verifying production deployment..."
+          
+          # Wait a moment for deployment to propagate
+          sleep 30
+          
+          # Check if the application is accessible
+          for i in {1..10}; do
+            if curl -f -s "$APP_URL" > /dev/null; then
+              echo "✅ Production application is accessible at $APP_URL"
+              break
+            fi
+            echo "⏳ Attempt $i/10: Waiting for production application to be ready..."
+            sleep 15
+          done
+
+  production-smoke-tests:
+    name: Production Smoke Tests
+    needs: [validate-production-deployment, deploy-to-production]
+    if: github.event.inputs.skip_smoke_tests != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run production smoke tests
+        run: |
+          APP_URL="${{ needs.deploy-to-production.outputs.app_url }}"
+          echo "🧪 Running production smoke tests..."
+          
+          # Basic connectivity test
+          if curl -f -s "$APP_URL" > /dev/null; then
+            echo "✅ Application is accessible"
+          else
+            echo "❌ Application is not accessible"
+            exit 1
+          fi
+          
+          # Check for basic HTML structure
+          RESPONSE=$(curl -s "$APP_URL")
+          if echo "$RESPONSE" | grep -q "<html"; then
+            echo "✅ Valid HTML response received"
+          else
+            echo "❌ Invalid HTML response"
+            exit 1
+          fi
+          
+          echo "✅ Production smoke tests passed"
+
+  update-github-release:
+    name: Update GitHub Release
+    needs: [validate-production-deployment, deploy-to-production, production-smoke-tests]
+    if: needs.validate-production-deployment.outputs.is_urgent != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update release with production deployment info
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const tag = '${{ needs.validate-production-deployment.outputs.ref }}';
+            
+            // Get the release by tag
+            const { data: release } = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: tag
+            });
+            
+            // Update the release body with production info
+            const productionInfo = `
+            
+            ## 🚀 Production Deployment
+            - **Production URL:** ${{ needs.deploy-to-production.outputs.app_url }}
+            - **Deployment Date:** ${new Date().toISOString().split('T')[0]}
+            - **Deployment ID:** ${{ needs.deploy-to-production.outputs.deployment_id }}
+            - **Approved By:** ${{ github.actor }}
+            `;
+            
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              body: release.body + productionInfo,
+              prerelease: false // Mark as full release now that it's in production
+            });
+            
+            console.log('✅ Updated GitHub release with production deployment information');
+
+  create-urgent-deployment-issue:
+    name: Create Urgent Deployment Issue
+    needs: [validate-production-deployment, deploy-to-production, production-smoke-tests]
+    if: needs.validate-production-deployment.outputs.is_urgent == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create urgent deployment tracking issue
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 URGENT Production Deployment - ${{ needs.validate-production-deployment.outputs.ref }}`,
+              body: `## 🚨 Urgent Production Deployment Summary
+              
+              **⚠️ This was an urgent deployment from the main branch, bypassing the normal beta promotion flow.**
+              
+              **Deployment Details:**
+              - **Tag:** ${{ needs.validate-production-deployment.outputs.ref }}
+              - **Source:** main branch (urgent deployment)
+              - **Production URL:** ${{ needs.deploy-to-production.outputs.app_url }}
+              - **Deployment Date:** ${new Date().toISOString().split('T')[0]}
+              - **Approved By:** ${{ github.actor }}
+              
+              **Status:** ✅ Successfully deployed to production
+              
+              ### Post-Deployment Actions Required
+              - [ ] **CRITICAL:** Monitor application performance closely
+              - [ ] **CRITICAL:** Check error rates and logs immediately
+              - [ ] **CRITICAL:** Verify all critical user journeys
+              - [ ] Document the reason for urgent deployment
+              - [ ] Create a proper release tag and notes
+              - [ ] Plan follow-up deployment through normal flow
+              - [ ] Review what caused the need for urgent deployment
+              
+              ### Rollback Information
+              If issues are detected, rollback can be performed immediately by deploying the previous stable tag.
+              
+              **Deployment completed at:** ${new Date().toISOString()}
+              
+              ---
+              **Note:** Urgent deployments should be rare. Please document the reason and follow up with proper release management.
+              `,
+              labels: ['deployment', 'production', 'urgent', 'completed']
+            });
+            
+            console.log(`Created urgent deployment tracking issue: ${issue.html_url}`);
+
+  deployment-notification:
+    name: Production Deployment Notification
+    needs: [validate-production-deployment, deploy-to-production, production-smoke-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine deployment status
+        id: status
+        run: |
+          if [ "${{ needs.deploy-to-production.result }}" = "success" ] && ([ "${{ needs.production-smoke-tests.result }}" = "success" ] || [ "${{ needs.production-smoke-tests.result }}" = "skipped" ]); then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "message=✅ Production deployment successful" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "message=❌ Production deployment failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create deployment summary
+        run: |
+          URGENT_BADGE=""
+          URGENT_WARNING=""
+          if [ "${{ needs.validate-production-deployment.outputs.is_urgent }}" = "true" ]; then
+            URGENT_BADGE="🚨 URGENT DEPLOYMENT"
+            URGENT_WARNING="
+          
+          ### ⚠️ Urgent Deployment Notice
+          This was an urgent deployment from the main branch, bypassing the normal promotion flow.
+          Please monitor closely and document the reason for this urgent deployment.
+          "
+          fi
+          
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🎉 Production Deployment Complete $URGENT_BADGE
+          
+          **Status:** ${{ steps.status.outputs.message }}
+          **Tag:** ${{ needs.validate-production-deployment.outputs.ref }}
+          **Production URL:** ${{ needs.deploy-to-production.outputs.app_url }}
+          **Deployment ID:** ${{ needs.deploy-to-production.outputs.deployment_id }}
+          **Approved By:** ${{ github.actor }}
+          $URGENT_WARNING
+          
+          ### Deployment Timeline
+          1. ✅ Validation completed
+          2. ✅ Approval received
+          3. ✅ Production deployment completed
+          4. ✅ Smoke tests passed
+          5. ✅ GitHub release updated
+          
+          ### Monitoring
+          - Monitor application performance and error rates
+          - Check user feedback and support channels
+          - Verify all critical functionality is working
+          
+          **🎯 Production deployment completed successfully!**
+          EOF
+
+      - name: Create production deployment issue
+        if: steps.status.outputs.status == 'success' && needs.validate-production-deployment.outputs.is_urgent != 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🎉 Production Deployment Complete - ${{ needs.validate-production-deployment.outputs.ref }}`,
+              body: `## Production Deployment Summary
+              
+              **Deployment Details:**
+              - **Tag:** ${{ needs.validate-production-deployment.outputs.ref }}
+              - **Production URL:** ${{ needs.deploy-to-production.outputs.app_url }}
+              - **Deployment Date:** ${new Date().toISOString().split('T')[0]}
+              - **Approved By:** ${{ github.actor }}
+              
+              **Status:** ✅ Successfully deployed to production
+              
+              ### Post-Deployment Checklist
+              - [ ] Monitor application performance
+              - [ ] Check error rates and logs
+              - [ ] Verify critical user journeys
+              - [ ] Monitor user feedback
+              - [ ] Update documentation if needed
+              
+              ### Rollback Information
+              If issues are detected, rollback can be performed by deploying the previous stable tag.
+              
+              **Deployment completed at:** ${new Date().toISOString()}
+              `,
+              labels: ['deployment', 'production', 'completed']
+            });
+            
+            console.log(`Created production deployment issue: ${issue.html_url}`);

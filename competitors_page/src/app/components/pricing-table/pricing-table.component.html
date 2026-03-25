@@ -1,0 +1,320 @@
+<!-- Pricing Table Component Template -->
+<!-- Implements requirements 4.1, 4.2, 4.3, 4.5 for responsive pricing comparison -->
+
+<div class="pricing-table-container">
+  <!-- Table Header -->
+  <div class="pricing-header">
+    <h3 class="pricing-title">Pricing Comparison</h3>
+    <p class="pricing-subtitle">Compare pricing plans across social media management platforms</p>
+    
+    <!-- Billing Cycle Toggle -->
+    <div class="billing-toggle" *ngIf="showAnnualPricing && getAvailableBillingCycles().length > 1">
+      <div class="toggle-container">
+        <button 
+          *ngFor="let cycle of getAvailableBillingCycles(); trackBy: trackByTier"
+          class="toggle-button"
+          [class.active]="selectedBillingCycle === cycle"
+          (click)="selectedBillingCycle = cycle"
+          [attr.aria-pressed]="selectedBillingCycle === cycle">
+          {{ cycle === 'monthly' ? 'Monthly' : 'Annual' }}
+          <span *ngIf="cycle === 'annual'" class="savings-badge">Save up to 20%</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Responsive Pricing Table -->
+  <div class="pricing-wrapper">
+    <div class="pricing-scroll-container">
+      <table class="pricing-table" role="table" aria-label="Pricing comparison table">
+        <!-- Table Header -->
+        <thead>
+          <tr>
+            <th class="plan-column-header" scope="col">
+              <span class="header-text">Plans</span>
+            </th>
+            <!-- Nexus Share Column -->
+            <th *ngIf="showNexusShare" 
+                class="platform-column-header nexus-share-header" 
+                scope="col">
+              <div class="platform-header-content">
+                <span class="platform-name">Nexus Share</span>
+                <span class="platform-badge">Our Platform</span>
+              </div>
+            </th>
+            <!-- Competitor Columns -->
+            <th *ngFor="let competitor of competitors; trackBy: trackByCompetitor" 
+                class="platform-column-header" 
+                scope="col">
+              <div class="platform-header-content">
+                <img [src]="competitor.logo" 
+                     [alt]="competitor.name + ' logo'" 
+                     class="platform-logo"
+                     loading="lazy">
+                <span class="platform-name">{{ competitor.name }}</span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+
+        <!-- Table Body -->
+        <tbody>
+          <tr *ngFor="let tierName of getAllTierNames(); trackBy: trackByTier" 
+              class="pricing-row">
+            
+            <!-- Plan Name Column -->
+            <td class="plan-name-cell" scope="row">
+              <div class="plan-name-content">
+                <span class="plan-name">{{ tierName }}</span>
+              </div>
+            </td>
+
+            <!-- Nexus Share Pricing -->
+            <td *ngIf="showNexusShare" 
+                class="pricing-cell nexus-share-cell">
+              <div class="pricing-content" 
+                   *ngIf="getTierByName(nexusShare?.pricing || [], tierName, selectedBillingCycle) as nexusTier; else noNexusTier">
+                <div class="price-display">
+                  <span class="price-amount">{{ formatPrice(nexusTier.price, selectedBillingCycle) }}</span>
+                  <span *ngIf="selectedBillingCycle === 'annual' && isNumericPrice(nexusTier.price) && nexusTier.price > 0" 
+                        class="monthly-equivalent">
+                    {{ currency }}{{ getMonthlyEquivalent(nexusTier.price) }}/mo
+                  </span>
+                </div>
+                
+                <!-- Features -->
+                <div class="tier-features" *ngIf="nexusTier.features.length > 0">
+                  <div class="feature-summary">
+                    <span class="feature-count">{{ getFeatureCount(nexusTier) }} features</span>
+                  </div>
+                  <ul class="feature-list">
+                    <li *ngFor="let feature of nexusTier.features.slice(0, 3)" class="feature-item">
+                      {{ feature }}
+                    </li>
+                    <li *ngIf="nexusTier.features.length > 3" class="feature-more">
+                      +{{ nexusTier.features.length - 3 }} more
+                    </li>
+                  </ul>
+                </div>
+                
+                <!-- Limitations -->
+                <div class="tier-limitations" *ngIf="hasLimitations(nexusTier)">
+                  <div class="limitation-summary">
+                    <span class="limitation-count">{{ getLimitationCount(nexusTier) }} limitations</span>
+                  </div>
+                  <ul class="limitation-list">
+                    <li *ngFor="let limitation of nexusTier.limitations.slice(0, 2)" class="limitation-item">
+                      {{ limitation }}
+                    </li>
+                    <li *ngIf="nexusTier.limitations.length > 2" class="limitation-more">
+                      +{{ nexusTier.limitations.length - 2 }} more
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <ng-template #noNexusTier>
+                <div class="no-tier">
+                  <span class="no-tier-text">Not available</span>
+                </div>
+              </ng-template>
+            </td>
+
+            <!-- Competitor Pricing -->
+            <td *ngFor="let competitor of competitors; trackBy: trackByCompetitor" 
+                class="pricing-cell"
+                [class.better-value]="highlightSavings && getTierByName(competitor.pricing, tierName, selectedBillingCycle) && isNexusShareBetterValue(getTierByName(competitor.pricing, tierName, selectedBillingCycle)!)">
+              <div class="pricing-content" 
+                   *ngIf="getTierByName(competitor.pricing, tierName, selectedBillingCycle) as competitorTier; else noCompetitorTier">
+                <div class="price-display">
+                  <span class="price-amount">{{ formatPrice(competitorTier.price, selectedBillingCycle) }}</span>
+                  <span *ngIf="selectedBillingCycle === 'annual' && isNumericPrice(competitorTier.price) && competitorTier.price > 0" 
+                        class="monthly-equivalent">
+                    {{ currency }}{{ getMonthlyEquivalent(competitorTier.price) }}/mo
+                  </span>
+                </div>
+                
+                <!-- Cost Savings Badge -->
+                <div class="savings-badge-container" 
+                     *ngIf="highlightSavings && showNexusShare && isNumericPrice(competitorTier.price) && isNexusShareBetterValue(competitorTier)">
+                  <div class="savings-badge" 
+                       *ngIf="getComparableNexusShareTier(competitorTier) as nexusComparable">
+                    <span class="savings-amount">
+                      Save {{ currency }}{{ calculateSavings(competitorTier.price, nexusComparable.price) }}
+                    </span>
+                    <span class="savings-percentage" 
+                          *ngIf="calculateSavingsPercentage(competitorTier.price, nexusComparable.price) > 0">
+                      ({{ calculateSavingsPercentage(competitorTier.price, nexusComparable.price) }}%)
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- Features -->
+                <div class="tier-features" *ngIf="competitorTier.features.length > 0">
+                  <div class="feature-summary">
+                    <span class="feature-count">{{ getFeatureCount(competitorTier) }} features</span>
+                  </div>
+                  <ul class="feature-list">
+                    <li *ngFor="let feature of competitorTier.features.slice(0, 3)" class="feature-item">
+                      {{ feature }}
+                    </li>
+                    <li *ngIf="competitorTier.features.length > 3" class="feature-more">
+                      +{{ competitorTier.features.length - 3 }} more
+                    </li>
+                  </ul>
+                </div>
+                
+                <!-- Limitations -->
+                <div class="tier-limitations" *ngIf="hasLimitations(competitorTier)">
+                  <div class="limitation-summary">
+                    <span class="limitation-count">{{ getLimitationCount(competitorTier) }} limitations</span>
+                  </div>
+                  <ul class="limitation-list">
+                    <li *ngFor="let limitation of competitorTier.limitations.slice(0, 2)" class="limitation-item">
+                      {{ limitation }}
+                    </li>
+                    <li *ngIf="competitorTier.limitations.length > 2" class="limitation-more">
+                      +{{ competitorTier.limitations.length - 2 }} more
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <ng-template #noCompetitorTier>
+                <div class="no-tier">
+                  <span class="no-tier-text">Not available</span>
+                </div>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pricing Summary Cards (Mobile-Friendly) -->
+  <div class="mobile-pricing" aria-label="Mobile pricing comparison">
+    <!-- Nexus Share Mobile Card -->
+    <div *ngIf="showNexusShare" class="mobile-platform-card nexus-share-mobile">
+      <div class="mobile-platform-header">
+        <h4 class="mobile-platform-name">Nexus Share</h4>
+        <span class="mobile-platform-badge">Our Platform</span>
+      </div>
+      
+      <div class="mobile-pricing-tiers">
+        <div *ngFor="let tier of getNexusSharePricing(selectedBillingCycle); trackBy: trackByPricingTier" 
+             class="mobile-tier-card">
+          <div class="mobile-tier-header">
+            <h5 class="mobile-tier-name">{{ tier.name }}</h5>
+            <div class="mobile-price-display">
+              <span class="mobile-price-amount">{{ formatPrice(tier.price, selectedBillingCycle) }}</span>
+              <span *ngIf="selectedBillingCycle === 'annual' && isNumericPrice(tier.price) && tier.price > 0" 
+                    class="mobile-monthly-equivalent">
+                {{ currency }}{{ getMonthlyEquivalent(tier.price) }}/mo
+              </span>
+            </div>
+          </div>
+          
+          <div class="mobile-tier-details">
+            <!-- Features -->
+            <div class="mobile-features" *ngIf="tier.features.length > 0">
+              <h6 class="mobile-section-title">Features ({{ getFeatureCount(tier) }})</h6>
+              <ul class="mobile-feature-list">
+                <li *ngFor="let feature of tier.features" class="mobile-feature-item">
+                  {{ feature }}
+                </li>
+              </ul>
+            </div>
+            
+            <!-- Limitations -->
+            <div class="mobile-limitations" *ngIf="hasLimitations(tier)">
+              <h6 class="mobile-section-title">Limitations ({{ getLimitationCount(tier) }})</h6>
+              <ul class="mobile-limitation-list">
+                <li *ngFor="let limitation of tier.limitations" class="mobile-limitation-item">
+                  {{ limitation }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Competitor Mobile Cards -->
+    <div *ngFor="let competitor of competitors; trackBy: trackByCompetitor" 
+         class="mobile-platform-card">
+      <div class="mobile-platform-header">
+        <img [src]="competitor.logo" 
+             [alt]="competitor.name + ' logo'" 
+             class="mobile-platform-logo"
+             loading="lazy">
+        <h4 class="mobile-platform-name">{{ competitor.name }}</h4>
+      </div>
+      
+      <div class="mobile-pricing-tiers">
+        <div *ngFor="let tier of getPricingForBilling(competitor.pricing, selectedBillingCycle); trackBy: trackByPricingTier" 
+             class="mobile-tier-card"
+             [class.better-value-mobile]="highlightSavings && isNumericPrice(tier.price) && isNexusShareBetterValue(tier)">
+          <div class="mobile-tier-header">
+            <h5 class="mobile-tier-name">{{ tier.name }}</h5>
+            <div class="mobile-price-display">
+              <span class="mobile-price-amount">{{ formatPrice(tier.price, selectedBillingCycle) }}</span>
+              <span *ngIf="selectedBillingCycle === 'annual' && isNumericPrice(tier.price) && tier.price > 0" 
+                    class="mobile-monthly-equivalent">
+                {{ currency }}{{ getMonthlyEquivalent(tier.price) }}/mo
+              </span>
+            </div>
+            
+            <!-- Mobile Savings Badge -->
+            <div class="mobile-savings-badge" 
+                 *ngIf="highlightSavings && showNexusShare && isNumericPrice(tier.price) && isNexusShareBetterValue(tier) && getComparableNexusShareTier(tier) as nexusComparable">
+              <span class="mobile-savings-text">
+                Save {{ currency }}{{ calculateSavings(tier.price, nexusComparable.price) }}
+                <span *ngIf="calculateSavingsPercentage(tier.price, nexusComparable.price) > 0">
+                  ({{ calculateSavingsPercentage(tier.price, nexusComparable.price) }}%)
+                </span>
+              </span>
+            </div>
+          </div>
+          
+          <div class="mobile-tier-details">
+            <!-- Features -->
+            <div class="mobile-features" *ngIf="tier.features.length > 0">
+              <h6 class="mobile-section-title">Features ({{ getFeatureCount(tier) }})</h6>
+              <ul class="mobile-feature-list">
+                <li *ngFor="let feature of tier.features" class="mobile-feature-item">
+                  {{ feature }}
+                </li>
+              </ul>
+            </div>
+            
+            <!-- Limitations -->
+            <div class="mobile-limitations" *ngIf="hasLimitations(tier)">
+              <h6 class="mobile-section-title">Limitations ({{ getLimitationCount(tier) }})</h6>
+              <ul class="mobile-limitation-list">
+                <li *ngFor="let limitation of tier.limitations" class="mobile-limitation-item">
+                  {{ limitation }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pricing Notes -->
+  <div class="pricing-notes">
+    <div class="notes-content">
+      <h4 class="notes-title">Pricing Notes</h4>
+      <ul class="notes-list">
+        <li class="note-item">All prices are in EUR and exclude taxes</li>
+        <li class="note-item">Annual plans typically offer 15-20% savings over monthly billing</li>
+        <li class="note-item">Pricing information is updated regularly but may change without notice</li>
+        <li class="note-item" *ngIf="highlightSavings">
+          Savings calculations are based on comparable feature sets and billing cycles
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

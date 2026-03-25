@@ -1,0 +1,35 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1976D2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0D47A1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  <text x="60" y="80" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFFFFF">
+    Nexus Share Profile
+  </text>
+  <text x="60" y="200" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#FFFFFF">
+    @lockhead
+  </text>
+  <g transform="translate(60, 300)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#FFFFFF">
+      42
+    </text>
+    <text x="0" y="35" font-family="Arial, sans-serif" font-size="20" fill="#E3F2FD">
+      Posts
+    </text>
+    <text x="200" y="0" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#FFFFFF">
+      7
+    </text>
+    <text x="200" y="35" font-family="Arial, sans-serif" font-size="20" fill="#E3F2FD">
+      Day Streak
+    </text>
+    <text x="400" y="0" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#FFFFFF">
+      85%
+    </text>
+    <text x="400" y="35" font-family="Arial, sans-serif" font-size="20" fill="#E3F2FD">
+      AI Usage
+    </text>
+  </g>
+</svg>

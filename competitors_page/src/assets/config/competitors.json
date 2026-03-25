@@ -1,0 +1,1413 @@
+{
+  "competitors": [
+    {
+      "name": "SocialFlow",
+      "slug": "socialflow",
+      "tagline": "The social media toolkit for small businesses",
+      "logo": "./assets/images/competitors/socialflow-logo.svg",
+      "website": "https://example-socialflow.com",
+      "pricing": [
+        {
+          "name": "Free",
+          "price": 0,
+          "billing": "monthly",
+          "features": [
+            "3 social channels",
+            "10 scheduled posts per channel",
+            "30-day analytics history",
+            "AI Assistant with unlimited credits",
+            "100 content ideas",
+            "Basic templates"
+          ],
+          "limitations": [
+            "Limited posts per channel",
+            "Limited analytics history",
+            "1 user only",
+            "SocialFlow branding"
+          ]
+        },
+        {
+          "name": "Essentials",
+          "price": 5,
+          "billing": "monthly",
+          "features": [
+            "Unlimited scheduled posts per channel",
+            "Unlimited analytics history",
+            "AI Assistant with unlimited credits",
+            "Unlimited content ideas",
+            "250 tags",
+            "1 user",
+            "Per-channel pricing ($5/channel)"
+          ],
+          "limitations": [
+            "1 user only",
+            "No team collaboration",
+            "No approval workflows",
+            "Per-channel pricing adds up quickly"
+          ]
+        },
+        {
+          "name": "Team",
+          "price": 10,
+          "billing": "monthly",
+          "features": [
+            "Unlimited scheduled posts per channel",
+            "Unlimited analytics history",
+            "AI Assistant with unlimited credits",
+            "Content approval workflows",
+            "Unlimited team members",
+            "Advanced analytics",
+            "Custom reports",
+            "Per-channel pricing ($10/channel)"
+          ],
+          "limitations": [
+            "Per-channel pricing expensive at scale",
+            "No advanced AI content generation"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "partial",
+        "scheduling": "full",
+        "analytics": "full",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "none",
+        "visualPlanning": "full",
+        "socialListening": "none"
+      },
+      "pros": [
+        "User-friendly interface with clean design",
+        "AI Assistant with unlimited credits on all plans",
+        "Reliable scheduling across multiple platforms",
+        "Good customer support",
+        "Established platform with large user base",
+        "Flexible per-channel pricing model",
+        "Unlimited analytics history on paid plans"
+      ],
+      "cons": [
+        "Per-channel pricing becomes expensive at scale ($50/month for 10 channels)",
+        "Limited free plan (10 posts per channel)",
+        "No advanced AI content generation",
+        "No advanced mention resolution",
+        "Team features only on highest tier"
+      ],
+      "targetAudience": "Small businesses and solo entrepreneurs managing few channels",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "TeamSync",
+      "slug": "teamsync",
+      "tagline": "Social media collaboration platform for teams",
+      "logo": "./assets/images/competitors/teamsync-logo.svg",
+      "website": "https://example-teamsync.com",
+      "pricing": [
+        {
+          "name": "Free Trial",
+          "price": 0,
+          "billing": "monthly",
+          "features": [
+            "1 workspace",
+            "50 posts total (not monthly)",
+            "Unlimited users",
+            "Basic collaboration",
+            "All social platforms except X/Twitter",
+            "No time limit on trial"
+          ],
+          "limitations": [
+            "1 workspace only",
+            "50 posts total (doesn't reset)",
+            "No X/Twitter publishing",
+            "No analytics or social inbox",
+            "TeamSync branding"
+          ]
+        },
+        {
+          "name": "Basic",
+          "price": 33,
+          "billing": "monthly",
+          "features": [
+            "Unlimited posts",
+            "Unlimited users",
+            "All social platforms including X/Twitter",
+            "Content approval workflows",
+            "Universal content support",
+            "Comments and annotations",
+            "10 GB storage",
+            "Per-workspace pricing ($33/workspace)"
+          ],
+          "limitations": [
+            "Per-workspace pricing",
+            "No advanced analytics (add-on required)",
+            "No social inbox (add-on required)",
+            "Basic approval workflows only"
+          ]
+        },
+        {
+          "name": "Pro",
+          "price": 66,
+          "billing": "monthly",
+          "features": [
+            "All Basic features",
+            "Multi-level approval workflows",
+            "All content views (feed, calendar, grid, list)",
+            "Unlimited labels and campaigns",
+            "50 GB storage",
+            "Priority support",
+            "12 months published posts storage",
+            "Per-workspace pricing ($66/workspace)"
+          ],
+          "limitations": [
+            "Per-workspace pricing adds up",
+            "Analytics and inbox are paid add-ons"
+          ]
+        },
+        {
+          "name": "Enterprise",
+          "price": "Custom",
+          "billing": "custom",
+          "features": [
+            "All Pro features",
+            "Unlimited workspaces",
+            "100 GB storage",
+            "SSO integration",
+            "Dedicated account manager",
+            "Personalized onboarding",
+            "24 months published posts storage",
+            "Custom pricing based on volume",
+            "Contact sales for pricing"
+          ],
+          "limitations": [
+            "Custom pricing required",
+            "Enterprise-level commitment"
+          ]
+        }
+      ],
+      "addOns": [
+        {
+          "name": "Analytics",
+          "price": 14,
+          "billing": "per workspace/monthly",
+          "features": [
+            "Cross-channel performance data",
+            "Page and post-level metrics",
+            "Audience insights",
+            "Customizable client-ready reports",
+            "30-day free trial"
+          ]
+        },
+        {
+          "name": "Social Inbox",
+          "price": 9,
+          "billing": "per workspace/monthly",
+          "features": [
+            "Unified inbox for comments and DMs",
+            "AI-suggested replies",
+            "Sentiment filtering",
+            "30-day free trial"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "none",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "full",
+        "mentionResolution": "none",
+        "contentRecycling": "none",
+        "visualPlanning": "full",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Excellent visual content planning",
+        "Outstanding team collaboration features",
+        "Intuitive approval workflows with multi-level support",
+        "Unlimited users on all plans (no per-seat pricing)",
+        "Beautiful, user-friendly interface",
+        "Strong client presentation features",
+        "Universal content support (beyond social media)",
+        "Internal posts and comments for private drafts",
+        "Flexible add-on system for analytics and inbox"
+      ],
+      "cons": [
+        "No AI content generation",
+        "Free trial limited to 50 posts total (not monthly)",
+        "No advanced mention resolution",
+        "Per-workspace pricing expensive for agencies ($33-66/workspace)",
+        "Analytics and social inbox are paid add-ons ($14-23/workspace)",
+        "No X/Twitter on free trial"
+      ],
+      "targetAudience": "Marketing teams, agencies, and collaborative content creators managing multiple brands",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "ContentQueue",
+      "slug": "contentqueue",
+      "tagline": "Social media scheduler built for engagement",
+      "logo": "./assets/images/competitors/contentqueue-logo.svg",
+      "website": "https://example-contentqueue.com",
+      "pricing": [
+        {
+          "name": "Free",
+          "price": 0,
+          "billing": "monthly",
+          "features": [
+            "1 social account",
+            "10 posts per month",
+            "Basic scheduling",
+            "Content suggestions",
+            "Viral content library access"
+          ],
+          "limitations": [
+            "1 social account only",
+            "Very limited posts",
+            "No analytics",
+            "ContentQueue branding"
+          ]
+        },
+        {
+          "name": "Starter",
+          "price": 12,
+          "billing": "monthly",
+          "features": [
+            "Multiple social accounts",
+            "Content discovery and curation",
+            "Basic scheduling",
+            "Viral content suggestions",
+            "Post recycling",
+            "Calendar view"
+          ],
+          "limitations": [
+            "Limited social accounts",
+            "No advanced analytics",
+            "No team features",
+            "Limited automation"
+          ]
+        },
+        {
+          "name": "Professional",
+          "price": 24,
+          "billing": "monthly",
+          "features": [
+            "More social accounts",
+            "Advanced content discovery",
+            "Post recycling",
+            "Basic analytics",
+            "Bulk scheduling",
+            "Content library",
+            "Viral hooks and templates"
+          ],
+          "limitations": [
+            "Basic analytics only",
+            "Limited team collaboration",
+            "No AI content generation"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "none",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "full",
+        "visualPlanning": "partial",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Excellent content discovery and curation",
+        "Strong post recycling features",
+        "Affordable pricing starting at $12/month",
+        "Viral content recommendations and hooks",
+        "Good for engagement-focused strategies",
+        "Easy bulk scheduling",
+        "Strong customer support",
+        "Content library with proven posts"
+      ],
+      "cons": [
+        "No AI content generation",
+        "Basic analytics compared to competitors",
+        "No advanced mention resolution",
+        "Limited visual planning features",
+        "No social listening capabilities",
+        "Interface feels dated compared to modern tools"
+      ],
+      "targetAudience": "Small businesses and solopreneurs focused on engagement and content curation",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "SchedulePro",
+      "slug": "schedulepro",
+      "tagline": "Social media planning made simple",
+      "logo": "./assets/images/competitors/schedulepro-logo.svg",
+      "website": "https://example-schedulepro.com",
+      "pricing": [
+        {
+          "name": "Solo",
+          "price": 19,
+          "billing": "monthly",
+          "features": [
+            "Unlimited social accounts",
+            "Unlimited posts",
+            "Brand-aware AI captions",
+            "Canva integration",
+            "Google Drive integration",
+            "Platform-specific previews",
+            "Content calendar",
+            "Basic analytics",
+            "7-day free trial"
+          ],
+          "limitations": [
+            "Basic analytics only",
+            "No team collaboration",
+            "1 user only"
+          ]
+        },
+        {
+          "name": "Creator",
+          "price": 39,
+          "billing": "monthly",
+          "features": [
+            "All Solo features",
+            "Advanced analytics",
+            "Priority support",
+            "Advanced AI features",
+            "Bulk scheduling",
+            "Multiple users"
+          ],
+          "limitations": [
+            "Limited team collaboration features",
+            "No approval workflows"
+          ]
+        },
+        {
+          "name": "Pro",
+          "price": 99,
+          "billing": "monthly",
+          "features": [
+            "All Creator features",
+            "Team collaboration",
+            "Content approval workflow",
+            "Advanced automation",
+            "Custom branding",
+            "Unlimited users"
+          ],
+          "limitations": [
+            "Higher price point"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "full",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "partial",
+        "visualPlanning": "full",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Unlimited posting on all plans",
+        "Brand-aware AI caption generation",
+        "Native Canva and Google Drive integration",
+        "Platform-specific post previews",
+        "Clean, simple interface",
+        "Predictable flat-rate pricing",
+        "Fast publishing workflow",
+        "Unlimited social accounts on all paid plans",
+        "No post limits or restrictions"
+      ],
+      "cons": [
+        "No free plan (7-day trial only)",
+        "No advanced mention resolution",
+        "Basic analytics compared to enterprise tools",
+        "No social listening capabilities",
+        "Newer platform with less established track record",
+        "Limited automation features compared to enterprise tools",
+        "Higher starting price than some competitors"
+      ],
+      "targetAudience": "Creators, agencies, and teams who need fast publishing and reliable workflows",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "SocialHub",
+      "slug": "socialhub",
+      "tagline": "Manage all your social media in one place",
+      "logo": "./assets/images/competitors/socialhub-logo.svg",
+      "website": "https://example-socialhub.com",
+      "pricing": [
+        {
+          "name": "Professional",
+          "price": 99,
+          "billing": "monthly",
+          "features": [
+            "10 social accounts",
+            "Unlimited posts",
+            "Basic analytics",
+            "1 user",
+            "Content scheduling",
+            "Social listening (basic)"
+          ],
+          "limitations": [
+            "Expensive for single user",
+            "Limited social accounts",
+            "1 user only",
+            "Basic analytics"
+          ]
+        },
+        {
+          "name": "Team",
+          "price": 249,
+          "billing": "monthly",
+          "features": [
+            "20 social accounts",
+            "Unlimited posts",
+            "Advanced analytics",
+            "3 users",
+            "Team collaboration",
+            "Social listening",
+            "Content approval"
+          ],
+          "limitations": [
+            "Very expensive ($83/user)",
+            "Limited to 3 users",
+            "Per-user pricing adds up"
+          ]
+        },
+        {
+          "name": "Enterprise",
+          "price": 0,
+          "billing": "annual",
+          "features": [
+            "Custom social accounts",
+            "Unlimited posts",
+            "Advanced analytics",
+            "Custom users",
+            "Advanced features",
+            "Dedicated support",
+            "Custom integrations",
+            "Contact sales for pricing"
+          ],
+          "limitations": [
+            "Custom pricing required",
+            "Overkill for small businesses",
+            "Enterprise-level commitment"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "partial",
+        "scheduling": "full",
+        "analytics": "full",
+        "teamCollaboration": "full",
+        "mentionResolution": "partial",
+        "contentRecycling": "partial",
+        "visualPlanning": "full",
+        "socialListening": "premium"
+      },
+      "pros": [
+        "Comprehensive enterprise feature set",
+        "Strong analytics and reporting",
+        "Enterprise-grade platform with proven track record",
+        "Extensive integrations",
+        "Advanced team collaboration",
+        "Social listening capabilities",
+        "Established platform with large user base"
+      ],
+      "cons": [
+        "Very expensive pricing ($99-249+/month)",
+        "Complex interface with steep learning curve",
+        "Overkill for small businesses and solo creators",
+        "Limited AI content generation",
+        "No free plan",
+        "Per-user pricing model expensive for teams"
+      ],
+      "targetAudience": "Large enterprises and agencies with substantial budgets",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "VisualPost",
+      "slug": "visualpost",
+      "tagline": "The #1 Instagram marketing platform",
+      "logo": "./assets/images/competitors/visualpost-logo.svg",
+      "website": "https://example-visualpost.com",
+      "pricing": [
+        {
+          "name": "Free",
+          "price": 0,
+          "billing": "monthly",
+          "features": [
+            "1 social set (all platforms)",
+            "30 posts per month",
+            "Basic scheduling",
+            "1 user",
+            "Visual content calendar"
+          ],
+          "limitations": [
+            "Very limited posts (30/month)",
+            "1 social set only",
+            "No analytics",
+            "VisualPost branding"
+          ]
+        },
+        {
+          "name": "Starter",
+          "price": 25,
+          "billing": "monthly",
+          "features": [
+            "1 social set",
+            "Unlimited posts",
+            "Basic analytics",
+            "1 user",
+            "Link in bio",
+            "Best time to post"
+          ],
+          "limitations": [
+            "1 social set only",
+            "1 user only",
+            "Basic analytics only"
+          ]
+        },
+        {
+          "name": "Growth",
+          "price": 50,
+          "billing": "monthly",
+          "features": [
+            "3 social sets",
+            "Unlimited posts",
+            "Advanced analytics",
+            "3 users",
+            "Hashtag suggestions",
+            "User-generated content tools"
+          ],
+          "limitations": [
+            "Limited to 3 social sets",
+            "No AI content generation"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "none",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "none",
+        "visualPlanning": "full",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Strong visual planning and content calendar",
+        "Instagram and TikTok-focused features",
+        "User-friendly interface",
+        "Good mobile app",
+        "Link in bio functionality",
+        "Best time to post recommendations",
+        "User-generated content tools"
+      ],
+      "cons": [
+        "No AI content generation",
+        "Limited free plan (30 posts/month)",
+        "Expensive for multi-platform use ($25-50/month)",
+        "No advanced mention resolution",
+        "Instagram-centric (less focus on other platforms)",
+        "Social set model confusing for some users"
+      ],
+      "targetAudience": "Instagram and TikTok-focused creators and small businesses",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "ContentHive",
+      "slug": "contenthive",
+      "tagline": "Social media management that works for you",
+      "logo": "./assets/images/competitors/contenthive-logo.svg",
+      "website": "https://example-contenthive.com",
+      "pricing": [
+        {
+          "name": "Bootstrap",
+          "price": 29,
+          "billing": "monthly",
+          "features": [
+            "5 social profiles",
+            "Unlimited posts",
+            "Content categories",
+            "1 workspace",
+            "AI Copilot for content",
+            "Content recycling",
+            "3 months analytics"
+          ],
+          "limitations": [
+            "Limited to 5 profiles",
+            "1 workspace only",
+            "1 user only",
+            "Limited analytics history"
+          ]
+        },
+        {
+          "name": "Accelerate",
+          "price": 49,
+          "billing": "monthly",
+          "features": [
+            "10 social profiles",
+            "Unlimited posts",
+            "AI Copilot",
+            "Content recycling",
+            "Canva integration",
+            "Unified inbox",
+            "1 year analytics"
+          ],
+          "limitations": [
+            "Limited to 10 profiles",
+            "1 user only",
+            "No team collaboration"
+          ]
+        },
+        {
+          "name": "Pro",
+          "price": 99,
+          "billing": "monthly",
+          "features": [
+            "25 social profiles",
+            "Unlimited posts",
+            "AI Copilot",
+            "3 users",
+            "Team collaboration",
+            "Advanced analytics",
+            "White label options",
+            "Unlimited analytics history"
+          ],
+          "limitations": [
+            "Limited to 3 users",
+            "Higher price point"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "none",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "full",
+        "visualPlanning": "partial",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Excellent content recycling features",
+        "Category-based posting system",
+        "AI Copilot for content assistance",
+        "Good scheduling options",
+        "Workspace organization",
+        "Evergreen content management",
+        "Canva integration",
+        "Unified social inbox"
+      ],
+      "cons": [
+        "No free plan (14-day trial only)",
+        "Limited users on all plans (1-3 users)",
+        "No advanced mention resolution",
+        "Interface can be complex for beginners",
+        "Per-profile pricing model",
+        "Limited AI features compared to newer tools"
+      ],
+      "targetAudience": "Small to medium businesses and content creators focused on evergreen content",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "EngageMax",
+      "slug": "engagemax",
+      "tagline": "Social media scheduling & automation for creators",
+      "logo": "./assets/images/competitors/engagemax-logo.svg",
+      "website": "https://example-engagemax.com",
+      "pricing": [
+        {
+          "name": "Starter",
+          "price": 29,
+          "billing": "monthly",
+          "features": [
+            "6 social accounts (1 X account)",
+            "Schedule up to 1 month ahead",
+            "Autoplugs & auto cross-posting",
+            "Viral thread hooks and tweet templates",
+            "1 Auto-DM tweet per week (100 DMs daily)",
+            "Engagement builder (30 users, 5 keywords)",
+            "Automated Gumroad sales",
+            "7-day free trial"
+          ],
+          "limitations": [
+            "Limited scheduling timeframe (1 month)",
+            "Only 1 X account",
+            "Limited Auto-DM capacity",
+            "Basic engagement builder"
+          ]
+        },
+        {
+          "name": "Creator",
+          "price": 65,
+          "billing": "monthly",
+          "features": [
+            "30 social accounts (5 X accounts)",
+            "Schedule up to 3 months ahead",
+            "250 X Auto-DMs per day",
+            "10 Tweet to Reels per month",
+            "Engagement builder (100 users, 10 keywords)",
+            "Weekend support",
+            "All Starter features"
+          ],
+          "limitations": [
+            "Limited Tweet to Reels (10/month)",
+            "3-month scheduling limit"
+          ]
+        },
+        {
+          "name": "Business",
+          "price": 97,
+          "billing": "monthly",
+          "features": [
+            "60 social accounts (10 X accounts)",
+            "Unlimited scheduling",
+            "300 X Auto-DMs per day",
+            "50 Tweet to Reels per month",
+            "Engagement builder (unlimited users, 20 keywords)",
+            "All Creator features"
+          ],
+          "limitations": [
+            "Higher price point"
+          ]
+        },
+        {
+          "name": "Agency",
+          "price": 199,
+          "billing": "monthly",
+          "features": [
+            "90 social accounts (15 X accounts)",
+            "Unlimited scheduling",
+            "400 X Auto-DMs per day",
+            "300 Tweet to Reels per month",
+            "Engagement builder (unlimited users, 50 keywords)",
+            "Priority support",
+            "All Business features"
+          ],
+          "limitations": [
+            "Very expensive ($199/month)"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "none",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "full",
+        "visualPlanning": "partial",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Excellent content inspiration with viral templates",
+        "Strong automation features (Auto-DM, Autoplugs)",
+        "Cross-platform content repurposing (Tweet to Reels)",
+        "Engagement builder for community management",
+        "Automated sales integration with Gumroad",
+        "Thread hooks and viral content templates",
+        "Auto-reposting of best performing content",
+        "Strong X/Twitter focus with advanced features"
+      ],
+      "cons": [
+        "No free plan (only 7-day trial)",
+        "No AI content generation",
+        "Expensive compared to basic scheduling tools",
+        "Limited analytics compared to enterprise tools",
+        "No advanced mention resolution",
+        "X/Twitter-centric (less focus on other platforms)",
+        "Complex pricing tiers with feature limitations"
+      ],
+      "targetAudience": "Content creators, influencers, and X/Twitter-focused marketers",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "PostFlow",
+      "slug": "postflow",
+      "tagline": "Social Media Scheduling Made Simple",
+      "logo": "./assets/images/competitors/postflow-logo.svg",
+      "website": "https://example-postflow.com",
+      "pricing": [
+        {
+          "name": "Free",
+          "price": 0,
+          "billing": "monthly",
+          "features": [
+            "Basic scheduling",
+            "Multiple social platforms",
+            "Content creation tools",
+            "Limited AI credits"
+          ],
+          "limitations": [
+            "Limited posts per month",
+            "Limited AI credits",
+            "Basic features only",
+            "PostFlow branding"
+          ]
+        },
+        {
+          "name": "Starter",
+          "price": 19,
+          "billing": "monthly",
+          "features": [
+            "Up to 10 social accounts",
+            "Unlimited scheduling",
+            "AI video and image creation",
+            "Basic analytics",
+            "Content calendar",
+            "Unlimited team members",
+            "Fixed AI credits per month"
+          ],
+          "limitations": [
+            "Limited to 10 accounts",
+            "Limited AI credits",
+            "Basic analytics only"
+          ]
+        },
+        {
+          "name": "Pro",
+          "price": 49,
+          "billing": "monthly",
+          "features": [
+            "Unlimited social accounts",
+            "Unlimited scheduling",
+            "Advanced AI tools",
+            "Advanced analytics",
+            "Priority support",
+            "Bulk scheduling",
+            "More AI credits",
+            "Unlimited team members"
+          ],
+          "limitations": [
+            "AI credits still limited",
+            "No team collaboration workflows"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "full",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "partial",
+        "visualPlanning": "full",
+        "socialListening": "none"
+      },
+      "pros": [
+        "AI-powered video and image creation",
+        "Supports 10+ social platforms including Bluesky and Threads",
+        "Simple, user-friendly interface",
+        "Comprehensive platform integration",
+        "Content creation tools built-in",
+        "Competitive pricing for AI features",
+        "One dashboard for all social networks",
+        "Unlimited team members on paid plans",
+        "No per-user fees"
+      ],
+      "cons": [
+        "Limited advanced analytics",
+        "No advanced mention resolution",
+        "Newer platform with less established track record",
+        "AI features have usage limits (credit-based)",
+        "No social listening capabilities",
+        "Limited team collaboration workflows",
+        "No approval system"
+      ],
+      "targetAudience": "Content creators, small businesses, and social media managers needing AI content creation",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "ThreadCraft",
+      "slug": "threadcraft",
+      "tagline": "AI-powered social media tool for creators and teams",
+      "logo": "./assets/images/competitors/threadcraft-logo.svg",
+      "website": "https://example-threadcraft.com",
+      "pricing": [
+        {
+          "name": "Free",
+          "price": 0,
+          "billing": "monthly",
+          "features": [
+            "1 social account",
+            "Basic thread writing",
+            "Draft management",
+            "Simple scheduling",
+            "Distraction-free editor"
+          ],
+          "limitations": [
+            "1 social account only",
+            "Limited features",
+            "No analytics",
+            "No AI assistance",
+            "ThreadCraft branding"
+          ]
+        },
+        {
+          "name": "Starter",
+          "price": 12.50,
+          "billing": "monthly",
+          "features": [
+            "1 social account",
+            "Scheduling & calendar",
+            "Basic analytics",
+            "Video support",
+            "AI writing prompts",
+            "Thread and carousel support"
+          ],
+          "limitations": [
+            "1 social account only",
+            "Basic analytics",
+            "No team collaboration",
+            "Limited AI features"
+          ]
+        },
+        {
+          "name": "Creator",
+          "price": 25,
+          "billing": "monthly",
+          "features": [
+            "5 social accounts",
+            "Advanced analytics",
+            "AI writing assistance",
+            "Content ideas & rewrites",
+            "Multi-platform posting",
+            "Thread & carousel optimization",
+            "Auto-retweet best posts"
+          ],
+          "limitations": [
+            "Limited to 5 accounts",
+            "No team collaboration",
+            "No advanced automation"
+          ]
+        },
+        {
+          "name": "Team",
+          "price": 49,
+          "billing": "monthly",
+          "features": [
+            "Unlimited social accounts",
+            "Team collaboration",
+            "Advanced AI features",
+            "Comment & feedback system",
+            "Draft sharing",
+            "Advanced analytics",
+            "Priority support"
+          ],
+          "limitations": [
+            "Higher cost for teams"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "full",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "none",
+        "visualPlanning": "full",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Strong AI writing assistance and content suggestions",
+        "Excellent thread and long-form content creation",
+        "Distraction-free writing environment",
+        "Multi-platform support (X, LinkedIn, Bluesky, Mastodon, Threads)",
+        "Visual content preview and calendar",
+        "Competitive pricing with free plan",
+        "Strong collaboration features for teams",
+        "AI-powered content ideas and rewrites",
+        "Thread and carousel optimization",
+        "Auto-retweet best performing content"
+      ],
+      "cons": [
+        "Limited free plan features (1 account)",
+        "No advanced mention resolution",
+        "No social listening capabilities",
+        "Limited automation features compared to enterprise tools",
+        "Primarily focused on text content (less visual content tools)",
+        "No content recycling features",
+        "Analytics are basic compared to enterprise solutions",
+        "Pricing increased in 2026"
+      ],
+      "targetAudience": "Content creators, writers, and teams focused on X/Twitter, LinkedIn, and Bluesky",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "SocialSync",
+      "slug": "socialsync",
+      "tagline": "Open-source social media scheduling with AI-powered automation",
+      "logo": "./assets/images/competitors/socialsync-logo.svg",
+      "website": "https://example-socialsync.com",
+      "pricing": [
+        {
+          "name": "Standard",
+          "price": 29,
+          "billing": "monthly",
+          "features": [
+            "5 channels",
+            "400 posts per month",
+            "Advanced Picture Editor",
+            "AI copilot",
+            "3 AI videos per month",
+            "Custom Integrations",
+            "API & Webhooks",
+            "Post comments",
+            "Repeated posts",
+            "Smart Agent",
+            "Cross posting",
+            "Analytics",
+            "RSS auto-post",
+            "7-day free trial"
+          ],
+          "limitations": [
+            "Limited to 5 channels",
+            "400 posts per month limit",
+            "Limited AI video generation (3/month)"
+          ]
+        },
+        {
+          "name": "Team",
+          "price": 39,
+          "billing": "monthly",
+          "features": [
+            "10 channels",
+            "Unlimited posts per month",
+            "Unlimited team members",
+            "Advanced Picture Editor",
+            "AI copilot",
+            "100 AI images per month",
+            "10 AI videos per month",
+            "All Standard features"
+          ],
+          "limitations": [
+            "Limited to 10 channels",
+            "Limited AI generation credits"
+          ]
+        },
+        {
+          "name": "Pro",
+          "price": 49,
+          "billing": "monthly",
+          "features": [
+            "30 channels",
+            "Unlimited posts per month",
+            "Unlimited team members",
+            "Advanced Picture Editor",
+            "AI copilot",
+            "300 AI images per month",
+            "30 AI videos per month",
+            "All Team features"
+          ],
+          "limitations": [
+            "Limited to 30 channels"
+          ]
+        },
+        {
+          "name": "Ultimate",
+          "price": 99,
+          "billing": "monthly",
+          "features": [
+            "100 channels",
+            "Unlimited posts per month",
+            "Unlimited team members",
+            "Advanced Picture Editor",
+            "AI copilot",
+            "500 AI images per month",
+            "60 AI videos per month",
+            "All Pro features"
+          ],
+          "limitations": []
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "full",
+        "scheduling": "full",
+        "analytics": "full",
+        "teamCollaboration": "full",
+        "mentionResolution": "none",
+        "contentRecycling": "full",
+        "visualPlanning": "full",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Open-source and self-hostable option available",
+        "Smart Agent AI assistant for natural conversation-based management",
+        "Comprehensive platform support (X, LinkedIn, Instagram, Facebook, TikTok, YouTube, Threads, Pinterest, Reddit, Discord, Bluesky, Mastodon)",
+        "Advanced automation with Internal and Global Plugs",
+        "Unlimited team members on all paid plans",
+        "Built-in picture editor",
+        "RSS auto-posting with AI-generated content",
+        "Flexible posting sets for recurring workflows",
+        "API and webhooks for custom integrations",
+        "Scheduled comments and threads support",
+        "Competitive pricing with generous features",
+        "7-day free trial"
+      ],
+      "cons": [
+        "No free plan (only 7-day trial or self-hosted)",
+        "No advanced mention resolution",
+        "Newer platform with less established track record",
+        "AI generation limited by monthly credits",
+        "Self-hosting requires technical expertise",
+        "Post limits on Standard plan (400/month)",
+        "Channel limits on lower tiers"
+      ],
+      "targetAudience": "Tech-savvy creators, agencies, and businesses wanting open-source flexibility with advanced automation",
+      "lastUpdated": "2026-03-02"
+    },
+    {
+      "name": "MetricsHub",
+      "slug": "metricshub",
+      "tagline": "All-in-one social media management with powerful analytics",
+      "logo": "./assets/images/competitors/metricshub-logo.svg",
+      "website": "https://example-metricshub.com",
+      "pricing": [
+        {
+          "name": "Free",
+          "price": 0,
+          "billing": "monthly",
+          "features": [
+            "1 brand",
+            "All social networks (except LinkedIn and X)",
+            "20 scheduled posts per month",
+            "Analyze 5 competitor profiles",
+            "30 days of analytics",
+            "AI social media assistant (3 credits/month)"
+          ],
+          "limitations": [
+            "1 brand only",
+            "Limited posts per month",
+            "No LinkedIn or X connection",
+            "Limited analytics history",
+            "MetricsHub branding"
+          ]
+        },
+        {
+          "name": "Starter",
+          "price": 18,
+          "billing": "monthly",
+          "features": [
+            "Up to 10 brands",
+            "Unlimited content publishing",
+            "Analyze up to 100 competitors",
+            "X/Twitter add-on available",
+            "LinkedIn connection",
+            "PDF and PPT reports",
+            "Multiple link-in-bio",
+            "Unlimited analytics history",
+            "Google Drive and Canva integration",
+            "AI assistant (20 credits per brand/month)"
+          ],
+          "limitations": [
+            "X/Twitter requires $5/month add-on per account",
+            "No team collaboration",
+            "No custom report templates"
+          ]
+        },
+        {
+          "name": "Advanced",
+          "price": 45,
+          "billing": "monthly",
+          "features": [
+            "Up to 50 brands",
+            "Unlimited content publishing",
+            "Team and client management",
+            "Role management",
+            "Post approval system",
+            "Full X/Twitter analytics",
+            "Customizable report templates",
+            "Looker Studio connector",
+            "Metricool API (Zapier, Make, MCP)",
+            "AI assistant (35 credits per brand/month)"
+          ],
+          "limitations": [
+            "X/Twitter still requires $5/month add-on per account",
+            "No white label"
+          ]
+        },
+        {
+          "name": "Enterprise",
+          "price": 139,
+          "billing": "monthly",
+          "features": [
+            "Custom number of brands",
+            "Metricool integration in your business",
+            "White Label",
+            "Dedicated account manager",
+            "Custom AI assistant credits",
+            "All Advanced features"
+          ],
+          "limitations": [
+            "Custom pricing for larger needs"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "partial",
+        "scheduling": "full",
+        "analytics": "full",
+        "teamCollaboration": "premium",
+        "mentionResolution": "none",
+        "contentRecycling": "partial",
+        "visualPlanning": "full",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Comprehensive analytics across 8+ social platforms",
+        "Excellent competitor analysis (up to 100 competitors)",
+        "Strong website/blog analytics integration",
+        "Unified inbox for all social messages",
+        "SmartLinks (link-in-bio) functionality",
+        "Affordable pricing with generous free plan",
+        "Google Drive and Canva integration",
+        "Automated PDF and PPT reports",
+        "Real-time analytics and historical data",
+        "Looker Studio connector for custom dashboards"
+      ],
+      "cons": [
+        "X/Twitter requires additional $5/month per account",
+        "UI can feel clunky compared to modern tools",
+        "Team collaboration only on Advanced plan",
+        "Custom report templates only on Advanced plan",
+        "AI content generation limited by credits",
+        "No advanced mention resolution",
+        "Hashtag tracker is expensive ($9.99/day)",
+        "Content queues setup can be confusing"
+      ],
+      "targetAudience": "Data-driven marketers, agencies, and businesses focused on analytics and competitor tracking",
+      "lastUpdated": "2026-02-27"
+    },
+    {
+      "name": "CrossPost",
+      "slug": "crosspost",
+      "tagline": "Ferry your content to all platforms",
+      "logo": "./assets/images/competitors/crosspost-logo.svg",
+      "website": "https://example-crosspost.com",
+      "pricing": [
+        {
+          "name": "Free",
+          "price": 0,
+          "billing": "monthly",
+          "features": [
+            "Basic multi-platform posting",
+            "Content scheduling",
+            "Limited posts per month"
+          ],
+          "limitations": [
+            "Limited features",
+            "Limited posts",
+            "CrossPost branding"
+          ]
+        },
+        {
+          "name": "Pro",
+          "price": 29,
+          "billing": "monthly",
+          "features": [
+            "Unlimited posts",
+            "Multi-platform support",
+            "Advanced scheduling",
+            "Analytics"
+          ],
+          "limitations": [
+            "Limited advanced features"
+          ]
+        }
+      ],
+      "features": {
+        "multiPlatformPosting": "full",
+        "aiContentGeneration": "none",
+        "scheduling": "full",
+        "analytics": "partial",
+        "teamCollaboration": "partial",
+        "mentionResolution": "none",
+        "contentRecycling": "none",
+        "visualPlanning": "partial",
+        "socialListening": "none"
+      },
+      "pros": [
+        "Simple, straightforward interface",
+        "Multi-platform content distribution",
+        "Affordable pricing"
+      ],
+      "cons": [
+        "Limited public information available",
+        "Newer platform with less established track record",
+        "No AI content generation",
+        "No advanced mention resolution",
+        "Limited analytics compared to competitors"
+      ],
+      "targetAudience": "Small businesses and creators looking for simple multi-platform posting",
+      "lastUpdated": "2026-03-04"
+    }
+  ],
+  "yourProduct": {
+    "uniqueFeatures": [
+      "AI-powered content enhancement",
+      "Advanced mention resolution across platforms (@username mapping)",
+      "Free tier with full feature access (no feature limitations)",
+      "Multi-platform OAuth2 with PKCE security",
+      "Intelligent scheduling recommendations",
+      "Cross-platform mention synchronization",
+      "Real-time content optimization suggestions",
+      "Unified social media management across multiple platforms"
+    ],
+    "pricing": [
+      {
+        "name": "Free",
+        "price": 0,
+        "billing": "monthly",
+        "features": [
+          "2 social accounts",
+          "5 posts per month",
+          "Basic scheduling",
+          "AI content enhancement",
+          "Multi-platform support",
+          "Mention resolution",
+          "Real-time optimization"
+        ],
+        "limitations": [
+          "Your Product branding on posts",
+          "Limited to 2 social accounts",
+          "5 posts per month limit"
+        ]
+      },
+      {
+        "name": "Pro",
+        "price": 19,
+        "billing": "monthly",
+        "features": [
+          "Unlimited social accounts",
+          "Unlimited posts",
+          "AI content enhancement",
+          "Advanced scheduling",
+          "Remove Your Product branding",
+          "Analytics & insights",
+          "Priority support",
+          "Advanced AI content suggestions",
+          "Custom scheduling templates"
+        ],
+        "limitations": []
+      }
+    ]
+  }
+}

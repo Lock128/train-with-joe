@@ -1,0 +1,32 @@
+<div class="recent-posts">
+  <div class="posts-grid">
+    <article class="post-card" *ngFor="let post of posts">
+      <!-- Post Header -->
+      <div class="post-header">
+        <time class="post-date">{{ formatDate(post.publishedAt) }}</time>
+      </div>
+
+      <!-- Post Content -->
+      <div class="post-content">
+        <p>{{ truncateContent(post.content) }}</p>
+      </div>
+
+      <!-- Platform Links -->
+      <div class="post-platforms" *ngIf="post.platforms && post.platforms.length > 0">
+        <span class="platforms-label">Published on:</span>
+        <div class="platform-links">
+          <a
+            *ngFor="let platform of post.platforms"
+            [href]="platform.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="platform-link"
+            [title]="getPlatformName(platform.network) + ' - @' + platform.handle"
+          >
+            <span class="platform-icon">{{ getPlatformIcon(platform.network) }}</span>
+          </a>
+        </div>
+      </div>
+    </article>
+  </div>
+</div>

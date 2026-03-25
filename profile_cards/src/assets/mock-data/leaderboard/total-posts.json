@@ -1,0 +1,27 @@
+{
+  "type": "total-posts",
+  "generatedAt": "2024-01-15T10:00:00Z",
+  "entries": [
+    {
+      "rank": 1,
+      "userId": "test-user-1",
+      "displayName": "john.doe",
+      "value": 168,
+      "profileCardUrl": "http://localhost:4200/test-user-1"
+    },
+    {
+      "rank": 2,
+      "userId": "test-user-2",
+      "displayName": "jane.smith",
+      "value": 140,
+      "profileCardUrl": "http://localhost:4200/test-user-2"
+    },
+    {
+      "rank": 3,
+      "userId": "test-user-3",
+      "displayName": "bob.wilson",
+      "value": 112,
+      "profileCardUrl": "http://localhost:4200/test-user-3"
+    }
+  ]
+}

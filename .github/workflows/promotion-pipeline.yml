@@ -1,0 +1,285 @@
+name: Promotion Pipeline - Beta
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git tag to deploy (tags only)'
+        required: true
+        type: string
+      skip_tests:
+        description: 'Skip integration tests'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  id-token: write
+  contents: write
+  actions: write
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  validate-inputs:
+    name: Validate Deployment Inputs
+    runs-on: ubuntu-latest
+    outputs:
+      ref: ${{ steps.validate.outputs.ref }}
+      skip_tests: ${{ steps.validate.outputs.skip_tests }}
+    steps:
+      - name: Validate inputs
+        id: validate
+        run: |
+          REF="${{ github.event.inputs.ref }}"
+          if [[ ! "$REF" =~ ^(v[0-9]+\.|deploy-[0-9]{8}-[0-9]{6}-[a-f0-9]{7}$|beta-|release-) ]]; then
+            echo "❌ Invalid ref format. Only tags are allowed (v*, deploy-*, beta-*, release-*)"
+            exit 1
+          fi
+          
+          echo "ref=$REF" >> $GITHUB_OUTPUT
+          echo "skip_tests=${{ github.event.inputs.skip_tests }}" >> $GITHUB_OUTPUT
+          
+          echo "🚀 Deploying to: beta"
+          echo "📦 Using tag: $REF"
+
+  pre-deployment-tests:
+    name: Pre-Deployment Tests
+    needs: validate-inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate-inputs.outputs.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Flutter dependencies
+        working-directory: frontend/src
+        run: flutter pub get
+
+      - name: Run backend linting
+        run: npm run lint
+
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions
+
+      - name: Run backend tests
+        run: npm test
+
+      - name: Run frontend tests
+        working-directory: frontend/src
+        run: flutter test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-beta
+          path: |
+            coverage/
+            frontend/coverage/
+          retention-days: 30
+
+  deploy-to-beta:
+    name: Deploy to Beta
+    needs: [validate-inputs, pre-deployment-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment: 
+      name: beta
+      url: ${{ steps.get-url.outputs.app_url }}
+    outputs:
+      app_url: ${{ steps.get-url.outputs.app_url }}
+      deployment_id: ${{ steps.deploy.outputs.deployment_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate-inputs.outputs.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_BETA }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install Flutter dependencies
+        working-directory: frontend/src
+        run: flutter pub get
+
+      - name: Build Flutter web app
+        working-directory: frontend/src
+        run: flutter build web --release
+
+      - name: Build Angular join page
+        working-directory: join_page
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions
+
+      - name: Deploy CDK stacks
+        id: deploy
+        run: |
+          echo "🚀 Deploying to beta environment..."
+          npm run deploy
+          echo "deployment_id=$(date +%s)" >> $GITHUB_OUTPUT
+        env:
+          NODE_ENV: beta
+          
+      - name: Get application URL
+        id: get-url
+        run: |
+          APP_URL="https://beta.yourdomain.com"
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+          echo "🌐 Application deployed at: $APP_URL"
+
+      - name: Create deployment state file
+        run: |
+          COMMIT_ID=$(git rev-parse HEAD)
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          
+          cat > deployment-state.json << EOF
+          {
+            "environment": "beta",
+            "commitId": "$COMMIT_ID",
+            "commitShort": "$COMMIT_SHORT",
+            "tag": "${{ needs.validate-inputs.outputs.ref }}",
+            "deploymentTimestamp": "$(date -u +'%Y-%m-%d %H:%M:%S UTC')",
+            "appUrl": "${{ steps.get-url.outputs.app_url }}",
+            "deploymentId": "${{ steps.deploy.outputs.deployment_id }}"
+          }
+          EOF
+
+      - name: Upload deployment state
+        uses: actions/upload-artifact@v7
+        with:
+          name: deployment-state-beta
+          path: deployment-state.json
+          retention-days: 90
+
+      - name: Create deployment summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🚀 Beta Deployment Summary
+          
+          **Git Ref:** ${{ needs.validate-inputs.outputs.ref }}
+          **Deployed At:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          **Application URL:** ${{ steps.get-url.outputs.app_url }}
+          
+          ### Next Steps
+          - Monitor the application health
+          - Run integration tests if needed
+          - Promote to production when ready
+          EOF
+
+  create-github-release:
+    name: Create GitHub Release
+    needs: [validate-inputs, deploy-to-beta]
+    runs-on: ubuntu-latest
+    outputs:
+      release_url: ${{ steps.create-release.outputs.release_url }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.validate-inputs.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: release-notes
+        run: |
+          TAG="${{ needs.validate-inputs.outputs.ref }}"
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo "")
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "## Changes since $PREVIOUS_TAG" > release_notes.md
+            echo "" >> release_notes.md
+            git log --pretty=format:"- %s (%h)" "$PREVIOUS_TAG..$TAG" >> release_notes.md
+          else
+            echo "## Initial Release" > release_notes.md
+          fi
+          
+          echo "" >> release_notes.md
+          echo "## Deployment Information" >> release_notes.md
+          echo "- **Beta Environment:** ${{ needs.deploy-to-beta.outputs.app_url }}" >> release_notes.md
+          echo "- **Deployment Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> release_notes.md
+
+      - name: Create GitHub Release
+        id: create-release
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const tag = '${{ needs.validate-inputs.outputs.ref }}';
+            const fs = require('fs');
+            const releaseNotes = fs.readFileSync('release_notes.md', 'utf8');
+            
+            const isPrerelease = tag.includes('beta') || tag.includes('alpha') || tag.startsWith('deploy-');
+            
+            const { data: release } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `Release ${tag}`,
+              body: releaseNotes,
+              draft: false,
+              prerelease: isPrerelease
+            });
+            
+            console.log(`Created release: ${release.html_url}`);
+            core.setOutput('release_url', release.html_url);
+
+  deployment-notification:
+    name: Deployment Notification
+    needs: [validate-inputs, deploy-to-beta, create-github-release]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create final summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 📊 Final Deployment Report
+          
+          **Status:** ${{ needs.deploy-to-beta.result == 'success' && '✅ Deployment successful' || '❌ Deployment failed' }}
+          **Environment:** beta
+          **Git Ref:** ${{ needs.validate-inputs.outputs.ref }}
+          **Application URL:** ${{ needs.deploy-to-beta.outputs.app_url }}
+          **GitHub Release:** ${{ needs.create-github-release.outputs.release_url }}
+          
+          ### Next Steps
+          - Monitor deployment and verify functionality
+          - Promote to production when ready using production-deployment workflow
+          EOF

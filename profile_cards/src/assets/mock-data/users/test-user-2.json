@@ -1,0 +1,279 @@
+{
+  "userId": "test-user-2",
+  "displayName": "Michael Chen",
+  "joinDate": "2024-02-20T08:15:00Z",
+  "metrics": {
+    "totalPosts": 412,
+    "connectedPlatforms": 4,
+    "currentStreak": 28,
+    "longestStreak": 67,
+    "totalAIUsage": 305,
+    "aiPostGeneration": 142,
+    "aiTextEnhancement": 98,
+    "aiScheduling": 45,
+    "aiTagSuggestion": 20
+  },
+  "recentPosts": [
+    {
+      "postId": "post-101",
+      "title": "AI Revolution",
+      "content": "The AI revolution is here, and it's transforming how we create content. Excited to be part of this journey!",
+      "publishedAt": "2024-11-09T11:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567890",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:2234567890",
+          "handle": "michael-chen"
+        }
+      ]
+    },
+    {
+      "postId": "post-102",
+      "title": "Startup Life",
+      "content": "Building a startup is like riding a rollercoaster. Thrilling, scary, and absolutely worth it!",
+      "publishedAt": "2024-11-08T15:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567891",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@michaelchen/post/xyz889",
+          "handle": "@michaelchen"
+        }
+      ]
+    },
+    {
+      "postId": "post-103",
+      "title": "Code Quality Matters",
+      "content": "Clean code isn't just about aesthetics. It's about maintainability, scalability, and team collaboration.",
+      "publishedAt": "2024-11-07T09:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567892",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:2234567891",
+          "handle": "michael-chen"
+        },
+        {
+          "network": "BLUESKY",
+          "url": "https://bsky.app/profile/michaelchen.bsky.social/post/def123",
+          "handle": "michaelchen.bsky.social"
+        }
+      ]
+    },
+    {
+      "postId": "post-104",
+      "title": "Team Success",
+      "content": "Proud of my team for shipping this feature ahead of schedule. Great work everyone! 🚀",
+      "publishedAt": "2024-11-06T13:15:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567893",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:2234567892",
+          "handle": "michael-chen"
+        }
+      ]
+    },
+    {
+      "postId": "post-105",
+      "title": "Developer Tools",
+      "content": "Just discovered an amazing new developer tool. Game changer for productivity!",
+      "publishedAt": "2024-11-05T10:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567894",
+          "handle": "@michaelchen"
+        }
+      ]
+    },
+    {
+      "postId": "post-106",
+      "title": "Work-Life Balance",
+      "content": "Remember to take breaks. Your best ideas often come when you step away from the screen.",
+      "publishedAt": "2024-11-04T17:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567895",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@michaelchen/post/xyz890",
+          "handle": "@michaelchen"
+        }
+      ]
+    },
+    {
+      "postId": "post-107",
+      "title": "Customer Feedback",
+      "content": "Listening to customer feedback is crucial. It's how we build products people actually want to use.",
+      "publishedAt": "2024-11-03T14:20:00Z",
+      "platforms": [
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:2234567893",
+          "handle": "michael-chen"
+        }
+      ]
+    },
+    {
+      "postId": "post-108",
+      "title": "Conference Highlights",
+      "content": "Amazing conference today! So many brilliant minds sharing innovative ideas. Feeling inspired!",
+      "publishedAt": "2024-11-02T19:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567896",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:2234567894",
+          "handle": "michael-chen"
+        }
+      ]
+    },
+    {
+      "postId": "post-109",
+      "title": "Open Source Contribution",
+      "content": "Just made my first contribution to a major open source project. Small steps, big impact!",
+      "publishedAt": "2024-11-01T08:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567897",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "BLUESKY",
+          "url": "https://bsky.app/profile/michaelchen.bsky.social/post/def124",
+          "handle": "michaelchen.bsky.social"
+        }
+      ]
+    },
+    {
+      "postId": "post-110",
+      "title": "Design Thinking",
+      "content": "Good design is invisible. Great design is unforgettable. Always thinking about the user experience.",
+      "publishedAt": "2024-10-31T12:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567898",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:2234567895",
+          "handle": "michael-chen"
+        }
+      ]
+    },
+    {
+      "postId": "post-111",
+      "title": "Scaling Challenges",
+      "content": "Scaling from 100 to 10,000 users taught me more than any course ever could. Real-world experience is invaluable.",
+      "publishedAt": "2024-10-30T16:15:00Z",
+      "platforms": [
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:2234567896",
+          "handle": "michael-chen"
+        }
+      ]
+    },
+    {
+      "postId": "post-112",
+      "title": "Automation Win",
+      "content": "Automated a task that was taking 2 hours daily. Now it runs in 2 minutes. This is why we code!",
+      "publishedAt": "2024-10-29T11:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567899",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@michaelchen/post/xyz891",
+          "handle": "@michaelchen"
+        }
+      ]
+    },
+    {
+      "postId": "post-113",
+      "title": "Mentorship Matters",
+      "content": "Grateful for the mentors who helped me along the way. Now it's my turn to pay it forward.",
+      "publishedAt": "2024-10-28T09:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567900",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:2234567897",
+          "handle": "michael-chen"
+        }
+      ]
+    },
+    {
+      "postId": "post-114",
+      "title": "API Design",
+      "content": "Good API design is an art form. It's about making complex systems simple and intuitive.",
+      "publishedAt": "2024-10-27T15:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567901",
+          "handle": "@michaelchen"
+        }
+      ]
+    },
+    {
+      "postId": "post-115",
+      "title": "Friday Deployment",
+      "content": "Yes, we deploy on Fridays. With proper testing and monitoring, it's not scary at all!",
+      "publishedAt": "2024-10-26T14:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/michaelchen/status/2234567902",
+          "handle": "@michaelchen"
+        },
+        {
+          "network": "BLUESKY",
+          "url": "https://bsky.app/profile/michaelchen.bsky.social/post/def125",
+          "handle": "michaelchen.bsky.social"
+        }
+      ]
+    }
+  ],
+  "rankings": {
+    "postRank": 1,
+    "aiUsageRank": 2
+  },
+  "lastUpdated": "2024-11-10T02:00:00Z",
+  "profileCardVersion": "1.0"
+}

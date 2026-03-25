@@ -1,0 +1,57 @@
+/* Global app styles with Nexus Share branding - Matching join_page */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #F8FEFF;
+}
+
+.main-content {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(30, 136, 229, 0.02), rgba(100, 181, 246, 0.03));
+}
+
+/* Footer with Nexus Share branding - Matching join_page */
+.app-footer {
+  background: #F5F5F5;
+  border-top: 1px solid #E0E0E0;
+  padding: 48px 24px;
+  margin-top: auto;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-content p {
+  color: #757575;
+  font-size: 0.875rem;
+  margin: 0 0 16px 0;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: #1E88E5;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s ease;
+  font-weight: 600;
+}
+
+.footer-links a:hover {
+  color: #1565C0;
+  text-decoration: underline;
+}
+
+.separator {
+  color: #BDBDBD;
+}

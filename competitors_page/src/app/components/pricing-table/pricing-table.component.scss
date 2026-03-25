@@ -1,0 +1,642 @@
+// Pricing Table Component Styles
+// Implements requirements 4.1, 4.2, 4.3, 4.5 for responsive pricing comparison
+
+.pricing-table-container {
+  width: 100%;
+  margin: 2rem 0;
+  
+  .pricing-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    
+    .pricing-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+    
+    .pricing-subtitle {
+      font-size: 1.1rem;
+      color: #666;
+      margin: 0 0 1.5rem 0;
+    }
+  }
+}
+
+// Billing Toggle
+.billing-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  
+  .toggle-container {
+    display: flex;
+    background: #f3f4f6;
+    border-radius: 12px;
+    padding: 4px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .toggle-button {
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    
+    &:hover {
+      color: #374151;
+    }
+    
+    &.active {
+      background: white;
+      color: #4f46e5;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .savings-badge {
+      font-size: 0.7rem;
+      background: #10b981;
+      color: white;
+      padding: 0.1rem 0.4rem;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+  }
+}
+
+// Desktop Pricing Table
+.pricing-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  
+  .pricing-scroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.pricing-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  
+  // Header Styles
+  thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    
+    th {
+      padding: 1.5rem 1rem;
+      text-align: center;
+      font-weight: 600;
+      border-right: 1px solid rgba(255, 255, 255, 0.2);
+      
+      &:last-child {
+        border-right: none;
+      }
+      
+      &.plan-column-header {
+        text-align: left;
+        min-width: 150px;
+        
+        .header-text {
+          font-size: 1.1rem;
+        }
+      }
+      
+      &.nexus-share-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: 3px;
+          background: #fbbf24;
+        }
+      }
+    }
+  }
+  
+  // Platform Header Content
+  .platform-header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    
+    .platform-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: white;
+      padding: 4px;
+    }
+    
+    .platform-name {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    .platform-badge {
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+  }
+  
+  // Body Styles
+  tbody {
+    tr {
+      border-bottom: 1px solid #e5e7eb;
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: #f9fafb;
+      }
+      
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+    
+    td {
+      padding: 1.5rem 1rem;
+      text-align: center;
+      border-right: 1px solid #f3f4f6;
+      vertical-align: top;
+      
+      &:last-child {
+        border-right: none;
+      }
+      
+      &.plan-name-cell {
+        text-align: left;
+        font-weight: 600;
+        background: #fafafa;
+        color: #374151;
+        
+        .plan-name {
+          font-size: 1rem;
+        }
+      }
+      
+      &.nexus-share-cell {
+        background: rgba(79, 70, 229, 0.05);
+        border-left: 3px solid #4f46e5;
+      }
+      
+      &.better-value {
+        position: relative;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: #10b981;
+        }
+      }
+    }
+  }
+}
+
+// Pricing Content Styles
+.pricing-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  
+  .price-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    
+    .price-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    
+    .monthly-equivalent {
+      font-size: 0.8rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+  }
+  
+  .tier-features, .tier-limitations {
+    width: 100%;
+    
+    .feature-summary, .limitation-summary {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #374151;
+    }
+    
+    .feature-list, .limitation-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.8rem;
+      
+      .feature-item, .limitation-item {
+        padding: 0.2rem 0;
+        color: #6b7280;
+        
+        &::before {
+          content: '✓';
+          color: #10b981;
+          font-weight: bold;
+          margin-right: 0.5rem;
+        }
+      }
+      
+      .limitation-item::before {
+        content: '⚠';
+        color: #f59e0b;
+      }
+      
+      .feature-more, .limitation-more {
+        padding: 0.2rem 0;
+        color: #9ca3af;
+        font-style: italic;
+        
+        &::before {
+          content: '...';
+          color: #9ca3af;
+          margin-right: 0.5rem;
+        }
+      }
+    }
+  }
+}
+
+// Savings Badge
+.savings-badge-container {
+  width: 100%;
+  
+  .savings-badge {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    
+    .savings-amount {
+      display: block;
+    }
+    
+    .savings-percentage {
+      font-size: 0.7rem;
+      opacity: 0.9;
+    }
+  }
+}
+
+// No Tier Available
+.no-tier {
+  padding: 1rem;
+  color: #9ca3af;
+  font-style: italic;
+  
+  .no-tier-text {
+    font-size: 0.9rem;
+  }
+}
+
+// Mobile Pricing (Hidden by default, shown on mobile)
+.mobile-pricing {
+  display: none;
+}
+
+// Pricing Notes
+.pricing-notes {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  border-left: 4px solid #4f46e5;
+  
+  .notes-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+  }
+  
+  .notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    .note-item {
+      padding: 0.25rem 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+      
+      &::before {
+        content: '•';
+        color: #4f46e5;
+        font-weight: bold;
+        margin-right: 0.5rem;
+      }
+    }
+  }
+}
+
+// Responsive Design - Tablet
+@media (max-width: 1024px) {
+  .pricing-table {
+    font-size: 0.8rem;
+    
+    thead th {
+      padding: 1rem 0.75rem;
+      
+      .platform-logo {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .platform-name {
+        font-size: 0.9rem;
+      }
+    }
+    
+    tbody td {
+      padding: 1rem 0.75rem;
+    }
+  }
+  
+  .pricing-content {
+    gap: 0.75rem;
+    
+    .price-display .price-amount {
+      font-size: 1.3rem;
+    }
+  }
+}
+
+// Responsive Design - Mobile
+@media (max-width: 768px) {
+  // Hide desktop table on mobile
+  .pricing-wrapper {
+    display: none;
+  }
+  
+  // Show mobile pricing
+  .mobile-pricing {
+    display: block;
+  }
+  
+  .mobile-platform-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    
+    &.nexus-share-mobile {
+      border: 2px solid #4f46e5;
+      
+      .mobile-platform-header {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+      }
+    }
+    
+    .mobile-platform-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      
+      .mobile-platform-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: contain;
+        background: white;
+        padding: 4px;
+      }
+      
+      .mobile-platform-name {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+        flex: 1;
+      }
+      
+      .mobile-platform-badge {
+        font-size: 0.8rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.3rem 0.8rem;
+        border-radius: 12px;
+        font-weight: 500;
+      }
+    }
+    
+    .mobile-pricing-tiers {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .mobile-tier-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.5rem;
+      
+      &.better-value-mobile {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+      }
+      
+      .mobile-tier-header {
+        margin-bottom: 1rem;
+        
+        .mobile-tier-name {
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: #374151;
+          margin: 0 0 0.5rem 0;
+        }
+        
+        .mobile-price-display {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          margin-bottom: 0.75rem;
+          
+          .mobile-price-amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1f2937;
+          }
+          
+          .mobile-monthly-equivalent {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 500;
+          }
+        }
+        
+        .mobile-savings-badge {
+          background: #10b981;
+          color: white;
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          text-align: center;
+          
+          .mobile-savings-text {
+            display: block;
+          }
+        }
+      }
+      
+      .mobile-tier-details {
+        .mobile-features, .mobile-limitations {
+          margin-bottom: 1rem;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          .mobile-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 0.5rem 0;
+          }
+          
+          .mobile-feature-list, .mobile-limitation-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            
+            .mobile-feature-item, .mobile-limitation-item {
+              padding: 0.3rem 0;
+              color: #6b7280;
+              font-size: 0.9rem;
+              
+              &::before {
+                content: '✓';
+                color: #10b981;
+                font-weight: bold;
+                margin-right: 0.5rem;
+              }
+            }
+            
+            .mobile-limitation-item::before {
+              content: '⚠';
+              color: #f59e0b;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Adjust billing toggle for mobile
+  .billing-toggle {
+    .toggle-container {
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    .toggle-button {
+      flex: 1;
+      padding: 1rem;
+    }
+  }
+}
+
+// Extra small mobile devices
+@media (max-width: 480px) {
+  .pricing-table-container {
+    margin: 1rem 0;
+    
+    .pricing-header {
+      margin-bottom: 1.5rem;
+      
+      .pricing-title {
+        font-size: 1.5rem;
+      }
+      
+      .pricing-subtitle {
+        font-size: 1rem;
+      }
+    }
+  }
+  
+  .mobile-platform-card {
+    margin-bottom: 1.5rem;
+    
+    .mobile-platform-header {
+      padding: 1rem;
+      flex-direction: column;
+      text-align: center;
+      gap: 0.75rem;
+      
+      .mobile-platform-logo {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .mobile-platform-name {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .mobile-pricing-tiers {
+      padding: 1rem;
+    }
+    
+    .mobile-tier-card {
+      padding: 1rem;
+      
+      .mobile-tier-header {
+        .mobile-price-display {
+          .mobile-price-amount {
+            font-size: 1.5rem;
+          }
+        }
+      }
+    }
+  }
+  
+  .pricing-notes {
+    padding: 1rem;
+    margin-top: 1.5rem;
+  }
+}

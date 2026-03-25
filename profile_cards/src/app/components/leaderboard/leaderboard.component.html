@@ -1,0 +1,219 @@
+<div class="leaderboard-container">
+  <!-- Header -->
+  <header class="leaderboard-header">
+    <h1>Most Active Users</h1>
+    <p class="subtitle">Top contributors on Nexus Share</p>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading most active users...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h2>{{ error }}</h2>
+    <button class="btn-primary" (click)="retry()">Try Again</button>
+  </div>
+
+  <!-- Leaderboard Content -->
+  <div *ngIf="!loading && !error" class="leaderboard-content">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button
+        class="tab"
+        [class.active]="activeTab === 'unique-posts'"
+        (click)="switchTab('unique-posts')"
+      >
+        📝 Unique Posts
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'total-posts'"
+        (click)="switchTab('total-posts')"
+      >
+        📊 Posts Across Networks
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'current-streak'"
+        (click)="switchTab('current-streak')"
+      >
+        🔥 Current Streak
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'longest-streak'"
+        (click)="switchTab('longest-streak')"
+      >
+        🏆 Longest Streak
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'ai-usage'"
+        (click)="switchTab('ai-usage')"
+      >
+        🤖 AI Usage
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'posts-by-tag'"
+        (click)="switchTab('posts-by-tag')"
+      >
+        🏷️ Posts by Tag
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'links-shared'"
+        (click)="switchTab('links-shared')"
+      >
+        🔗 Links Shared
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'likes'"
+        (click)="switchTab('likes')"
+      >
+        👍 Likes
+      </button>
+      <button
+        class="tab"
+        [class.active]="activeTab === 'impressions'"
+        (click)="switchTab('impressions')"
+      >
+        👁️ Impressions
+      </button>
+    </div>
+
+    <!-- Tag Selector (only visible when posts-by-tag tab is active) -->
+    <div class="tag-selector" *ngIf="activeTab === 'posts-by-tag'">
+      <!-- Show available tags when no tag is selected -->
+      <div *ngIf="!selectedTag" class="tags-overview">
+        <h3>Available Tags ({{ availableTags.length }})</h3>
+        
+        <!-- Tag search -->
+        <div class="tag-search">
+          <input
+            type="text"
+            [(ngModel)]="tagSearchQuery"
+            (input)="onTagSearchChange()"
+            placeholder="Search tags..."
+            class="tag-search-input"
+          />
+          <span class="search-icon">🔍</span>
+        </div>
+
+        <!-- Tags grid -->
+        <div class="tags-grid" *ngIf="filteredTags.length > 0">
+          <div
+            class="tag-card"
+            *ngFor="let tag of filteredTags.slice(0, 50)"
+            (click)="loadTagLeaderboard(tag.name)"
+          >
+            <div class="tag-name">#{{ tag.name }}</div>
+            <div class="tag-stats">
+              <span class="post-count">{{ tag.postCount }} posts</span>
+              <span class="user-count">{{ tag.userCount }} users</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- No tags found -->
+        <div class="no-tags" *ngIf="filteredTags.length === 0 && tagSearchQuery">
+          <p>No tags found matching "{{ tagSearchQuery }}"</p>
+        </div>
+
+        <!-- Empty state -->
+        <div class="no-tags" *ngIf="availableTags.length === 0">
+          <p>No tags found. Tags will appear here once users start posting with hashtags.</p>
+        </div>
+      </div>
+
+      <!-- Show selected tag info and back button -->
+      <div *ngIf="selectedTag" class="selected-tag-header">
+        <button class="btn-back" (click)="goBackToTags()">← Back to Tags</button>
+        <h3>Posts tagged with #{{ selectedTag }}</h3>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Search users..."
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <!-- Leaderboard Info -->
+    <div class="leaderboard-info" *ngIf="currentLeaderboard">
+      <p>
+        Last updated: {{ formatDate(currentLeaderboard.generatedAt) }}
+      </p>
+      <p *ngIf="searchQuery">
+        Showing {{ filteredEntries.length }} of {{ currentLeaderboard.entries.length }} users
+      </p>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="leaderboard-table" *ngIf="filteredEntries.length > 0">
+      <div class="table-header">
+        <div class="col-rank">Rank</div>
+        <div class="col-user">User</div>
+        <div class="col-value">
+          {{
+            activeTab === 'unique-posts'
+              ? 'Unique Posts'
+              : activeTab === 'total-posts'
+                ? 'Posts Across Networks'
+                : activeTab === 'current-streak'
+                  ? 'Current Streak (days)'
+                  : activeTab === 'longest-streak'
+                    ? 'Longest Streak (days)'
+                    : activeTab === 'ai-usage'
+                      ? 'AI Assists'
+                      : activeTab === 'links-shared'
+                        ? 'Links Shared'
+                        : activeTab === 'likes'
+                          ? 'Total Likes'
+                          : activeTab === 'impressions'
+                            ? 'Total Impressions'
+                            : 'Posts with Tag'
+          }}
+        </div>
+      </div>
+
+      <div
+        class="table-row"
+        *ngFor="let entry of filteredEntries"
+        [class]="getRankClass(entry.rank)"
+        (click)="navigateToProfile(entry.userId)"
+      >
+        <div class="col-rank">
+          <span class="rank-number">{{ entry.rank }}</span>
+          <span class="rank-emoji" *ngIf="getRankEmoji(entry.rank)">{{ getRankEmoji(entry.rank) }}</span>
+        </div>
+        <div class="col-user">
+          <span class="user-name">{{ entry.displayName }}</span>
+        </div>
+        <div class="col-value">
+          <span class="value-number">{{ formatValue(entry.value) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results -->
+    <div class="no-results" *ngIf="filteredEntries.length === 0 && searchQuery">
+      <p>No users found matching "{{ searchQuery }}"</p>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!currentLeaderboard || currentLeaderboard.entries.length === 0">
+      <p>No data available yet.</p>
+    </div>
+  </div>
+</div>

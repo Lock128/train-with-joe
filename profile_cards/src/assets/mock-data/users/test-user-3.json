@@ -1,0 +1,249 @@
+{
+  "userId": "test-user-3",
+  "displayName": "Emma Rodriguez",
+  "joinDate": "2024-03-10T14:45:00Z",
+  "metrics": {
+    "totalPosts": 156,
+    "connectedPlatforms": 3,
+    "currentStreak": 7,
+    "longestStreak": 21,
+    "totalAIUsage": 98,
+    "aiPostGeneration": 45,
+    "aiTextEnhancement": 32,
+    "aiScheduling": 15,
+    "aiTagSuggestion": 6
+  },
+  "recentPosts": [
+    {
+      "postId": "post-201",
+      "title": "Content Strategy",
+      "content": "Consistency beats perfection every time. Show up, create value, and watch your audience grow.",
+      "publishedAt": "2024-11-09T10:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567890",
+          "handle": "@emmarodriguez"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:3234567890",
+          "handle": "emma-rodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-202",
+      "title": "Marketing Insights",
+      "content": "The best marketing doesn't feel like marketing. It feels like a conversation with a friend.",
+      "publishedAt": "2024-11-08T14:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567891",
+          "handle": "@emmarodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-203",
+      "title": "Brand Building",
+      "content": "Your personal brand is what people say about you when you're not in the room. Make it count!",
+      "publishedAt": "2024-11-07T11:15:00Z",
+      "platforms": [
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:3234567891",
+          "handle": "emma-rodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-204",
+      "title": "Social Media Tips",
+      "content": "3 tips for better social media engagement: 1) Ask questions 2) Share stories 3) Be authentic",
+      "publishedAt": "2024-11-06T16:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567892",
+          "handle": "@emmarodriguez"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@emmarodriguez/post/xyz989",
+          "handle": "@emmarodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-205",
+      "title": "Creative Process",
+      "content": "My creative process: coffee, brainstorm, more coffee, create, even more coffee. ☕",
+      "publishedAt": "2024-11-05T08:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567893",
+          "handle": "@emmarodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-206",
+      "title": "Audience Growth",
+      "content": "Hit 5,000 followers today! Thank you for being part of this community. Let's keep growing together!",
+      "publishedAt": "2024-11-04T12:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567894",
+          "handle": "@emmarodriguez"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:3234567892",
+          "handle": "emma-rodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-207",
+      "title": "Content Calendar",
+      "content": "Planning content in advance has been a game-changer. Less stress, more consistency, better results.",
+      "publishedAt": "2024-11-03T09:30:00Z",
+      "platforms": [
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:3234567893",
+          "handle": "emma-rodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-208",
+      "title": "Storytelling Power",
+      "content": "Facts tell, but stories sell. Master the art of storytelling and watch your impact multiply.",
+      "publishedAt": "2024-11-02T15:15:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567895",
+          "handle": "@emmarodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-209",
+      "title": "Engagement Strategy",
+      "content": "Engagement isn't about likes and shares. It's about building real connections with real people.",
+      "publishedAt": "2024-11-01T10:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567896",
+          "handle": "@emmarodriguez"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@emmarodriguez/post/xyz990",
+          "handle": "@emmarodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-210",
+      "title": "Content Repurposing",
+      "content": "One idea, multiple formats. That's the secret to maximizing your content's reach and impact.",
+      "publishedAt": "2024-10-31T13:00:00Z",
+      "platforms": [
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:3234567894",
+          "handle": "emma-rodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-211",
+      "title": "Authenticity Wins",
+      "content": "In a world of filters and facades, authenticity is your superpower. Be real, be you.",
+      "publishedAt": "2024-10-30T11:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567897",
+          "handle": "@emmarodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-212",
+      "title": "Video Content",
+      "content": "Started creating video content and the engagement is incredible! Don't be afraid to try new formats.",
+      "publishedAt": "2024-10-29T14:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567898",
+          "handle": "@emmarodriguez"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:3234567895",
+          "handle": "emma-rodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-213",
+      "title": "Community First",
+      "content": "Building a community is more valuable than building an audience. Focus on connection, not just numbers.",
+      "publishedAt": "2024-10-28T09:15:00Z",
+      "platforms": [
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:3234567896",
+          "handle": "emma-rodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-214",
+      "title": "Content Ideas",
+      "content": "Never run out of content ideas again! Here's my simple system for endless inspiration.",
+      "publishedAt": "2024-10-27T16:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567899",
+          "handle": "@emmarodriguez"
+        }
+      ]
+    },
+    {
+      "postId": "post-215",
+      "title": "Weekend Reflection",
+      "content": "Reflecting on this week's content performance. Some wins, some lessons. Always learning and improving!",
+      "publishedAt": "2024-10-26T17:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/emmarodriguez/status/3234567900",
+          "handle": "@emmarodriguez"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@emmarodriguez/post/xyz991",
+          "handle": "@emmarodriguez"
+        }
+      ]
+    }
+  ],
+  "rankings": {
+    "postRank": 12,
+    "aiUsageRank": 18
+  },
+  "lastUpdated": "2024-11-10T02:00:00Z",
+  "profileCardVersion": "1.0"
+}

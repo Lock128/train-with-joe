@@ -1,0 +1,195 @@
+<!-- Feature Matrix Component Template -->
+<!-- Implements requirements 3.2, 3.4, 3.5 for responsive feature comparison -->
+
+<div class="feature-matrix-container">
+  <!-- Matrix Header -->
+  <div class="matrix-header">
+    <h3 class="matrix-title">Feature Comparison</h3>
+    <p class="matrix-subtitle">Compare features across social media management platforms</p>
+  </div>
+
+  <!-- Responsive Feature Matrix Table -->
+  <div class="matrix-wrapper" [class.has-tooltip]="activeTooltip">
+    <div class="matrix-scroll-container">
+      <table class="feature-matrix-table" role="table" aria-label="Feature comparison matrix">
+        <!-- Table Header -->
+        <thead>
+          <tr>
+            <th class="feature-column-header" scope="col">
+              <span class="header-text">Features</span>
+            </th>
+            <!-- Nexus Share Column (if highlighting enabled) -->
+            <th *ngIf="highlightNexusShare" 
+                class="competitor-column-header nexus-share-header" 
+                scope="col">
+              <div class="competitor-header-content">
+                <span class="competitor-name">Nexus Share</span>
+                <span class="competitor-badge" aria-label="Our platform">Our Platform</span>
+              </div>
+            </th>
+            <!-- Competitor Columns -->
+            <th *ngFor="let competitor of competitors; trackBy: trackByCompetitor" 
+                class="competitor-column-header" 
+                scope="col">
+              <div class="competitor-header-content">
+                <img [src]="competitor.logo" 
+                     [alt]="competitor.name + ' logo'" 
+                     class="competitor-logo"
+                     loading="lazy">
+                <span class="competitor-name">{{ competitor.name }}</span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+
+        <!-- Table Body -->
+        <tbody>
+          <tr *ngFor="let feature of featureDefinitions; trackBy: trackByFeature" 
+              class="feature-row"
+              [class.nexus-advantage]="highlightNexusShare && isNexusShareAdvantage(feature.key)">
+            
+            <!-- Feature Name Column -->
+            <td class="feature-name-cell" scope="row">
+              <div class="feature-name-content">
+                <span class="feature-name">{{ feature.displayName }}</span>
+                <!-- Tooltip Trigger -->
+                <button *ngIf="showTooltips"
+                        class="tooltip-trigger"
+                        type="button"
+                        [attr.aria-label]="'Learn more about ' + feature.displayName"
+                        [attr.aria-describedby]="'tooltip-' + feature.key"
+                        (mouseenter)="showTooltip(feature.key, $event)"
+                        (mouseleave)="hideTooltip()"
+                        (focus)="showTooltip(feature.key, $event)"
+                        (blur)="hideTooltip()"
+                        (keydown.escape)="hideTooltip()">
+                  <span class="tooltip-icon" aria-hidden="true">?</span>
+                </button>
+              </div>
+              
+              <!-- Tooltip Content -->
+              <div *ngIf="activeTooltip === feature.key" 
+                   [id]="'tooltip-' + feature.key"
+                   class="tooltip-content"
+                   role="tooltip"
+                   [attr.aria-live]="'polite'"
+                   (mouseenter)="keepTooltipVisible()"
+                   (mouseleave)="hideTooltip()">
+                <div class="tooltip-arrow" aria-hidden="true"></div>
+                <div class="tooltip-text">
+                  <strong>{{ feature.displayName }}</strong>
+                  <p>{{ feature.description }}</p>
+                </div>
+              </div>
+            </td>
+
+            <!-- Nexus Share Feature Status -->
+            <td *ngIf="highlightNexusShare" 
+                class="feature-status-cell nexus-share-cell"
+                [class]="getFeatureStatusClass(getNexusShareFeatureStatus(feature.key))">
+              <div class="feature-status-content">
+                <span class="feature-icon" 
+                      [attr.aria-label]="getFeatureStatusLabel(getNexusShareFeatureStatus(feature.key))">
+                  {{ getFeatureStatusIcon(getNexusShareFeatureStatus(feature.key)) }}
+                </span>
+                <span class="feature-status-text sr-only">
+                  {{ getFeatureStatusLabel(getNexusShareFeatureStatus(feature.key)) }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Competitor Feature Status -->
+            <td *ngFor="let competitor of competitors; trackBy: trackByCompetitor" 
+                class="feature-status-cell"
+                [class]="getFeatureStatusClass(competitor.features[feature.key])">
+              <div class="feature-status-content">
+                <span class="feature-icon" 
+                      [attr.aria-label]="getFeatureStatusLabel(competitor.features[feature.key])">
+                  {{ getFeatureStatusIcon(competitor.features[feature.key]) }}
+                </span>
+                <span class="feature-status-text sr-only">
+                  {{ getFeatureStatusLabel(competitor.features[feature.key]) }}
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="matrix-legend">
+    <h4 class="legend-title">Legend</h4>
+    <div class="legend-items">
+      <div class="legend-item">
+        <span class="legend-icon feature-status-full" aria-hidden="true">✓</span>
+        <span class="legend-text">Full Support</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-icon feature-status-partial" aria-hidden="true">◐</span>
+        <span class="legend-text">Partial Support</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-icon feature-status-premium" aria-hidden="true">★</span>
+        <span class="legend-text">Premium Feature</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-icon feature-status-none" aria-hidden="true">✗</span>
+        <span class="legend-text">Not Supported</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile-Friendly Alternative View -->
+  <div class="mobile-matrix" aria-label="Mobile feature comparison">
+    <div *ngFor="let feature of featureDefinitions; trackBy: trackByFeature" 
+         class="mobile-feature-group">
+      <div class="mobile-feature-header">
+        <h4 class="mobile-feature-name">{{ feature.displayName }}</h4>
+        <p class="mobile-feature-description">{{ feature.description }}</p>
+      </div>
+      
+      <div class="mobile-feature-comparisons">
+        <!-- Nexus Share Mobile -->
+        <div *ngIf="highlightNexusShare" 
+             class="mobile-competitor nexus-share-mobile"
+             [class]="getFeatureStatusClass(getNexusShareFeatureStatus(feature.key))">
+          <div class="mobile-competitor-header">
+            <span class="mobile-competitor-name">Nexus Share</span>
+            <span class="mobile-competitor-badge">Our Platform</span>
+          </div>
+          <div class="mobile-feature-status">
+            <span class="mobile-feature-icon">
+              {{ getFeatureStatusIcon(getNexusShareFeatureStatus(feature.key)) }}
+            </span>
+            <span class="mobile-feature-label">
+              {{ getFeatureStatusLabel(getNexusShareFeatureStatus(feature.key)) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Competitors Mobile -->
+        <div *ngFor="let competitor of competitors; trackBy: trackByCompetitor" 
+             class="mobile-competitor"
+             [class]="getFeatureStatusClass(competitor.features[feature.key])">
+          <div class="mobile-competitor-header">
+            <img [src]="competitor.logo" 
+                 [alt]="competitor.name + ' logo'" 
+                 class="mobile-competitor-logo"
+                 loading="lazy">
+            <span class="mobile-competitor-name">{{ competitor.name }}</span>
+          </div>
+          <div class="mobile-feature-status">
+            <span class="mobile-feature-icon">
+              {{ getFeatureStatusIcon(competitor.features[feature.key]) }}
+            </span>
+            <span class="mobile-feature-label">
+              {{ getFeatureStatusLabel(competitor.features[feature.key]) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,378 @@
+<div class="overview-container">
+  <header class="hero-section" role="banner">
+    <div class="logo-section">
+      <img src="./assets/images/your-product-logo.png" alt="Your Product" class="logo">
+    </div>
+    <h1 id="main-heading">Compare Your Product with Leading Social Media Management Tools</h1>
+    <p class="hero-subtitle" aria-describedby="main-heading">
+      See how Your Product stacks up against other popular platforms.
+    </p>
+  </header>
+  
+  <!-- Search and Filter Section -->
+  <section class="search-filter-section" role="search" aria-labelledby="search-heading">
+    <h2 id="search-heading" class="sr-only">Search and Filter Competitors</h2>
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <label for="competitor-search" class="sr-only">Search competitors and features</label>
+        <input 
+          id="competitor-search"
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="onSearchChange()"
+          placeholder="Search competitors, features, or capabilities..."
+          class="search-input"
+          aria-label="Search competitors and features"
+          aria-describedby="search-results-summary">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+      </div>
+      <button 
+        (click)="toggleFilters()" 
+        class="filter-toggle-button"
+        [class.active]="showFilters"
+        [attr.aria-expanded]="showFilters"
+        aria-controls="filter-panel"
+        aria-label="Toggle filters">
+        <span class="filter-icon" aria-hidden="true">⚙️</span>
+        Filters
+        <span class="filter-arrow" [class.rotated]="showFilters" aria-hidden="true">▼</span>
+      </button>
+    </div>
+
+    <div id="filter-panel" 
+         class="filter-panel" 
+         [class.show]="showFilters"
+         [attr.aria-hidden]="!showFilters"
+         role="region"
+         aria-labelledby="filter-heading">
+      <h3 id="filter-heading" class="sr-only">Filter Options</h3>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="price-range">Price Range:</label>
+          <select 
+            id="price-range"
+            [(ngModel)]="selectedPriceRange" 
+            (change)="onPriceRangeChange()"
+            class="filter-select"
+            aria-describedby="price-range-help">
+            <option *ngFor="let range of priceRanges" [value]="range.value">
+              {{ range.label }}
+            </option>
+          </select>
+          <div id="price-range-help" class="sr-only">Filter competitors by their pricing range</div>
+        </div>
+
+        <div class="filter-group">
+          <label for="feature-category">Feature Category:</label>
+          <select 
+            id="feature-category"
+            [(ngModel)]="selectedFeatureCategory" 
+            (change)="onFeatureCategoryChange()"
+            class="filter-select"
+            aria-describedby="feature-category-help">
+            <option *ngFor="let category of featureCategories" [value]="category.value">
+              {{ category.label }}
+            </option>
+          </select>
+          <div id="feature-category-help" class="sr-only">Filter competitors by feature categories</div>
+        </div>
+
+        <div class="filter-actions">
+          <button (click)="clearFilters()" 
+                  class="clear-filters-button"
+                  aria-label="Clear all filters">
+            Clear All
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="search-results-summary" 
+         class="results-summary" 
+         *ngIf="!loading && !error"
+         role="status"
+         aria-live="polite">
+      <p>
+        Showing {{ getFilteredCompetitorsCount() }} of {{ getTotalCompetitorsCount() }} competitors
+        <span *ngIf="searchTerm || selectedPriceRange !== 'all' || selectedFeatureCategory !== 'all'">
+          (filtered)
+        </span>
+      </p>
+    </div>
+  </section>
+  
+  <!-- Routing Error Message -->
+  <div *ngIf="routingError" 
+       class="routing-error-message" 
+       role="alert" 
+       aria-live="assertive">
+    <div class="error-content">
+      <span class="error-icon" aria-hidden="true">⚠️</span>
+      <p>{{ routingError }}</p>
+      <button (click)="dismissRoutingError()" 
+              class="dismiss-button"
+              aria-label="Dismiss error message">×</button>
+    </div>
+  </div>
+  
+  <main class="comparison-content">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state" role="status" aria-live="polite">
+      <div class="skeleton-container">
+        <!-- Skeleton for search and filters -->
+        <div class="skeleton-search">
+          <div class="skeleton-input"></div>
+          <div class="skeleton-button"></div>
+        </div>
+        
+        <!-- Skeleton for feature matrix -->
+        <div class="skeleton-table">
+          <div class="skeleton-table-header">
+            <div class="skeleton-cell" *ngFor="let i of [1,2,3,4,5]"></div>
+          </div>
+          <div class="skeleton-table-row" *ngFor="let i of [1,2,3,4,5,6,7,8]">
+            <div class="skeleton-cell" *ngFor="let j of [1,2,3,4,5]"></div>
+          </div>
+        </div>
+        
+        <!-- Skeleton for pricing cards -->
+        <div class="skeleton-pricing">
+          <div class="skeleton-pricing-card" *ngFor="let i of [1,2,3,4]">
+            <div class="skeleton-pricing-header"></div>
+            <div class="skeleton-pricing-content">
+              <div class="skeleton-price"></div>
+              <div class="skeleton-features">
+                <div class="skeleton-feature" *ngFor="let j of [1,2,3,4]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="loading-text">Loading comparison data...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="error-state" role="alert">
+      <h3>Unable to Load Comparison Data</h3>
+      <p>{{ error }}</p>
+      <button (click)="retryLoad()" class="retry-button">Try Again</button>
+    </div>
+
+    <!-- Feature Comparison Matrix -->
+    <section *ngIf="!loading && !error" class="feature-matrix-section">
+      <h2 id="feature-comparison-heading">Feature Comparison</h2>
+      <div class="table-container">
+        <table class="feature-matrix" 
+               role="table" 
+               aria-labelledby="feature-comparison-heading"
+               aria-describedby="feature-matrix-description">
+          <caption id="feature-matrix-description" class="sr-only">
+            Comparison of features between Your Product and competitor social media management tools
+          </caption>
+          <thead>
+            <tr>
+              <th class="feature-header" scope="col">Features</th>
+              <th class="nexus-header" scope="col">
+                <div class="nexus-brand">
+                  <strong>Your Product</strong>
+                  <span class="highlight-badge" aria-label="Best value option">Best Value</span>
+                </div>
+              </th>
+              <th *ngFor="let competitor of filteredCompetitors" scope="col">
+                <a [routerLink]="['/', competitor.slug]" 
+                   class="competitor-link"
+                   (click)="trackCompetitorClick(competitor.name)"
+                   [attr.aria-label]="'View detailed comparison with ' + competitor.name">
+                  <img *ngIf="competitor.logo" 
+                       [src]="competitor.logo" 
+                       [alt]="competitor.name + ' logo'"
+                       class="competitor-logo"
+                       loading="lazy"
+                       width="24"
+                       height="24">
+                  {{ competitor.name }}
+                </a>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let feature of featureList">
+              <th class="feature-name" scope="row">{{ feature.displayName }}</th>
+              <td class="nexus-cell" 
+                  [ngClass]="getFeatureClass(yourProductFeatures[feature.key])"
+                  [attr.aria-label]="'Your Product: ' + getFeatureText(yourProductFeatures[feature.key])">
+                <span class="feature-icon" aria-hidden="true">{{ getFeatureIcon(yourProductFeatures[feature.key]) }}</span>
+                <span class="feature-text sr-only">{{ getFeatureText(yourProductFeatures[feature.key]) }}</span>
+              </td>
+              <td *ngFor="let competitor of filteredCompetitors" 
+                  class="competitor-cell" 
+                  [ngClass]="getFeatureClass(competitor.features[feature.key])"
+                  [attr.aria-label]="competitor.name + ': ' + getFeatureText(competitor.features[feature.key])">
+                <span class="feature-icon" aria-hidden="true">{{ getFeatureIcon(competitor.features[feature.key]) }}</span>
+                <span class="feature-text sr-only">{{ getFeatureText(competitor.features[feature.key]) }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Detailed Comparison Links -->
+      <div class="detailed-comparison-links">
+        <h3>Get Detailed Comparisons</h3>
+        <div class="comparison-links-grid" role="list">
+          <a *ngFor="let competitor of filteredCompetitors" 
+             [routerLink]="['/', competitor.slug]" 
+             class="detailed-comparison-link"
+             role="listitem"
+             (click)="trackCompetitorClick(competitor.name)"
+             [attr.aria-label]="'View detailed comparison between Your Product and ' + competitor.name">
+            <div class="link-content">
+              <h4>Your Product vs {{ competitor.name }}</h4>
+              <p>See detailed feature comparison, pricing analysis, and user testimonials</p>
+              <span class="link-arrow" aria-hidden="true">→</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Comparison -->
+    <section *ngIf="!loading && !error" class="pricing-section">
+      <h2 id="pricing-comparison-heading">Pricing Comparison</h2>
+      <div class="pricing-grid" role="list" aria-labelledby="pricing-comparison-heading">
+        <!-- Your Product Pricing -->
+        <div class="pricing-card nexus-pricing" role="listitem">
+          <div class="pricing-header">
+            <h3>Your Product</h3>
+            <span class="highlight-badge" aria-label="Best value option">Best Value</span>
+          </div>
+          <div class="pricing-tiers">
+            <div *ngFor="let tier of yourProductData?.pricing" class="pricing-tier">
+              <div class="tier-header">
+                <h4>{{ tier.name }}</h4>
+                <div class="price" [attr.aria-label]="tier.name + ' plan costs ' + tier.price + ' euros per month'">
+                  <span class="currency" aria-hidden="true">€</span>
+                  <span class="amount">{{ tier.price }}</span>
+                  <span class="period">/month</span>
+                </div>
+              </div>
+              <ul class="features-list" [attr.aria-label]="'Features included in ' + tier.name + ' plan'">
+                <li *ngFor="let feature of tier.features" class="feature-item">
+                  <span class="check-icon" aria-hidden="true">✓</span>
+                  {{ feature }}
+                </li>
+              </ul>
+              <div *ngIf="tier.limitations.length > 0" class="limitations">
+                <p class="limitations-header">Limitations:</p>
+                <ul [attr.aria-label]="'Limitations of ' + tier.name + ' plan'">
+                  <li *ngFor="let limitation of tier.limitations">{{ limitation }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Competitor Pricing -->
+        <div *ngFor="let competitor of filteredCompetitors" class="pricing-card competitor-pricing" role="listitem">
+          <div class="pricing-header">
+            <h3>
+              <a [routerLink]="['/', competitor.slug]" 
+                 class="competitor-pricing-link"
+                 (click)="trackPricingView(competitor.name)"
+                 [attr.aria-label]="'View detailed pricing comparison with ' + competitor.name">
+                {{ competitor.name }}
+              </a>
+            </h3>
+          </div>
+          <div class="pricing-tiers">
+            <div *ngFor="let tier of getTopPricingTiers(competitor)" class="pricing-tier">
+              <div class="tier-header">
+                <h4>{{ tier.name }}</h4>
+                <div class="price" [attr.aria-label]="tier.name + ' plan costs ' + tier.price + ' euros per month'">
+                  <span class="currency" aria-hidden="true">€</span>
+                  <span class="amount">{{ tier.price }}</span>
+                  <span class="period">/month</span>
+                </div>
+              </div>
+              <ul class="features-list" [attr.aria-label]="'Features included in ' + competitor.name + ' ' + tier.name + ' plan'">
+                <li *ngFor="let feature of getTopFeatures(tier.features)" class="feature-item">
+                  {{ feature }}
+                </li>
+              </ul>
+              <div *ngIf="tier.limitations.length > 0" class="limitations">
+                <p class="limitations-header">Limitations:</p>
+                <ul [attr.aria-label]="'Limitations of ' + competitor.name + ' ' + tier.name + ' plan'">
+                  <li *ngFor="let limitation of getTopLimitations(tier.limitations)">{{ limitation }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="pricing-card-footer">
+            <a [routerLink]="['/', competitor.slug]" 
+               class="detailed-pricing-link"
+               (click)="trackPricingView(competitor.name)"
+               [attr.aria-label]="'View detailed pricing comparison with ' + competitor.name">
+              View Detailed Comparison →
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cost Savings Highlight -->
+      <div class="cost-savings">
+        <h3 id="cost-savings-heading">💰 Save Money with Your Product</h3>
+        <div class="savings-grid" role="list" aria-labelledby="cost-savings-heading">
+          <div *ngFor="let competitor of filteredCompetitors" 
+               class="savings-item"
+               role="listitem"
+               tabindex="0"
+               (click)="trackSavingsCalculation(competitor.name)"
+               (keydown.enter)="trackSavingsCalculation(competitor.name)"
+               (keydown.space)="trackSavingsCalculation(competitor.name)"
+               [attr.aria-label]="'Save up to ' + calculateSavings(competitor) + ' euros per month compared to ' + competitor.name">
+            <span class="competitor-name">vs {{ competitor.name }}:</span>
+            <span class="savings-amount">Save up to €{{ calculateSavings(competitor) }}/month</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section *ngIf="!loading && !error" class="cta-section">
+      <h2>Ready to Get Started?</h2>
+      <p class="cta-subtitle">Join thousands of users who've made the switch to Your Product</p>
+      <div class="cta-buttons" role="group" aria-label="Call to action buttons">
+        <a href="https://example.com/join/" 
+           class="cta-button primary"
+           (click)="trackConversionClick('free_trial_click')"
+           aria-label="Start your free trial with Your Product">
+          Try Your Product Free
+        </a>
+        <a href="https://example.com/pricing/" 
+           class="cta-button secondary"
+           (click)="trackConversionClick('pricing_page_click')"
+           aria-label="View full pricing details">
+          View Full Pricing
+        </a>
+      </div>
+      <div class="cta-features" role="list" aria-label="Key features">
+        <div class="cta-feature" role="listitem">
+          <span class="feature-icon" aria-hidden="true">🚀</span>
+          <span>AI-Powered Content</span>
+        </div>
+        <div class="cta-feature" role="listitem">
+          <span class="feature-icon" aria-hidden="true">💰</span>
+          <span>Free Plan</span>
+        </div>
+        <div class="cta-feature" role="listitem">
+          <span class="feature-icon" aria-hidden="true">🔒</span>
+          <span>Secure OAuth2</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Data Freshness Summary (Bottom) -->
+  <footer class="data-freshness-footer">
+    <app-data-freshness [showOverallSummary]="true"></app-data-freshness>
+  </footer>
+</div>

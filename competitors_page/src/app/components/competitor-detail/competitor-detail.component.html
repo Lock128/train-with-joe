@@ -1,0 +1,312 @@
+<div class="detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading competitor comparison...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <h2>Competitor Not Found</h2>
+    <p>{{ error }}</p>
+    <button (click)="goToOverview()" class="cta-button">View All Comparisons</button>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading && !error && competitor">
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb">
+      <a routerLink="/" class="breadcrumb-link">
+        <span class="breadcrumb-icon">←</span>
+        <span>All Comparisons</span>
+      </a>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">{{ competitor.name }} vs Your Product</span>
+    </nav>
+    
+    <!-- Data Freshness Information -->
+    <div class="data-freshness-info">
+      <p class="freshness-note">
+        <span class="freshness-icon">📅</span>
+        Last updated: {{ competitor.lastUpdated || 'Recently' }}
+      </p>
+    </div>
+    
+    <!-- Header Section -->
+    <header class="competitor-header">
+      <div class="header-content">
+        <div class="competitor-info">
+          <img *ngIf="competitor.logo" [src]="competitor.logo" [alt]="competitor.name + ' logo'" class="competitor-logo">
+          <div class="competitor-text">
+            <h1>Your Product vs {{ competitor.name }}</h1>
+            <p class="competitor-tagline">{{ competitor.tagline }}</p>
+            <p class="header-subtitle">
+              Detailed comparison between Your Product and {{ competitor.name }}
+            </p>
+          </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+          <div class="stat-item">
+            <span class="stat-label">Monthly Savings</span>
+            <span class="stat-value">${{ calculateMonthlySavings() }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Annual Savings</span>
+            <span class="stat-value">${{ calculateAnnualSavings() }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    
+    <main class="detail-content">
+      <!-- Feature-by-Feature Comparison -->
+      <section class="feature-comparison-section">
+        <h2>Feature-by-Feature Comparison</h2>
+        <div class="feature-comparison-table">
+          <div class="table-header">
+            <div class="feature-column">Feature</div>
+            <div class="nexus-column">Your Product</div>
+            <div class="competitor-column">{{ competitor.name }}</div>
+          </div>
+          
+          <div class="table-body">
+            <div *ngFor="let feature of featureDisplayNames | keyvalue" class="feature-row">
+              <div class="feature-name">{{ feature.value }}</div>
+              
+              <div class="nexus-feature">
+                <span [class]="getYourProductFeatureStatus(feature.key).class" class="feature-status">
+                  {{ getYourProductFeatureStatus(feature.key).icon }}
+                </span>
+                <span class="feature-text">{{ getYourProductFeatureStatus(feature.key).text }}</span>
+              </div>
+              
+              <div class="competitor-feature">
+                <span [class]="getCompetitorFeatureStatus(feature.key).class" class="feature-status">
+                  {{ getCompetitorFeatureStatus(feature.key).icon }}
+                </span>
+                <span class="feature-text">{{ getCompetitorFeatureStatus(feature.key).text }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Unique Your Product Features -->
+        <div class="unique-features" *ngIf="yourProduct">
+          <h3>Unique Your Product Advantages</h3>
+          <ul class="advantages-list">
+            <li *ngFor="let feature of yourProduct.uniqueFeatures">{{ feature }}</li>
+          </ul>
+        </div>
+      </section>
+      
+      <!-- Pricing Analysis -->
+      <section class="pricing-analysis-section">
+        <h2>Pricing Analysis & Cost Savings</h2>
+        
+        <div class="pricing-comparison">
+          <div class="pricing-table">
+            <h3>{{ competitor.name }} Pricing</h3>
+            <div class="pricing-tiers">
+              <div *ngFor="let tier of competitor.pricing" class="pricing-tier">
+                <div class="tier-header">
+                  <h4>{{ tier.name }}</h4>
+                  <div class="tier-price">
+                    <span class="price">${{ tier.price }}</span>
+                    <span class="billing">/{{ tier.billing }}</span>
+                  </div>
+                </div>
+                <div class="tier-features">
+                  <h5>Features:</h5>
+                  <ul>
+                    <li *ngFor="let feature of tier.features">{{ feature }}</li>
+                  </ul>
+                </div>
+                <div class="tier-limitations" *ngIf="tier.limitations.length > 0">
+                  <h5>Limitations:</h5>
+                  <ul>
+                    <li *ngFor="let limitation of tier.limitations">{{ limitation }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="pricing-table nexus-pricing" *ngIf="yourProduct">
+            <h3>Your Product Pricing</h3>
+            <div class="pricing-tiers">
+              <div *ngFor="let tier of yourProduct.pricing" class="pricing-tier nexus-tier">
+                <div class="tier-header">
+                  <h4>{{ tier.name }}</h4>
+                  <div class="tier-price">
+                    <span class="price">${{ tier.price }}</span>
+                    <span class="billing">/{{ tier.billing }}</span>
+                  </div>
+                </div>
+                <div class="tier-features">
+                  <h5>Features:</h5>
+                  <ul>
+                    <li *ngFor="let feature of tier.features">{{ feature }}</li>
+                  </ul>
+                </div>
+                <div class="tier-limitations" *ngIf="tier.limitations.length > 0">
+                  <h5>Limitations:</h5>
+                  <ul>
+                    <li *ngFor="let limitation of tier.limitations">{{ limitation }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Cost Savings Highlight -->
+        <div class="savings-highlight" *ngIf="calculateMonthlySavings() > 0">
+          <h3>Your Potential Savings</h3>
+          <div class="savings-stats">
+            <div class="savings-item">
+              <span class="savings-amount">${{ calculateMonthlySavings() }}</span>
+              <span class="savings-period">per month</span>
+            </div>
+            <div class="savings-item">
+              <span class="savings-amount">${{ calculateAnnualSavings() }}</span>
+              <span class="savings-period">per year</span>
+            </div>
+          </div>
+          <p class="savings-description">
+            Switch to Your Product and save money while getting more features, including AI content enhancement 
+            and advanced mention resolution that {{ competitor.name }} doesn't offer.
+          </p>
+        </div>
+      </section>
+      
+      <!-- Pros and Cons Comparison -->
+      <section class="pros-cons-section">
+        <h2>Honest Comparison</h2>
+        <div class="comparison-grid">
+          <div class="competitor-analysis">
+            <h3>{{ competitor.name }}</h3>
+            <div class="pros-cons">
+              <div class="pros">
+                <h4>Strengths</h4>
+                <ul>
+                  <li *ngFor="let pro of competitor.pros">{{ pro }}</li>
+                </ul>
+              </div>
+              <div class="cons">
+                <h4>Areas for Improvement</h4>
+                <ul>
+                  <li *ngFor="let con of competitor.cons">{{ con }}</li>
+                </ul>
+              </div>
+            </div>
+            <p class="target-audience"><strong>Best for:</strong> {{ competitor.targetAudience }}</p>
+          </div>
+          
+          <div class="nexus-analysis">
+            <h3>Your Product</h3>
+            <div class="pros-cons">
+              <div class="pros">
+                <h4>Strengths</h4>
+                <ul>
+                  <li>AI-powered content enhancement</li>
+                  <li>Advanced mention resolution</li>
+                  <li>Generous free tier</li>
+                  <li>Modern, intuitive interface</li>
+                  <li>Competitive pricing</li>
+                  <li>Multi-platform OAuth2 security</li>
+                </ul>
+              </div>
+              <div class="cons">
+                <h4>Areas for Improvement</h4>
+                <ul>
+                  <li>Newer platform (less established)</li>
+                  <li>Smaller user community</li>
+                  <li>Limited third-party integrations (growing)</li>
+                </ul>
+              </div>
+            </div>
+            <p class="target-audience"><strong>Best for:</strong> Businesses and creators who want AI-enhanced content and modern social media management</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Customer Testimonials -->
+      <section class="testimonials-section">
+        <h2>What Users Say About Switching</h2>
+        <div class="testimonials-grid">
+          <div *ngFor="let testimonial of getTestimonials()" class="testimonial-card">
+            <blockquote>
+              "{{ testimonial.quote }}"
+            </blockquote>
+            <div class="testimonial-author">
+              <strong>{{ testimonial.name }}</strong>
+              <span>{{ testimonial.role }} at {{ testimonial.company }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Migration Guide -->
+        <div class="migration-guide">
+          <h3>Ready to Make the Switch?</h3>
+          <div class="migration-steps">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h4>Sign up for Your Product</h4>
+                <p>Create your free account and connect your social media profiles</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h4>Import your content</h4>
+                <p>Use our migration tools to transfer your scheduled posts and content</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h4>Experience the difference</h4>
+                <p>Start using AI content enhancement and advanced features immediately</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Call to Action -->
+      <section class="cta-section">
+        <h2>Ready to Switch to Your Product?</h2>
+        <p>Join thousands of users who've already made the switch from {{ competitor.name }} to Your Product.</p>
+        <div class="cta-buttons">
+          <a href="https://nexus-share.com/join/" class="cta-button primary">Start Your Free Trial</a>
+          <a routerLink="/" class="cta-button secondary">Compare All Tools</a>
+        </div>
+        <p class="cta-note">No credit card required • Free tier available • Cancel anytime</p>
+      </section>
+      
+      <!-- Related Comparisons -->
+      <section class="related-comparisons-section">
+        <h2>Compare Other Tools</h2>
+        <p>See how Your Product compares to other popular social media management platforms:</p>
+        <div class="related-links">
+          <a *ngFor="let otherCompetitor of getOtherCompetitors()" 
+             [routerLink]="['/', otherCompetitor.slug]" 
+             class="related-comparison-link">
+            <div class="related-link-content">
+              <h4>Your Product vs {{ otherCompetitor.name }}</h4>
+              <p>{{ otherCompetitor.tagline }}</p>
+              <span class="link-arrow">→</span>
+            </div>
+          </a>
+        </div>
+        <div class="back-to-overview">
+          <a routerLink="/" class="overview-link">
+            View Complete Comparison Overview
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>

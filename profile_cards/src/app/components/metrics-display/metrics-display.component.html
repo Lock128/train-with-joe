@@ -1,0 +1,110 @@
+<div class="metrics-display">
+  <!-- Primary Metrics -->
+  <div class="metrics-grid">
+    <div class="metric-card primary">
+      <div class="metric-icon">📝</div>
+      <div class="metric-content">
+        <div class="metric-value">{{ metrics.uniquePosts }}</div>
+        <div class="metric-label">Unique Posts</div>
+        <div class="metric-rank" *ngIf="rankings.uniquePostsRank">
+          #{{ rankings.uniquePostsRank }} on leaderboard
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card primary">
+      <div class="metric-icon">🌐</div>
+      <div class="metric-content">
+        <div class="metric-value">{{ metrics.totalPostsAcrossNetworks }}</div>
+        <div class="metric-label">Total Posts</div>
+        <div class="metric-rank" *ngIf="rankings.totalPostsRank">
+          #{{ rankings.totalPostsRank }} on leaderboard
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card primary">
+      <div class="metric-icon">🔗</div>
+      <div class="metric-content">
+        <div class="metric-value">{{ metrics.connectedPlatforms }}</div>
+        <div class="metric-label">Connected Platforms</div>
+      </div>
+    </div>
+
+    <div class="metric-card primary">
+      <div class="metric-icon">🔥</div>
+      <div class="metric-content">
+        <div class="metric-value">{{ metrics.currentStreak }}</div>
+        <div class="metric-label">Current Streak</div>
+        <div class="metric-sublabel">{{ metrics.longestStreak }} day longest</div>
+      </div>
+    </div>
+
+    <div class="metric-card primary">
+      <div class="metric-icon">🤖</div>
+      <div class="metric-content">
+        <div class="metric-value">{{ metrics.totalAIUsage }}</div>
+        <div class="metric-label">AI Assists</div>
+        <div class="metric-rank" *ngIf="rankings.aiUsageRank">
+          #{{ rankings.aiUsageRank }} on leaderboard
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card primary">
+      <div class="metric-icon">🔗</div>
+      <div class="metric-content">
+        <div class="metric-value">{{ metrics.totalLinksShared }}</div>
+        <div class="metric-label">Links Shared</div>
+        <div class="metric-rank" *ngIf="rankings.linksSharedRank">
+          #{{ rankings.linksSharedRank }} on leaderboard
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card primary">
+      <div class="metric-icon">❤️</div>
+      <div class="metric-content">
+        <div class="metric-value">{{ metrics.totalLikes }}</div>
+        <div class="metric-label">Total Likes</div>
+        <div class="metric-rank" *ngIf="rankings.likesRank">
+          #{{ rankings.likesRank }} on leaderboard
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-card primary">
+      <div class="metric-icon">👁️</div>
+      <div class="metric-content">
+        <div class="metric-value">{{ metrics.totalImpressions }}</div>
+        <div class="metric-label">Total Impressions</div>
+        <div class="metric-rank" *ngIf="rankings.impressionsRank">
+          #{{ rankings.impressionsRank }} on leaderboard
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Usage Breakdown -->
+  <div class="ai-breakdown" *ngIf="metrics.totalAIUsage > 0">
+    <h3>AI Usage Breakdown</h3>
+    <div class="ai-metrics-grid">
+      <div class="ai-metric" *ngIf="metrics.aiPostGeneration > 0">
+        <span class="ai-metric-label">Post Generation</span>
+        <span class="ai-metric-value">{{ metrics.aiPostGeneration }}</span>
+      </div>
+      <div class="ai-metric" *ngIf="metrics.aiTextEnhancement > 0">
+        <span class="ai-metric-label">Text Enhancement</span>
+        <span class="ai-metric-value">{{ metrics.aiTextEnhancement }}</span>
+      </div>
+      <div class="ai-metric" *ngIf="metrics.aiScheduling > 0">
+        <span class="ai-metric-label">Intelligent Scheduling</span>
+        <span class="ai-metric-value">{{ metrics.aiScheduling }}</span>
+      </div>
+      <div class="ai-metric" *ngIf="metrics.aiTagSuggestion > 0">
+        <span class="ai-metric-label">Tag Suggestions</span>
+        <span class="ai-metric-value">{{ metrics.aiTagSuggestion }}</span>
+      </div>
+    </div>
+  </div>
+</div>

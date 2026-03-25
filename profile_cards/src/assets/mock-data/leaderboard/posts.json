@@ -1,0 +1,181 @@
+{
+  "type": "posts",
+  "generatedAt": "2024-11-10T02:00:00Z",
+  "entries": [
+    {
+      "rank": 1,
+      "userId": "test-user-2",
+      "displayName": "Michael Chen",
+      "value": 412,
+      "profileCardUrl": "/test-user-2"
+    },
+    {
+      "rank": 2,
+      "userId": "user-1001",
+      "displayName": "Alex Thompson",
+      "value": 387,
+      "profileCardUrl": "/user-1001"
+    },
+    {
+      "rank": 3,
+      "userId": "test-user-1",
+      "displayName": "Sarah Johnson",
+      "value": 247,
+      "profileCardUrl": "/test-user-1"
+    },
+    {
+      "rank": 4,
+      "userId": "user-1002",
+      "displayName": "David Kim",
+      "value": 234,
+      "profileCardUrl": "/user-1002"
+    },
+    {
+      "rank": 5,
+      "userId": "user-1003",
+      "displayName": "Lisa Martinez",
+      "value": 221,
+      "profileCardUrl": "/user-1003"
+    },
+    {
+      "rank": 6,
+      "userId": "user-1004",
+      "displayName": "James Wilson",
+      "value": 209,
+      "profileCardUrl": "/user-1004"
+    },
+    {
+      "rank": 7,
+      "userId": "user-1005",
+      "displayName": "Maria Garcia",
+      "value": 198,
+      "profileCardUrl": "/user-1005"
+    },
+    {
+      "rank": 8,
+      "userId": "user-1006",
+      "displayName": "Robert Brown",
+      "value": 187,
+      "profileCardUrl": "/user-1006"
+    },
+    {
+      "rank": 9,
+      "userId": "user-1007",
+      "displayName": "Jennifer Lee",
+      "value": 176,
+      "profileCardUrl": "/user-1007"
+    },
+    {
+      "rank": 10,
+      "userId": "user-1008",
+      "displayName": "William Taylor",
+      "value": 165,
+      "profileCardUrl": "/user-1008"
+    },
+    {
+      "rank": 11,
+      "userId": "user-1009",
+      "displayName": "Patricia Anderson",
+      "value": 159,
+      "profileCardUrl": "/user-1009"
+    },
+    {
+      "rank": 12,
+      "userId": "test-user-3",
+      "displayName": "Emma Rodriguez",
+      "value": 156,
+      "profileCardUrl": "/test-user-3"
+    },
+    {
+      "rank": 13,
+      "userId": "user-1010",
+      "displayName": "Christopher Moore",
+      "value": 148,
+      "profileCardUrl": "/user-1010"
+    },
+    {
+      "rank": 14,
+      "userId": "user-1011",
+      "displayName": "Linda Jackson",
+      "value": 142,
+      "profileCardUrl": "/user-1011"
+    },
+    {
+      "rank": 15,
+      "userId": "user-1012",
+      "displayName": "Daniel White",
+      "value": 136,
+      "profileCardUrl": "/user-1012"
+    },
+    {
+      "rank": 16,
+      "userId": "user-1013",
+      "displayName": "Barbara Harris",
+      "value": 131,
+      "profileCardUrl": "/user-1013"
+    },
+    {
+      "rank": 17,
+      "userId": "user-1014",
+      "displayName": "Matthew Martin",
+      "value": 127,
+      "profileCardUrl": "/user-1014"
+    },
+    {
+      "rank": 18,
+      "userId": "user-1015",
+      "displayName": "Susan Thompson",
+      "value": 123,
+      "profileCardUrl": "/user-1015"
+    },
+    {
+      "rank": 19,
+      "userId": "user-1016",
+      "displayName": "Joseph Garcia",
+      "value": 119,
+      "profileCardUrl": "/user-1016"
+    },
+    {
+      "rank": 20,
+      "userId": "user-1017",
+      "displayName": "Jessica Martinez",
+      "value": 115,
+      "profileCardUrl": "/user-1017"
+    },
+    {
+      "rank": 21,
+      "userId": "user-1018",
+      "displayName": "Thomas Robinson",
+      "value": 112,
+      "profileCardUrl": "/user-1018"
+    },
+    {
+      "rank": 22,
+      "userId": "user-1019",
+      "displayName": "Sarah Clark",
+      "value": 108,
+      "profileCardUrl": "/user-1019"
+    },
+    {
+      "rank": 23,
+      "userId": "user-1020",
+      "displayName": "Charles Rodriguez",
+      "value": 105,
+      "profileCardUrl": "/user-1020"
+    },
+    {
+      "rank": 24,
+      "userId": "user-1021",
+      "displayName": "Karen Lewis",
+      "value": 102,
+      "profileCardUrl": "/user-1021"
+    },
+    {
+      "rank": 25,
+      "userId": "user-1022",
+      "displayName": "Steven Walker",
+      "value": 99,
+      "profileCardUrl": "/user-1022"
+    }
+  ]
+}

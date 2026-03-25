@@ -1,0 +1,31 @@
+{
+  "leaderboardType": "impressions",
+  "entries": [
+    {
+      "rank": 1,
+      "userId": "user1",
+      "username": "TechGuru",
+      "displayName": "Tech Guru",
+      "value": 125000,
+      "avatarUrl": "https://i.pravatar.cc/150?u=user1"
+    },
+    {
+      "rank": 2,
+      "userId": "user2",
+      "username": "CodeMaster",
+      "displayName": "Code Master",
+      "value": 98500,
+      "avatarUrl": "https://i.pravatar.cc/150?u=user2"
+    },
+    {
+      "rank": 3,
+      "userId": "user3",
+      "username": "DevPro",
+      "displayName": "Dev Pro",
+      "value": 87300,
+      "avatarUrl": "https://i.pravatar.cc/150?u=user3"
+    }
+  ],
+  "totalEntries": 3,
+  "generatedAt": "2025-01-15T09:00:00Z"
+}

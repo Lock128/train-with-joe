@@ -1,0 +1,12 @@
+<header class="nav-header">
+  <div class="nav-container">
+    <div class="nav-brand" (click)="goToLeaderboard()">
+      <img src="assets/images/logo_darkmode_boring.png" alt="Nexus Share" class="brand-logo" (error)="onLogoError($event)">
+      <span class="brand-text" [class.fallback]="logoError">Nexus Share</span>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/leaderboard" routerLinkActive="active" class="nav-link">Leaderboard</a>
+      <button class="btn-cta" (click)="goToMainApp()">Get Started</button>
+    </nav>
+  </div>
+</header>

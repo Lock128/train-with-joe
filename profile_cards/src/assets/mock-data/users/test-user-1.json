@@ -1,0 +1,307 @@
+{
+  "userId": "test-user-1",
+  "displayName": "Sarah Johnson",
+  "joinDate": "2024-01-15T10:30:00Z",
+  "metrics": {
+    "uniquePosts": 42,
+    "totalPostsAcrossNetworks": 168,
+    "connectedPlatforms": 5,
+    "currentStreak": 12,
+    "longestStreak": 45,
+    "totalAIUsage": 189,
+    "aiPostGeneration": 78,
+    "aiTextEnhancement": 65,
+    "aiScheduling": 32,
+    "aiTagSuggestion": 14,
+    "totalLinksShared": 450,
+    "totalLikes": 3200,
+    "totalImpressions": 125000
+  },
+  "recentPosts": [
+    {
+      "postId": "post-1",
+      "title": "Exciting Product Launch",
+      "content": "Just launched our new feature! 🚀 Check it out and let me know what you think. This has been months in the making and I'm so proud of the team.",
+      "publishedAt": "2024-11-09T14:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567890",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:1234567890",
+          "handle": "sarah-johnson"
+        },
+        {
+          "network": "BLUESKY",
+          "url": "https://bsky.app/profile/sarahjohnson.bsky.social/post/abc123",
+          "handle": "sarahjohnson.bsky.social"
+        }
+      ]
+    },
+    {
+      "postId": "post-2",
+      "title": "Weekly Reflection",
+      "content": "Reflecting on this week's achievements. Sometimes the small wins matter most. Grateful for the journey and excited for what's ahead.",
+      "publishedAt": "2024-11-08T09:15:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567891",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@sarahjohnson/post/xyz789",
+          "handle": "@sarahjohnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-3",
+      "title": "Tech Tips Tuesday",
+      "content": "Pro tip: Always test your code in production... just kidding! 😄 Here are 5 essential testing strategies every developer should know.",
+      "publishedAt": "2024-11-07T16:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567892",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:1234567891",
+          "handle": "sarah-johnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-4",
+      "title": "Morning Motivation",
+      "content": "Good morning! Remember: progress over perfection. Every step forward counts, no matter how small.",
+      "publishedAt": "2024-11-06T07:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567893",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "BLUESKY",
+          "url": "https://bsky.app/profile/sarahjohnson.bsky.social/post/abc124",
+          "handle": "sarahjohnson.bsky.social"
+        },
+        {
+          "network": "MASTODON",
+          "url": "https://mastodon.social/@sarahjohnson/1234567890",
+          "handle": "@sarahjohnson@mastodon.social"
+        }
+      ]
+    },
+    {
+      "postId": "post-5",
+      "title": "Industry Insights",
+      "content": "The future of AI in content creation is fascinating. Here's my take on where we're heading and what it means for creators.",
+      "publishedAt": "2024-11-05T13:20:00Z",
+      "platforms": [
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:1234567892",
+          "handle": "sarah-johnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-6",
+      "title": "Weekend Plans",
+      "content": "Looking forward to a relaxing weekend! Planning to disconnect and recharge. What are your weekend plans?",
+      "publishedAt": "2024-11-04T18:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567894",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@sarahjohnson/post/xyz790",
+          "handle": "@sarahjohnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-7",
+      "title": "Product Update",
+      "content": "We've just rolled out some amazing updates based on your feedback. Thank you for helping us build something great!",
+      "publishedAt": "2024-11-03T11:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567895",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:1234567893",
+          "handle": "sarah-johnson"
+        },
+        {
+          "network": "BLUESKY",
+          "url": "https://bsky.app/profile/sarahjohnson.bsky.social/post/abc125",
+          "handle": "sarahjohnson.bsky.social"
+        }
+      ]
+    },
+    {
+      "postId": "post-8",
+      "title": "Learning Journey",
+      "content": "Today I learned something new about TypeScript generics. Never stop learning! 📚",
+      "publishedAt": "2024-11-02T15:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567896",
+          "handle": "@sarahjohnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-9",
+      "title": "Community Shoutout",
+      "content": "Huge shoutout to the amazing developer community! Your support and collaboration make everything better.",
+      "publishedAt": "2024-11-01T10:15:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567897",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:1234567894",
+          "handle": "sarah-johnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-10",
+      "title": "Productivity Hack",
+      "content": "My favorite productivity hack: time-blocking. Here's how I structure my day for maximum efficiency.",
+      "publishedAt": "2024-10-31T08:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567898",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@sarahjohnson/post/xyz791",
+          "handle": "@sarahjohnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-11",
+      "title": "Milestone Celebration",
+      "content": "Celebrating 1000 followers today! Thank you all for being part of this journey. Here's to many more milestones together! 🎉",
+      "publishedAt": "2024-10-30T17:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567899",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:1234567895",
+          "handle": "sarah-johnson"
+        },
+        {
+          "network": "BLUESKY",
+          "url": "https://bsky.app/profile/sarahjohnson.bsky.social/post/abc126",
+          "handle": "sarahjohnson.bsky.social"
+        }
+      ]
+    },
+    {
+      "postId": "post-12",
+      "title": "Behind the Scenes",
+      "content": "A peek behind the scenes of our development process. It's messy, it's chaotic, but it's real!",
+      "publishedAt": "2024-10-29T12:30:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567900",
+          "handle": "@sarahjohnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-13",
+      "title": "Inspiration Monday",
+      "content": "Starting the week with positive energy! What's one thing you're excited about this week?",
+      "publishedAt": "2024-10-28T06:45:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567901",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "THREADS",
+          "url": "https://www.threads.net/@sarahjohnson/post/xyz792",
+          "handle": "@sarahjohnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-14",
+      "title": "Tech Stack Discussion",
+      "content": "Let's talk tech stacks! What's your go-to combination for building modern web apps? Mine: React + TypeScript + Node.js",
+      "publishedAt": "2024-10-27T14:15:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567902",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "LINKEDIN",
+          "url": "https://www.linkedin.com/feed/update/urn:li:activity:1234567896",
+          "handle": "sarah-johnson"
+        }
+      ]
+    },
+    {
+      "postId": "post-15",
+      "title": "Friday Vibes",
+      "content": "TGIF! 🎊 Wrapping up a productive week. Time to celebrate the wins and learn from the challenges.",
+      "publishedAt": "2024-10-26T16:00:00Z",
+      "platforms": [
+        {
+          "network": "X",
+          "url": "https://x.com/sarahjohnson/status/1234567903",
+          "handle": "@sarahjohnson"
+        },
+        {
+          "network": "BLUESKY",
+          "url": "https://bsky.app/profile/sarahjohnson.bsky.social/post/abc127",
+          "handle": "sarahjohnson.bsky.social"
+        }
+      ]
+    }
+  ],
+  "rankings": {
+    "uniquePostsRank": 1,
+    "totalPostsRank": 1,
+    "aiUsageRank": 1,
+    "linksSharedRank": 2,
+    "likesRank": 3,
+    "impressionsRank": 5
+  },
+  "lastUpdated": "2024-11-10T02:00:00Z",
+  "profileCardVersion": "1.0"
+}

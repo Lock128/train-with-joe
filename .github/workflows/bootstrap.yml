@@ -1,0 +1,92 @@
+name: Bootstrap CDK Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to bootstrap'
+        required: true
+        default: 'sandbox'
+        type: choice
+        options:
+          - sandbox
+          - beta
+          - prod
+      region:
+        description: 'AWS Region to bootstrap'
+        required: true
+        default: 'us-east-1'
+        type: choice
+        options:
+          - us-east-1
+          - eu-central-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  bootstrap:
+    name: Bootstrap CDK Environment (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions        
+
+      - name: Set AWS Role ARN based on environment
+        run: |
+          case "${{ inputs.environment }}" in
+            "sandbox")
+              echo "AWS_ROLE_ARN=${{ secrets.AWS_ROLE_ARN }}" >> $GITHUB_ENV
+              ;;
+            "beta")
+              echo "AWS_ROLE_ARN=${{ secrets.AWS_ROLE_ARN_BETA }}" >> $GITHUB_ENV
+              ;;
+            "prod")
+              echo "AWS_ROLE_ARN=${{ secrets.AWS_ROLE_ARN_PROD }}" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "❌ Invalid environment: ${{ inputs.environment }}"
+              exit 1
+              ;;
+          esac
+          echo "Using role ARN for ${{ inputs.environment }}: $AWS_ROLE_ARN"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ inputs.region }}
+
+      - name: Extract AWS Account ID from Role ARN
+        run: |
+          AWS_ACCOUNT_ID=$(echo ${{ env.AWS_ROLE_ARN }} | cut -d ':' -f 5)
+          echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> $GITHUB_ENV
+          echo "Extracted AWS Account ID: $AWS_ACCOUNT_ID for ${{ inputs.environment }} environment"
+
+      - name: Bootstrap CDK environment
+        run: |
+          echo "🚀 Bootstrapping CDK for ${{ inputs.environment }} environment"
+          echo "Account: ${{ env.AWS_ACCOUNT_ID }}"
+          echo "Region: ${{ inputs.region }}"
+          npx cdk bootstrap aws://${{ env.AWS_ACCOUNT_ID }}/${{ inputs.region }}
+        
+      - name: Verify bootstrap status
+        run: |
+          echo "✅ CDK environment bootstrapped successfully for ${{ inputs.environment }}"
+          echo "Account: ${{ env.AWS_ACCOUNT_ID }}"
+          echo "Region: ${{ inputs.region }}"
+          echo "Bootstrap stack details:"
+          aws cloudformation describe-stacks --stack-name CDKToolkit --region ${{ inputs.region }} --query "Stacks[0].Outputs" --output table

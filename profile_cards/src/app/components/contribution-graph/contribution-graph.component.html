@@ -1,0 +1,64 @@
+<div class="contribution-graph">
+  <div class="graph-header">
+    <h3>Post Activity</h3>
+    <div class="graph-stats">
+      <span class="total-posts">{{ totalPosts }} posts in the last {{ monthsToShow }} months</span>
+    </div>
+  </div>
+
+  <div class="graph-container">
+    <!-- Day labels -->
+    <div class="day-labels">
+      <div class="day-label"></div>
+      <div class="day-label">Mon</div>
+      <div class="day-label"></div>
+      <div class="day-label">Wed</div>
+      <div class="day-label"></div>
+      <div class="day-label">Fri</div>
+      <div class="day-label"></div>
+    </div>
+
+    <!-- Contribution grid -->
+    <div class="graph-grid">
+      <!-- Month labels -->
+      <div class="month-labels">
+        <div 
+          *ngFor="let month of months" 
+          class="month-label"
+          [style.grid-column]="'span ' + month.weeks">
+          {{ month.name }}
+        </div>
+      </div>
+
+      <!-- Weeks and days -->
+      <div class="weeks-container">
+        <div *ngFor="let week of weeks" class="week">
+          <div 
+            *ngFor="let day of week.days"
+            class="day"
+            [class.level-0]="day.level === 0"
+            [class.level-1]="day.level === 1"
+            [class.level-2]="day.level === 2"
+            [class.level-3]="day.level === 3"
+            [class.level-4]="day.level === 4"
+            [attr.data-tooltip]="getTooltip(day)"
+            [attr.data-date]="day.date.toISOString()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="graph-legend">
+      <span class="legend-label">Less</span>
+      <div class="legend-squares">
+        <div class="legend-square level-0"></div>
+        <div class="legend-square level-1"></div>
+        <div class="legend-square level-2"></div>
+        <div class="legend-square level-3"></div>
+        <div class="legend-square level-4"></div>
+      </div>
+      <span class="legend-label">More</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+{
+  "/users": {
+    "target": "http://localhost:4300",
+    "secure": false,
+    "pathRewrite": {
+      "^/users": "/assets/mock-data/users"
+    }
+  },
+  "/leaderboard": {
+    "target": "http://localhost:4300",
+    "secure": false,
+    "pathRewrite": {
+      "^/leaderboard": "/assets/mock-data/leaderboard"
+    }
+  }
+}

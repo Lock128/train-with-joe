@@ -1,0 +1,88 @@
+<!-- Individual competitor freshness display -->
+<div *ngIf="competitor && freshnessStatus" class="data-freshness" [class]="getFreshnessClass()">
+  
+  <!-- Compact display for inline use -->
+  <div *ngIf="compact" class="freshness-compact">
+    <span class="freshness-icon" [title]="freshnessStatus.disclaimer || 'Data is current'">
+      {{ getFreshnessIcon() }}
+    </span>
+    <span class="freshness-text">{{ getRelativeTime() }}</span>
+  </div>
+
+  <!-- Full display with disclaimer -->
+  <div *ngIf="!compact" class="freshness-full">
+    <div class="freshness-header">
+      <span class="freshness-icon">{{ getFreshnessIcon() }}</span>
+      <span class="freshness-title">Data Freshness</span>
+    </div>
+    
+    <div class="freshness-details">
+      <p class="last-updated">
+        <strong>Last Updated:</strong> {{ formatLastUpdated() }} ({{ getRelativeTime() }})
+      </p>
+      
+      <div *ngIf="freshnessStatus.disclaimer" class="freshness-disclaimer">
+        <p class="disclaimer-text">
+          <strong>Note:</strong> {{ freshnessStatus.disclaimer }}
+        </p>
+        <p class="verification-note">
+          Please verify current pricing and features on 
+          <a [href]="competitor.website" target="_blank" rel="noopener noreferrer">
+            {{ competitor.name }}'s official website
+          </a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overall data freshness summary -->
+<div *ngIf="showOverallSummary && overallSummary" class="freshness-summary">
+  <div class="summary-header" (click)="toggleExpanded()" style="cursor: pointer;">
+    <div class="header-content">
+      <h3>Data Freshness Summary</h3>
+      <span class="toggle-icon">{{ isExpanded ? '▼' : '▶' }}</span>
+    </div>
+    <p class="summary-subtitle">
+      <span *ngIf="!isExpanded">Average data age: {{ overallSummary.averageDataAge }} days</span>
+      <span *ngIf="isExpanded">Overview of competitor data currency across all platforms</span>
+    </p>
+  </div>
+  
+  <div *ngIf="isExpanded" class="summary-stats">
+    <div class="stat-grid">
+      <div class="stat-item fresh">
+        <span class="stat-number">{{ overallSummary.freshCount }}</span>
+        <span class="stat-label">Fresh (≤7 days)</span>
+      </div>
+      
+      <div class="stat-item moderate">
+        <span class="stat-number">{{ overallSummary.moderateCount }}</span>
+        <span class="stat-label">Moderate (8-30 days)</span>
+      </div>
+      
+      <div class="stat-item outdated">
+        <span class="stat-number">{{ overallSummary.outdatedCount }}</span>
+        <span class="stat-label">Outdated (31-90 days)</span>
+      </div>
+      
+      <div class="stat-item stale">
+        <span class="stat-number">{{ overallSummary.staleCount }}</span>
+        <span class="stat-label">Stale (>90 days)</span>
+      </div>
+    </div>
+    
+    <div class="summary-details">
+      <p><strong>Average data age:</strong> {{ overallSummary.averageDataAge }} days</p>
+      <p><strong>Oldest data:</strong> {{ overallSummary.oldestDataAge }} days</p>
+      <p><strong>Newest data:</strong> {{ overallSummary.newestDataAge }} days</p>
+      
+      <div *ngIf="overallSummary.needsUpdateCount > 0" class="update-notice">
+        <p class="warning-text">
+          <strong>⚠ {{ overallSummary.needsUpdateCount }} competitor(s) need data updates.</strong>
+          Information may be significantly outdated. Please verify current details directly with competitors.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

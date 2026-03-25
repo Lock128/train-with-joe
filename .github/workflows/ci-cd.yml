@@ -1,0 +1,300 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'join_page/**'
+      - 'competitors_page/**'
+      - 'profile_cards/**'
+      - 'README.md'
+      - 'package.json'
+      - 'package-lock.json'
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+  actions: write
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend || github.event_name == 'workflow_dispatch' }}
+      frontend: ${{ steps.changes.outputs.frontend || github.event_name == 'workflow_dispatch' }}
+      join_page: ${{ steps.changes.outputs.join_page || github.event_name == 'workflow_dispatch' }}
+      competitors_page: ${{ steps.changes.outputs.competitors_page || github.event_name == 'workflow_dispatch' }}
+      profile_cards: ${{ steps.changes.outputs.profile_cards || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - '.github/workflows/**'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/**'
+            join_page:
+              - 'join_page/**'
+              - '.github/workflows/**'
+            competitors_page:
+              - 'competitors_page/**'
+              - '.github/workflows/**'
+            profile_cards:
+              - 'profile_cards/**'
+              - '.github/workflows/**'
+
+  backend-test:
+    name: Backend Tests
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions
+
+      - name: Run tests
+        run: npm test
+
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-coverage
+          path: coverage/
+          retention-days: 7
+
+  frontend-test:
+    name: Frontend Tests
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ runner.os }}-flutter-deps-${{ hashFiles('frontend/src/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-deps-
+
+      - name: Install dependencies
+        working-directory: frontend/src
+        run: flutter pub get
+
+      - name: Generate mocks
+        working-directory: frontend/src
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Run tests
+        working-directory: frontend/src
+        run: flutter test
+
+
+      - name: Upload test coverage
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+          retention-days: 7
+
+  join-page-test:
+    name: Join Page Tests
+    needs: changes
+    if: needs.changes.outputs.join_page == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: Install join_page dependencies
+        working-directory: join_page
+        run: npm ci
+
+      - name: Check if tests exist
+        id: check-tests
+        working-directory: join_page
+        run: |
+          if find src -name "*.spec.ts" -o -name "*.test.ts" | grep -q .; then
+            echo "has_tests=true" >> $GITHUB_OUTPUT
+            echo "✅ Test files found"
+          else
+            echo "has_tests=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No test files found"
+          fi
+
+      - name: Run join_page tests
+        if: steps.check-tests.outputs.has_tests == 'true'
+        working-directory: join_page
+        run: npm test
+
+      - name: Run build verification (no tests available)
+        if: steps.check-tests.outputs.has_tests == 'false'
+        working-directory: join_page
+        run: |
+          echo "⚠️ No tests configured for join_page - running build verification instead"
+          npm run build
+          echo "✅ Build verification completed successfully"
+
+  deploy:
+    name: Deploy to AWS
+    needs: [changes, backend-test, frontend-test, join-page-test]
+    if: |
+      (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') || 
+        github.event_name == 'workflow_dispatch'
+      ) && 
+      always() && 
+      (
+        (needs.backend-test.result == 'success' || needs.backend-test.result == 'skipped') &&
+        (needs.frontend-test.result == 'success' || needs.frontend-test.result == 'skipped') &&
+        (needs.join-page-test.result == 'success' || needs.join-page-test.result == 'skipped')
+      )
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_tag: ${{ steps.create-tag.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          HUSKY: 0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ runner.os }}-flutter-deps-${{ hashFiles('frontend/src/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-flutter-deps-
+
+      - name: Install Flutter dependencies
+        working-directory: frontend/src
+        run: flutter pub get
+
+      - name: Build Flutter web app
+        working-directory: frontend/src
+        run: flutter build web --release
+
+      - name: Build Angular join page
+        working-directory: join_page
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions
+
+      - name: Deploy CDK stacks
+        run: npm run deploy
+        env:
+          NODE_ENV: sandbox
+        timeout-minutes: 60
+
+      - name: Create deployment tag
+        id: create-tag
+        continue-on-error: true
+        run: |
+          TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          TAG="deploy-${TIMESTAMP}-${COMMIT_SHORT}"
+          
+          echo "Creating deployment tag: $TAG"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Automated deployment tag for commit ${{ github.sha }}"
+          
+          if git push origin "$TAG" 2>&1; then
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+            echo "✅ Created deployment tag: $TAG"
+          else
+            echo "⚠️ Failed to push tag"
+            echo "tag=$COMMIT_SHORT" >> $GITHUB_OUTPUT
+          fi
+        env:
+          HUSKY: 0
+
+      - name: Create deployment summary
+        run: |
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployment Tag** | \`${{ steps.create-tag.outputs.tag }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | Sandbox |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | $COMMIT_SHORT |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Deployed At** | $(date -u +'%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status** | ✅ Deployed Successfully |" >> $GITHUB_STEP_SUMMARY

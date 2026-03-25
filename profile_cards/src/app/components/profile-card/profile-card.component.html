@@ -1,0 +1,59 @@
+<div class="profile-card-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading profile...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <h2>{{ error }}</h2>
+    <p *ngIf="error === 'Profile not found'">
+      This profile doesn't exist or hasn't been generated yet.
+    </p>
+    <p *ngIf="error !== 'Profile not found'">
+      There was a problem loading this profile.
+    </p>
+    <div class="error-actions">
+      <button class="btn-primary" (click)="retry()">Try Again</button>
+      <button class="btn-secondary" (click)="goToLeaderboard()">View Leaderboard</button>
+    </div>
+  </div>
+
+  <!-- Profile Card Content -->
+  <div *ngIf="profileData && !loading && !error" class="profile-card-content">
+    <!-- Header Section -->
+    <header class="profile-header">
+      <div class="profile-info">
+        <h1 class="display-name">{{ profileData.displayName }}</h1>
+        <p class="join-date">Member since {{ formatDate(profileData.joinDate) }}</p>
+        <p class="last-updated">Last updated: {{ formatRelativeTime(profileData.lastUpdated) }}</p>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-secondary" (click)="goToLeaderboard()">View Leaderboard</button>
+      </div>
+    </header>
+
+    <!-- Metrics Section -->
+    <section class="metrics-section">
+      <app-metrics-display [metrics]="profileData.metrics" [rankings]="profileData.rankings"></app-metrics-display>
+    </section>
+
+    <!-- Contribution Graph Section -->
+    <section class="contribution-section" *ngIf="profileData.postDates && profileData.postDates.length > 0">
+      <app-contribution-graph [postDates]="profileData.postDates" [monthsToShow]="12"></app-contribution-graph>
+    </section>
+
+    <!-- Recent Posts Section -->
+    <section class="recent-posts-section" *ngIf="profileData.recentPosts && profileData.recentPosts.length > 0">
+      <h2>Recent Posts</h2>
+      <app-recent-posts [posts]="profileData.recentPosts"></app-recent-posts>
+    </section>
+
+    <!-- No Posts Message -->
+    <section class="no-posts" *ngIf="!profileData.recentPosts || profileData.recentPosts.length === 0">
+      <p>No posts published yet.</p>
+    </section>
+  </div>
+</div>

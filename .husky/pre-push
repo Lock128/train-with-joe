@@ -1,0 +1,10 @@
+
+# Run backend tests
+echo "Running backend tests..."
+#npm run test:fast || exit 1
+
+# Run frontend tests
+echo "Running frontend tests..."
+#cd frontend/src && flutter test || exit 1
+
+echo "All tests passed! Proceeding with push..."

@@ -1,0 +1,157 @@
+# Minimal SaaS Template GraphQL Schema
+# Simplified from nexus-share architecture for essential SaaS functionality
+
+# ============================================================================
+# ENUMS
+# ============================================================================
+
+enum SubscriptionStatus @aws_cognito_user_pools {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
+}
+
+enum PaymentProvider @aws_cognito_user_pools {
+  STRIPE
+  APPLE_APP_STORE
+  GOOGLE_PLAY_STORE
+}
+
+# ============================================================================
+# TYPES
+# ============================================================================
+
+type User @aws_cognito_user_pools {
+  id: ID!
+  email: String!
+  name: String
+  subscriptionStatus: SubscriptionStatus
+  subscriptionProvider: PaymentProvider
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Subscription @aws_cognito_user_pools {
+  id: ID!
+  userId: ID!
+  provider: PaymentProvider!
+  status: SubscriptionStatus!
+  planId: String
+  externalId: String
+  currentPeriodEnd: AWSDateTime
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# ============================================================================
+# INPUT TYPES
+# ============================================================================
+
+input CreateUserInput @aws_cognito_user_pools {
+  email: String!
+  name: String
+}
+
+input UpdateUserInput @aws_cognito_user_pools {
+  id: ID!
+  name: String
+}
+
+input CreateSubscriptionInput @aws_cognito_user_pools {
+  provider: PaymentProvider!
+  planId: String!
+}
+
+input CreateStripeCheckoutInput @aws_cognito_user_pools {
+  planId: String!
+  successUrl: String!
+  cancelUrl: String!
+}
+
+input ValidateAppStoreReceiptInput @aws_cognito_user_pools {
+  receiptData: String!
+}
+
+input ValidatePlayStoreReceiptInput @aws_cognito_user_pools {
+  purchaseToken: String!
+  productId: String!
+}
+
+input EnhanceContentInput @aws_cognito_user_pools {
+  content: String!
+}
+
+input GenerateContentInput @aws_cognito_user_pools {
+  prompt: String!
+}
+
+# ============================================================================
+# RESPONSE TYPES
+# ============================================================================
+
+type UserResponse @aws_cognito_user_pools {
+  success: Boolean!
+  user: User
+  error: String
+}
+
+type SubscriptionResponse @aws_cognito_user_pools {
+  success: Boolean!
+  subscription: Subscription
+  error: String
+}
+
+type ContentResponse @aws_cognito_user_pools {
+  success: Boolean!
+  content: String
+  error: String
+}
+
+type CheckoutResponse @aws_cognito_user_pools {
+  success: Boolean!
+  checkoutUrl: String
+  sessionId: String
+  error: String
+}
+
+# ============================================================================
+# QUERIES
+# ============================================================================
+
+type Query {
+  getUser(id: ID!): User @aws_cognito_user_pools
+  getSubscriptionStatus: Subscription @aws_cognito_user_pools
+}
+
+# ============================================================================
+# MUTATIONS
+# ============================================================================
+
+type Mutation {
+  # User operations
+  createUser(input: CreateUserInput!): UserResponse @aws_cognito_user_pools
+  updateUser(input: UpdateUserInput!): UserResponse @aws_cognito_user_pools
+  
+  # Subscription operations
+  createSubscription(input: CreateSubscriptionInput!): SubscriptionResponse @aws_cognito_user_pools
+  createStripeCheckout(input: CreateStripeCheckoutInput!): CheckoutResponse @aws_cognito_user_pools
+  cancelSubscription: SubscriptionResponse @aws_cognito_user_pools
+  
+  # Payment validation operations
+  validateAppStoreReceipt(input: ValidateAppStoreReceiptInput!): SubscriptionResponse @aws_cognito_user_pools
+  validatePlayStoreReceipt(input: ValidatePlayStoreReceiptInput!): SubscriptionResponse @aws_cognito_user_pools
+  
+  # AI operations
+  enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools
+  generateContent(input: GenerateContentInput!): ContentResponse @aws_cognito_user_pools
+}
+
+# ============================================================================
+# SCHEMA DEFINITION
+# ============================================================================
+
+schema {
+  query: Query
+  mutation: Mutation
+}
