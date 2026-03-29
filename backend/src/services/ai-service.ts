@@ -198,6 +198,154 @@ Provide an improved version that maintains the original meaning but is more poli
   }
 
   /**
+   * Build multimodal request body for image analysis (Claude/Nova only)
+   */
+  private buildMultimodalRequestBody(
+    imageBase64: string,
+    textPrompt: string,
+    maxTokens: number = 2000,
+  ): Record<string, unknown> {
+    return {
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: 'image/jpeg',
+                data: imageBase64,
+              },
+            },
+            { type: 'text', text: textPrompt },
+          ],
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: maxTokens,
+      anthropic_version: 'bedrock-2023-05-31',
+    };
+  }
+
+  /**
+   * Analyze an image for vocabulary words using AI
+   */
+  async analyzeImageForVocabulary(
+    imageBase64: string,
+    userId: string,
+    language?: string,
+  ): Promise<{
+    title: string;
+    words: Array<{
+      word: string;
+      definition: string;
+      partOfSpeech?: string;
+      exampleSentence?: string;
+      difficulty?: string;
+    }>;
+    language: string;
+  }> {
+    // Check rate limit
+    if (!this.checkRateLimit(userId)) {
+      throw new Error('Rate limit exceeded. Please wait before making more AI requests.');
+    }
+
+    if (!imageBase64 || imageBase64.trim().length === 0) {
+      throw new Error('Image data cannot be empty');
+    }
+
+    // Titan models do not support image analysis
+    const isTitan = this.modelId.includes('titan');
+    if (isTitan) {
+      throw new Error(
+        'Image analysis requires a multimodal model (Claude or Nova). Please configure BEDROCK_MODEL_ID accordingly.',
+      );
+    }
+
+    try {
+      const languageInstruction = language ? `The vocabulary words should be in ${language}.` : '';
+      const prompt = `Analyze this image and extract vocabulary words suitable for kids learning. ${languageInstruction}
+
+Return a JSON object with the following fields:
+- "title": a brief description of the image content
+- "words": an array of objects, each with:
+  - "word": the vocabulary word
+  - "definition": a kid-friendly definition
+  - "partOfSpeech": the part of speech (noun, verb, adjective, etc.)
+  - "exampleSentence": a simple example sentence using the word
+  - "difficulty": one of "easy", "medium", or "hard"
+- "language": the language of the vocabulary words
+
+Return ONLY the JSON object, no additional text.`;
+
+      const requestBody = this.buildMultimodalRequestBody(imageBase64, prompt);
+
+      const response = await this.bedrockClient.send(
+        new InvokeModelCommand({
+          modelId: this.modelId,
+          contentType: 'application/json',
+          accept: 'application/json',
+          body: JSON.stringify(requestBody),
+        }),
+      );
+
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+      const responseText = this.extractResponseText(responseBody);
+
+      if (!responseText) {
+        throw new Error('No content returned from Bedrock');
+      }
+
+      // Parse JSON from response (handle both raw JSON and JSON embedded in text)
+      let parsed;
+      try {
+        parsed = JSON.parse(responseText);
+      } catch {
+        // Try to extract JSON from text (e.g., markdown code blocks)
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsed = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('Failed to parse vocabulary response as JSON');
+        }
+      }
+
+      // Log usage
+      const tokenCount = responseText.length / 4; // Rough estimate
+      this.logUsage(userId, 'analyzeImageForVocabulary', tokenCount);
+
+      return {
+        title: parsed.title || 'Vocabulary from Image',
+        words: parsed.words || [],
+        language: parsed.language || language || 'English',
+      };
+    } catch (error) {
+      console.error('Error analyzing image for vocabulary with Bedrock:', error);
+
+      if (error instanceof Error) {
+        if (error.message.includes('Rate limit')) {
+          throw error;
+        }
+        if (error.message.includes('Image analysis requires')) {
+          throw error;
+        }
+        if (error.message.includes('Failed to parse')) {
+          throw error;
+        }
+        if (error.message.includes('throttling')) {
+          throw new Error('Bedrock service is currently throttling requests. Please try again later.');
+        }
+        if (error.message.includes('model')) {
+          throw new Error('Bedrock model is not available. Please contact support.');
+        }
+      }
+
+      throw new Error('Failed to analyze image for vocabulary');
+    }
+  }
+
+  /**
    * Generate content from prompt using AI
    */
   async generateContent(prompt: string, userId: string): Promise<string> {

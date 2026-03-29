@@ -214,6 +214,10 @@ describe('BaseStack CDK Integration Tests', () => {
     template.hasResourceProperties('AWS::SSM::Parameter', {
       Name: '/test/config/assets-bucket-name',
     });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/test/config/vocabulary-lists-table-name',
+    });
   });
 
   test('should have correct resource counts', { timeout: 60000 }, () => {
@@ -232,8 +236,56 @@ describe('BaseStack CDK Integration Tests', () => {
     // Verify expected resource counts
     template.resourceCountIs('AWS::Cognito::UserPool', 1);
     template.resourceCountIs('AWS::Cognito::UserPoolClient', 1);
-    template.resourceCountIs('AWS::DynamoDB::Table', 2); // users and subscriptions
+    template.resourceCountIs('AWS::DynamoDB::Table', 3); // users, subscriptions, and vocabulary-lists
     template.resourceCountIs('AWS::S3::Bucket', 1); // assets bucket
+  });
+
+  test('should create DynamoDB vocabulary-lists table with correct schema', { timeout: 60000 }, () => {
+    const app = new App();
+
+    const baseStack = new BaseStack(app, 'TestBaseStack', {
+      env: {
+        account: '123456789012',
+        region: 'us-east-1',
+      },
+      namespace: 'test',
+    });
+
+    const template = Template.fromStack(baseStack);
+
+    // Verify vocabulary-lists table exists with correct configuration
+    template.hasResourceProperties('AWS::DynamoDB::Table', {
+      TableName: 'train-with-joe-vocabulary-lists-test',
+      BillingMode: 'PAY_PER_REQUEST',
+      KeySchema: [
+        {
+          AttributeName: 'id',
+          KeyType: 'HASH',
+        },
+      ],
+      StreamSpecification: {
+        StreamViewType: 'NEW_AND_OLD_IMAGES',
+      },
+    });
+
+    // Verify userId GSI exists
+    const templateJson = template.toJSON();
+    const vocabularyTables = Object.values(templateJson.Resources).filter(
+      (resource: any) =>
+        resource.Type === 'AWS::DynamoDB::Table' &&
+        resource.Properties.TableName === 'train-with-joe-vocabulary-lists-test',
+    );
+
+    expect(vocabularyTables.length).toBe(1);
+    const vocabularyTable = vocabularyTables[0] as any;
+    expect(vocabularyTable.Properties.GlobalSecondaryIndexes).toBeDefined();
+    expect(vocabularyTable.Properties.GlobalSecondaryIndexes.length).toBeGreaterThanOrEqual(1);
+
+    const userIdIndex = vocabularyTable.Properties.GlobalSecondaryIndexes.find(
+      (idx: any) => idx.IndexName === 'userId-index',
+    );
+    expect(userIdIndex).toBeDefined();
+    expect(userIdIndex.KeySchema[0].AttributeName).toBe('userId');
   });
 
   test('should configure CORS for assets bucket', { timeout: 60000 }, () => {

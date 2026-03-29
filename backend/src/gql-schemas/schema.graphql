@@ -44,6 +44,25 @@ type Subscription @aws_cognito_user_pools {
   updatedAt: AWSDateTime!
 }
 
+type VocabularyWord @aws_cognito_user_pools {
+  word: String!
+  definition: String!
+  partOfSpeech: String
+  exampleSentence: String
+  difficulty: String
+}
+
+type VocabularyList @aws_cognito_user_pools {
+  id: ID!
+  userId: ID!
+  title: String
+  words: [VocabularyWord!]!
+  sourceImageKey: String
+  language: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
 # ============================================================================
 # INPUT TYPES
 # ============================================================================
@@ -86,6 +105,11 @@ input GenerateContentInput @aws_cognito_user_pools {
   prompt: String!
 }
 
+input AnalyzeImageVocabularyInput @aws_cognito_user_pools {
+  imageBase64: String!
+  language: String
+}
+
 # ============================================================================
 # RESPONSE TYPES
 # ============================================================================
@@ -115,6 +139,12 @@ type CheckoutResponse @aws_cognito_user_pools {
   error: String
 }
 
+type VocabularyListResponse @aws_cognito_user_pools {
+  success: Boolean!
+  vocabularyList: VocabularyList
+  error: String
+}
+
 # ============================================================================
 # QUERIES
 # ============================================================================
@@ -122,6 +152,8 @@ type CheckoutResponse @aws_cognito_user_pools {
 type Query {
   getUser(id: ID!): User @aws_cognito_user_pools
   getSubscriptionStatus: Subscription @aws_cognito_user_pools
+  getVocabularyLists: [VocabularyList] @aws_cognito_user_pools
+  getVocabularyList(id: ID!): VocabularyList @aws_cognito_user_pools
 }
 
 # ============================================================================
@@ -145,6 +177,7 @@ type Mutation {
   # AI operations
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools
   generateContent(input: GenerateContentInput!): ContentResponse @aws_cognito_user_pools
+  analyzeImageVocabulary(input: AnalyzeImageVocabularyInput!): VocabularyListResponse @aws_cognito_user_pools
 }
 
 # ============================================================================

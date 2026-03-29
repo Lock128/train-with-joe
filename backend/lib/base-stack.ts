@@ -19,6 +19,7 @@ export class BaseStack extends Stack {
   public readonly userPoolFrontendClientId: string;
   public readonly usersTable: Table;
   public readonly subscriptionsTable: Table;
+  public readonly vocabularyListsTable: Table;
   public readonly assetsBucket: Bucket;
   public readonly assetsBucketNameParameterName: string;
   private readonly namespace: string;
@@ -31,6 +32,7 @@ export class BaseStack extends Stack {
     // Create DynamoDB tables
     this.usersTable = this.createUsersTable(namespace);
     this.subscriptionsTable = this.createSubscriptionsTable(namespace);
+    this.vocabularyListsTable = this.createVocabularyListsTable(namespace);
 
     // Create S3 bucket for application assets
     this.assetsBucket = this.createAssetsBucket(namespace);
@@ -51,6 +53,12 @@ export class BaseStack extends Stack {
     new StringParameter(this, 'SubscriptionsTableNameParameter', {
       stringValue: this.subscriptionsTable.tableName,
       parameterName: `/${namespace}/config/subscriptions-table-name`,
+      simpleName: false,
+    });
+
+    new StringParameter(this, 'VocabularyListsTableNameParameter', {
+      stringValue: this.vocabularyListsTable.tableName,
+      parameterName: `/${namespace}/config/vocabulary-lists-table-name`,
       simpleName: false,
     });
 
@@ -199,6 +207,30 @@ export class BaseStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
       stream: StreamViewType.NEW_AND_OLD_IMAGES,
       tableName: `train-with-joe-subscriptions-${namespace}`,
+    });
+
+    // Add GSI for userId lookup
+    table.addGlobalSecondaryIndex({
+      indexName: 'userId-index',
+      partitionKey: {
+        name: 'userId',
+        type: AttributeType.STRING,
+      },
+    });
+
+    return table;
+  }
+
+  createVocabularyListsTable(namespace: string): Table {
+    const table = new Table(this, `VocabularyListsTable-${namespace}`, {
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      removalPolicy: RemovalPolicy.DESTROY,
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
+      tableName: `train-with-joe-vocabulary-lists-${namespace}`,
     });
 
     // Add GSI for userId lookup
