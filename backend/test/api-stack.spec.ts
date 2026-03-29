@@ -28,6 +28,7 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     // Synthesize the stack to CloudFormation template
@@ -61,6 +62,7 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     const template = Template.fromStack(apiStack);
@@ -93,6 +95,7 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     const template = Template.fromStack(apiStack);
@@ -129,6 +132,7 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     const template = Template.fromStack(apiStack);
@@ -170,6 +174,7 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     const template = Template.fromStack(apiStack);
@@ -221,12 +226,13 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     const template = Template.fromStack(apiStack);
 
-    // Verify data sources exist (2 DynamoDB + 1 Lambda)
-    template.resourceCountIs('AWS::AppSync::DataSource', 3);
+    // Verify data sources exist (2 DynamoDB + 4 Lambda)
+    template.resourceCountIs('AWS::AppSync::DataSource', 6);
 
     // Verify DynamoDB data sources have correct type
     const templateJson = template.toJSON();
@@ -234,14 +240,14 @@ describe('APIStack CDK Integration Tests', () => {
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
     );
 
-    expect(dataSources.length).toBe(3);
+    expect(dataSources.length).toBe(6);
 
     // Count data source types
     const dynamoDbSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AMAZON_DYNAMODB');
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(1); // Stripe Checkout Lambda
+    expect(lambdaSources.length).toBe(4); // Stripe Checkout + 3 Vocabulary Lambdas
   });
 
   test('should export API endpoint URL and ID', { timeout: 60000 }, () => {
@@ -264,6 +270,7 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     const template = Template.fromStack(apiStack);
@@ -304,13 +311,14 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     const template = Template.fromStack(apiStack);
 
     // Verify expected resource counts
     template.resourceCountIs('AWS::AppSync::GraphQLApi', 1);
-    template.resourceCountIs('AWS::AppSync::DataSource', 3); // users, subscriptions, and Lambda
+    template.resourceCountIs('AWS::AppSync::DataSource', 6); // users, subscriptions, and 4 Lambdas
 
     // Verify at least 3 IAM roles exist (CloudWatch role + 2 data source roles, CDK may create additional service roles)
     const templateJson = template.toJSON();
@@ -338,6 +346,7 @@ describe('APIStack CDK Integration Tests', () => {
       userPool: baseStack.userPool,
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
     });
 
     const template = Template.fromStack(apiStack);

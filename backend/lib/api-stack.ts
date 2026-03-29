@@ -14,6 +14,7 @@ interface APIStackProps extends cdk.StackProps {
   userPool: UserPool;
   usersTable: Table;
   subscriptionsTable: Table;
+  vocabularyListsTable: Table;
 }
 
 export class APIStack extends cdk.Stack {
@@ -22,7 +23,7 @@ export class APIStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: APIStackProps) {
     super(scope, id, props);
 
-    const { namespace, userPool, usersTable, subscriptionsTable } = props;
+    const { namespace, userPool, usersTable, subscriptionsTable, vocabularyListsTable } = props;
 
     // Create CloudWatch Logs role for AppSync
     const cwRole = new Role(this, 'APICWRole', {
@@ -118,6 +119,91 @@ export class APIStack extends cdk.Stack {
     createStripeCheckoutDataSource.createResolver('CreateStripeCheckoutResolver', {
       typeName: 'Mutation',
       fieldName: 'createStripeCheckout',
+    });
+
+    // Create vocabulary Lambda functions
+    const vocabularyLambdaProps = {
+      runtime: Runtime.NODEJS_20_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        NAMESPACE: namespace,
+        VOCABULARY_LISTS_TABLE_NAME: vocabularyListsTable.tableName,
+        BEDROCK_MODEL_ID: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0',
+      },
+    };
+
+    // Create analyzeImageVocabulary Lambda function
+    const analyzeImageVocabularyFunction = new NodejsFunction(this, 'AnalyzeImageVocabularyFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.analyzeImageVocabulary.ts'),
+      handler: 'handler',
+    });
+
+    // Grant DynamoDB permissions
+    vocabularyListsTable.grantReadWriteData(analyzeImageVocabularyFunction);
+
+    // Grant Bedrock permissions
+    analyzeImageVocabularyFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['bedrock:InvokeModel'],
+        resources: ['*'],
+      }),
+    );
+
+    // Add Lambda data source and resolver for analyzeImageVocabulary
+    const analyzeImageVocabularyDataSource = api.addLambdaDataSource(
+      'AnalyzeImageVocabularyDataSource',
+      analyzeImageVocabularyFunction,
+    );
+
+    analyzeImageVocabularyDataSource.createResolver('AnalyzeImageVocabularyResolver', {
+      typeName: 'Mutation',
+      fieldName: 'analyzeImageVocabulary',
+    });
+
+    // Create getVocabularyLists Lambda function
+    const getVocabularyListsFunction = new NodejsFunction(this, 'GetVocabularyListsFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getVocabularyLists.ts'),
+      handler: 'handler',
+    });
+
+    vocabularyListsTable.grantReadData(getVocabularyListsFunction);
+
+    const getVocabularyListsDataSource = api.addLambdaDataSource(
+      'GetVocabularyListsDataSource',
+      getVocabularyListsFunction,
+    );
+
+    getVocabularyListsDataSource.createResolver('GetVocabularyListsResolver', {
+      typeName: 'Query',
+      fieldName: 'getVocabularyLists',
+    });
+
+    // Create getVocabularyList Lambda function
+    const getVocabularyListFunction = new NodejsFunction(this, 'GetVocabularyListFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getVocabularyList.ts'),
+      handler: 'handler',
+    });
+
+    vocabularyListsTable.grantReadData(getVocabularyListFunction);
+
+    const getVocabularyListDataSource = api.addLambdaDataSource(
+      'GetVocabularyListDataSource',
+      getVocabularyListFunction,
+    );
+
+    getVocabularyListDataSource.createResolver('GetVocabularyListResolver', {
+      typeName: 'Query',
+      fieldName: 'getVocabularyList',
     });
 
     // Export API endpoint URL and API ID
