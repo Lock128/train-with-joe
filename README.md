@@ -163,10 +163,26 @@ npm run destroy
 - API documentation generated from GraphQL schema
 - Inline code comments for complex logic
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, and pull request guidelines.
+
+Code ownership is defined in [CODEOWNERS](CODEOWNERS).
+
+## CI/CD
+
+The project uses GitHub Actions for continuous integration and deployment:
+
+- Push to `main` → tests + deploy to sandbox
+- Manual promotion to beta (staging validation)
+- Manual promotion to production (requires approval)
+
+See [.github/README.md](.github/README.md) for full workflow documentation.
+
 ## License
 
 MIT
 
 ## Support
 
-For issues and questions, please refer to the documentation or create an issue in the repository.
+For issues and questions, check the `/documentation` directory or open an issue in the repository.

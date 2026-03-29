@@ -1,0 +1,37 @@
+# CODEOWNERS - Train with Joe
+# This file defines code ownership for pull request reviews.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+*                                   @train-with-joe/core-team
+
+# Backend (CDK infrastructure, Lambda functions, services)
+/backend/                           @train-with-joe/backend-team
+/cdk.json                          @train-with-joe/backend-team
+/build.mjs                         @train-with-joe/backend-team
+
+# GraphQL schema changes need backend review
+/backend/src/gql-schemas/          @train-with-joe/backend-team
+
+# Frontend (Flutter app)
+/frontend/                         @train-with-joe/frontend-team
+
+# Angular landing pages
+/join_page/                        @train-with-joe/frontend-team
+/competitors_page/                 @train-with-joe/frontend-team
+/profile_cards/                    @train-with-joe/frontend-team
+
+# CI/CD and GitHub config
+/.github/                          @train-with-joe/devops-team
+/scripts/                          @train-with-joe/devops-team
+
+# Documentation
+/documentation/                    @train-with-joe/core-team
+README.md                          @train-with-joe/core-team
+
+# Shared config (linting, formatting, testing)
+/eslint.config.mjs                 @train-with-joe/core-team
+/.prettierrc                       @train-with-joe/core-team
+/vitest.config.ts                  @train-with-joe/core-team
+/tsconfig.json                     @train-with-joe/core-team
+/package.json                      @train-with-joe/core-team
