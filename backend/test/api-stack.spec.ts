@@ -326,6 +326,56 @@ describe('APIStack CDK Integration Tests', () => {
     expect(roles.length).toBeGreaterThanOrEqual(3);
   });
 
+  test('should create vocabulary analysis Lambda functions with Bedrock permissions', { timeout: 60000 }, () => {
+    const app = new App();
+
+    const baseStack = new BaseStack(app, 'TestBaseStack', {
+      env: {
+        account: '123456789012',
+        region: 'us-east-1',
+      },
+      namespace: 'test',
+    });
+
+    const apiStack = new APIStack(app, 'TestAPIStack', {
+      env: {
+        account: '123456789012',
+        region: 'us-east-1',
+      },
+      namespace: 'test',
+      userPool: baseStack.userPool,
+      usersTable: baseStack.usersTable,
+      subscriptionsTable: baseStack.subscriptionsTable,
+      vocabularyListsTable: baseStack.vocabularyListsTable,
+    });
+
+    const template = Template.fromStack(apiStack);
+
+    // Verify Lambda functions exist with Node.js 20 runtime
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Runtime: 'nodejs20.x',
+      MemorySize: 256,
+      Timeout: 30,
+    });
+
+    // Verify Bedrock IAM permissions exist for invoking models
+    const templateJson = template.toJSON();
+    const policies = Object.values(templateJson.Resources).filter(
+      (resource: any) => resource.Type === 'AWS::IAM::Policy',
+    );
+
+    const bedrockPolicy = policies.find((policy: any) => {
+      const statements = policy.Properties?.PolicyDocument?.Statement || [];
+      return statements.some((stmt: any) => {
+        if (stmt.Effect !== 'Allow') return false;
+        const actions = Array.isArray(stmt.Action) ? stmt.Action : [stmt.Action];
+        return actions.includes('bedrock:InvokeModel');
+      });
+    });
+
+    expect(bedrockPolicy).toBeDefined();
+  });
+
   test('should enable X-Ray tracing', { timeout: 60000 }, () => {
     const app = new App();
 
