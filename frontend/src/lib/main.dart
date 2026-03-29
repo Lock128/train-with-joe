@@ -13,10 +13,13 @@ import 'providers/subscription_provider.dart';
 import 'services/auth_service.dart';
 import 'services/api_service.dart';
 import 'services/payment_service.dart';
+import 'providers/vocabulary_provider.dart';
 import 'screens/signin_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/subscription_screen.dart';
+import 'screens/image_vocabulary_screen.dart';
+import 'screens/vocabulary_lists_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -179,6 +182,10 @@ class _MyAppState extends State<MyApp> {
           create: (_) => SubscriptionProvider(),
           update: (_, auth, previous) => previous!..updateAuth(auth),
         ),
+        ChangeNotifierProxyProvider<app.AuthProvider, VocabularyProvider>(
+          create: (_) => VocabularyProvider(),
+          update: (_, auth, previous) => previous!..updateAuth(auth),
+        ),
       ],
       child: Consumer<app.AuthProvider>(
         builder: (context, authProvider, _) {
@@ -234,6 +241,14 @@ class _MyAppState extends State<MyApp> {
         GoRoute(
           path: '/subscription',
           builder: (context, state) => const SubscriptionScreen(),
+        ),
+        GoRoute(
+          path: '/vocabulary',
+          builder: (context, state) => const VocabularyListsScreen(),
+        ),
+        GoRoute(
+          path: '/vocabulary/analyze',
+          builder: (context, state) => const ImageVocabularyScreen(),
         ),
       ],
     );

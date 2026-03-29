@@ -167,6 +167,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
+
+                    ElevatedButton.icon(
+                      onPressed: () => context.go('/vocabulary/analyze'),
+                      icon: const Icon(Icons.camera_alt),
+                      label: const Text('Analyze Image'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    ElevatedButton.icon(
+                      onPressed: () => context.go('/vocabulary'),
+                      icon: const Icon(Icons.library_books),
+                      label: const Text('My Vocabulary Lists'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     
                     OutlinedButton.icon(
                       onPressed: _handleSignOut,
