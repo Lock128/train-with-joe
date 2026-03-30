@@ -115,3 +115,5 @@ The minimal template does not include social authentication providers (Facebook,
 - Use environment variables or secure configuration management for production
 - Rotate credentials regularly
 - Enable MFA for production environments!
+
+!
