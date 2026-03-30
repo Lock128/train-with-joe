@@ -60,7 +60,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     children: [
                       // App branding
                       Icon(
-                        Icons.lock_outline,
+                        Icons.auto_stories,
                         size: 80,
                         color: theme.colorScheme.primary,
                       ),

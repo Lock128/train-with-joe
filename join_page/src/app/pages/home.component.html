@@ -170,7 +170,8 @@
     <p class="section-subtitle">Join Train with Joe and help your kids build an amazing vocabulary</p>
     
     <div class="form-container">
-      <form (ngSubmit)="joinWaitlist()">
+      <!-- Step 1: Registration -->
+      <form *ngIf="step === 'register'" (ngSubmit)="onRegister()">
         <div class="form-group">
           <input 
             type="email" 
@@ -178,16 +179,45 @@
             placeholder="Enter your email address"
             [(ngModel)]="email"
             name="email"
-            required>
+            required
+            autocomplete="email"
+            aria-label="Email address">
         </div>
         
-        <div *ngIf="message" [class]="isSuccess ? 'alert alert-success' : 'alert alert-error'">
+        <div class="form-group">
+          <input 
+            type="password" 
+            class="form-input" 
+            placeholder="Create a password"
+            [(ngModel)]="password"
+            name="password"
+            required
+            minlength="8"
+            autocomplete="new-password"
+            aria-label="Password">
+        </div>
+        
+        <div class="form-group">
+          <input 
+            type="password" 
+            class="form-input" 
+            placeholder="Confirm your password"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            required
+            autocomplete="new-password"
+            aria-label="Confirm password">
+        </div>
+
+        <p class="password-hint">Min 8 characters with uppercase, lowercase, number, and symbol.</p>
+        
+        <div *ngIf="message" [class]="isSuccess ? 'alert alert-success' : 'alert alert-error'" role="alert">
           {{ message }}
         </div>
         
         <button type="submit" class="btn btn-primary" style="width: 100%;" [disabled]="isLoading">
           <span *ngIf="!isLoading">Start Learning Free</span>
-          <span *ngIf="isLoading">Processing...</span>
+          <span *ngIf="isLoading">Creating account...</span>
         </button>
         
         <div style="text-align: center; margin-top: 24px;">
@@ -195,6 +225,34 @@
             By signing up, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>
+      </form>
+
+      <!-- Step 2: Email Verification -->
+      <form *ngIf="step === 'verify'" (ngSubmit)="onVerify()">
+        <p class="verify-instructions">We sent a verification code to <strong>{{ email }}</strong></p>
+
+        <div class="form-group">
+          <input 
+            type="text" 
+            class="form-input verification-input" 
+            placeholder="Enter 6-digit code"
+            [(ngModel)]="verificationCode"
+            name="verificationCode"
+            required
+            maxlength="6"
+            autocomplete="one-time-code"
+            inputmode="numeric"
+            aria-label="Verification code">
+        </div>
+        
+        <div *ngIf="message" [class]="isSuccess ? 'alert alert-success' : 'alert alert-error'" role="alert">
+          {{ message }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Verify &amp; Start Learning</span>
+          <span *ngIf="isLoading">Verifying...</span>
+        </button>
       </form>
     </div>
   </div>

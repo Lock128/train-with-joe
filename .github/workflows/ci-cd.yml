@@ -255,6 +255,10 @@ jobs:
         working-directory: frontend/src
         run: flutter pub get
 
+      - name: Inject Amplify config
+        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+        run: bash scripts/inject-amplify-config.sh sandbox eu-central-1
+
       - name: Build Flutter web app
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         working-directory: frontend/src

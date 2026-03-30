@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -5,10 +7,10 @@
 }
 
 body {
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.6;
-  color: #212121;
-  background-color: #F8FEFF;
+  color: #2D3436;
+  background-color: #FAFBFF;
 }
 
 .container {
@@ -21,47 +23,51 @@ body {
   display: inline-block;
   padding: 16px 32px;
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 14px;
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-primary {
-  background-color: #1E88E5;
+  background: linear-gradient(135deg, #6C5CE7, #A29BFE);
   color: white;
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
 }
 
 .btn-primary:hover {
-  background-color: #1565C0;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
+  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
 }
 
 .btn-primary:disabled {
-  background-color: #BDBDBD;
+  background: #BDBDBD;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .btn-outline {
   background-color: transparent;
   color: white;
-  border: 2px solid white;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
 }
 
 .btn-outline:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: white;
 }
 
 .card {
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 32px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(100, 181, 246, 0.2);
+  box-shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+  border: 1px solid rgba(108, 92, 231, 0.1);
 }
 
 .section {

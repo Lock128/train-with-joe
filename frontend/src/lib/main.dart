@@ -193,10 +193,57 @@ class _MyAppState extends State<MyApp> {
             title: 'Train with Joe',
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.orange,
+                seedColor: const Color(0xFF6C5CE7),
                 brightness: Brightness.light,
+                primary: const Color(0xFF6C5CE7),
+                secondary: const Color(0xFF00B894),
+                tertiary: const Color(0xFFFDCB6E),
               ),
               useMaterial3: true,
+              fontFamily: 'Nunito',
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6C5CE7),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+              outlinedButtonTheme: OutlinedButtonThemeData(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF6C5CE7),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  side: const BorderSide(color: Color(0xFF6C5CE7)),
+                ),
+              ),
+              textButtonTheme: TextButtonThemeData(
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF6C5CE7),
+                ),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: Color(0xFF6C5CE7), width: 2),
+                ),
+              ),
+              cardTheme: CardTheme(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 2,
+              ),
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Color(0xFF6C5CE7),
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
             ),
             routerConfig: _createRouter(authProvider),
           );

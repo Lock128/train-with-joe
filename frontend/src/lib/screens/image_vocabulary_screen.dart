@@ -251,7 +251,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           label: const Text('Analyze Image'),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.all(16),
-            backgroundColor: Colors.blue,
+            backgroundColor: const Color(0xFF6C5CE7),
             foregroundColor: Colors.white,
           ),
         ),

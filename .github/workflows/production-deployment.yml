@@ -258,6 +258,9 @@ jobs:
         working-directory: frontend/src
         run: flutter pub get
 
+      - name: Inject Amplify config
+        run: bash scripts/inject-amplify-config.sh production ${{ env.AWS_REGION }}
+
       - name: Generate build info
         working-directory: frontend/src
         run: |
