@@ -220,6 +220,40 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions
+
+      - name: Get commit info
+        id: commit-info
+        run: |
+          echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_full=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Deploy CDK stacks to production
+        id: deploy
+        run: |
+          echo "🚀 Deploying to PRODUCTION environment..."
+          echo "⚠️  This is a PRODUCTION deployment!"
+          echo "Using region: ${{ env.AWS_REGION }}"
+          npm run deploy
+          echo "deployment_id=$(date +%s)" >> $GITHUB_OUTPUT
+        env:
+          NODE_ENV: production
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+          APP_VERSION: "1.0.0"
+          COMMIT_ID: ${{ steps.commit-info.outputs.commit_full }}
+          COMMIT_SHORT: ${{ steps.commit-info.outputs.commit_short }}
+          BUILD_TIME: ${{ github.run_started_at }}
+          BRANCH: ${{ github.ref_name }}
+          TAG: ${{ needs.validate-production-deployment.outputs.ref }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+          cache: true
+
       - name: Install Flutter dependencies
         working-directory: frontend/src
         run: flutter pub get
@@ -263,33 +297,6 @@ jobs:
         run: |
           npm ci
           npm run build
-
-      - name: Build AppSync functions
-        run: npm run build:appsyncFunctions
-
-      - name: Get commit info
-        id: commit-info
-        run: |
-          echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "commit_full=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Deploy CDK stacks to production
-        id: deploy
-        run: |
-          echo "🚀 Deploying to PRODUCTION environment..."
-          echo "⚠️  This is a PRODUCTION deployment!"
-          echo "Using region: ${{ env.AWS_REGION }}"
-          npm run deploy
-          echo "deployment_id=$(date +%s)" >> $GITHUB_OUTPUT
-        env:
-          NODE_ENV: production
-          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
-          APP_VERSION: "1.0.0"
-          COMMIT_ID: ${{ steps.commit-info.outputs.commit_full }}
-          COMMIT_SHORT: ${{ steps.commit-info.outputs.commit_short }}
-          BUILD_TIME: ${{ github.run_started_at }}
-          BRANCH: ${{ github.ref_name }}
-          TAG: ${{ needs.validate-production-deployment.outputs.ref }}
 
       - name: Get CloudFront distribution IDs
         id: cf-ids

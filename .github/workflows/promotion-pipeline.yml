@@ -134,6 +134,24 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_BETA }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions
+
+      - name: Deploy CDK stacks
+        id: deploy
+        run: |
+          echo "🚀 Deploying to beta environment..."
+          npm run deploy
+          echo "deployment_id=$(date +%s)" >> $GITHUB_OUTPUT
+        env:
+          NODE_ENV: beta
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+
       - name: Install Flutter dependencies
         working-directory: frontend/src
         run: flutter pub get
@@ -147,18 +165,6 @@ jobs:
         run: |
           npm ci
           npm run build
-
-      - name: Build AppSync functions
-        run: npm run build:appsyncFunctions
-
-      - name: Deploy CDK stacks
-        id: deploy
-        run: |
-          echo "🚀 Deploying to beta environment..."
-          npm run deploy
-          echo "deployment_id=$(date +%s)" >> $GITHUB_OUTPUT
-        env:
-          NODE_ENV: beta
 
       - name: Get CloudFront distribution IDs
         id: cf-ids

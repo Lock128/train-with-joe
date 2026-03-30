@@ -223,6 +223,15 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
 
+      - name: Build AppSync functions
+        run: npm run build:appsyncFunctions
+
+      - name: Deploy CDK stacks
+        run: npm run deploy
+        env:
+          NODE_ENV: sandbox
+        timeout-minutes: 60
+
       - name: Setup Flutter
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         uses: subosito/flutter-action@v2
@@ -257,15 +266,6 @@ jobs:
         run: |
           npm ci
           npm run build
-
-      - name: Build AppSync functions
-        run: npm run build:appsyncFunctions
-
-      - name: Deploy CDK stacks
-        run: npm run deploy
-        env:
-          NODE_ENV: sandbox
-        timeout-minutes: 60
 
       - name: Get CloudFront distribution IDs
         if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
