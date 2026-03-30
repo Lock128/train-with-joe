@@ -290,23 +290,46 @@ jobs:
           BUILD_TIME: ${{ github.run_started_at }}
           BRANCH: ${{ github.ref_name }}
           TAG: ${{ needs.validate-production-deployment.outputs.ref }}
-          
-      - name: Invalidate CloudFront cache
+
+      - name: Get CloudFront distribution IDs
+        id: cf-ids
         run: |
-          echo "🔄 Invalidating CloudFront cache..."
-          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name DistributionStack-production --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" --output text)
-          if [ -n "$DISTRIBUTION_ID" ]; then
-            INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/*" --query "Invalidation.Id" --output text)
-            echo "✅ CloudFront cache invalidation initiated for distribution: $DISTRIBUTION_ID"
-            echo "🔄 Invalidation ID: $INVALIDATION_ID"
-            
-            # Wait for invalidation to complete (up to 10 minutes)
-            echo "⏳ Waiting for cache invalidation to complete..."
-            aws cloudfront wait invalidation-completed --distribution-id $DISTRIBUTION_ID --id $INVALIDATION_ID --cli-read-timeout 600 --cli-connect-timeout 60
-            echo "✅ Cache invalidation completed successfully"
-          else
-            echo "⚠️ CloudFront distribution ID not found, skipping cache invalidation"
-          fi
+          NAMESPACE="production"
+          FRONTEND_DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name "DistributionStack-${NAMESPACE}" \
+            --query "Stacks[0].Outputs[?OutputKey=='FrontendDistributionId'].OutputValue" \
+            --output text)
+          JOIN_PAGE_DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name "DistributionStack-${NAMESPACE}" \
+            --query "Stacks[0].Outputs[?OutputKey=='JoinPageDistributionId'].OutputValue" \
+            --output text)
+          FRONTEND_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name "DistributionStack-${NAMESPACE}" \
+            --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" \
+            --output text)
+          JOIN_PAGE_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name "DistributionStack-${NAMESPACE}" \
+            --query "Stacks[0].Outputs[?OutputKey=='JoinPageBucketName'].OutputValue" \
+            --output text)
+          echo "frontend_dist_id=$FRONTEND_DIST_ID" >> $GITHUB_OUTPUT
+          echo "join_page_dist_id=$JOIN_PAGE_DIST_ID" >> $GITHUB_OUTPUT
+          echo "frontend_bucket=$FRONTEND_BUCKET" >> $GITHUB_OUTPUT
+          echo "join_page_bucket=$JOIN_PAGE_BUCKET" >> $GITHUB_OUTPUT
+
+      - name: Deploy frontend to S3
+        run: |
+          aws s3 sync frontend/src/build/web "s3://${{ steps.cf-ids.outputs.frontend_bucket }}" --delete
+
+      - name: Deploy join page to S3
+        run: |
+          aws s3 sync join_page/dist/train-with-joe-join/browser "s3://${{ steps.cf-ids.outputs.join_page_bucket }}" --delete
+
+      - name: Invalidate CloudFront caches
+        run: |
+          echo "🔄 Invalidating CloudFront caches..."
+          aws cloudfront create-invalidation --distribution-id "${{ steps.cf-ids.outputs.frontend_dist_id }}" --paths "/*"
+          aws cloudfront create-invalidation --distribution-id "${{ steps.cf-ids.outputs.join_page_dist_id }}" --paths "/*"
+          echo "✅ CloudFront cache invalidation initiated for both distributions"
 
       - name: Get production application URL
         id: get-url

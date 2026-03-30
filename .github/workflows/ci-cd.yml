@@ -262,6 +262,44 @@ jobs:
           NODE_ENV: sandbox
         timeout-minutes: 60
 
+      - name: Get CloudFront distribution IDs
+        id: cf-ids
+        run: |
+          NAMESPACE="sandbox"
+          FRONTEND_DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name "DistributionStack-${NAMESPACE}" \
+            --query "Stacks[0].Outputs[?OutputKey=='FrontendDistributionId'].OutputValue" \
+            --output text)
+          JOIN_PAGE_DIST_ID=$(aws cloudformation describe-stacks \
+            --stack-name "DistributionStack-${NAMESPACE}" \
+            --query "Stacks[0].Outputs[?OutputKey=='JoinPageDistributionId'].OutputValue" \
+            --output text)
+          FRONTEND_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name "DistributionStack-${NAMESPACE}" \
+            --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" \
+            --output text)
+          JOIN_PAGE_BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name "DistributionStack-${NAMESPACE}" \
+            --query "Stacks[0].Outputs[?OutputKey=='JoinPageBucketName'].OutputValue" \
+            --output text)
+          echo "frontend_dist_id=$FRONTEND_DIST_ID" >> $GITHUB_OUTPUT
+          echo "join_page_dist_id=$JOIN_PAGE_DIST_ID" >> $GITHUB_OUTPUT
+          echo "frontend_bucket=$FRONTEND_BUCKET" >> $GITHUB_OUTPUT
+          echo "join_page_bucket=$JOIN_PAGE_BUCKET" >> $GITHUB_OUTPUT
+
+      - name: Deploy frontend to S3
+        run: |
+          aws s3 sync frontend/src/build/web "s3://${{ steps.cf-ids.outputs.frontend_bucket }}" --delete
+
+      - name: Deploy join page to S3
+        run: |
+          aws s3 sync join_page/dist/train-with-joe-join/browser "s3://${{ steps.cf-ids.outputs.join_page_bucket }}" --delete
+
+      - name: Invalidate CloudFront caches
+        run: |
+          aws cloudfront create-invalidation --distribution-id "${{ steps.cf-ids.outputs.frontend_dist_id }}" --paths "/*"
+          aws cloudfront create-invalidation --distribution-id "${{ steps.cf-ids.outputs.join_page_dist_id }}" --paths "/*"
+
       - name: Create deployment tag
         id: create-tag
         continue-on-error: true

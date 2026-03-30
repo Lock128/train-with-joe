@@ -8,7 +8,7 @@ import { BaseStack } from '../lib/base-stack';
 import { APIStack } from '../lib/api-stack';
 import { BedrockStack } from '../lib/bedrock-stack';
 import { SubscriptionStack } from '../lib/subscription-stack';
-// import { DistributionStack } from '../lib/distribution-stack';
+import { DistributionStack } from '../lib/distribution-stack';
 
 const app = new cdk.App();
 
@@ -79,5 +79,11 @@ const subscriptionStack = new SubscriptionStack(app, `SubscriptionStack-${namesp
 });
 subscriptionStack.addDependency(baseStack);
 
-// Note: DistributionStack commented out for now - requires frontend bucket setup
-// Will be enabled when frontend infrastructure is implemented
+// Create CloudFront distributions for frontend and join page
+const distributionStack = new DistributionStack(app, `DistributionStack-${namespace}`, {
+  env,
+  namespace,
+  frontendBucket: baseStack.frontendBucket,
+  joinPageBucket: baseStack.joinPageBucket,
+});
+distributionStack.addDependency(baseStack);
