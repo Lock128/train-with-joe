@@ -72,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 32),
                       const Text(
-                        'Join Train with Joe!',
+                        'Create Account',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -81,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Start your vocabulary adventure',
+                        'Sign up to get started',
                         style: TextStyle(
                           fontSize: 16,
                           color: theme.colorScheme.onSurface.withOpacity(0.6),

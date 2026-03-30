@@ -66,7 +66,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       const SizedBox(height: 32),
                       const Text(
-                        'Welcome Back to Train with Joe!',
+                        'Welcome Back',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -75,7 +75,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Sign in to start learning',
+                        'Sign in to your account',
                         style: TextStyle(
                           fontSize: 16,
                           color: theme.colorScheme.onSurface.withOpacity(0.6),

@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Train with Joe'),
+        title: const Text('Home'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -103,11 +103,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             const CircleAvatar(
                               radius: 50,
-                              child: Icon(Icons.emoji_events, size: 50),
+                              child: Icon(Icons.person, size: 50),
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Ready to Learn!',
+                              'Welcome!',
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                             const SizedBox(height: 8),
@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Card(
                       child: ListTile(
                         leading: const Icon(Icons.card_membership),
-                        title: const Text('My Plan'),
+                        title: const Text('Subscription'),
                         subtitle: Text(
                           user != null && user['subscriptionStatus'] != null
                               ? 'Status: ${user['subscriptionStatus']}'
@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // Quick actions
                     const Text(
-                      'What would you like to do?',
+                      'Quick Actions',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -161,27 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ElevatedButton.icon(
                       onPressed: () => context.go('/subscription'),
                       icon: const Icon(Icons.upgrade),
-                      label: const Text('My Learning Plan'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    ElevatedButton.icon(
-                      onPressed: () => context.go('/vocabulary/analyze'),
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Analyze Image'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    ElevatedButton.icon(
-                      onPressed: () => context.go('/vocabulary'),
-                      icon: const Icon(Icons.library_books),
-                      label: const Text('My Vocabulary Lists'),
+                      label: const Text('Manage Subscription'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                       ),
