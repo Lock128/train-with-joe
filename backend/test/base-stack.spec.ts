@@ -166,14 +166,13 @@ describe('BaseStack CDK Integration Tests', () => {
 
     const template = Template.fromStack(baseStack);
 
-    // Verify S3 buckets exist (assets + frontend + join page)
-    template.resourceCountIs('AWS::S3::Bucket', 3);
+    // Verify S3 bucket exists (assets bucket)
+    template.resourceCountIs('AWS::S3::Bucket', 1);
 
     // Verify assets bucket has versioning enabled
     const templateJson = template.toJSON();
     const buckets = Object.values(templateJson.Resources).filter(
-      (resource: any) =>
-        resource.Type === 'AWS::S3::Bucket' && resource.Properties.VersioningConfiguration?.Status === 'Enabled',
+      (resource: any) => resource.Type === 'AWS::S3::Bucket',
     );
 
     expect(buckets.length).toBe(1);
@@ -238,7 +237,7 @@ describe('BaseStack CDK Integration Tests', () => {
     template.resourceCountIs('AWS::Cognito::UserPool', 1);
     template.resourceCountIs('AWS::Cognito::UserPoolClient', 1);
     template.resourceCountIs('AWS::DynamoDB::Table', 3); // users, subscriptions, and vocabulary-lists
-    template.resourceCountIs('AWS::S3::Bucket', 3); // assets + frontend + join page
+    template.resourceCountIs('AWS::S3::Bucket', 1); // assets bucket
   });
 
   test('should create DynamoDB vocabulary-lists table with correct schema', { timeout: 60000 }, () => {

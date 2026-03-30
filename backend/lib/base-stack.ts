@@ -22,8 +22,6 @@ export class BaseStack extends Stack {
   public readonly vocabularyListsTable: Table;
   public readonly assetsBucket: Bucket;
   public readonly assetsBucketNameParameterName: string;
-  public readonly frontendBucket: Bucket;
-  public readonly joinPageBucket: Bucket;
   private readonly namespace: string;
 
   constructor(scope: Construct, id: string, props: BaseStackProps) {
@@ -44,10 +42,6 @@ export class BaseStack extends Stack {
       parameterName: this.assetsBucketNameParameterName,
       simpleName: false,
     });
-
-    // Create S3 buckets for static site hosting
-    this.frontendBucket = this.createHostingBucket('FrontendBucket', `train-with-joe-frontend-${namespace}`);
-    this.joinPageBucket = this.createHostingBucket('JoinPageBucket', `train-with-joe-join-page-${namespace}`);
 
     // Export table names
     new StringParameter(this, 'UsersTableNameParameter', {
@@ -249,15 +243,6 @@ export class BaseStack extends Stack {
     });
 
     return table;
-  }
-
-  createHostingBucket(id: string, bucketName: string): Bucket {
-    return new Bucket(this, id, {
-      bucketName,
-      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: RemovalPolicy.DESTROY,
-      autoDeleteObjects: true,
-    });
   }
 
   createAssetsBucket(namespace: string): Bucket {

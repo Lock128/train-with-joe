@@ -1,40 +1,57 @@
 import * as cdk from 'aws-cdk-lib';
+import { RemovalPolicy } from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
-import type { Bucket } from 'aws-cdk-lib/aws-s3';
+import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Distribution, ViewerProtocolPolicy, CachePolicy } from 'aws-cdk-lib/aws-cloudfront';
 
 interface DistributionStackProps extends cdk.StackProps {
   namespace: string;
-  frontendBucket: Bucket;
-  joinPageBucket: Bucket;
 }
 
 /**
  * CDK Stack for CloudFront distributions
- * Serves frontend (Flutter) and join page (Angular) via CDN
+ * Creates S3 buckets and CloudFront distributions for frontend (Flutter) and join page (Angular).
+ * Buckets live in this stack to avoid cross-stack dependency cycles with OAC.
  */
 export class DistributionStack extends cdk.Stack {
   public readonly frontendDistribution: Distribution;
   public readonly joinPageDistribution: Distribution;
+  public readonly frontendBucket: Bucket;
+  public readonly joinPageBucket: Bucket;
 
   constructor(scope: Construct, id: string, props: DistributionStackProps) {
     super(scope, id, props);
 
-    const { namespace, frontendBucket, joinPageBucket } = props;
+    const { namespace } = props;
+
+    // Create hosting buckets
+    this.frontendBucket = new Bucket(this, 'FrontendBucket', {
+      bucketName: `train-with-joe-frontend-${namespace}`,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    this.joinPageBucket = new Bucket(this, 'JoinPageBucket', {
+      bucketName: `train-with-joe-join-page-${namespace}`,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
 
     // Frontend distribution (Flutter web app)
     this.frontendDistribution = this.createSpaDistribution(
       'FrontendDistribution',
       `Train with Joe ${namespace} - Frontend`,
-      frontendBucket,
+      this.frontendBucket,
     );
 
     // Join page distribution (Angular landing page)
     this.joinPageDistribution = this.createSpaDistribution(
       'JoinPageDistribution',
       `Train with Joe ${namespace} - Join Page`,
-      joinPageBucket,
+      this.joinPageBucket,
     );
 
     // Outputs
@@ -47,7 +64,7 @@ export class DistributionStack extends cdk.Stack {
       description: 'Frontend CloudFront domain name',
     });
     new cdk.CfnOutput(this, 'FrontendBucketName', {
-      value: frontendBucket.bucketName,
+      value: this.frontendBucket.bucketName,
       description: 'S3 bucket for frontend hosting',
     });
     new cdk.CfnOutput(this, 'JoinPageDistributionId', {
@@ -59,7 +76,7 @@ export class DistributionStack extends cdk.Stack {
       description: 'Join page CloudFront domain name',
     });
     new cdk.CfnOutput(this, 'JoinPageBucketName', {
-      value: joinPageBucket.bucketName,
+      value: this.joinPageBucket.bucketName,
       description: 'S3 bucket for join page hosting',
     });
   }

@@ -80,10 +80,7 @@ const subscriptionStack = new SubscriptionStack(app, `SubscriptionStack-${namesp
 subscriptionStack.addDependency(baseStack);
 
 // Create CloudFront distributions for frontend and join page
-const distributionStack = new DistributionStack(app, `DistributionStack-${namespace}`, {
+new DistributionStack(app, `DistributionStack-${namespace}`, {
   env,
   namespace,
-  frontendBucket: baseStack.frontendBucket,
-  joinPageBucket: baseStack.joinPageBucket,
 });
-distributionStack.addDependency(baseStack);
