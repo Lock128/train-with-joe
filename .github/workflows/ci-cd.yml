@@ -224,6 +224,7 @@ jobs:
           aws-region: eu-central-1
 
       - name: Setup Flutter
+        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.4'
@@ -231,6 +232,7 @@ jobs:
           cache: true
 
       - name: Cache Flutter dependencies
+        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         uses: actions/cache@v5
         with:
           path: |
@@ -240,14 +242,17 @@ jobs:
             ${{ runner.os }}-flutter-deps-
 
       - name: Install Flutter dependencies
+        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         working-directory: frontend/src
         run: flutter pub get
 
       - name: Build Flutter web app
+        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         working-directory: frontend/src
         run: flutter build web --release
 
       - name: Build Angular join page
+        if: needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
         working-directory: join_page
         run: |
           npm ci
@@ -263,6 +268,7 @@ jobs:
         timeout-minutes: 60
 
       - name: Get CloudFront distribution IDs
+        if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
         id: cf-ids
         run: |
           NAMESPACE="sandbox"
@@ -288,14 +294,17 @@ jobs:
           echo "join_page_bucket=$JOIN_PAGE_BUCKET" >> $GITHUB_OUTPUT
 
       - name: Deploy frontend to S3
+        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           aws s3 sync frontend/src/build/web "s3://${{ steps.cf-ids.outputs.frontend_bucket }}" --delete
 
       - name: Deploy join page to S3
+        if: needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           aws s3 sync join_page/dist/train-with-joe-join/browser "s3://${{ steps.cf-ids.outputs.join_page_bucket }}" --delete
 
       - name: Invalidate CloudFront caches
+        if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           aws cloudfront create-invalidation --distribution-id "${{ steps.cf-ids.outputs.frontend_dist_id }}" --paths "/*"
           aws cloudfront create-invalidation --distribution-id "${{ steps.cf-ids.outputs.join_page_dist_id }}" --paths "/*"
