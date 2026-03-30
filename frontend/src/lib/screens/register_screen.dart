@@ -66,7 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       // App branding
                       Icon(
-                        Icons.school,
+                        Icons.person_add_outlined,
                         size: 80,
                         color: theme.colorScheme.primary,
                       ),
