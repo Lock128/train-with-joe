@@ -174,18 +174,10 @@ void main() {
       expect(authProvider.isLoading, false);
     });
 
-    test('register success should authenticate user automatically', () async {
+    test('register success should return true without signing in (verification needed)', () async {
       // Arrange
-      final mockUser = createMockUser('new-user-id', 'newuser@example.com');
       when(mockAuthService.register(any, any, name: anyNamed('name')))
           .thenAnswer((_) async => {});
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
-            idToken: 'id-token',
-            expiresIn: 3600,
-          ));
-      when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       // Act
       final result = await authProvider.register(
@@ -196,13 +188,77 @@ void main() {
 
       // Assert
       expect(result, true);
-      expect(authProvider.isAuthenticated, true);
-      expect(authProvider.currentUser, mockUser);
+      expect(authProvider.isAuthenticated, false);
+      expect(authProvider.currentUser, null);
       expect(authProvider.error, null);
       expect(authProvider.isLoading, false);
       
       verify(mockAuthService.register('newuser@example.com', 'password123', name: 'New User')).called(1);
+      verifyNever(mockAuthService.signIn(any, any));
+    });
+
+    test('confirmSignUp success should verify and sign in user', () async {
+      // Arrange
+      final mockUser = createMockUser('new-user-id', 'newuser@example.com');
+      when(mockAuthService.confirmSignUp(any, any))
+          .thenAnswer((_) async => true);
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
+            accessToken: 'access-token',
+            refreshToken: 'refresh-token',
+            idToken: 'id-token',
+            expiresIn: 3600,
+          ));
+      when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
+
+      // Act
+      final result = await authProvider.confirmSignUp(
+        'newuser@example.com',
+        'password123',
+        '123456',
+      );
+
+      // Assert
+      expect(result, true);
+      expect(authProvider.isAuthenticated, true);
+      expect(authProvider.currentUser, mockUser);
+      expect(authProvider.error, null);
+      expect(authProvider.isLoading, false);
+
+      verify(mockAuthService.confirmSignUp('newuser@example.com', '123456')).called(1);
       verify(mockAuthService.signIn('newuser@example.com', 'password123')).called(1);
+    });
+
+    test('confirmSignUp failure should set error', () async {
+      // Arrange
+      when(mockAuthService.confirmSignUp(any, any))
+          .thenThrow(Exception('Invalid verification code'));
+
+      // Act
+      final result = await authProvider.confirmSignUp(
+        'newuser@example.com',
+        'password123',
+        '000000',
+      );
+
+      // Assert
+      expect(result, false);
+      expect(authProvider.isAuthenticated, false);
+      expect(authProvider.error, 'Invalid verification code');
+      expect(authProvider.isLoading, false);
+    });
+
+    test('resendCode success should return true', () async {
+      // Arrange
+      when(mockAuthService.resendSignUpCode(any))
+          .thenAnswer((_) async => {});
+
+      // Act
+      final result = await authProvider.resendCode('newuser@example.com');
+
+      // Assert
+      expect(result, true);
+      expect(authProvider.error, null);
+      expect(authProvider.isLoading, false);
     });
 
     test('register failure should set error and remain unauthenticated', () async {
@@ -226,18 +282,10 @@ void main() {
 
     test('register should set loading state during operation', () async {
       // Arrange
-      final mockUser = createMockUser('new-user-id', 'newuser@example.com');
       when(mockAuthService.register(any, any, name: anyNamed('name')))
           .thenAnswer((_) async {
         await Future.delayed(Duration(milliseconds: 100));
       });
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
-            idToken: 'id-token',
-            expiresIn: 3600,
-          ));
-      when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       // Act
       final registerFuture = authProvider.register('newuser@example.com', 'password123');

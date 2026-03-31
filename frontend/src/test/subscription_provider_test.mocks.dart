@@ -7,10 +7,10 @@ import 'dart:async' as _i3;
 import 'dart:ui' as _i7;
 
 import 'package:in_app_purchase/in_app_purchase.dart' as _i5;
+import 'package:mockito/mockito.dart' as _i1;
 import 'package:train_with_joe/providers/auth_provider.dart' as _i6;
 import 'package:train_with_joe/services/api_service.dart' as _i2;
 import 'package:train_with_joe/services/payment_service.dart' as _i4;
-import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -251,6 +251,26 @@ class MockAuthProvider extends _i1.Mock implements _i6.AuthProvider {
   _i3.Future<bool> register(String? email, String? password, {String? name}) =>
       (super.noSuchMethod(
             Invocation.method(#register, [email, password], {#name: name}),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> confirmSignUp(
+    String? email,
+    String? password,
+    String? code,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#confirmSignUp, [email, password, code]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> resendCode(String? email) =>
+      (super.noSuchMethod(
+            Invocation.method(#resendCode, [email]),
             returnValue: _i3.Future<bool>.value(false),
           )
           as _i3.Future<bool>);

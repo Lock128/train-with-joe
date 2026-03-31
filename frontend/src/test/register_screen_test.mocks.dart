@@ -6,8 +6,8 @@
 import 'dart:async' as _i4;
 
 import 'package:amplify_flutter/amplify_flutter.dart' as _i3;
-import 'package:train_with_joe/services/auth_service.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:train_with_joe/services/auth_service.dart' as _i2;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -68,6 +68,23 @@ class MockAuthService extends _i1.Mock implements _i2.AuthService {
   _i4.Future<void> register(String? email, String? password, {String? name}) =>
       (super.noSuchMethod(
             Invocation.method(#register, [email, password], {#name: name}),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<bool> confirmSignUp(String? email, String? code) =>
+      (super.noSuchMethod(
+            Invocation.method(#confirmSignUp, [email, code]),
+            returnValue: _i4.Future<bool>.value(false),
+          )
+          as _i4.Future<bool>);
+
+  @override
+  _i4.Future<void> resendSignUpCode(String? email) =>
+      (super.noSuchMethod(
+            Invocation.method(#resendSignUpCode, [email]),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
