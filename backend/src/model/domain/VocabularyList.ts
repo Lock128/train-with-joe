@@ -6,6 +6,7 @@ export type VocabularyListStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
 export interface VocabularyWord {
   word: string;
+  translation?: string;
   definition: string;
   partOfSpeech?: string;
   exampleSentence?: string;
@@ -18,7 +19,8 @@ export interface VocabularyList {
   title?: string;
   sourceImageKey?: string;
   words: VocabularyWord[];
-  language?: string;
+  sourceLanguage?: string;
+  targetLanguage?: string;
   status?: VocabularyListStatus;
   errorMessage?: string;
   createdAt: string;

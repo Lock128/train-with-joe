@@ -52,6 +52,7 @@ type Subscription @aws_cognito_user_pools {
 
 type VocabularyWord @aws_cognito_user_pools {
   word: String!
+  translation: String
   definition: String!
   partOfSpeech: String
   exampleSentence: String
@@ -64,7 +65,8 @@ type VocabularyList @aws_cognito_user_pools {
   title: String
   words: [VocabularyWord!]!
   sourceImageKey: String
-  language: String
+  sourceLanguage: String
+  targetLanguage: String
   status: VocabularyListStatus
   errorMessage: String
   createdAt: AWSDateTime!
@@ -115,7 +117,8 @@ input GenerateContentInput @aws_cognito_user_pools {
 
 input AnalyzeImageVocabularyInput @aws_cognito_user_pools {
   imageS3Keys: [String!]!
-  language: String
+  sourceLanguage: String
+  targetLanguage: String
 }
 
 input GetImageUploadUrlsInput @aws_cognito_user_pools {

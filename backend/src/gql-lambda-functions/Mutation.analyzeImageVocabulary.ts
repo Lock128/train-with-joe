@@ -9,7 +9,8 @@ import { VocabularyListRepository } from '../repositories/vocabulary-list-reposi
 
 interface AnalyzeImageVocabularyInput {
   imageS3Keys: string[];
-  language?: string;
+  sourceLanguage?: string;
+  targetLanguage?: string;
 }
 
 interface Event {
@@ -54,7 +55,8 @@ export const handler = async (event: Event) => {
       title: 'Analyzing...',
       words: [],
       sourceImageKey: input.imageS3Keys[0],
-      language: input.language || 'English',
+      sourceLanguage: input.sourceLanguage,
+      targetLanguage: input.targetLanguage,
       status: 'PENDING',
       createdAt: now,
       updatedAt: now,
@@ -69,7 +71,8 @@ export const handler = async (event: Event) => {
           vocabularyListId,
           userId,
           imageS3Keys: input.imageS3Keys,
-          language: input.language,
+          sourceLanguage: input.sourceLanguage,
+          targetLanguage: input.targetLanguage,
         }),
       }),
     );

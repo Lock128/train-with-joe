@@ -72,7 +72,8 @@ class VocabularyProvider extends ChangeNotifier {
   /// Upload images to S3 and analyze them for vocabulary words
   Future<Map<String, dynamic>?> analyzeImages(
     List<Uint8List> images, {
-    String? language,
+    String? sourceLanguage,
+    String? targetLanguage,
   }) async {
     _isAnalyzing = true;
     _error = null;
@@ -100,8 +101,8 @@ class VocabularyProvider extends ChangeNotifier {
           analyzeImageVocabulary(input: \$input) {
             success
             vocabularyList {
-              id userId title language status errorMessage createdAt updatedAt
-              words { word definition partOfSpeech exampleSentence difficulty }
+              id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
+              words { word translation definition partOfSpeech exampleSentence difficulty }
             }
             error
           }
@@ -113,7 +114,8 @@ class VocabularyProvider extends ChangeNotifier {
         variables: {
           'input': {
             'imageS3Keys': s3Keys,
-            if (language != null) 'language': language,
+            if (sourceLanguage != null) 'sourceLanguage': sourceLanguage,
+            if (targetLanguage != null) 'targetLanguage': targetLanguage,
           },
         },
       );
@@ -163,8 +165,8 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyLists {
           getVocabularyLists {
-            id userId title language status errorMessage createdAt updatedAt
-            words { word definition partOfSpeech exampleSentence difficulty }
+            id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
+            words { word translation definition partOfSpeech exampleSentence difficulty }
           }
         }
       ''';
@@ -189,8 +191,8 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyList(\$id: ID!) {
           getVocabularyList(id: \$id) {
-            id userId title language status errorMessage createdAt updatedAt
-            words { word definition partOfSpeech exampleSentence difficulty }
+            id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
+            words { word translation definition partOfSpeech exampleSentence difficulty }
           }
         }
       ''';
@@ -225,12 +227,13 @@ class VocabularyProvider extends ChangeNotifier {
               id
               userId
               title
-              language
+              sourceLanguage
+              targetLanguage
               status
               errorMessage
               createdAt
               updatedAt
-              words { word definition partOfSpeech exampleSentence difficulty }
+              words { word translation definition partOfSpeech exampleSentence difficulty }
             }
           }
         ''';

@@ -280,17 +280,20 @@ Provide an improved version that maintains the original meaning but is more poli
   async analyzeImageForVocabulary(
     imageBase64: string,
     userId: string,
-    language?: string,
+    sourceLanguage?: string,
+    targetLanguage?: string,
   ): Promise<{
     title: string;
     words: Array<{
       word: string;
+      translation?: string;
       definition: string;
       partOfSpeech?: string;
       exampleSentence?: string;
       difficulty?: string;
     }>;
-    language: string;
+    sourceLanguage: string;
+    targetLanguage: string;
   }> {
     // Check rate limit
     if (!this.checkRateLimit(userId)) {
@@ -310,23 +313,28 @@ Provide an improved version that maintains the original meaning but is more poli
     }
 
     try {
-      const languageInstruction = language ? `The vocabulary words should be in ${language}.` : '';
-      const prompt = `Analyze this image and extract up to 10 vocabulary words suitable for kids learning. ${languageInstruction}
+      const languageInstruction =
+        sourceLanguage && targetLanguage
+          ? `The image contains vocabulary translating from ${sourceLanguage} to ${targetLanguage}. Use these as the source and target languages.`
+          : 'Detect the languages used in the image. If the image contains translations between two languages, identify both.';
+      const prompt = `Analyze this image and extract all vocabulary words suitable for language learners. Capture the words in the same way as they are noted in the image. ${languageInstruction}
 
 Return a JSON object with ONLY these fields:
 - "title": a brief description of the image (max 10 words)
+- "sourceLanguage": the language words are translated FROM (e.g. "English")
+- "targetLanguage": the language words are translated TO (e.g. "German"). If the image is monolingual, set this to the same value as sourceLanguage.
 - "words": an array of up to 10 objects, each with:
-  - "word": the vocabulary word
-  - "definition": a kid-friendly definition (max 20 words)
+  - "word": the vocabulary word in the source language
+  - "translation": the translation in the target language (if available)
+  - "definition": a learner-friendly definition (max 20 words)
   - "partOfSpeech": noun, verb, adjective, adverb, or other
   - "exampleSentence": a simple example sentence (max 15 words)
   - "difficulty": easy, medium, or hard
-- "language": the language of the vocabulary words
 
 Return ONLY valid JSON, no markdown, no code blocks, no extra text.`;
 
       console.log(
-        `[analyzeImageForVocabulary] Starting analysis for user=${userId}, model=${this.modelId}, language=${language || 'default'}, imageSize=${imageBase64.length} chars`,
+        `[analyzeImageForVocabulary] Starting analysis for user=${userId}, model=${this.modelId}, imageSize=${imageBase64.length} chars`,
       );
 
       const requestBody = this.buildMultimodalRequestBody(imageBase64, prompt, 4000);
@@ -395,7 +403,7 @@ Return ONLY valid JSON, no markdown, no code blocks, no extra text.`;
 
       const wordCount = parsed.words?.length || 0;
       console.log(
-        `[analyzeImageForVocabulary] Success: title="${parsed.title}", words=${wordCount}, language="${parsed.language}"`,
+        `[analyzeImageForVocabulary] Success: title="${parsed.title}", words=${wordCount}, sourceLanguage="${parsed.sourceLanguage}", targetLanguage="${parsed.targetLanguage}"`,
       );
 
       // Log usage
@@ -405,7 +413,8 @@ Return ONLY valid JSON, no markdown, no code blocks, no extra text.`;
       return {
         title: parsed.title || 'Vocabulary from Image',
         words: parsed.words || [],
-        language: parsed.language || language || 'English',
+        sourceLanguage: parsed.sourceLanguage || 'English',
+        targetLanguage: parsed.targetLanguage || parsed.sourceLanguage || 'English',
       };
     } catch (error) {
       console.error('Error analyzing image for vocabulary with Bedrock:', error);

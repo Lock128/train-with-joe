@@ -13,7 +13,8 @@ interface ProcessEvent {
   vocabularyListId: string;
   userId: string;
   imageS3Keys: string[];
-  language?: string;
+  sourceLanguage?: string;
+  targetLanguage?: string;
 }
 
 const s3 = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
@@ -26,18 +27,22 @@ async function getImageBase64(s3Key: string): Promise<string> {
 }
 
 export const handler = async (event: ProcessEvent) => {
-  const { vocabularyListId, userId, imageS3Keys, language } = event;
+  const { vocabularyListId, userId, imageS3Keys, sourceLanguage, targetLanguage } = event;
   const repository = VocabularyListRepository.getInstance();
 
   try {
     const aiService = getAIService();
     const allWords: VocabularyList['words'] = [];
     let title = '';
+    let detectedSourceLang = sourceLanguage || '';
+    let detectedTargetLang = targetLanguage || '';
 
     for (const s3Key of imageS3Keys) {
       const imageBase64 = await getImageBase64(s3Key);
-      const result = await aiService.analyzeImageForVocabulary(imageBase64, userId, language);
+      const result = await aiService.analyzeImageForVocabulary(imageBase64, userId, sourceLanguage, targetLanguage);
       if (!title) title = result.title;
+      if (!detectedSourceLang) detectedSourceLang = result.sourceLanguage;
+      if (!detectedTargetLang) detectedTargetLang = result.targetLanguage;
       allWords.push(...result.words);
     }
 
@@ -46,7 +51,8 @@ export const handler = async (event: ProcessEvent) => {
     await repository.update(vocabularyListId, {
       title: finalTitle,
       words: allWords,
-      language: language || 'English',
+      sourceLanguage: detectedSourceLang || undefined,
+      targetLanguage: detectedTargetLang || undefined,
       status: 'COMPLETED',
     });
 
