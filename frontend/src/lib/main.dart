@@ -233,7 +233,7 @@ class _MyAppState extends State<MyApp> {
                   borderSide: const BorderSide(color: Color(0xFF6C5CE7), width: 2),
                 ),
               ),
-              cardTheme: CardTheme(
+              cardTheme: CardThemeData(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),

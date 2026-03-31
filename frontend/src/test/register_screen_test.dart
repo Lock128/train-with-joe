@@ -93,7 +93,7 @@ void main() {
       // Assert
       expect(find.text('Create Account'), findsOneWidget);
       expect(find.text('Sign up to get started'), findsOneWidget);
-      expect(find.byIcon(Icons.person_add_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.rocket_launch), findsOneWidget);
       expect(find.byType(TextFormField), findsNWidgets(4)); // Name, email, password, confirm
       expect(find.text('Name (optional)'), findsOneWidget);
       expect(find.text('Email'), findsOneWidget);

@@ -88,7 +88,7 @@ void main() {
       // Assert
       expect(find.text('Welcome Back'), findsOneWidget);
       expect(find.text('Sign in to your account'), findsOneWidget);
-      expect(find.byIcon(Icons.lock_outline), findsOneWidget);
+      expect(find.byIcon(Icons.auto_stories), findsOneWidget);
       expect(find.byType(TextFormField), findsNWidgets(2)); // Email and password
       expect(find.text('Email'), findsOneWidget);
       expect(find.text('Password'), findsOneWidget);
