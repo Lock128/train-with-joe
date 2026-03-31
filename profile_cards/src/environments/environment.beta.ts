@@ -3,5 +3,5 @@ export const environment = {
   production: false,
   name: 'beta',
   apiBaseUrl: '',
-  cardsDomain: 'https://cards.beta.train-with-joe.com',
+  cardsDomain: 'https://cards.beta.trainwithjoe.com',
 };

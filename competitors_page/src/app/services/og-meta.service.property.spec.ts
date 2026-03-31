@@ -52,7 +52,7 @@ describe('OGMetaService Property Tests', () => {
 
     if (!Object.prototype.hasOwnProperty.call(window, 'mockLocation')) {
       Object.defineProperty(window, 'mockLocation', {
-        value: { href: 'https://train-with-joe.com/compare/test' },
+        value: { href: 'https://trainwithjoe.com/compare/test' },
         writable: true,
         configurable: true,
       });

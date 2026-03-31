@@ -173,7 +173,7 @@ export class OGMetaService {
         name: 'Train with Joe',
         applicationCategory: 'BusinessApplication',
         description: 'AI-powered social media management and automation platform',
-        url: 'https://train-with-joe.com',
+        url: 'https://trainwithjoe.com',
         offers: {
           '@type': 'Offer',
           price: '0',
@@ -224,7 +224,7 @@ export class OGMetaService {
           {
             '@type': 'SoftwareApplication',
             name: 'Train with Joe',
-            url: 'https://train-with-joe.com',
+            url: 'https://trainwithjoe.com',
             description: 'AI-powered social media management and automation platform',
             applicationCategory: 'BusinessApplication',
             offers: {

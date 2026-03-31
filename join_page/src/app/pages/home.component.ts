@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
@@ -24,7 +24,10 @@ export class HomeComponent {
   currentYear = new Date().getFullYear();
   step: FormStep = 'register';
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private ngZone: NgZone,
+  ) {}
 
   async onRegister() {
     if (!this.validateEmail(this.email)) {
@@ -45,17 +48,21 @@ export class HomeComponent {
 
     try {
       const confirmed = await this.authService.signUp(this.email, this.password);
-      if (confirmed) {
-        // Auto-confirmed (unlikely with email verification enabled), sign in directly
-        await this.signInAndRedirect();
-      } else {
-        this.step = 'verify';
-        this.showSuccess('Check your email for a verification code.');
-      }
+      this.ngZone.run(() => {
+        if (confirmed) {
+          // Auto-confirmed (unlikely with email verification enabled), sign in directly
+          this.signInAndRedirect();
+        } else {
+          this.step = 'verify';
+          this.showSuccess('Check your email for a verification code.');
+        }
+      });
     } catch (error: unknown) {
-      this.showError(this.parseError(error));
+      this.ngZone.run(() => this.showError(this.parseError(error)));
     } finally {
-      this.isLoading = false;
+      this.ngZone.run(() => {
+        this.isLoading = false;
+      });
     }
   }
 
@@ -70,12 +77,16 @@ export class HomeComponent {
 
     try {
       await this.authService.confirmSignUp(this.email, this.verificationCode.trim());
-      this.showSuccess('Email verified. Signing you in...');
-      await this.signInAndRedirect();
+      this.ngZone.run(() => {
+        this.showSuccess('Email verified. Signing you in...');
+        this.signInAndRedirect();
+      });
     } catch (error: unknown) {
-      this.showError(this.parseError(error));
+      this.ngZone.run(() => this.showError(this.parseError(error)));
     } finally {
-      this.isLoading = false;
+      this.ngZone.run(() => {
+        this.isLoading = false;
+      });
     }
   }
 

@@ -19,7 +19,7 @@ export interface OGMetaConfig {
   providedIn: 'root',
 })
 export class OGMetaService {
-  private readonly baseUrl = 'https://train-with-joe.com/cards';
+  private readonly baseUrl = 'https://trainwithjoe.com/cards';
   private readonly defaultImage = `${this.baseUrl}/assets/images/og-profile.png`;
 
   constructor(

@@ -21,7 +21,7 @@ export class NavHeaderComponent {
 
   goToMainApp(): void {
     // This will be environment-specific
-    window.open('https://train-with-joe.com/join/', '_blank');
+    window.open('https://trainwithjoe.com/join/', '_blank');
   }
 
   onLogoError(event: Event): void {

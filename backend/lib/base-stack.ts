@@ -218,7 +218,7 @@ export class BaseStack extends Stack {
               
               <p>Enter this code in the app to verify your email address.</p>
               <p style="text-align: center; margin: 20px 0;">
-                <a href="https://train-with-joe.com/verify-email" 
+                <a href="https://trainwithjoe.com/verify-email" 
                    style="background-color: #1976d2; color: #fff; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-size: 16px;">
                   Open Verification Screen
                 </a>
@@ -325,8 +325,8 @@ export class BaseStack extends Stack {
   }
 
   createAssetsBucket(namespace: string): Bucket {
-    const domainName = namespace === 'prod' ? 'train-with-joe.com' : `${namespace}.train-with-joe.com`;
-    const allowedOrigins = [`https://${domainName}`];
+    const domainName = namespace === 'prod' ? 'trainwithjoe.com' : `${namespace}.trainwithjoe.com`;
+    const allowedOrigins = [`https://${domainName}`, 'https://*.cloudfront.net'];
     if (namespace !== 'prod') {
       allowedOrigins.push('http://localhost:*');
     }

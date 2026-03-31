@@ -160,9 +160,9 @@ Build output will be in the `dist/` directory.
 The app supports multiple environments:
 
 - **Local**: Development with mock data
-- **Sandbox**: Testing environment at `cards.sandbox.train-with-joe.com`
-- **Beta**: Staging environment at `cards.beta.train-with-joe.com`
-- **Production**: Live environment at `cards.train-with-joe.com`
+- **Sandbox**: Testing environment at `cards.sandbox.trainwithjoe.com`
+- **Beta**: Staging environment at `cards.beta.trainwithjoe.com`
+- **Production**: Live environment at `cards.trainwithjoe.com`
 
 ## Deployment
 
