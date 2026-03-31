@@ -81,10 +81,22 @@ export class AIService {
    * Build request body based on model type
    */
   private buildRequestBody(prompt: string, maxTokens: number = 1000): Record<string, unknown> {
-    const isClaudeOrNova =
-      this.modelId.includes('nova') || this.modelId.includes('sonnet') || this.modelId.includes('claude');
+    if (this.modelId.includes('nova')) {
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: [{ text: prompt }],
+          },
+        ],
+        inferenceConfig: {
+          temperature: 0.7,
+          maxTokens,
+        },
+      };
+    }
 
-    if (isClaudeOrNova) {
+    if (this.modelId.includes('sonnet') || this.modelId.includes('claude')) {
       return {
         messages: [
           {
@@ -188,8 +200,16 @@ Provide an improved version that maintains the original meaning but is more poli
         if (error.message.includes('throttling')) {
           throw new Error('Bedrock service is currently throttling requests. Please try again later.');
         }
-        if (error.message.includes('model')) {
-          throw new Error('Bedrock model is not available. Please contact support.');
+        if (error.message.includes('is not authorized to perform') || error.message.includes('AccessDeniedException')) {
+          throw new Error(
+            'Bedrock model access is not enabled. Please enable model access in the AWS Bedrock console.',
+          );
+        }
+        if (
+          error.message.includes('Could not resolve the foundation model') ||
+          error.message.includes('ValidationException')
+        ) {
+          throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
         }
       }
 
@@ -205,6 +225,31 @@ Provide an improved version that maintains the original meaning but is more poli
     textPrompt: string,
     maxTokens: number = 2000,
   ): Record<string, unknown> {
+    if (this.modelId.includes('nova')) {
+      // Amazon Nova multimodal format
+      return {
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                image: {
+                  format: 'jpeg',
+                  source: { bytes: imageBase64 },
+                },
+              },
+              { text: textPrompt },
+            ],
+          },
+        ],
+        inferenceConfig: {
+          temperature: 0.7,
+          maxTokens,
+        },
+      };
+    }
+
+    // Anthropic Claude multimodal format
     return {
       messages: [
         {
@@ -336,8 +381,16 @@ Return ONLY the JSON object, no additional text.`;
         if (error.message.includes('throttling')) {
           throw new Error('Bedrock service is currently throttling requests. Please try again later.');
         }
-        if (error.message.includes('model')) {
-          throw new Error('Bedrock model is not available. Please contact support.');
+        if (error.message.includes('is not authorized to perform') || error.message.includes('AccessDeniedException')) {
+          throw new Error(
+            'Bedrock model access is not enabled. Please enable model access in the AWS Bedrock console.',
+          );
+        }
+        if (
+          error.message.includes('Could not resolve the foundation model') ||
+          error.message.includes('ValidationException')
+        ) {
+          throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
         }
       }
 
@@ -392,8 +445,16 @@ Return ONLY the JSON object, no additional text.`;
         if (error.message.includes('throttling')) {
           throw new Error('Bedrock service is currently throttling requests. Please try again later.');
         }
-        if (error.message.includes('model')) {
-          throw new Error('Bedrock model is not available. Please contact support.');
+        if (error.message.includes('is not authorized to perform') || error.message.includes('AccessDeniedException')) {
+          throw new Error(
+            'Bedrock model access is not enabled. Please enable model access in the AWS Bedrock console.',
+          );
+        }
+        if (
+          error.message.includes('Could not resolve the foundation model') ||
+          error.message.includes('ValidationException')
+        ) {
+          throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
         }
       }
 

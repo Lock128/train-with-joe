@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
@@ -26,7 +26,7 @@ export class HomeComponent {
 
   constructor(
     private authService: AuthService,
-    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async onRegister() {
@@ -46,24 +46,25 @@ export class HomeComponent {
     this.isLoading = true;
     this.message = '';
 
+    let confirmed: boolean | undefined;
+    let signUpError: unknown;
+
     try {
-      const confirmed = await this.authService.signUp(this.email, this.password);
-      this.ngZone.run(() => {
-        if (confirmed) {
-          // Auto-confirmed (unlikely with email verification enabled), sign in directly
-          this.signInAndRedirect();
-        } else {
-          this.step = 'verify';
-          this.showSuccess('Check your email for a verification code.');
-        }
-      });
+      confirmed = await this.authService.signUp(this.email, this.password);
     } catch (error: unknown) {
-      this.ngZone.run(() => this.showError(this.parseError(error)));
-    } finally {
-      this.ngZone.run(() => {
-        this.isLoading = false;
-      });
+      signUpError = error;
     }
+
+    this.isLoading = false;
+    if (signUpError) {
+      this.showError(this.parseError(signUpError));
+    } else if (confirmed) {
+      this.signInAndRedirect();
+    } else {
+      this.step = 'verify';
+      this.showSuccess('Check your email for a verification code.');
+    }
+    this.cdr.detectChanges();
   }
 
   async onVerify() {
@@ -75,25 +76,27 @@ export class HomeComponent {
     this.isLoading = true;
     this.message = '';
 
+    let verifyError: unknown;
+
     try {
       await this.authService.confirmSignUp(this.email, this.verificationCode.trim());
-      this.ngZone.run(() => {
-        this.showSuccess('Email verified. Signing you in...');
-        this.signInAndRedirect();
-      });
     } catch (error: unknown) {
-      this.ngZone.run(() => this.showError(this.parseError(error)));
-    } finally {
-      this.ngZone.run(() => {
-        this.isLoading = false;
-      });
+      verifyError = error;
     }
+
+    this.isLoading = false;
+    if (verifyError) {
+      this.showError(this.parseError(verifyError));
+    } else {
+      this.showSuccess('Email verified. Signing you in...');
+      this.signInAndRedirect();
+    }
+    this.cdr.detectChanges();
   }
 
   private async signInAndRedirect() {
     try {
       const tokens = await this.authService.signIn(this.email, this.password);
-      // Redirect to the app with tokens so it can auto-login
       const params = new URLSearchParams({
         idToken: tokens.idToken,
         accessToken: tokens.accessToken,
@@ -101,8 +104,8 @@ export class HomeComponent {
       });
       window.location.href = `${environment.appUrl}/auth/callback?${params.toString()}`;
     } catch (error: unknown) {
-      // Sign-in failed after registration — send them to the app login page
       this.showError('Account created but auto-login failed. Redirecting to login...');
+      this.cdr.detectChanges();
       setTimeout(() => {
         window.location.href = `${environment.appUrl}/login`;
       }, 2000);

@@ -25,12 +25,27 @@ APP_CLIENT_ID=$(aws ssm get-parameter \
   --query "Parameter.Value" --output text)
 echo "  App Client ID: ${APP_CLIENT_ID}"
 
+# Resolve frontend app URL: try SSM first, fall back to convention
+APP_URL=$(aws ssm get-parameter \
+  --name "/${NAMESPACE}/config/frontend-url" \
+  --query "Parameter.Value" --output text 2>/dev/null || true)
+
+if [ -z "${APP_URL}" ]; then
+  if [ "${NAMESPACE}" = "production" ]; then
+    APP_URL="https://app.trainwithjoe.com"
+  else
+    APP_URL="https://app.${NAMESPACE}.trainwithjoe.com"
+  fi
+fi
+echo "  App URL: ${APP_URL}"
+
 for FILE in "${ENV_FILE}" "${ENV_PROD_FILE}"; do
   if [ -f "${FILE}" ]; then
     sed -i.bak \
       -e "s|REPLACE_WITH_REGION|${REGION}|g" \
       -e "s|REPLACE_WITH_USER_POOL_ID|${USER_POOL_ID}|g" \
       -e "s|REPLACE_WITH_USER_POOL_CLIENT_ID|${APP_CLIENT_ID}|g" \
+      -e "s|REPLACE_WITH_APP_URL|${APP_URL}|g" \
       "${FILE}"
     rm -f "${FILE}.bak"
     echo "  ✅ Patched ${FILE}"
