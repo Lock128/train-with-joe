@@ -1,5 +1,20 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 
+const { mockSend } = vi.hoisted(() => ({
+  mockSend: vi.fn(),
+}));
+
+vi.mock('@aws-sdk/client-s3', () => {
+  return {
+    S3Client: class {
+      send = mockSend;
+    },
+    GetObjectCommand: class {
+      constructor(public input: any) {}
+    },
+  };
+});
+
 vi.mock('../src/services/ai-service', () => ({
   getAIService: vi.fn(),
 }));
@@ -13,7 +28,6 @@ vi.mock('../src/repositories/vocabulary-list-repository', () => ({
 import { handler } from '../src/gql-lambda-functions/Mutation.analyzeImageVocabulary';
 import { getAIService } from '../src/services/ai-service';
 import { VocabularyListRepository } from '../src/repositories/vocabulary-list-repository';
-import type { VocabularyList } from '../src/model/domain/VocabularyList';
 
 const mockAnalyzeImageForVocabulary = vi.fn();
 const mockCreate = vi.fn();
@@ -26,6 +40,11 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     });
     (VocabularyListRepository.getInstance as any).mockReturnValue({
       create: mockCreate,
+    });
+    mockSend.mockResolvedValue({
+      Body: {
+        transformToByteArray: () => Promise.resolve(new Uint8Array(Buffer.from('imagedata'))),
+      },
     });
   });
 
@@ -52,23 +71,12 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     };
 
     mockAnalyzeImageForVocabulary.mockResolvedValue(aiResult);
-
-    const createdList: VocabularyList = {
-      id: 'test-uuid',
-      userId: 'user-123',
-      title: 'Kitchen Vocabulary',
-      words: aiResult.words,
-      language: 'English',
-      createdAt: '2024-01-01T00:00:00.000Z',
-      updatedAt: '2024-01-01T00:00:00.000Z',
-    };
-
-    mockCreate.mockResolvedValue(createdList);
+    mockCreate.mockImplementation((list: any) => Promise.resolve(list));
 
     const event = {
       arguments: {
         input: {
-          imageBase64: 'base64encodedimagedata',
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
           language: 'English',
         },
       },
@@ -83,8 +91,13 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     expect(result.vocabularyList).toBeDefined();
     expect(result.vocabularyList.title).toBe('Kitchen Vocabulary');
     expect(result.vocabularyList.words).toHaveLength(2);
+    expect(result.vocabularyList.sourceImageKey).toBe('uploads/user-123/image1.jpg');
     expect(result.error).toBeNull();
-    expect(mockAnalyzeImageForVocabulary).toHaveBeenCalledWith('base64encodedimagedata', 'user-123', 'English');
+    expect(mockAnalyzeImageForVocabulary).toHaveBeenCalledWith(
+      Buffer.from(new Uint8Array(Buffer.from('imagedata'))).toString('base64'),
+      'user-123',
+      'English',
+    );
     expect(mockCreate).toHaveBeenCalledTimes(1);
   });
 
@@ -92,7 +105,7 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     const event = {
       arguments: {
         input: {
-          imageBase64: 'base64encodedimagedata',
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
         },
       },
       identity: {
@@ -108,11 +121,11 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     expect(mockAnalyzeImageForVocabulary).not.toHaveBeenCalled();
   });
 
-  test('should return error when imageBase64 is missing', async () => {
+  test('should return error when imageS3Keys is empty', async () => {
     const event = {
       arguments: {
         input: {
-          imageBase64: '',
+          imageS3Keys: [],
         },
       },
       identity: {
@@ -124,7 +137,7 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
 
     expect(result.success).toBe(false);
     expect(result.vocabularyList).toBeNull();
-    expect(result.error).toBe('Image data is required');
+    expect(result.error).toBe('At least one image S3 key is required');
     expect(mockAnalyzeImageForVocabulary).not.toHaveBeenCalled();
   });
 
@@ -142,7 +155,7 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
 
     expect(result.success).toBe(false);
     expect(result.vocabularyList).toBeNull();
-    expect(result.error).toBe('Image data is required');
+    expect(result.error).toBe('At least one image S3 key is required');
   });
 
   test('should return error when AI service throws', async () => {
@@ -151,7 +164,7 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     const event = {
       arguments: {
         input: {
-          imageBase64: 'base64encodedimagedata',
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
         },
       },
       identity: {
@@ -178,7 +191,7 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     const event = {
       arguments: {
         input: {
-          imageBase64: 'base64encodedimagedata',
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
         },
       },
       identity: {
@@ -199,7 +212,7 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     const event = {
       arguments: {
         input: {
-          imageBase64: 'base64encodedimagedata',
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
         },
       },
       identity: {
