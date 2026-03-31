@@ -1,23 +1,19 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 
-const { mockSend } = vi.hoisted(() => ({
-  mockSend: vi.fn(),
+const { mockLambdaSend } = vi.hoisted(() => ({
+  mockLambdaSend: vi.fn(),
 }));
 
-vi.mock('@aws-sdk/client-s3', () => {
+vi.mock('@aws-sdk/client-lambda', () => {
   return {
-    S3Client: class {
-      send = mockSend;
+    LambdaClient: class {
+      send = mockLambdaSend;
     },
-    GetObjectCommand: class {
+    InvokeCommand: class {
       constructor(public input: any) {}
     },
   };
 });
-
-vi.mock('../src/services/ai-service', () => ({
-  getAIService: vi.fn(),
-}));
 
 vi.mock('../src/repositories/vocabulary-list-repository', () => ({
   VocabularyListRepository: {
@@ -26,53 +22,21 @@ vi.mock('../src/repositories/vocabulary-list-repository', () => ({
 }));
 
 import { handler } from '../src/gql-lambda-functions/Mutation.analyzeImageVocabulary';
-import { getAIService } from '../src/services/ai-service';
 import { VocabularyListRepository } from '../src/repositories/vocabulary-list-repository';
 
-const mockAnalyzeImageForVocabulary = vi.fn();
 const mockCreate = vi.fn();
 
 describe('Mutation.analyzeImageVocabulary handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (getAIService as any).mockReturnValue({
-      analyzeImageForVocabulary: mockAnalyzeImageForVocabulary,
-    });
     (VocabularyListRepository.getInstance as any).mockReturnValue({
       create: mockCreate,
     });
-    mockSend.mockResolvedValue({
-      Body: {
-        transformToByteArray: () => Promise.resolve(new Uint8Array(Buffer.from('imagedata'))),
-      },
-    });
+    mockCreate.mockImplementation((list: any) => Promise.resolve(list));
+    mockLambdaSend.mockResolvedValue({});
   });
 
-  test('should successfully analyze an image and return vocabulary list', async () => {
-    const aiResult = {
-      title: 'Kitchen Vocabulary',
-      words: [
-        {
-          word: 'spatula',
-          definition: 'A flat utensil used for mixing and spreading',
-          partOfSpeech: 'noun',
-          exampleSentence: 'Use the spatula to flip the pancake.',
-          difficulty: 'easy',
-        },
-        {
-          word: 'whisk',
-          definition: 'A utensil for whipping eggs or cream',
-          partOfSpeech: 'noun',
-          exampleSentence: 'She used a whisk to beat the eggs.',
-          difficulty: 'easy',
-        },
-      ],
-      language: 'English',
-    };
-
-    mockAnalyzeImageForVocabulary.mockResolvedValue(aiResult);
-    mockCreate.mockImplementation((list: any) => Promise.resolve(list));
-
+  test('should create a PENDING vocabulary list and invoke processor async', async () => {
     const event = {
       arguments: {
         input: {
@@ -80,37 +44,28 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
           language: 'English',
         },
       },
-      identity: {
-        sub: 'user-123',
-      },
+      identity: { sub: 'user-123' },
     };
 
     const result = await handler(event);
 
     expect(result.success).toBe(true);
     expect(result.vocabularyList).toBeDefined();
-    expect(result.vocabularyList.title).toBe('Kitchen Vocabulary');
-    expect(result.vocabularyList.words).toHaveLength(2);
+    expect(result.vocabularyList.title).toBe('Analyzing...');
+    expect(result.vocabularyList.status).toBe('PENDING');
+    expect(result.vocabularyList.words).toEqual([]);
     expect(result.vocabularyList.sourceImageKey).toBe('uploads/user-123/image1.jpg');
     expect(result.error).toBeNull();
-    expect(mockAnalyzeImageForVocabulary).toHaveBeenCalledWith(
-      Buffer.from(new Uint8Array(Buffer.from('imagedata'))).toString('base64'),
-      'user-123',
-      'English',
-    );
     expect(mockCreate).toHaveBeenCalledTimes(1);
+    expect(mockLambdaSend).toHaveBeenCalledTimes(1);
   });
 
   test('should return error when authentication is missing', async () => {
     const event = {
       arguments: {
-        input: {
-          imageS3Keys: ['uploads/user-123/image1.jpg'],
-        },
+        input: { imageS3Keys: ['uploads/user-123/image1.jpg'] },
       },
-      identity: {
-        sub: undefined as any,
-      },
+      identity: { sub: undefined as any },
     };
 
     const result = await handler(event);
@@ -118,19 +73,14 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     expect(result.success).toBe(false);
     expect(result.vocabularyList).toBeNull();
     expect(result.error).toBe('Authentication required');
-    expect(mockAnalyzeImageForVocabulary).not.toHaveBeenCalled();
+    expect(mockCreate).not.toHaveBeenCalled();
+    expect(mockLambdaSend).not.toHaveBeenCalled();
   });
 
   test('should return error when imageS3Keys is empty', async () => {
     const event = {
-      arguments: {
-        input: {
-          imageS3Keys: [],
-        },
-      },
-      identity: {
-        sub: 'user-123',
-      },
+      arguments: { input: { imageS3Keys: [] } },
+      identity: { sub: 'user-123' },
     };
 
     const result = await handler(event);
@@ -138,17 +88,12 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     expect(result.success).toBe(false);
     expect(result.vocabularyList).toBeNull();
     expect(result.error).toBe('At least one image S3 key is required');
-    expect(mockAnalyzeImageForVocabulary).not.toHaveBeenCalled();
   });
 
   test('should return error when input is null', async () => {
     const event = {
-      arguments: {
-        input: null as any,
-      },
-      identity: {
-        sub: 'user-123',
-      },
+      arguments: { input: null as any },
+      identity: { sub: 'user-123' },
     };
 
     const result = await handler(event);
@@ -158,45 +103,29 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     expect(result.error).toBe('At least one image S3 key is required');
   });
 
-  test('should return error when AI service throws', async () => {
-    mockAnalyzeImageForVocabulary.mockRejectedValue(new Error('Model invocation failed'));
-
+  test('should return error for invalid image key (wrong user prefix)', async () => {
     const event = {
       arguments: {
-        input: {
-          imageS3Keys: ['uploads/user-123/image1.jpg'],
-        },
+        input: { imageS3Keys: ['uploads/other-user/image1.jpg'] },
       },
-      identity: {
-        sub: 'user-123',
-      },
+      identity: { sub: 'user-123' },
     };
 
     const result = await handler(event);
 
     expect(result.success).toBe(false);
     expect(result.vocabularyList).toBeNull();
-    expect(result.error).toBe('Model invocation failed');
+    expect(result.error).toBe('Invalid image key');
   });
 
   test('should return error when repository create fails', async () => {
-    mockAnalyzeImageForVocabulary.mockResolvedValue({
-      title: 'Test',
-      words: [{ word: 'test', definition: 'a test' }],
-      language: 'English',
-    });
-
     mockCreate.mockRejectedValue(new Error('DynamoDB write failed'));
 
     const event = {
       arguments: {
-        input: {
-          imageS3Keys: ['uploads/user-123/image1.jpg'],
-        },
+        input: { imageS3Keys: ['uploads/user-123/image1.jpg'] },
       },
-      identity: {
-        sub: 'user-123',
-      },
+      identity: { sub: 'user-123' },
     };
 
     const result = await handler(event);
@@ -204,26 +133,40 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     expect(result.success).toBe(false);
     expect(result.vocabularyList).toBeNull();
     expect(result.error).toBe('DynamoDB write failed');
+    expect(mockLambdaSend).not.toHaveBeenCalled();
   });
 
-  test('should return generic error message for non-Error throws', async () => {
-    mockAnalyzeImageForVocabulary.mockRejectedValue('string error');
+  test('should return error when Lambda invoke fails', async () => {
+    mockLambdaSend.mockRejectedValue(new Error('Lambda invoke failed'));
 
     const event = {
       arguments: {
-        input: {
-          imageS3Keys: ['uploads/user-123/image1.jpg'],
-        },
+        input: { imageS3Keys: ['uploads/user-123/image1.jpg'] },
       },
-      identity: {
-        sub: 'user-123',
-      },
+      identity: { sub: 'user-123' },
     };
 
     const result = await handler(event);
 
     expect(result.success).toBe(false);
     expect(result.vocabularyList).toBeNull();
-    expect(result.error).toBe('Failed to analyze image for vocabulary');
+    expect(result.error).toBe('Lambda invoke failed');
+  });
+
+  test('should return generic error message for non-Error throws', async () => {
+    mockCreate.mockRejectedValue('string error');
+
+    const event = {
+      arguments: {
+        input: { imageS3Keys: ['uploads/user-123/image1.jpg'] },
+      },
+      identity: { sub: 'user-123' },
+    };
+
+    const result = await handler(event);
+
+    expect(result.success).toBe(false);
+    expect(result.vocabularyList).toBeNull();
+    expect(result.error).toBe('Failed to start image analysis');
   });
 });
