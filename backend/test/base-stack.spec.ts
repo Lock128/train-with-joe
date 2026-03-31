@@ -60,6 +60,27 @@ describe('BaseStack CDK Integration Tests', () => {
     template.resourceCountIs('AWS::Cognito::UserPoolClient', 1);
   });
 
+  test('should create Cognito Identity Pool linked to User Pool', { timeout: 60000 }, () => {
+    const app = new App();
+
+    const baseStack = new BaseStack(app, 'TestBaseStack', {
+      env: {
+        account: '123456789012',
+        region: 'us-east-1',
+      },
+      namespace: 'test',
+    });
+
+    const template = Template.fromStack(baseStack);
+
+    template.hasResourceProperties('AWS::Cognito::IdentityPool', {
+      IdentityPoolName: 'TrainWithJoe_test',
+      AllowUnauthenticatedIdentities: false,
+    });
+
+    template.resourceCountIs('AWS::Cognito::IdentityPoolRoleAttachment', 1);
+  });
+
   test('should create DynamoDB users table with correct schema', { timeout: 60000 }, () => {
     const app = new App();
 
@@ -217,6 +238,10 @@ describe('BaseStack CDK Integration Tests', () => {
 
     template.hasResourceProperties('AWS::SSM::Parameter', {
       Name: '/test/config/vocabulary-lists-table-name',
+    });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/test/config/cognito-identity-pool-id',
     });
   });
 

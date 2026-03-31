@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_api/amplify_api.dart';
@@ -69,13 +71,7 @@ class ApiService {
   /// Parse JSON response string to Map
   Map<String, dynamic> _parseResponse(String responseData) {
     try {
-      // The response data is already a JSON string, parse it
-      final dynamic parsed = responseData;
-      if (parsed is String) {
-        // If it's still a string, it needs parsing
-        return {};
-      }
-      return parsed as Map<String, dynamic>;
+      return jsonDecode(responseData) as Map<String, dynamic>;
     } catch (e) {
       debugPrint('Error parsing response: $e');
       return {};

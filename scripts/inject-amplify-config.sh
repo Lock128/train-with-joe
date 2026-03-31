@@ -32,16 +32,11 @@ API_URL=$(aws cloudformation describe-stacks \
   --output text)
 echo "  API URL: ${API_URL}"
 
-# Identity Pool ID is optional — not all environments have one
-IDENTITY_POOL_ID=$(aws cognito-identity list-identity-pools --max-results 10 \
-  --query "IdentityPools[?starts_with(IdentityPoolName, 'TrainWithJoe')].IdentityPoolId | [0]" \
-  --output text 2>/dev/null || echo "")
-if [ "${IDENTITY_POOL_ID}" = "None" ] || [ -z "${IDENTITY_POOL_ID}" ]; then
-  IDENTITY_POOL_ID="${REGION}:00000000-0000-0000-0000-000000000000"
-  echo "  Identity Pool ID: not found, using placeholder"
-else
-  echo "  Identity Pool ID: ${IDENTITY_POOL_ID}"
-fi
+# Fetch Identity Pool ID from SSM
+IDENTITY_POOL_ID=$(aws ssm get-parameter \
+  --name "/${NAMESPACE}/config/cognito-identity-pool-id" \
+  --query "Parameter.Value" --output text)
+echo "  Identity Pool ID: ${IDENTITY_POOL_ID}"
 
 # Patch the config file
 sed -i.bak \

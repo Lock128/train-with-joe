@@ -28,6 +28,7 @@ echo "  App Client ID: ${APP_CLIENT_ID}"
 for FILE in "${ENV_FILE}" "${ENV_PROD_FILE}"; do
   if [ -f "${FILE}" ]; then
     sed -i.bak \
+      -e "s|REPLACE_WITH_REGION|${REGION}|g" \
       -e "s|REPLACE_WITH_USER_POOL_ID|${USER_POOL_ID}|g" \
       -e "s|REPLACE_WITH_USER_POOL_CLIENT_ID|${APP_CLIENT_ID}|g" \
       "${FILE}"

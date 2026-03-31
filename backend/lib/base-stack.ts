@@ -2,11 +2,14 @@ import * as cdk from 'aws-cdk-lib';
 import { RemovalPolicy, Stack, type Environment } from 'aws-cdk-lib';
 import {
   AccountRecovery,
+  CfnIdentityPool,
+  CfnIdentityPoolRoleAttachment,
   UserPool,
   UserPoolEmail,
   type UserPoolClient,
   type CfnUserPool,
 } from 'aws-cdk-lib/aws-cognito';
+import { FederatedPrincipal, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
 import { AttributeType, BillingMode, StreamViewType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { BlockPublicAccess, Bucket, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import { EmailIdentity, Identity } from 'aws-cdk-lib/aws-ses';
@@ -29,6 +32,7 @@ export class BaseStack extends Stack {
   public readonly vocabularyListsTable: Table;
   public readonly assetsBucket: Bucket;
   public readonly assetsBucketNameParameterName: string;
+  public readonly identityPoolId: string;
   private readonly namespace: string;
 
   constructor(scope: Construct, id: string, props: BaseStackProps) {
@@ -91,6 +95,57 @@ export class BaseStack extends Stack {
     new StringParameter(this, 'UserPoolIdParameter', {
       stringValue: this.userPool.userPoolId,
       parameterName: this.userPoolIdParameterName,
+      simpleName: false,
+    });
+
+    // Create Cognito Identity Pool for IAM-based auth (used by image uploads)
+    const identityPool = new CfnIdentityPool(this, 'IdentityPool', {
+      identityPoolName: `TrainWithJoe_${namespace}`,
+      allowUnauthenticatedIdentities: false,
+      cognitoIdentityProviders: [
+        {
+          clientId: userPoolSetup.frontendClient.userPoolClientId,
+          providerName: this.userPool.userPoolProviderName,
+        },
+      ],
+    });
+    this.identityPoolId = identityPool.ref;
+
+    // Authenticated role for Identity Pool users
+    const authenticatedRole = new Role(this, 'CognitoAuthenticatedRole', {
+      assumedBy: new FederatedPrincipal(
+        'cognito-identity.amazonaws.com',
+        {
+          StringEquals: {
+            'cognito-identity.amazonaws.com:aud': identityPool.ref,
+          },
+          'ForAnyValue:StringLike': {
+            'cognito-identity.amazonaws.com:amr': 'authenticated',
+          },
+        },
+        'sts:AssumeRoleWithWebIdentity',
+      ),
+    });
+
+    // Grant authenticated users access to the assets bucket
+    authenticatedRole.addToPolicy(
+      new PolicyStatement({
+        actions: ['s3:GetObject', 's3:PutObject'],
+        resources: [`${this.assetsBucket.bucketArn}/*`],
+      }),
+    );
+
+    new CfnIdentityPoolRoleAttachment(this, 'IdentityPoolRoleAttachment', {
+      identityPoolId: identityPool.ref,
+      roles: {
+        authenticated: authenticatedRole.roleArn,
+      },
+    });
+
+    // Export Identity Pool ID parameter
+    new StringParameter(this, 'IdentityPoolIdParameter', {
+      stringValue: identityPool.ref,
+      parameterName: `/${namespace}/config/cognito-identity-pool-id`,
       simpleName: false,
     });
   }
