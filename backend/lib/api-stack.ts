@@ -141,27 +141,38 @@ export class APIStack extends cdk.Stack {
       },
     };
 
-    // Create analyzeImageVocabulary Lambda function
-    const analyzeImageVocabularyFunction = new NodejsFunction(this, 'AnalyzeImageVocabularyFunction', {
+    // Create async processing Lambda for image vocabulary analysis (long-running Bedrock calls)
+    const processImageVocabularyFunction = new NodejsFunction(this, 'ProcessImageVocabularyFunction', {
       ...vocabularyLambdaProps,
-      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.analyzeImageVocabulary.ts'),
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 512,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/process-image-vocabulary.ts'),
       handler: 'handler',
     });
 
-    // Grant DynamoDB permissions
-    vocabularyListsTable.grantReadWriteData(analyzeImageVocabularyFunction);
-
-    // Grant S3 read permissions for reading uploaded images
-    assetsBucket.grantRead(analyzeImageVocabularyFunction);
-
-    // Grant Bedrock permissions
-    analyzeImageVocabularyFunction.addToRolePolicy(
+    vocabularyListsTable.grantReadWriteData(processImageVocabularyFunction);
+    assetsBucket.grantRead(processImageVocabularyFunction);
+    processImageVocabularyFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
         actions: ['bedrock:InvokeModel'],
         resources: ['*'],
       }),
     );
+
+    // Create analyzeImageVocabulary mutation Lambda (fast — creates PENDING record, invokes processor async)
+    const analyzeImageVocabularyFunction = new NodejsFunction(this, 'AnalyzeImageVocabularyFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.analyzeImageVocabulary.ts'),
+      handler: 'handler',
+      environment: {
+        ...vocabularyLambdaProps.environment,
+        PROCESS_IMAGE_VOCABULARY_FUNCTION_NAME: processImageVocabularyFunction.functionName,
+      },
+    });
+
+    vocabularyListsTable.grantReadWriteData(analyzeImageVocabularyFunction);
+    processImageVocabularyFunction.grantInvoke(analyzeImageVocabularyFunction);
 
     // Add Lambda data source and resolver for analyzeImageVocabulary
     const analyzeImageVocabularyDataSource = api.addLambdaDataSource(

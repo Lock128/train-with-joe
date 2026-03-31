@@ -12,6 +12,12 @@ enum SubscriptionStatus @aws_cognito_user_pools {
   PAST_DUE
 }
 
+enum VocabularyListStatus @aws_cognito_user_pools {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
 enum PaymentProvider @aws_cognito_user_pools {
   STRIPE
   APPLE_APP_STORE
@@ -59,6 +65,8 @@ type VocabularyList @aws_cognito_user_pools {
   words: [VocabularyWord!]!
   sourceImageKey: String
   language: String
+  status: VocabularyListStatus
+  errorMessage: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }

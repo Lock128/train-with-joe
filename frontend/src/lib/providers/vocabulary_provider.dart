@@ -97,7 +97,7 @@ class VocabularyProvider extends ChangeNotifier {
           analyzeImageVocabulary(input: \$input) {
             success
             vocabularyList {
-              id userId title language createdAt updatedAt
+              id userId title language status errorMessage createdAt updatedAt
               words { word definition partOfSpeech exampleSentence difficulty }
             }
             error
@@ -120,8 +120,18 @@ class VocabularyProvider extends ChangeNotifier {
       if (result != null && result['success'] == true) {
         final vocabularyList = result['vocabularyList'] as Map<String, dynamic>?;
         if (vocabularyList != null) {
-          _currentList = vocabularyList;
-          _vocabularyLists.add(vocabularyList);
+          // Poll until the async processing completes
+          final completed = await _pollForCompletion(vocabularyList['id'] as String);
+          if (completed != null) {
+            _currentList = completed;
+            _vocabularyLists.add(completed);
+            return completed;
+          } else {
+            _error = 'Analysis timed out. Check your vocabulary lists later.';
+            // Still add the pending list so the user can find it
+            _vocabularyLists.add(vocabularyList);
+            return null;
+          }
         }
         return vocabularyList;
       } else {
@@ -150,7 +160,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyLists {
           getVocabularyLists {
-            id userId title language createdAt updatedAt
+            id userId title language status errorMessage createdAt updatedAt
             words { word definition partOfSpeech exampleSentence difficulty }
           }
         }
@@ -176,7 +186,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyList(\$id: ID!) {
           getVocabularyList(id: \$id) {
-            id userId title language createdAt updatedAt
+            id userId title language status errorMessage createdAt updatedAt
             words { word definition partOfSpeech exampleSentence difficulty }
           }
         }
@@ -192,6 +202,46 @@ class VocabularyProvider extends ChangeNotifier {
       notifyListeners();
       return null;
     }
+  }
+
+  /// Poll getVocabularyList until status is COMPLETED or FAILED
+  Future<Map<String, dynamic>?> _pollForCompletion(String id) async {
+    const maxAttempts = 60; // up to ~3 minutes with 3s intervals
+    const pollInterval = Duration(seconds: 3);
+
+    for (var i = 0; i < maxAttempts; i++) {
+      await Future.delayed(pollInterval);
+
+      try {
+        const query = '''
+          query GetVocabularyList(\$id: ID!) {
+            getVocabularyList(id: \$id) {
+              id userId title language status errorMessage createdAt updatedAt
+              words { word definition partOfSpeech exampleSentence difficulty }
+            }
+          }
+        ''';
+
+        final response = await _apiService.query(query, variables: {'id': id});
+        final list = response['getVocabularyList'] as Map<String, dynamic>?;
+
+        if (list == null) continue;
+
+        final status = list['status'] as String?;
+        if (status == 'COMPLETED') return list;
+        if (status == 'FAILED') {
+          _error = list['errorMessage'] as String? ?? 'Analysis failed';
+          return null;
+        }
+        // Still PENDING — keep polling
+      } catch (e) {
+        debugPrint('Polling error (attempt ${i + 1}): $e');
+        // Don't break on transient errors, keep trying
+      }
+    }
+
+    // Timed out
+    return null;
   }
 
   /// Clear vocabulary data (on sign out)

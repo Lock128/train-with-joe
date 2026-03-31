@@ -2,6 +2,8 @@
  * Domain models for VocabularyList entity
  */
 
+export type VocabularyListStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
+
 export interface VocabularyWord {
   word: string;
   definition: string;
@@ -17,6 +19,8 @@ export interface VocabularyList {
   sourceImageKey?: string;
   words: VocabularyWord[];
   language?: string;
+  status?: VocabularyListStatus;
+  errorMessage?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,13 +1,10 @@
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getAIService } from '../services/ai-service';
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { VocabularyListRepository } from '../repositories/vocabulary-list-repository';
-import type { VocabularyList } from '../model/domain/VocabularyList';
 
 /**
  * Lambda resolver for Mutation.analyzeImageVocabulary
- * Reads images from S3 and analyzes them using Amazon Bedrock AI to extract vocabulary words.
- * Supports multiple images per request — each image produces its own VocabularyList,
- * but for now we merge all words into a single list.
+ * Creates a PENDING vocabulary list record and asynchronously invokes the
+ * processing Lambda to do the actual Bedrock analysis (avoids AppSync 30s timeout).
  */
 
 interface AnalyzeImageVocabularyInput {
@@ -24,14 +21,8 @@ interface Event {
   };
 }
 
-const s3 = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
-const BUCKET = process.env.ASSETS_BUCKET_NAME!;
-
-async function getImageBase64(s3Key: string): Promise<string> {
-  const response = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: s3Key }));
-  const bytes = await response.Body!.transformToByteArray();
-  return Buffer.from(bytes).toString('base64');
-}
+const lambdaClient = new LambdaClient({ region: process.env.AWS_REGION || 'us-east-1' });
+const PROCESSOR_FUNCTION_NAME = process.env.PROCESS_IMAGE_VOCABULARY_FUNCTION_NAME!;
 
 export const handler = async (event: Event) => {
   const userId = event.identity?.sub;
@@ -45,7 +36,6 @@ export const handler = async (event: Event) => {
     return { success: false, vocabularyList: null, error: 'At least one image S3 key is required' };
   }
 
-  // Validate that all keys belong to this user
   for (const key of input.imageS3Keys) {
     if (!key.startsWith(`uploads/${userId}/`)) {
       return { success: false, vocabularyList: null, error: 'Invalid image key' };
@@ -53,38 +43,44 @@ export const handler = async (event: Event) => {
   }
 
   try {
-    const aiService = getAIService();
-    const allWords: VocabularyList['words'] = [];
-    let title = '';
-
-    for (const s3Key of input.imageS3Keys) {
-      const imageBase64 = await getImageBase64(s3Key);
-      const result = await aiService.analyzeImageForVocabulary(imageBase64, userId, input.language);
-      if (!title) title = result.title;
-      allWords.push(...result.words);
-    }
-
     const repository = VocabularyListRepository.getInstance();
-    const vocabularyList: VocabularyList = {
-      id: crypto.randomUUID(),
+
+    // Create a PENDING record immediately — returned to the client right away
+    const vocabularyListId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const pendingList = await repository.create({
+      id: vocabularyListId,
       userId,
-      title: input.imageS3Keys.length > 1 ? `${title} (+${input.imageS3Keys.length - 1} more)` : title,
-      words: allWords,
+      title: 'Analyzing...',
+      words: [],
       sourceImageKey: input.imageS3Keys[0],
       language: input.language || 'English',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      status: 'PENDING',
+      createdAt: now,
+      updatedAt: now,
+    });
 
-    const created = await repository.create(vocabularyList);
+    // Fire-and-forget: invoke the processing Lambda asynchronously
+    await lambdaClient.send(
+      new InvokeCommand({
+        FunctionName: PROCESSOR_FUNCTION_NAME,
+        InvocationType: 'Event', // async, no waiting for response
+        Payload: JSON.stringify({
+          vocabularyListId,
+          userId,
+          imageS3Keys: input.imageS3Keys,
+          language: input.language,
+        }),
+      }),
+    );
 
-    return { success: true, vocabularyList: created, error: null };
+    return { success: true, vocabularyList: pendingList, error: null };
   } catch (error) {
-    console.error('Error analyzing image for vocabulary:', error);
+    console.error('Error initiating image vocabulary analysis:', error);
     return {
       success: false,
       vocabularyList: null,
-      error: error instanceof Error ? error.message : 'Failed to analyze image for vocabulary',
+      error: error instanceof Error ? error.message : 'Failed to start image analysis',
     };
   }
 };

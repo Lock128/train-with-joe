@@ -311,21 +311,28 @@ Provide an improved version that maintains the original meaning but is more poli
 
     try {
       const languageInstruction = language ? `The vocabulary words should be in ${language}.` : '';
-      const prompt = `Analyze this image and extract vocabulary words suitable for kids learning. ${languageInstruction}
+      const prompt = `Analyze this image and extract up to 10 vocabulary words suitable for kids learning. ${languageInstruction}
 
-Return a JSON object with the following fields:
-- "title": a brief description of the image content
-- "words": an array of objects, each with:
+Return a JSON object with ONLY these fields:
+- "title": a brief description of the image (max 10 words)
+- "words": an array of up to 10 objects, each with:
   - "word": the vocabulary word
-  - "definition": a kid-friendly definition
-  - "partOfSpeech": the part of speech (noun, verb, adjective, etc.)
-  - "exampleSentence": a simple example sentence using the word
-  - "difficulty": one of "easy", "medium", or "hard"
+  - "definition": a kid-friendly definition (max 20 words)
+  - "partOfSpeech": noun, verb, adjective, adverb, or other
+  - "exampleSentence": a simple example sentence (max 15 words)
+  - "difficulty": easy, medium, or hard
 - "language": the language of the vocabulary words
 
-Return ONLY the JSON object, no additional text.`;
+Return ONLY valid JSON, no markdown, no code blocks, no extra text.`;
 
-      const requestBody = this.buildMultimodalRequestBody(imageBase64, prompt);
+      console.log(
+        `[analyzeImageForVocabulary] Starting analysis for user=${userId}, model=${this.modelId}, language=${language || 'default'}, imageSize=${imageBase64.length} chars`,
+      );
+
+      const requestBody = this.buildMultimodalRequestBody(imageBase64, prompt, 4000);
+
+      console.log('[analyzeImageForVocabulary] Sending request to Bedrock...');
+      const startTime = Date.now();
 
       const response = await this.bedrockClient.send(
         new InvokeModelCommand({
@@ -336,26 +343,60 @@ Return ONLY the JSON object, no additional text.`;
         }),
       );
 
+      const elapsed = Date.now() - startTime;
+      console.log(`[analyzeImageForVocabulary] Bedrock responded in ${elapsed}ms`);
+
       const responseBody = JSON.parse(new TextDecoder().decode(response.body));
       const responseText = this.extractResponseText(responseBody);
 
+      console.log(`[analyzeImageForVocabulary] Response text length: ${responseText?.length || 0} chars`);
       if (!responseText) {
+        console.error(
+          '[analyzeImageForVocabulary] Empty response from Bedrock, responseBody keys:',
+          Object.keys(responseBody),
+        );
         throw new Error('No content returned from Bedrock');
       }
 
-      // Parse JSON from response (handle both raw JSON and JSON embedded in text)
+      // Parse JSON from response (handle markdown fences and embedded JSON)
       let parsed;
       try {
-        parsed = JSON.parse(responseText);
-      } catch {
-        // Try to extract JSON from text (e.g., markdown code blocks)
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        // Strip markdown code fences if present
+        const stripped = responseText
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/\s*```\s*$/, '')
+          .trim();
+        parsed = JSON.parse(stripped);
+        console.log('[analyzeImageForVocabulary] JSON parsed successfully (direct)');
+      } catch (parseError) {
+        console.warn(
+          `[analyzeImageForVocabulary] Direct JSON parse failed: ${parseError instanceof Error ? parseError.message : parseError}`,
+        );
+        console.warn(`[analyzeImageForVocabulary] Response text (first 500 chars): ${responseText.substring(0, 500)}`);
+        console.warn(
+          `[analyzeImageForVocabulary] Response text (last 500 chars): ${responseText.substring(Math.max(0, responseText.length - 500))}`,
+        );
+
+        // Try to extract the first complete JSON object
+        const jsonMatch = responseText.match(/\{[^]*?\}(?=\s*$|\s*```)/);
         if (jsonMatch) {
-          parsed = JSON.parse(jsonMatch[0]);
+          try {
+            parsed = JSON.parse(jsonMatch[0]);
+            console.log('[analyzeImageForVocabulary] JSON parsed successfully (regex extraction)');
+          } catch {
+            console.error('[analyzeImageForVocabulary] Regex-extracted JSON also failed to parse');
+            throw new Error('Failed to parse vocabulary response as JSON');
+          }
         } else {
+          console.error('[analyzeImageForVocabulary] No JSON object found in response');
           throw new Error('Failed to parse vocabulary response as JSON');
         }
       }
+
+      const wordCount = parsed.words?.length || 0;
+      console.log(
+        `[analyzeImageForVocabulary] Success: title="${parsed.title}", words=${wordCount}, language="${parsed.language}"`,
+      );
 
       // Log usage
       const tokenCount = responseText.length / 4; // Rough estimate
