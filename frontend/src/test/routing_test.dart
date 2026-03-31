@@ -196,8 +196,12 @@ void main() {
         // Assert - should be on home screen
         expect(find.text('Home'), findsOneWidget);
 
-        // Act - tap manage subscription button
-        await tester.tap(find.widgetWithText(ElevatedButton, 'Manage Subscription'));
+        // Scroll down to make the Manage Subscription button visible
+        await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -200));
+        await tester.pumpAndSettle();
+
+        // Act - tap manage subscription button (now an OutlinedButton)
+        await tester.tap(find.widgetWithText(OutlinedButton, 'Manage Subscription'));
         await tester.pumpAndSettle();
 
         // Assert - should navigate to subscription screen
@@ -223,8 +227,12 @@ void main() {
         await tester.pumpWidget(createTestApp());
         await tester.pumpAndSettle();
 
-        // Navigate to subscription
-        await tester.tap(find.widgetWithText(ElevatedButton, 'Manage Subscription'));
+        // Scroll down to make the Manage Subscription button visible
+        await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -200));
+        await tester.pumpAndSettle();
+
+        // Navigate to subscription (now an OutlinedButton)
+        await tester.tap(find.widgetWithText(OutlinedButton, 'Manage Subscription'));
         await tester.pumpAndSettle();
 
         // Assert - should be on subscription screen
@@ -391,7 +399,7 @@ void main() {
         expect(find.text('Home'), findsOneWidget);
 
         // Act - sign out using the app bar logout button
-        await tester.tap(find.byIcon(Icons.logout).first);
+        await tester.tap(find.byTooltip('Sign Out'));
         await tester.pumpAndSettle();
 
         // Assert - should be redirected to signin

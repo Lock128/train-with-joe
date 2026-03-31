@@ -189,18 +189,22 @@ void main() {
       expect(find.byType(Card), findsWidgets);
     });
 
-    testWidgets('should have elevated button for manage subscription', (tester) async {
+    testWidgets('should have elevated buttons for vocabulary actions', (tester) async {
       await tester.pumpWidget(createTestWidget(const HomeScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ElevatedButton), findsOneWidget);
+      expect(find.byType(ElevatedButton), findsNWidgets(2));
+      expect(find.text('Scan Image for Vocabulary'), findsOneWidget);
+      expect(find.text('My Vocabulary Lists'), findsOneWidget);
     });
 
-    testWidgets('should have outlined button for sign out', (tester) async {
+    testWidgets('should have outlined buttons for subscription and sign out', (tester) async {
       await tester.pumpWidget(createTestWidget(const HomeScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.byType(OutlinedButton), findsOneWidget);
+      expect(find.byType(OutlinedButton), findsNWidgets(2));
+      expect(find.text('Manage Subscription'), findsOneWidget);
+      expect(find.text('Sign Out'), findsOneWidget);
     });
 
     testWidgets('should display subscription status from user data', (tester) async {
