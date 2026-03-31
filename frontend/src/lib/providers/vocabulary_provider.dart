@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:amplify_flutter/amplify_flutter.dart' hide AuthProvider;
 import 'package:amplify_api/amplify_api.dart';
 import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
