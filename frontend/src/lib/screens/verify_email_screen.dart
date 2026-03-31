@@ -7,12 +7,10 @@ import '../providers/auth_provider.dart';
 /// Screen for entering the email verification code after registration
 class VerifyEmailScreen extends StatefulWidget {
   final String email;
-  final String password;
 
   const VerifyEmailScreen({
     super.key,
-    required this.email,
-    required this.password,
+    this.email = '',
   });
 
   @override
@@ -21,11 +19,22 @@ class VerifyEmailScreen extends StatefulWidget {
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _codeController = TextEditingController();
+  bool _obscurePassword = true;
   bool _resendSuccess = false;
 
   @override
+  void initState() {
+    super.initState();
+    _emailController.text = widget.email;
+  }
+
+  @override
   void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
     _codeController.dispose();
     super.dispose();
   }
@@ -35,8 +44,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.confirmSignUp(
-      widget.email,
-      widget.password,
+      _emailController.text.trim(),
+      _passwordController.text,
       _codeController.text.trim(),
     );
 
@@ -46,8 +55,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   Future<void> _handleResend() async {
+    if (_emailController.text.trim().isEmpty) return;
     final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.resendCode(widget.email);
+    final success = await authProvider.resendCode(_emailController.text.trim());
     if (success && mounted) {
       setState(() => _resendSuccess = true);
       Future.delayed(const Duration(seconds: 3), () {
@@ -82,15 +92,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       const SizedBox(height: 32),
                       const Text(
                         'Verify Your Email',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'We sent a verification code to\n${widget.email}',
+                        'Enter the verification code sent to your email',
                         style: TextStyle(
                           fontSize: 16,
                           color: theme.colorScheme.onSurface.withOpacity(0.6),
@@ -99,15 +106,65 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       ),
                       const SizedBox(height: 32),
 
+                      // Email field
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.email_outlined),
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
+                        enabled: !authProvider.isLoading,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Password field
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: const Icon(Icons.lock_outlined),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                          border: const OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          return null;
+                        },
+                        enabled: !authProvider.isLoading,
+                      ),
+                      const SizedBox(height: 16),
+
                       // Code input
                       TextFormField(
                         controller: _codeController,
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          letterSpacing: 8,
-                        ),
+                        style: const TextStyle(fontSize: 24, letterSpacing: 8),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(6),
@@ -190,7 +247,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Verify', style: TextStyle(fontSize: 16)),
+                            : const Text('Verify & Sign In', style: TextStyle(fontSize: 16)),
                       ),
                       const SizedBox(height: 16),
 

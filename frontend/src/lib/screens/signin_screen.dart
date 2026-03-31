@@ -184,6 +184,14 @@ class _SignInScreenState extends State<SignInScreen> {
                             : () => context.go('/register'),
                         child: const Text("Don't have an account? Register"),
                       ),
+
+                      // Verify email link
+                      TextButton(
+                        onPressed: authProvider.isLoading
+                            ? null
+                            : () => context.go('/verify-email?email=${Uri.encodeComponent(_emailController.text.trim())}'),
+                        child: const Text('Have a verification code?'),
+                      ),
                     ],
                   ),
                 );

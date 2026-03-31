@@ -286,11 +286,8 @@ class _MyAppState extends State<MyApp> {
         GoRoute(
           path: '/verify-email',
           builder: (context, state) {
-            final extra = state.extra as Map<String, String>? ?? {};
-            return VerifyEmailScreen(
-              email: extra['email'] ?? '',
-              password: extra['password'] ?? '',
-            );
+            final email = state.uri.queryParameters['email'] ?? '';
+            return VerifyEmailScreen(email: email);
           },
         ),
         GoRoute(
