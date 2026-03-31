@@ -207,7 +207,8 @@ Provide an improved version that maintains the original meaning but is more poli
         }
         if (
           error.message.includes('Could not resolve the foundation model') ||
-          error.message.includes('ValidationException')
+          error.message.includes('ValidationException') ||
+          error.name === 'ValidationException'
         ) {
           throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
         }
@@ -388,7 +389,8 @@ Return ONLY the JSON object, no additional text.`;
         }
         if (
           error.message.includes('Could not resolve the foundation model') ||
-          error.message.includes('ValidationException')
+          error.message.includes('ValidationException') ||
+          error.name === 'ValidationException'
         ) {
           throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
         }
@@ -452,7 +454,8 @@ Return ONLY the JSON object, no additional text.`;
         }
         if (
           error.message.includes('Could not resolve the foundation model') ||
-          error.message.includes('ValidationException')
+          error.message.includes('ValidationException') ||
+          error.name === 'ValidationException'
         ) {
           throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
         }

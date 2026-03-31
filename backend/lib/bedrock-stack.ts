@@ -23,7 +23,7 @@ export class BedrockStack extends Stack {
 
     // Create SSM parameter for Bedrock model ID
     const modelIdParameter = new StringParameter(this, 'BedrockModelIdParam', {
-      stringValue: 'amazon.nova-lite-v1:0',
+      stringValue: 'eu.amazon.nova-2-lite-v1:0',
       parameterName: `/${namespace}/bedrock/model-id`,
       description: 'Bedrock model ID for AI content generation (multimodal, supports image analysis)',
       simpleName: false,
