@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:amplify_api/amplify_api.dart';
 import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
 
@@ -209,38 +212,81 @@ class VocabularyProvider extends ChangeNotifier {
     const maxAttempts = 60; // up to ~3 minutes with 3s intervals
     const pollInterval = Duration(seconds: 3);
 
+    debugPrint('[VocabularyProvider] Starting polling for id=$id');
+
     for (var i = 0; i < maxAttempts; i++) {
       await Future.delayed(pollInterval);
 
       try {
-        const query = '''
-          query GetVocabularyList(\$id: ID!) {
+        // Use a fresh query string each iteration to avoid any client-side caching
+        final query = '''
+          query GetVocabularyListPoll(\$id: ID!) {
             getVocabularyList(id: \$id) {
-              id userId title language status errorMessage createdAt updatedAt
+              id
+              userId
+              title
+              language
+              status
+              errorMessage
+              createdAt
+              updatedAt
               words { word definition partOfSpeech exampleSentence difficulty }
             }
           }
         ''';
 
-        final response = await _apiService.query(query, variables: {'id': id});
-        final list = response['getVocabularyList'] as Map<String, dynamic>?;
+        debugPrint('[VocabularyProvider] Poll attempt ${i + 1}/$maxAttempts for id=$id');
 
-        if (list == null) continue;
+        final request = GraphQLRequest<String>(
+          document: query,
+          variables: {'id': id},
+        );
+        final gqlResponse = await Amplify.API.query(request: request).response;
+
+        if (gqlResponse.hasErrors) {
+          final errors = gqlResponse.errors.map((e) => e.message).join(', ');
+          debugPrint('[VocabularyProvider] Poll GraphQL errors: $errors');
+          continue;
+        }
+
+        if (gqlResponse.data == null) {
+          debugPrint('[VocabularyProvider] Poll returned null data');
+          continue;
+        }
+
+        final parsed = jsonDecode(gqlResponse.data!) as Map<String, dynamic>;
+        final list = parsed['getVocabularyList'] as Map<String, dynamic>?;
+
+        if (list == null) {
+          debugPrint('[VocabularyProvider] Poll returned null list');
+          continue;
+        }
 
         final status = list['status'] as String?;
+        final wordsCount = (list['words'] as List<dynamic>?)?.length ?? 0;
+        debugPrint('[VocabularyProvider] Poll result: status=$status, words=$wordsCount, title=${list['title']}');
+
         if (status == 'COMPLETED') return list;
         if (status == 'FAILED') {
           _error = list['errorMessage'] as String? ?? 'Analysis failed';
           return null;
         }
+
+        // Fallback: if status field is missing (schema not deployed yet),
+        // check if words have been populated as a completion signal
+        if (status == null && wordsCount > 0) {
+          debugPrint('[VocabularyProvider] No status field but words found — treating as completed');
+          return list;
+        }
+
         // Still PENDING — keep polling
       } catch (e) {
-        debugPrint('Polling error (attempt ${i + 1}): $e');
+        debugPrint('[VocabularyProvider] Polling error (attempt ${i + 1}): $e');
         // Don't break on transient errors, keep trying
       }
     }
 
-    // Timed out
+    debugPrint('[VocabularyProvider] Polling timed out for id=$id');
     return null;
   }
 
