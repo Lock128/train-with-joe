@@ -163,6 +163,9 @@ jobs:
         working-directory: frontend/src
         run: flutter build web --release
 
+      - name: Inject join page config
+        run: bash scripts/inject-join-page-config.sh beta ${{ env.AWS_REGION }}
+
       - name: Build Angular join page
         working-directory: join_page
         run: |

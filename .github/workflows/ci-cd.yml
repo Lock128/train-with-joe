@@ -264,6 +264,10 @@ jobs:
         working-directory: frontend/src
         run: flutter build web --release
 
+      - name: Inject join page config
+        if: needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
+        run: bash scripts/inject-join-page-config.sh sandbox eu-central-1
+
       - name: Build Angular join page
         if: needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
         working-directory: join_page
