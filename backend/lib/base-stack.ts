@@ -284,7 +284,7 @@ export class BaseStack extends Stack {
       cors: [
         {
           allowedHeaders: ['*'],
-          allowedMethods: [HttpMethods.PUT],
+          allowedMethods: [HttpMethods.PUT, HttpMethods.GET],
           allowedOrigins,
           exposedHeaders: ['x-amz-server-side-encryption', 'x-amz-request-id', 'x-amz-id-2', 'ETag', 'x-amz-meta-foo'],
           maxAge: 3000,

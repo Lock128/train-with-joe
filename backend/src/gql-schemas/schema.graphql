@@ -106,8 +106,12 @@ input GenerateContentInput @aws_cognito_user_pools {
 }
 
 input AnalyzeImageVocabularyInput @aws_cognito_user_pools {
-  imageBase64: String!
+  imageS3Keys: [String!]!
   language: String
+}
+
+input GetImageUploadUrlsInput @aws_cognito_user_pools {
+  count: Int!
 }
 
 # ============================================================================
@@ -145,6 +149,17 @@ type VocabularyListResponse @aws_cognito_user_pools {
   error: String
 }
 
+type ImageUploadUrl @aws_cognito_user_pools {
+  s3Key: String!
+  uploadUrl: String!
+}
+
+type ImageUploadUrlsResponse @aws_cognito_user_pools {
+  success: Boolean!
+  uploads: [ImageUploadUrl!]
+  error: String
+}
+
 # ============================================================================
 # QUERIES
 # ============================================================================
@@ -154,6 +169,7 @@ type Query {
   getSubscriptionStatus: Subscription @aws_cognito_user_pools
   getVocabularyLists: [VocabularyList] @aws_cognito_user_pools
   getVocabularyList(id: ID!): VocabularyList @aws_cognito_user_pools
+  getImageUploadUrls(input: GetImageUploadUrlsInput!): ImageUploadUrlsResponse @aws_cognito_user_pools
 }
 
 # ============================================================================

@@ -5,6 +5,7 @@ import { type UserPool } from 'aws-cdk-lib/aws-cognito';
 import { PolicyStatement, Role, ServicePrincipal, Effect } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { type Table } from 'aws-cdk-lib/aws-dynamodb';
+import { type Bucket } from 'aws-cdk-lib/aws-s3';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import * as path from 'path';
@@ -15,6 +16,7 @@ interface APIStackProps extends cdk.StackProps {
   usersTable: Table;
   subscriptionsTable: Table;
   vocabularyListsTable: Table;
+  assetsBucket: Bucket;
 }
 
 export class APIStack extends cdk.Stack {
@@ -23,7 +25,7 @@ export class APIStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: APIStackProps) {
     super(scope, id, props);
 
-    const { namespace, userPool, usersTable, subscriptionsTable, vocabularyListsTable } = props;
+    const { namespace, userPool, usersTable, subscriptionsTable, vocabularyListsTable, assetsBucket } = props;
 
     // Create CloudWatch Logs role for AppSync
     const cwRole = new Role(this, 'APICWRole', {
@@ -125,7 +127,7 @@ export class APIStack extends cdk.Stack {
     const vocabularyLambdaProps = {
       runtime: Runtime.NODEJS_20_X,
       memorySize: 256,
-      timeout: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(60),
       bundling: {
         minify: true,
         sourceMap: true,
@@ -135,6 +137,7 @@ export class APIStack extends cdk.Stack {
         NAMESPACE: namespace,
         VOCABULARY_LISTS_TABLE_NAME: vocabularyListsTable.tableName,
         BEDROCK_MODEL_ID: process.env.BEDROCK_MODEL_ID || 'anthropic.claude-3-sonnet-20240229-v1:0',
+        ASSETS_BUCKET_NAME: assetsBucket.bucketName,
       },
     };
 
@@ -147,6 +150,9 @@ export class APIStack extends cdk.Stack {
 
     // Grant DynamoDB permissions
     vocabularyListsTable.grantReadWriteData(analyzeImageVocabularyFunction);
+
+    // Grant S3 read permissions for reading uploaded images
+    assetsBucket.grantRead(analyzeImageVocabularyFunction);
 
     // Grant Bedrock permissions
     analyzeImageVocabularyFunction.addToRolePolicy(
@@ -166,6 +172,26 @@ export class APIStack extends cdk.Stack {
     analyzeImageVocabularyDataSource.createResolver('AnalyzeImageVocabularyResolver', {
       typeName: 'Mutation',
       fieldName: 'analyzeImageVocabulary',
+    });
+
+    // Create getImageUploadUrls Lambda function
+    const getImageUploadUrlsFunction = new NodejsFunction(this, 'GetImageUploadUrlsFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getImageUploadUrls.ts'),
+      handler: 'handler',
+    });
+
+    // Grant S3 write permissions for generating presigned PUT URLs
+    assetsBucket.grantPut(getImageUploadUrlsFunction);
+
+    const getImageUploadUrlsDataSource = api.addLambdaDataSource(
+      'GetImageUploadUrlsDataSource',
+      getImageUploadUrlsFunction,
+    );
+
+    getImageUploadUrlsDataSource.createResolver('GetImageUploadUrlsResolver', {
+      typeName: 'Query',
+      fieldName: 'getImageUploadUrls',
     });
 
     // Create getVocabularyLists Lambda function
