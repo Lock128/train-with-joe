@@ -146,14 +146,44 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
     );
   }
 
+  void _confirmDelete(BuildContext context, Map<String, dynamic> list) {
+    final title = list['title'] as String? ?? 'Untitled List';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Vocabulary List'),
+        content: Text('Are you sure you want to delete "$title"? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.read<VocabularyProvider>().deleteVocabularyList(list['id'] as String);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildListTile(Map<String, dynamic> list) {
     final title = list['title'] as String? ?? 'Untitled List';
-    final language = list['language'] as String?;
+    final sourceLang = list['sourceLanguage'] as String?;
+    final targetLang = list['targetLanguage'] as String?;
     final createdAt = list['createdAt'] as String?;
     final words = (list['words'] as List<dynamic>?) ?? [];
 
     final subtitleParts = <String>['${words.length} words'];
-    if (language != null) subtitleParts.add(language);
+    if (sourceLang != null && targetLang != null && sourceLang != targetLang) {
+      subtitleParts.add('$sourceLang → $targetLang');
+    } else if (sourceLang != null) {
+      subtitleParts.add(sourceLang);
+    }
     if (createdAt != null) subtitleParts.add(_formatDate(createdAt));
 
     return Card(
@@ -171,6 +201,11 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
           subtitleParts.join(' - '),
           style: const TextStyle(color: Colors.grey),
         ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline),
+          tooltip: 'Delete list',
+          onPressed: () => _confirmDelete(context, list),
+        ),
         children: words.map((wordData) {
           final word = wordData as Map<String, dynamic>;
           return _buildWordListTile(word);
@@ -181,14 +216,35 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
 
   Widget _buildWordListTile(Map<String, dynamic> word) {
     final wordText = word['word'] as String? ?? '';
+    final translation = word['translation'] as String?;
     final definition = word['definition'] as String? ?? '';
     final partOfSpeech = word['partOfSpeech'] as String?;
     final difficulty = word['difficulty'] as String?;
 
     return ListTile(
-      title: Text(
-        wordText,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+      title: Row(
+        children: [
+          Text(
+            wordText,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          if (translation != null && translation.isNotEmpty) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6),
+              child: Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+            ),
+            Flexible(
+              child: Text(
+                translation,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF6C5CE7),
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ],
       ),
       subtitle: Text(definition),
       trailing: Row(

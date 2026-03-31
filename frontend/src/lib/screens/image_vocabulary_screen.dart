@@ -15,7 +15,8 @@ class ImageVocabularyScreen extends StatefulWidget {
 
 class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   final List<Uint8List> _selectedImages = [];
-  String _selectedLanguage = 'English';
+  String? _selectedSourceLanguage;
+  String? _selectedTargetLanguage;
   final List<Map<String, dynamic>> _analysisResults = [];
   int _analyzedCount = 0;
 
@@ -94,7 +95,8 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
 
     final result = await provider.analyzeImages(
       _selectedImages,
-      language: _selectedLanguage,
+      sourceLanguage: _selectedSourceLanguage,
+      targetLanguage: _selectedTargetLanguage,
     );
 
     if (result != null && mounted) {
@@ -303,27 +305,66 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           ),
         const SizedBox(height: 16),
 
-        // Language selector
+        // Language selectors
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.language),
-                const SizedBox(width: 12),
-                const Text('Language:', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButton<String>(
-                    value: _selectedLanguage,
-                    isExpanded: true,
-                    onChanged: isAnalyzing ? null : (value) {
-                      if (value != null) setState(() => _selectedLanguage = value);
-                    },
-                    items: _supportedLanguages.map((lang) {
-                      return DropdownMenuItem(value: lang, child: Text(lang));
-                    }).toList(),
-                  ),
+                const Text(
+                  'Languages (optional — auto-detected from image)',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(Icons.language, size: 20),
+                    const SizedBox(width: 8),
+                    const Text('From:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: DropdownButton<String?>(
+                        value: _selectedSourceLanguage,
+                        isExpanded: true,
+                        hint: const Text('Auto-detect'),
+                        onChanged: isAnalyzing ? null : (value) {
+                          setState(() => _selectedSourceLanguage = value);
+                        },
+                        items: [
+                          const DropdownMenuItem<String?>(value: null, child: Text('Auto-detect')),
+                          ..._supportedLanguages.map((lang) {
+                            return DropdownMenuItem(value: lang, child: Text(lang));
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.translate, size: 20),
+                    const SizedBox(width: 8),
+                    const Text('To:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: DropdownButton<String?>(
+                        value: _selectedTargetLanguage,
+                        isExpanded: true,
+                        hint: const Text('Auto-detect'),
+                        onChanged: isAnalyzing ? null : (value) {
+                          setState(() => _selectedTargetLanguage = value);
+                        },
+                        items: [
+                          const DropdownMenuItem<String?>(value: null, child: Text('Auto-detect')),
+                          ..._supportedLanguages.map((lang) {
+                            return DropdownMenuItem(value: lang, child: Text(lang));
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -407,7 +448,8 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
     if (_analysisResults.isEmpty) return const SizedBox.shrink();
     final result = _analysisResults.first;
     final title = result['title'] as String? ?? 'Vocabulary List';
-    final language = result['language'] as String?;
+    final sourceLang = result['sourceLanguage'] as String?;
+    final targetLang = result['targetLanguage'] as String?;
     final words = (result['words'] as List<dynamic>?) ?? [];
 
     return Column(
@@ -429,25 +471,29 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
-                    if (language != null)
+                    if (sourceLang != null && targetLang != null && sourceLang != targetLang)
                       Chip(
-                        label: Text(language),
+                        label: Text('$sourceLang → $targetLang'),
+                        avatar: const Icon(Icons.translate, size: 16),
+                      )
+                    else if (sourceLang != null)
+                      Chip(
+                        label: Text(sourceLang),
                         avatar: const Icon(Icons.language, size: 16),
                       ),
-                    const SizedBox(width: 8),
                     Chip(
                       label: Text('${words.length} words'),
                       avatar: const Icon(Icons.format_list_numbered, size: 16),
                     ),
-                    if (_selectedImages.length > 1) ...[
-                      const SizedBox(width: 8),
+                    if (_selectedImages.length > 1)
                       Chip(
                         label: Text('${_selectedImages.length} images'),
                         avatar: const Icon(Icons.photo_library, size: 16),
                       ),
-                    ],
                   ],
                 ),
               ],
@@ -462,6 +508,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
 
   Widget _buildWordCard(Map<String, dynamic> word) {
     final wordText = word['word'] as String? ?? '';
+    final translation = word['translation'] as String?;
     final definition = word['definition'] as String? ?? '';
     final partOfSpeech = word['partOfSpeech'] as String?;
     final exampleSentence = word['exampleSentence'] as String?;
@@ -477,9 +524,23 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    wordText,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        wordText,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      if (translation != null && translation.isNotEmpty)
+                        Text(
+                          translation,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF6C5CE7),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 if (partOfSpeech != null)

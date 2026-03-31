@@ -201,6 +201,9 @@ type Mutation {
   validateAppStoreReceipt(input: ValidateAppStoreReceiptInput!): SubscriptionResponse @aws_cognito_user_pools
   validatePlayStoreReceipt(input: ValidatePlayStoreReceiptInput!): SubscriptionResponse @aws_cognito_user_pools
   
+  # Vocabulary operations
+  deleteVocabularyList(id: ID!): VocabularyListResponse @aws_cognito_user_pools
+
   # AI operations
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools
   generateContent(input: GenerateContentInput!): ContentResponse @aws_cognito_user_pools

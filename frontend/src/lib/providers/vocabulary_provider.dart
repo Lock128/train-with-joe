@@ -293,6 +293,45 @@ class VocabularyProvider extends ChangeNotifier {
     return null;
   }
 
+  /// Delete a vocabulary list by ID
+  Future<bool> deleteVocabularyList(String id) async {
+    try {
+      const mutation = '''
+        mutation DeleteVocabularyList(\$id: ID!) {
+          deleteVocabularyList(id: \$id) {
+            success
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {'id': id},
+      );
+
+      final result = response['deleteVocabularyList'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        _vocabularyLists.removeWhere((list) => list['id'] == id);
+        if (_currentList?['id'] == id) {
+          _currentList = null;
+        }
+        notifyListeners();
+        return true;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to delete vocabulary list';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error deleting vocabulary list: $e');
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Clear vocabulary data (on sign out)
   void clear() {
     _vocabularyLists = [];
