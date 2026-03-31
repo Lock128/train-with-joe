@@ -100,7 +100,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Register a new user
+  /// Register a new user (returns true if sign-up succeeded, user still needs verification)
   Future<bool> register(String email, String password, {String? name}) async {
     _isLoading = true;
     _error = null;
@@ -108,8 +108,34 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       await _authService.register(email, password, name: name);
-      
-      // After successful registration, sign in automatically
+      _error = null;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Confirm sign up with verification code, then sign in
+  Future<bool> confirmSignUp(String email, String password, String code) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final confirmed = await _authService.confirmSignUp(email, code);
+      if (!confirmed) {
+        _error = 'Verification failed. Please try again.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
+      // Auto sign-in after successful verification
       await _authService.signIn(email, password);
       _currentUser = await _authService.getCurrentUser();
       _isAuthenticated = true;
@@ -119,8 +145,25 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _error = e.toString().replaceAll('Exception: ', '');
-      _isAuthenticated = false;
-      _currentUser = null;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Resend the verification code
+  Future<bool> resendCode(String email) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _authService.resendSignUpCode(email);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
       _isLoading = false;
       notifyListeners();
       return false;

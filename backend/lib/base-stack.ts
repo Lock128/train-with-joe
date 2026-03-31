@@ -1,8 +1,15 @@
 import * as cdk from 'aws-cdk-lib';
 import { RemovalPolicy, Stack, type Environment } from 'aws-cdk-lib';
-import { AccountRecovery, UserPool, type UserPoolClient, type CfnUserPool } from 'aws-cdk-lib/aws-cognito';
+import {
+  AccountRecovery,
+  UserPool,
+  UserPoolEmail,
+  type UserPoolClient,
+  type CfnUserPool,
+} from 'aws-cdk-lib/aws-cognito';
 import { AttributeType, BillingMode, StreamViewType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { BlockPublicAccess, Bucket, HttpMethods } from 'aws-cdk-lib/aws-s3';
+import { EmailIdentity, Identity } from 'aws-cdk-lib/aws-ses';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import type { Construct } from 'constructs';
 import type { StackProps } from 'aws-cdk-lib';
@@ -62,6 +69,12 @@ export class BaseStack extends Stack {
       simpleName: false,
     });
 
+    // Verify SES email identity for Cognito verification emails
+    const sesFromEmail = `lockhead+joe${namespace}@lockhead.info`;
+    new EmailIdentity(this, 'SesEmailIdentity', {
+      identity: Identity.email(sesFromEmail),
+    });
+
     const userPoolSetup = this.createUserPool(namespace);
     this.userPool = userPoolSetup.userPool;
     this.userPoolFrontendClientIdParameterName = `/${namespace}/config/cognito-frontend-client-id`;
@@ -103,6 +116,11 @@ export class BaseStack extends Stack {
       },
       // Email-only account recovery
       accountRecovery: AccountRecovery.EMAIL_ONLY,
+      email: UserPoolEmail.withSES({
+        fromEmail: `lockhead+joe${namespace}@lockhead.info`,
+        fromName: 'Train with Joe',
+        sesRegion: 'eu-central-1',
+      }),
       passwordPolicy: {
         minLength: 8,
         requireLowercase: true,
@@ -143,7 +161,13 @@ export class BaseStack extends Stack {
                 </div>
               </div>
               
-              <p>Enter this code to verify your email address or reset your password.</p>
+              <p>Enter this code in the app to verify your email address.</p>
+              <p style="text-align: center; margin: 20px 0;">
+                <a href="https://train-with-joe.com/verify-email" 
+                   style="background-color: #1976d2; color: #fff; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-size: 16px;">
+                  Open Verification Screen
+                </a>
+              </p>
               <p>If you did not request this code, please ignore this email.</p>
               
               <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">

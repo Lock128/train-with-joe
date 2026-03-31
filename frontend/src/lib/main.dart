@@ -16,6 +16,7 @@ import 'services/payment_service.dart';
 import 'providers/vocabulary_provider.dart';
 import 'screens/signin_screen.dart';
 import 'screens/register_screen.dart';
+import 'screens/verify_email_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/image_vocabulary_screen.dart';
@@ -258,7 +259,8 @@ class _MyAppState extends State<MyApp> {
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
         final isAuthRoute = state.matchedLocation == '/signin' || 
-                           state.matchedLocation == '/register';
+                           state.matchedLocation == '/register' ||
+                           state.matchedLocation == '/verify-email';
 
         // Redirect to home if authenticated and trying to access auth routes
         if (isAuthenticated && isAuthRoute) {
@@ -280,6 +282,16 @@ class _MyAppState extends State<MyApp> {
         GoRoute(
           path: '/register',
           builder: (context, state) => const RegisterScreen(),
+        ),
+        GoRoute(
+          path: '/verify-email',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, String>? ?? {};
+            return VerifyEmailScreen(
+              email: extra['email'] ?? '',
+              password: extra['password'] ?? '',
+            );
+          },
         ),
         GoRoute(
           path: '/home',

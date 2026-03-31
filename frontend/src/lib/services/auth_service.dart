@@ -66,8 +66,31 @@ class AuthService {
       );
 
       if (!result.isSignUpComplete) {
-        throw Exception('Sign up incomplete - verification required');
+        // Verification required — this is expected, not an error
+        debugPrint('Sign up requires confirmation');
       }
+    } on AuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  /// Confirm sign up with verification code
+  Future<bool> confirmSignUp(String email, String code) async {
+    try {
+      final result = await Amplify.Auth.confirmSignUp(
+        username: email,
+        confirmationCode: code,
+      );
+      return result.isSignUpComplete;
+    } on AuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  /// Resend the sign up confirmation code
+  Future<void> resendSignUpCode(String email) async {
+    try {
+      await Amplify.Auth.resendSignUpCode(username: email);
     } on AuthException catch (e) {
       throw _handleAuthException(e);
     }

@@ -138,4 +138,4 @@ Runtime secrets and config are stored in SSM Parameter Store under `/<namespace>
 
 Environment variables used by Lambda functions: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `APPSTORE_SHARED_SECRET`, `BEDROCK_MODEL_ID`, `USERS_TABLE_NAME`, `SUBSCRIPTIONS_TABLE_NAME`.
 
-!!!!
+!

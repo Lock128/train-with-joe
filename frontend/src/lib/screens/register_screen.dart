@@ -42,7 +42,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (success && mounted) {
-      context.go('/home');
+      context.go('/verify-email', extra: {
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text,
+      });
     }
   }
 
