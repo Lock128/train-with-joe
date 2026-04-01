@@ -32,6 +32,8 @@ void main() {
         ),
         (tuple) {
           final email = tuple.$1;
+          // password used for authentication simulation
+          // ignore: unused_local_variable
           final password = tuple.$2;
 
           // Mock successful sign-in response

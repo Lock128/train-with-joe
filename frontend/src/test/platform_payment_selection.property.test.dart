@@ -195,7 +195,7 @@ void main() {
         ),
         (tuple) {
           final planId = tuple.$1;
-          final iteration = tuple.$2;
+          // iteration used for property test repetition
 
           final paymentService = PaymentService();
           final provider = paymentService.detectPlatform();

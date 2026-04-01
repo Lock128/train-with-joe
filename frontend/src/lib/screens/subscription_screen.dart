@@ -139,22 +139,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     // Close loading dialog
     if (mounted) {
       Navigator.of(context).pop();
-    }
 
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Subscription created successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else if (mounted && subscriptionProvider.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(subscriptionProvider.error!),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Subscription created successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (subscriptionProvider.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(subscriptionProvider.error!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

@@ -108,14 +108,6 @@ void main() {
 
     testWidgets('should display active subscription details', (tester) async {
       // Arrange - set active subscription
-      final mockSubscription = {
-        'id': 'sub-123',
-        'userId': 'user-456',
-        'provider': 'STRIPE',
-        'status': 'ACTIVE',
-        'planId': 'pro-monthly',
-        'currentPeriodEnd': '2024-12-31T23:59:59Z',
-      };
 
       // Manually set subscription in provider
       await tester.pumpWidget(createTestWidget(const SubscriptionScreen()));

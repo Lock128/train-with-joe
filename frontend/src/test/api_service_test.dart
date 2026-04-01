@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:train_with_joe/services/api_service.dart';
 
 /// Widget tests for ApiService
@@ -44,7 +43,6 @@ void main() {
 
       test('should handle null variables by using empty map', () {
         // Arrange
-        const queryString = 'query ListUsers { listUsers { items { id } } }';
         final Map<String, dynamic>? variables = null;
 
         // Act

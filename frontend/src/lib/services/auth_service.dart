@@ -22,7 +22,7 @@ class AuthService {
         final tokens = session.userPoolTokensResult.value;
         // In Amplify 2.x, tokens are already strings
         final accessTokenStr = tokens.accessToken.toString();
-        final refreshTokenStr = tokens.refreshToken?.toString() ?? '';
+        final refreshTokenStr = tokens.refreshToken.toString();
         final idTokenStr = tokens.idToken.toString();
         
         return AuthTokens(
@@ -125,7 +125,7 @@ class AuthService {
         final tokens = session.userPoolTokensResult.value;
         // In Amplify 2.x, tokens are already strings
         final accessTokenStr = tokens.accessToken.toString();
-        final refreshTokenStr = tokens.refreshToken?.toString() ?? refreshToken;
+        final refreshTokenStr = tokens.refreshToken.toString();
         final idTokenStr = tokens.idToken.toString();
         
         return AuthTokens(
