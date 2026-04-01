@@ -211,7 +211,7 @@ class VocabularyProvider extends ChangeNotifier {
 
   /// Poll getVocabularyList until status is COMPLETED or FAILED
   Future<Map<String, dynamic>?> _pollForCompletion(String id) async {
-    const maxAttempts = 60; // up to ~3 minutes with 3s intervals
+    const maxAttempts = 220; // up to ~11 minutes with 3s intervals
     const pollInterval = Duration(seconds: 3);
 
     debugPrint('[VocabularyProvider] Starting polling for id=$id');

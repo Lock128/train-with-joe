@@ -146,7 +146,7 @@ export class APIStack extends cdk.Stack {
     // Create async processing Lambda for image vocabulary analysis (long-running Bedrock calls)
     const processImageVocabularyFunction = new NodejsFunction(this, 'ProcessImageVocabularyFunction', {
       ...vocabularyLambdaProps,
-      timeout: cdk.Duration.minutes(5),
+      timeout: cdk.Duration.minutes(10),
       memorySize: 512,
       entry: path.join(__dirname, '../src/gql-lambda-functions/process-image-vocabulary.ts'),
       handler: 'handler',
