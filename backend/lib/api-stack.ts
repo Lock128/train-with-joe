@@ -358,6 +358,22 @@ export class APIStack extends cdk.Stack {
       fieldName: 'updateTraining',
     });
 
+    // Create deleteTraining Lambda function
+    const deleteTrainingFunction = new NodejsFunction(this, 'DeleteTrainingFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.deleteTraining.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(deleteTrainingFunction);
+
+    const deleteTrainingDataSource = api.addLambdaDataSource('DeleteTrainingDataSource', deleteTrainingFunction);
+
+    deleteTrainingDataSource.createResolver('DeleteTrainingResolver', {
+      typeName: 'Mutation',
+      fieldName: 'deleteTraining',
+    });
+
     // Create startTraining Lambda function
     const startTrainingFunction = new NodejsFunction(this, 'StartTrainingFunction', {
       ...trainingLambdaProps,

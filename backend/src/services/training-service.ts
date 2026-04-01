@@ -34,10 +34,11 @@ export class TrainingService {
     vocabularyListIds: string[],
     mode: TrainingMode,
     name?: string,
+    wordCount?: number,
   ): Promise<{ success: boolean; training?: Training; error?: string }> {
     try {
       const vocabRepo = VocabularyListRepository.getInstance();
-      const words: TrainingWord[] = [];
+      let words: TrainingWord[] = [];
 
       for (const listId of vocabularyListIds) {
         const list = await vocabRepo.getById(listId);
@@ -55,6 +56,19 @@ export class TrainingService {
 
       if (words.length === 0) {
         return { success: false, error: 'No words available from the selected vocabulary lists' };
+      }
+
+      // Determine how many words to include (max 100)
+      const maxWords = 100;
+      const requestedCount = wordCount ? Math.min(Math.max(1, wordCount), maxWords) : Math.min(words.length, maxWords);
+
+      // Randomly select words if we have more than requested
+      if (words.length > requestedCount) {
+        for (let i = words.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [words[i], words[j]] = [words[j], words[i]];
+        }
+        words = words.slice(0, requestedCount);
       }
 
       const now = new Date().toISOString();

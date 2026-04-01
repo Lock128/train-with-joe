@@ -104,8 +104,9 @@ class TrainingProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> createTraining(
     List<String> vocabListIds,
     String mode,
-    String? name,
-  ) async {
+    String? name, {
+    int? wordCount,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -131,6 +132,7 @@ class TrainingProvider extends ChangeNotifier {
             'vocabularyListIds': vocabListIds,
             'mode': mode,
             if (name != null) 'name': name,
+            if (wordCount != null) 'wordCount': wordCount,
           },
         },
       );
@@ -225,6 +227,45 @@ class TrainingProvider extends ChangeNotifier {
     }
   }
 
+  /// Delete a training by ID
+  Future<bool> deleteTraining(String id) async {
+    try {
+      const mutation = '''
+        mutation DeleteTraining(\$trainingId: ID!) {
+          deleteTraining(trainingId: \$trainingId) {
+            success
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {'trainingId': id},
+      );
+
+      final result = response['deleteTraining'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        _trainings.removeWhere((t) => t['id'] == id);
+        if (_currentTraining?['id'] == id) {
+          _currentTraining = null;
+        }
+        notifyListeners();
+        return true;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to delete training';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error deleting training: $e');
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Start a training execution
   Future<Map<String, dynamic>?> startTraining(String id) async {
     _isLoading = true;
@@ -239,7 +280,7 @@ class TrainingProvider extends ChangeNotifier {
             execution {
               id trainingId userId startedAt completedAt correctCount incorrectCount
               results { wordIndex word expectedAnswer userAnswer correct }
-              multipleChoiceOptions { wordIndex options correctOptionIndex }
+              multipleChoiceOptions { wordIndex options }
             }
             error
           }
@@ -289,7 +330,7 @@ class TrainingProvider extends ChangeNotifier {
             execution {
               id trainingId userId startedAt completedAt correctCount incorrectCount
               results { wordIndex word expectedAnswer userAnswer correct }
-              multipleChoiceOptions { wordIndex options correctOptionIndex }
+              multipleChoiceOptions { wordIndex options }
             }
             error
           }

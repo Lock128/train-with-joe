@@ -230,35 +230,146 @@ class _AddWordsSheet extends StatefulWidget {
 
 class _AddWordsSheetState extends State<_AddWordsSheet> {
   final Set<int> _selected = {};
+  final _filterController = TextEditingController();
+  final _customWordController = TextEditingController();
+  final _customTranslationController = TextEditingController();
+  final List<Map<String, dynamic>> _customWords = [];
+  String _filter = '';
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    _customWordController.dispose();
+    _customTranslationController.dispose();
+    super.dispose();
+  }
+
+  List<MapEntry<int, Map<String, dynamic>>> get _filteredWords {
+    final entries = widget.availableWords.asMap().entries.toList();
+    if (_filter.isEmpty) return entries;
+    final lower = _filter.toLowerCase();
+    return entries.where((e) {
+      final word = (e.value['word'] as String? ?? '').toLowerCase();
+      final translation = (e.value['translation'] as String? ?? '').toLowerCase();
+      return word.contains(lower) || translation.contains(lower);
+    }).toList();
+  }
+
+  int get _totalSelected => _selected.length + _customWords.length;
+
+  void _addCustomWord() {
+    final word = _customWordController.text.trim();
+    final translation = _customTranslationController.text.trim();
+    if (word.isEmpty || translation.isEmpty) return;
+    setState(() {
+      _customWords.add({'word': word, 'translation': translation});
+      _customWordController.clear();
+      _customTranslationController.clear();
+    });
+  }
+
+  void _submitAll() {
+    final fromList = _selected.map((i) => widget.availableWords[i]).toList();
+    widget.onAdd([...fromList, ..._customWords]);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final filtered = _filteredWords;
     return DraggableScrollableSheet(
-      initialChildSize: 0.6, maxChildSize: 0.9, minChildSize: 0.3, expand: false,
+      initialChildSize: 0.7, maxChildSize: 0.95, minChildSize: 0.3, expand: false,
       builder: (context, scrollController) => Column(children: [
         Padding(padding: const EdgeInsets.all(16), child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Add Words', style: Theme.of(context).textTheme.titleMedium),
             ElevatedButton(
-              onPressed: _selected.isEmpty ? null : () => widget.onAdd(_selected.map((i) => widget.availableWords[i]).toList()),
-              child: Text('Add ${_selected.length}'),
+              onPressed: _totalSelected == 0 ? null : _submitAll,
+              child: Text('Add $_totalSelected'),
             ),
           ],
         )),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: TextField(
+            controller: _filterController,
+            decoration: InputDecoration(
+              hintText: 'Filter words...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _filter.isNotEmpty
+                  ? IconButton(icon: const Icon(Icons.clear), onPressed: () {
+                      _filterController.clear();
+                      setState(() => _filter = '');
+                    })
+                  : null,
+              border: const OutlineInputBorder(),
+              isDense: true,
+            ),
+            onChanged: (v) => setState(() => _filter = v),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Custom word entry
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(children: [
+            Expanded(child: TextField(
+              controller: _customWordController,
+              decoration: const InputDecoration(hintText: 'Word', border: OutlineInputBorder(), isDense: true),
+              textInputAction: TextInputAction.next,
+            )),
+            const SizedBox(width: 8),
+            Expanded(child: TextField(
+              controller: _customTranslationController,
+              decoration: const InputDecoration(hintText: 'Translation', border: OutlineInputBorder(), isDense: true),
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _addCustomWord(),
+            )),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.add_circle, color: Colors.green),
+              tooltip: 'Add custom word',
+              onPressed: _addCustomWord,
+            ),
+          ]),
+        ),
+        if (_customWords.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          SizedBox(
+            height: 40,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _customWords.length,
+              itemBuilder: (context, i) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Chip(
+                  label: Text('${_customWords[i]['word']} → ${_customWords[i]['translation']}', style: const TextStyle(fontSize: 12)),
+                  deleteIcon: const Icon(Icons.close, size: 16),
+                  onDeleted: () => setState(() => _customWords.removeAt(i)),
+                ),
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
         Expanded(
-          child: widget.availableWords.isEmpty
-              ? const Center(child: Text('No additional words available.', style: TextStyle(color: Colors.grey)))
+          child: filtered.isEmpty
+              ? Center(child: Text(
+                  widget.availableWords.isEmpty ? 'No additional words available.' : 'No words match your filter.',
+                  style: const TextStyle(color: Colors.grey)))
               : ListView.builder(
-                  controller: scrollController, itemCount: widget.availableWords.length,
+                  controller: scrollController, itemCount: filtered.length,
                   itemBuilder: (context, index) {
-                    final word = widget.availableWords[index];
+                    final entry = filtered[index];
+                    final word = entry.value;
+                    final origIndex = entry.key;
                     return CheckboxListTile(
                       title: Text(word['word'] as String? ?? ''),
                       subtitle: Text(word['translation'] as String? ?? ''),
-                      value: _selected.contains(index),
+                      value: _selected.contains(origIndex),
                       onChanged: (checked) => setState(() {
-                        if (checked == true) { _selected.add(index); } else { _selected.remove(index); }
+                        if (checked == true) { _selected.add(origIndex); } else { _selected.remove(origIndex); }
                       }),
                     );
                   },

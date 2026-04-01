@@ -17,6 +17,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   String _selectedMode = 'TEXT_INPUT';
   final TextEditingController _nameController = TextEditingController();
   bool _listsLoaded = false;
+  int _wordCount = 20;
 
   @override
   void initState() {
@@ -53,6 +54,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
       _selectedListIds.toList(),
       _selectedMode,
       name,
+      wordCount: _wordCount,
     );
 
     if (!mounted) return;
@@ -141,6 +143,12 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
             );
           }
 
+          // Count total words across selected lists
+          final totalWords = lists
+              .where((l) => _selectedListIds.contains(l['id'] as String))
+              .fold<int>(0, (sum, l) => sum + ((l['words'] as List<dynamic>?)?.length ?? 0));
+          final effectiveMax = totalWords > 100 ? 100 : (totalWords > 0 ? totalWords : 1);
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -207,7 +215,34 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     },
                   );
                 }),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
+                // Word count selector
+                if (_selectedListIds.isNotEmpty) ...[
+                  Text(
+                    'Number of Words: $_wordCount',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$totalWords words available across selected lists'
+                        '${totalWords > 100 ? " (max 100 will be randomly picked)" : ""}',
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  Slider(
+                    value: _wordCount.clamp(1, effectiveMax).toDouble(),
+                    min: 1,
+                    max: effectiveMax.toDouble(),
+                    divisions: effectiveMax > 1 ? effectiveMax - 1 : 1,
+                    label: _wordCount.toString(),
+                    onChanged: (value) {
+                      setState(() {
+                        _wordCount = value.round();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
 
                 // Create button
                 ElevatedButton(

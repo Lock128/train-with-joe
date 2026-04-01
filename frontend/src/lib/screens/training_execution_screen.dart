@@ -107,6 +107,27 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     });
   }
 
+  Future<void> _confirmAbort() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Abort Training?'),
+        content: const Text('Your progress in this session will be lost.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Continue')),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Abort'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      context.go('/trainings/${widget.trainingId}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final words = _words;
@@ -124,7 +145,14 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final wordText = currentWord['word'] as String? ?? '';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Training')),
+      appBar: AppBar(
+        title: const Text('Training'),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          tooltip: 'Abort training',
+          onPressed: _confirmAbort,
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

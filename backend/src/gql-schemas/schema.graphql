@@ -95,7 +95,6 @@ type TrainingResult @aws_cognito_user_pools {
 type MultipleChoiceOption @aws_cognito_user_pools {
   wordIndex: Int!
   options: [String!]!
-  correctOptionIndex: Int!
 }
 
 type TrainingExecution @aws_cognito_user_pools {
@@ -225,6 +224,7 @@ input CreateTrainingInput @aws_cognito_user_pools {
   vocabularyListIds: [String!]!
   mode: TrainingMode!
   name: String
+  wordCount: Int
 }
 
 input TrainingWordInput @aws_cognito_user_pools {
@@ -379,6 +379,7 @@ type Mutation {
   # Training operations
   createTraining(input: CreateTrainingInput!): TrainingResponse @aws_cognito_user_pools
   updateTraining(input: UpdateTrainingInput!): TrainingResponse @aws_cognito_user_pools
+  deleteTraining(trainingId: ID!): TrainingResponse @aws_cognito_user_pools
   startTraining(trainingId: ID!): TrainingExecutionResponse @aws_cognito_user_pools
   submitAnswer(input: SubmitAnswerInput!): SubmitAnswerResponse @aws_cognito_user_pools
 }

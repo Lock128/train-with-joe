@@ -12,6 +12,7 @@ interface Event {
       vocabularyListIds: string[];
       mode: TrainingMode;
       name?: string;
+      wordCount?: number;
     };
   };
   identity: {
@@ -21,7 +22,7 @@ interface Event {
 
 export const handler = async (event: Event) => {
   const userId = event.identity?.sub;
-  const { vocabularyListIds, mode, name } = event.arguments.input;
+  const { vocabularyListIds, mode, name, wordCount } = event.arguments.input;
 
   if (!userId) {
     return {
@@ -33,7 +34,7 @@ export const handler = async (event: Event) => {
 
   try {
     const service = TrainingService.getInstance();
-    return await service.createTraining(userId, vocabularyListIds, mode, name);
+    return await service.createTraining(userId, vocabularyListIds, mode, name, wordCount);
   } catch (error) {
     console.error('Error creating training:', error);
     return {

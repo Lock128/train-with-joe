@@ -20,7 +20,9 @@ export const handler = async (event: Event) => {
 
   try {
     const service = TrainingService.getInstance();
-    return await service.getTrainings(userId);
+    const trainings = await service.getTrainings(userId);
+    // Filter out corrupt/incomplete records that would fail GraphQL non-null validation
+    return trainings.filter((t) => t.name && t.mode && t.vocabularyListIds && t.words && t.createdAt && t.updatedAt);
   } catch (error) {
     console.error('Error getting trainings:', error);
     return [];
