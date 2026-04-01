@@ -399,20 +399,14 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             const CircularProgressIndicator(),
             const SizedBox(height: 24),
             Text(
-              'Analyzing image ${_analyzedCount + 1} of ${_selectedImages.length}...',
+              'Analyzing ${_selectedImages.length} image${_selectedImages.length == 1 ? '' : 's'}...',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Extracting vocabulary words from the image',
+              'Extracting vocabulary words — this may take a moment',
               style: TextStyle(color: Colors.grey),
             ),
-            if (_selectedImages.length > 1) ...[
-              const SizedBox(height: 16),
-              LinearProgressIndicator(
-                value: _analyzedCount / _selectedImages.length,
-              ),
-            ],
           ],
         ),
       ),

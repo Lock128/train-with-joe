@@ -282,6 +282,7 @@ Provide an improved version that maintains the original meaning but is more poli
     userId: string,
     sourceLanguage?: string,
     targetLanguage?: string,
+    options?: { skipRateLimit?: boolean },
   ): Promise<{
     title: string;
     words: Array<{
@@ -295,8 +296,8 @@ Provide an improved version that maintains the original meaning but is more poli
     sourceLanguage: string;
     targetLanguage: string;
   }> {
-    // Check rate limit
-    if (!this.checkRateLimit(userId)) {
+    // Check rate limit (skip for internal batch processing)
+    if (!options?.skipRateLimit && !this.checkRateLimit(userId)) {
       throw new Error('Rate limit exceeded. Please wait before making more AI requests.');
     }
 

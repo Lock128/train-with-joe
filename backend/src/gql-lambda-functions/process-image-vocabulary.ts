@@ -39,7 +39,9 @@ export const handler = async (event: ProcessEvent) => {
 
     for (const s3Key of imageS3Keys) {
       const imageBase64 = await getImageBase64(s3Key);
-      const result = await aiService.analyzeImageForVocabulary(imageBase64, userId, sourceLanguage, targetLanguage);
+      const result = await aiService.analyzeImageForVocabulary(imageBase64, userId, sourceLanguage, targetLanguage, {
+        skipRateLimit: true,
+      });
       if (!title) title = result.title;
       if (!detectedSourceLang) detectedSourceLang = result.sourceLanguage;
       if (!detectedTargetLang) detectedTargetLang = result.targetLanguage;
