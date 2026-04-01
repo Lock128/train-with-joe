@@ -261,7 +261,7 @@ describe('BaseStack CDK Integration Tests', () => {
     // Verify expected resource counts
     template.resourceCountIs('AWS::Cognito::UserPool', 1);
     template.resourceCountIs('AWS::Cognito::UserPoolClient', 1);
-    template.resourceCountIs('AWS::DynamoDB::Table', 3); // users, subscriptions, and vocabulary-lists
+    template.resourceCountIs('AWS::DynamoDB::Table', 4); // users, subscriptions, vocabulary-lists, and trainings
     template.resourceCountIs('AWS::S3::Bucket', 1); // assets bucket
   });
 

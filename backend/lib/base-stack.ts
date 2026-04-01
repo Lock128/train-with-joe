@@ -30,6 +30,7 @@ export class BaseStack extends Stack {
   public readonly usersTable: Table;
   public readonly subscriptionsTable: Table;
   public readonly vocabularyListsTable: Table;
+  public readonly trainingsTable: Table;
   public readonly assetsBucket: Bucket;
   public readonly assetsBucketNameParameterName: string;
   public readonly identityPoolId: string;
@@ -44,6 +45,7 @@ export class BaseStack extends Stack {
     this.usersTable = this.createUsersTable(namespace);
     this.subscriptionsTable = this.createSubscriptionsTable(namespace);
     this.vocabularyListsTable = this.createVocabularyListsTable(namespace);
+    this.trainingsTable = this.createTrainingsTable(namespace);
 
     // Create S3 bucket for application assets
     this.assetsBucket = this.createAssetsBucket(namespace);
@@ -70,6 +72,12 @@ export class BaseStack extends Stack {
     new StringParameter(this, 'VocabularyListsTableNameParameter', {
       stringValue: this.vocabularyListsTable.tableName,
       parameterName: `/${namespace}/config/vocabulary-lists-table-name`,
+      simpleName: false,
+    });
+
+    new StringParameter(this, 'TrainingsTableNameParameter', {
+      stringValue: this.trainingsTable.tableName,
+      parameterName: `/${namespace}/config/trainings-table-name`,
       simpleName: false,
     });
 
@@ -317,6 +325,38 @@ export class BaseStack extends Stack {
       indexName: 'userId-index',
       partitionKey: {
         name: 'userId',
+        type: AttributeType.STRING,
+      },
+    });
+
+    return table;
+  }
+
+  createTrainingsTable(namespace: string): Table {
+    const table = new Table(this, `TrainingsTable-${namespace}`, {
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      removalPolicy: RemovalPolicy.DESTROY,
+      tableName: `train-with-joe-trainings-${namespace}`,
+    });
+
+    // Add GSI for userId lookup
+    table.addGlobalSecondaryIndex({
+      indexName: 'userId-index',
+      partitionKey: {
+        name: 'userId',
+        type: AttributeType.STRING,
+      },
+    });
+
+    // Add GSI for trainingId lookup (for execution queries)
+    table.addGlobalSecondaryIndex({
+      indexName: 'trainingId-index',
+      partitionKey: {
+        name: 'trainingId',
         type: AttributeType.STRING,
       },
     });

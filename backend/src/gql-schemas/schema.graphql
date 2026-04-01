@@ -24,6 +24,11 @@ enum PaymentProvider @aws_cognito_user_pools {
   GOOGLE_PLAY_STORE
 }
 
+enum TrainingMode @aws_cognito_user_pools {
+  TEXT_INPUT
+  MULTIPLE_CHOICE
+}
+
 # ============================================================================
 # TYPES
 # ============================================================================
@@ -71,6 +76,92 @@ type VocabularyList @aws_cognito_user_pools {
   errorMessage: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
+}
+
+type TrainingWord @aws_cognito_user_pools {
+  word: String!
+  translation: String!
+  vocabularyListId: String!
+}
+
+type TrainingResult @aws_cognito_user_pools {
+  wordIndex: Int!
+  word: String!
+  expectedAnswer: String!
+  userAnswer: String!
+  correct: Boolean!
+}
+
+type MultipleChoiceOption @aws_cognito_user_pools {
+  wordIndex: Int!
+  options: [String!]!
+  correctOptionIndex: Int!
+}
+
+type TrainingExecution @aws_cognito_user_pools {
+  id: ID!
+  trainingId: ID!
+  userId: ID!
+  startedAt: AWSDateTime!
+  completedAt: AWSDateTime
+  results: [TrainingResult!]!
+  multipleChoiceOptions: [MultipleChoiceOption!]
+  correctCount: Int!
+  incorrectCount: Int!
+}
+
+type Training @aws_cognito_user_pools {
+  id: ID!
+  userId: ID!
+  name: String!
+  mode: TrainingMode!
+  vocabularyListIds: [String!]!
+  words: [TrainingWord!]!
+  executions: [TrainingExecution!]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type TrainingWordStatistic @aws_cognito_user_pools {
+  word: String!
+  translation: String!
+  correctCount: Int!
+  totalCount: Int!
+  accuracyPercentage: Float!
+}
+
+type TrainingAccuracyTrend @aws_cognito_user_pools {
+  executionId: ID!
+  startedAt: AWSDateTime!
+  accuracy: Float!
+}
+
+type TrainingStatistics @aws_cognito_user_pools {
+  overallAccuracy: Float!
+  averageTimeSeconds: Float!
+  totalExecutions: Int!
+  perWordStatistics: [TrainingWordStatistic!]!
+  mostMissedWords: [TrainingWordStatistic!]!
+  accuracyTrend: [TrainingAccuracyTrend!]!
+}
+
+type TrainingDayExecution @aws_cognito_user_pools {
+  executionId: ID!
+  trainingId: ID!
+  trainingName: String!
+  startedAt: AWSDateTime!
+  completedAt: AWSDateTime
+  correctCount: Int!
+  incorrectCount: Int!
+  durationSeconds: Float
+}
+
+type TrainingDayStatistics @aws_cognito_user_pools {
+  date: String!
+  executions: [TrainingDayExecution!]!
+  totalExecutions: Int!
+  totalCorrect: Int!
+  totalIncorrect: Int!
 }
 
 # ============================================================================
@@ -130,6 +221,29 @@ input GetImageUploadUrlsInput @aws_cognito_user_pools {
   count: Int!
 }
 
+input CreateTrainingInput @aws_cognito_user_pools {
+  vocabularyListIds: [String!]!
+  mode: TrainingMode!
+  name: String
+}
+
+input TrainingWordInput @aws_cognito_user_pools {
+  word: String!
+  translation: String!
+  vocabularyListId: String!
+}
+
+input UpdateTrainingInput @aws_cognito_user_pools {
+  trainingId: ID!
+  words: [TrainingWordInput!]!
+}
+
+input SubmitAnswerInput @aws_cognito_user_pools {
+  executionId: ID!
+  wordIndex: Int!
+  answer: String!
+}
+
 # ============================================================================
 # RESPONSE TYPES
 # ============================================================================
@@ -176,6 +290,38 @@ type ImageUploadUrlsResponse @aws_cognito_user_pools {
   error: String
 }
 
+type TrainingResponse @aws_cognito_user_pools {
+  success: Boolean!
+  training: Training
+  error: String
+}
+
+type TrainingExecutionResponse @aws_cognito_user_pools {
+  success: Boolean!
+  execution: TrainingExecution
+  error: String
+}
+
+type SubmitAnswerResponse @aws_cognito_user_pools {
+  success: Boolean!
+  result: TrainingResult
+  completed: Boolean
+  execution: TrainingExecution
+  error: String
+}
+
+type TrainingStatisticsResponse @aws_cognito_user_pools {
+  success: Boolean!
+  statistics: TrainingStatistics
+  error: String
+}
+
+type TrainingDayStatisticsResponse @aws_cognito_user_pools {
+  success: Boolean!
+  dayStatistics: TrainingDayStatistics
+  error: String
+}
+
 # ============================================================================
 # QUERIES
 # ============================================================================
@@ -186,6 +332,10 @@ type Query {
   getVocabularyLists: [VocabularyList] @aws_cognito_user_pools
   getVocabularyList(id: ID!): VocabularyList @aws_cognito_user_pools
   getImageUploadUrls(input: GetImageUploadUrlsInput!): ImageUploadUrlsResponse @aws_cognito_user_pools
+  getTraining(trainingId: ID!): TrainingResponse @aws_cognito_user_pools
+  getTrainings: [Training] @aws_cognito_user_pools
+  getTrainingStatistics(trainingId: ID!): TrainingStatisticsResponse @aws_cognito_user_pools
+  getTrainingDayStatistics(date: String!): TrainingDayStatisticsResponse @aws_cognito_user_pools
 }
 
 # ============================================================================
@@ -214,6 +364,12 @@ type Mutation {
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools
   generateContent(input: GenerateContentInput!): ContentResponse @aws_cognito_user_pools
   analyzeImageVocabulary(input: AnalyzeImageVocabularyInput!): VocabularyListResponse @aws_cognito_user_pools
+
+  # Training operations
+  createTraining(input: CreateTrainingInput!): TrainingResponse @aws_cognito_user_pools
+  updateTraining(input: UpdateTrainingInput!): TrainingResponse @aws_cognito_user_pools
+  startTraining(trainingId: ID!): TrainingExecutionResponse @aws_cognito_user_pools
+  submitAnswer(input: SubmitAnswerInput!): SubmitAnswerResponse @aws_cognito_user_pools
 }
 
 # ============================================================================
