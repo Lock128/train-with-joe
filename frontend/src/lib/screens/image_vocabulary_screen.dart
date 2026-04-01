@@ -411,14 +411,22 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   }
 
   Widget _buildErrorState(VocabularyProvider provider) {
+    final isBackgroundProcessing = provider.error?.contains('background') ?? false;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            Icon(
+              isBackgroundProcessing ? Icons.hourglass_top : Icons.error_outline,
+              size: 64,
+              color: isBackgroundProcessing ? Colors.orange : Colors.red,
+            ),
             const SizedBox(height: 16),
-            Text('Analysis Failed', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              isBackgroundProcessing ? 'Still Processing' : 'Analysis Failed',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
             Text(
               provider.error!,
@@ -426,11 +434,18 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => _analyzeImages(provider),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
+            if (isBackgroundProcessing)
+              ElevatedButton.icon(
+                onPressed: () => context.go('/vocabulary'),
+                icon: const Icon(Icons.list),
+                label: const Text('Go to Vocabulary Lists'),
+              )
+            else
+              ElevatedButton.icon(
+                onPressed: () => _analyzeImages(provider),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
           ],
         ),
       ),

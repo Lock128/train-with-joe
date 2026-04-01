@@ -131,9 +131,14 @@ class VocabularyProvider extends ChangeNotifier {
             _currentList = completed;
             _vocabularyLists.add(completed);
             return completed;
+          } else if (_error == null) {
+            // Polling timed out but no error — still processing in the background
+            _error = 'Processing is running in the background. Please check your vocabulary lists in a few minutes.';
+            _vocabularyLists.add(vocabularyList);
+            notifyListeners();
+            return null;
           } else {
-            _error = 'Analysis timed out. Check your vocabulary lists later.';
-            // Still add the pending list so the user can find it
+            // Actual failure (e.g. status == FAILED)
             _vocabularyLists.add(vocabularyList);
             return null;
           }
@@ -211,7 +216,7 @@ class VocabularyProvider extends ChangeNotifier {
 
   /// Poll getVocabularyList until status is COMPLETED or FAILED
   Future<Map<String, dynamic>?> _pollForCompletion(String id) async {
-    const maxAttempts = 220; // up to ~11 minutes with 3s intervals
+    const maxAttempts = 60; // up to ~3 minutes with 3s intervals
     const pollInterval = Duration(seconds: 3);
 
     debugPrint('[VocabularyProvider] Starting polling for id=$id');
