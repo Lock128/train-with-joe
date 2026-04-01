@@ -137,6 +137,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     );
     controller.dispose();
     if (newName == null || newName.isEmpty || newName == currentName) return;
+    if (!mounted) return;
     final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, name: newName);
     if (mounted && updated != null) {
       setState(() => _training = updated);
