@@ -281,6 +281,31 @@ export class APIStack extends cdk.Stack {
       fieldName: 'renameVocabularyList',
     });
 
+    // Create getAppInfo Lambda function
+    const getAppInfoFunction = new NodejsFunction(this, 'GetAppInfoFunction', {
+      runtime: Runtime.NODEJS_20_X,
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(5),
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getAppInfo.ts'),
+      handler: 'handler',
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        COMMIT_ID: process.env.COMMIT_ID ?? 'local',
+        BUILD_NUMBER: process.env.BUILD_NUMBER ?? '0',
+      },
+    });
+
+    const getAppInfoDataSource = api.addLambdaDataSource('GetAppInfoDataSource', getAppInfoFunction);
+
+    getAppInfoDataSource.createResolver('GetAppInfoResolver', {
+      typeName: 'Query',
+      fieldName: 'getAppInfo',
+    });
+
     // Export API endpoint URL and API ID
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.graphqlUrl,

@@ -177,11 +177,21 @@ type ImageUploadUrlsResponse @aws_cognito_user_pools {
 }
 
 # ============================================================================
+# APP INFO
+# ============================================================================
+
+type AppInfo @aws_cognito_user_pools {
+  commitId: String!
+  buildNumber: String!
+}
+
+# ============================================================================
 # QUERIES
 # ============================================================================
 
 type Query {
   getUser(id: ID!): User @aws_cognito_user_pools
+  getAppInfo: AppInfo @aws_cognito_user_pools
   getSubscriptionStatus: Subscription @aws_cognito_user_pools
   getVocabularyLists: [VocabularyList] @aws_cognito_user_pools
   getVocabularyList(id: ID!): VocabularyList @aws_cognito_user_pools

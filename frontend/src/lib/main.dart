@@ -21,6 +21,7 @@ import 'screens/home_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/image_vocabulary_screen.dart';
 import 'screens/vocabulary_lists_screen.dart';
+import 'screens/info_screen.dart';
 import 'widgets/app_shell.dart';
 
 void main() {
@@ -309,6 +310,10 @@ class _MyAppState extends State<MyApp> {
             GoRoute(
               path: '/vocabulary/analyze',
               builder: (context, state) => const ImageVocabularyScreen(),
+            ),
+            GoRoute(
+              path: '/info',
+              builder: (context, state) => const InfoScreen(),
             ),
           ],
         ),

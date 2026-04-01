@@ -230,6 +230,8 @@ jobs:
         run: npm run deploy
         env:
           NODE_ENV: sandbox
+          COMMIT_ID: ${{ github.sha }}
+          BUILD_NUMBER: ${{ github.run_number }}
         timeout-minutes: 60
 
       - name: Setup Flutter
@@ -262,7 +264,7 @@ jobs:
       - name: Build Flutter web app
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         working-directory: frontend/src
-        run: flutter build web --release
+        run: flutter build web --release --dart-define=COMMIT_ID=${{ github.sha }} --dart-define=GITHUB_RUN_NUMBER=${{ github.run_number }}
 
       - name: Inject join page config
         if: needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
