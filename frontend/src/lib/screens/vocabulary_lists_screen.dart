@@ -146,6 +146,53 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
     );
   }
 
+  void _showRenameDialog(BuildContext context, Map<String, dynamic> list) {
+    final currentTitle = list['title'] as String? ?? '';
+    final controller = TextEditingController(text: currentTitle);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename Vocabulary List'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'New title',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (value) {
+            if (value.trim().isNotEmpty) {
+              Navigator.of(ctx).pop();
+              context.read<VocabularyProvider>().renameVocabularyList(
+                list['id'] as String,
+                value.trim(),
+              );
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final value = controller.text.trim();
+              if (value.isNotEmpty) {
+                Navigator.of(ctx).pop();
+                context.read<VocabularyProvider>().renameVocabularyList(
+                  list['id'] as String,
+                  value,
+                );
+              }
+            },
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _confirmDelete(BuildContext context, Map<String, dynamic> list) {
     final title = list['title'] as String? ?? 'Untitled List';
     showDialog(
@@ -201,10 +248,26 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
           subtitleParts.join(' - '),
           style: const TextStyle(color: Colors.grey),
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline),
-          tooltip: 'Delete list',
-          onPressed: () => _confirmDelete(context, list),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Rename list',
+              onPressed: () => _showRenameDialog(context, list),
+            ),
+            IconButton(
+              icon: const Icon(Icons.download),
+              tooltip: 'Export as text',
+              onPressed: () =>
+                  context.read<VocabularyProvider>().exportAsText(list),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Delete list',
+              onPressed: () => _confirmDelete(context, list),
+            ),
+          ],
         ),
         children: words.map((wordData) {
           final word = wordData as Map<String, dynamic>;

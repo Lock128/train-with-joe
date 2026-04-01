@@ -30,8 +30,8 @@ export const handler = async (event: Event) => {
     return { success: false, uploads: null, error: 'Authentication required' };
   }
 
-  if (!count || count < 1 || count > 20) {
-    return { success: false, uploads: null, error: 'count must be between 1 and 20' };
+  if (!count || count < 1 || count > 50) {
+    return { success: false, uploads: null, error: 'count must be between 1 and 50' };
   }
 
   try {

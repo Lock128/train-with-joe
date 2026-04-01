@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:amplify_flutter/amplify_flutter.dart' hide AuthProvider;
 import 'package:amplify_api/amplify_api.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
 
@@ -293,6 +294,53 @@ class VocabularyProvider extends ChangeNotifier {
     return null;
   }
 
+  /// Rename a vocabulary list
+  Future<bool> renameVocabularyList(String id, String newTitle) async {
+    try {
+      const mutation = '''
+        mutation RenameVocabularyList(\$input: RenameVocabularyListInput!) {
+          renameVocabularyList(input: \$input) {
+            success
+            vocabularyList {
+              id title
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {
+          'input': {'id': id, 'title': newTitle},
+        },
+      );
+
+      final result = response['renameVocabularyList'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        final idx = _vocabularyLists.indexWhere((list) => list['id'] == id);
+        if (idx != -1) {
+          _vocabularyLists[idx]['title'] = newTitle;
+        }
+        if (_currentList?['id'] == id) {
+          _currentList?['title'] = newTitle;
+        }
+        notifyListeners();
+        return true;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to rename vocabulary list';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error renaming vocabulary list: $e');
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Delete a vocabulary list by ID
   Future<bool> deleteVocabularyList(String id) async {
     try {
@@ -330,6 +378,30 @@ class VocabularyProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Export a vocabulary list as a txt file in "word = translation" format
+  Future<void> exportAsText(Map<String, dynamic> list) async {
+    final title = list['title'] as String? ?? 'vocabulary';
+    final words = (list['words'] as List<dynamic>?) ?? [];
+
+    final lines = words.map((w) {
+      final word = (w as Map<String, dynamic>)['word'] as String? ?? '';
+      final translation = w['translation'] as String? ?? '';
+      return '$word = $translation';
+    });
+
+    final content = lines.join('\n');
+    final fileName =
+        '${title.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_')}.txt';
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: content,
+        subject: title,
+        title: fileName,
+      ),
+    );
   }
 
   /// Clear vocabulary data (on sign out)

@@ -262,6 +262,25 @@ export class APIStack extends cdk.Stack {
       fieldName: 'deleteVocabularyList',
     });
 
+    // Create renameVocabularyList Lambda function
+    const renameVocabularyListFunction = new NodejsFunction(this, 'RenameVocabularyListFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.renameVocabularyList.ts'),
+      handler: 'handler',
+    });
+
+    vocabularyListsTable.grantReadWriteData(renameVocabularyListFunction);
+
+    const renameVocabularyListDataSource = api.addLambdaDataSource(
+      'RenameVocabularyListDataSource',
+      renameVocabularyListFunction,
+    );
+
+    renameVocabularyListDataSource.createResolver('RenameVocabularyListResolver', {
+      typeName: 'Mutation',
+      fieldName: 'renameVocabularyList',
+    });
+
     // Export API endpoint URL and API ID
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.graphqlUrl,

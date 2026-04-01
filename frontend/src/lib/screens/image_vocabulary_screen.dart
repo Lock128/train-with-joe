@@ -243,9 +243,10 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 12),
-        GridView.builder(
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 300),
+          child: GridView.builder(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             crossAxisSpacing: 8,
@@ -279,6 +280,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
               ],
             );
           },
+        ),
         ),
         const SizedBox(height: 16),
 

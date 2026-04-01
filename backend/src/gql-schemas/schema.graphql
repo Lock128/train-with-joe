@@ -121,6 +121,11 @@ input AnalyzeImageVocabularyInput @aws_cognito_user_pools {
   targetLanguage: String
 }
 
+input RenameVocabularyListInput @aws_cognito_user_pools {
+  id: ID!
+  title: String!
+}
+
 input GetImageUploadUrlsInput @aws_cognito_user_pools {
   count: Int!
 }
@@ -203,6 +208,7 @@ type Mutation {
   
   # Vocabulary operations
   deleteVocabularyList(id: ID!): VocabularyListResponse @aws_cognito_user_pools
+  renameVocabularyList(input: RenameVocabularyListInput!): VocabularyListResponse @aws_cognito_user_pools
 
   # AI operations
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools

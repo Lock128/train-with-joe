@@ -29,6 +29,9 @@ dependencies:
   # Image picking
   image_picker: ^1.1.2
 
+  # Sharing / export
+  share_plus: ^10.1.4
+
   # Utilities
   intl: ^0.20.2
   shared_preferences: ^2.5.3
