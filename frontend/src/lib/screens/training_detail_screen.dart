@@ -181,27 +181,6 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
           Chip(label: Text(_modeLabel(mode), style: TextStyle(color: _modeColor(mode))),
             backgroundColor: _modeColor(mode).withValues(alpha: 0.1)),
           const SizedBox(height: 16),
-          Text('Words (${words.length})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          if (words.isEmpty)
-            const Padding(padding: EdgeInsets.symmetric(vertical: 24),
-              child: Text('No words in this training.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)))
-          else
-            ListView.builder(
-              shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: words.length,
-              itemBuilder: (context, index) {
-                final word = words[index] as Map<String, dynamic>;
-                return ListTile(
-                  title: Text(word['word'] as String? ?? ''),
-                  subtitle: Text(word['translation'] as String? ?? ''),
-                  trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteWord(index)),
-                );
-              },
-            ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(onPressed: _showAddWordsSheet, icon: const Icon(Icons.add),
-            label: const Text('Add Words'), style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(12))),
-          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: isMcTooFew || _isStarting ? null : _startTraining,
             style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
@@ -213,6 +192,30 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
             const Padding(padding: EdgeInsets.only(top: 8), child: Text(
               'Multiple choice mode requires at least 3 words.',
               style: TextStyle(color: Colors.orange, fontSize: 13), textAlign: TextAlign.center)),
+          const SizedBox(height: 16),
+          Text('Words (${words.length})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          if (words.isEmpty)
+            const Padding(padding: EdgeInsets.symmetric(vertical: 24),
+              child: Text('No words in this training.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)))
+          else
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 300),
+              child: ListView.builder(
+                itemCount: words.length,
+                itemBuilder: (context, index) {
+                  final word = words[index] as Map<String, dynamic>;
+                  return ListTile(
+                    title: Text(word['word'] as String? ?? ''),
+                    subtitle: Text(word['translation'] as String? ?? ''),
+                    trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteWord(index)),
+                  );
+                },
+              ),
+            ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(onPressed: _showAddWordsSheet, icon: const Icon(Icons.add),
+            label: const Text('Add Words'), style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(12))),
         ]),
       ),
     );

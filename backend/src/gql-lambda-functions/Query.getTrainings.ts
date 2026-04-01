@@ -21,8 +21,18 @@ export const handler = async (event: Event) => {
   try {
     const service = TrainingService.getInstance();
     const trainings = await service.getTrainings(userId);
-    // Filter out corrupt/incomplete records that would fail GraphQL non-null validation
-    return trainings.filter((t) => t.name && t.mode && t.vocabularyListIds && t.words && t.createdAt && t.updatedAt);
+    // Filter out corrupt/incomplete records (e.g. TrainingExecution records from the same table)
+    return trainings.filter(
+      (t) =>
+        t.name != null &&
+        t.mode != null &&
+        Array.isArray(t.vocabularyListIds) &&
+        t.vocabularyListIds.length > 0 &&
+        Array.isArray(t.words) &&
+        t.words.length > 0 &&
+        t.createdAt != null &&
+        t.updatedAt != null,
+    );
   } catch (error) {
     console.error('Error getting trainings:', error);
     return [];
