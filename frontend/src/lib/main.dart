@@ -14,6 +14,7 @@ import 'services/auth_service.dart';
 import 'services/api_service.dart';
 import 'services/payment_service.dart';
 import 'providers/vocabulary_provider.dart';
+import 'providers/training_provider.dart';
 import 'screens/signin_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/verify_email_screen.dart';
@@ -21,6 +22,12 @@ import 'screens/home_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/image_vocabulary_screen.dart';
 import 'screens/vocabulary_lists_screen.dart';
+import 'screens/training_list_screen.dart';
+import 'screens/training_creation_screen.dart';
+import 'screens/training_detail_screen.dart';
+import 'screens/training_execution_screen.dart';
+import 'screens/training_results_screen.dart';
+import 'screens/training_history_screen.dart';
 import 'widgets/app_shell.dart';
 
 void main() {
@@ -188,6 +195,10 @@ class _MyAppState extends State<MyApp> {
           create: (_) => VocabularyProvider(),
           update: (_, auth, previous) => previous!..updateAuth(auth),
         ),
+        ChangeNotifierProxyProvider<app.AuthProvider, TrainingProvider>(
+          create: (_) => TrainingProvider(),
+          update: (_, auth, previous) => previous!..updateAuth(auth),
+        ),
       ],
       child: Consumer<app.AuthProvider>(
         builder: (context, authProvider, _) {
@@ -309,6 +320,40 @@ class _MyAppState extends State<MyApp> {
             GoRoute(
               path: '/vocabulary/analyze',
               builder: (context, state) => const ImageVocabularyScreen(),
+            ),
+            GoRoute(
+              path: '/trainings',
+              builder: (context, state) => const TrainingListScreen(),
+            ),
+            GoRoute(
+              path: '/trainings/create',
+              builder: (context, state) => const TrainingCreationScreen(),
+            ),
+            GoRoute(
+              path: '/trainings/:id',
+              builder: (context, state) => TrainingDetailScreen(
+                trainingId: state.pathParameters['id']!,
+              ),
+            ),
+            GoRoute(
+              path: '/trainings/:id/execute/:executionId',
+              builder: (context, state) => TrainingExecutionScreen(
+                trainingId: state.pathParameters['id']!,
+                executionId: state.pathParameters['executionId']!,
+              ),
+            ),
+            GoRoute(
+              path: '/trainings/:id/results/:executionId',
+              builder: (context, state) => TrainingResultsScreen(
+                trainingId: state.pathParameters['id']!,
+                executionId: state.pathParameters['executionId']!,
+              ),
+            ),
+            GoRoute(
+              path: '/trainings/:id/history',
+              builder: (context, state) => TrainingHistoryScreen(
+                trainingId: state.pathParameters['id']!,
+              ),
             ),
           ],
         ),

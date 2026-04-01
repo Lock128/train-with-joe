@@ -16,6 +16,7 @@ class AppShell extends StatelessWidget {
     _NavDestination('/home', Icons.home_outlined, Icons.home, 'Home'),
     _NavDestination('/vocabulary/analyze', Icons.camera_alt_outlined, Icons.camera_alt, 'Scan'),
     _NavDestination('/vocabulary', Icons.list_alt_outlined, Icons.list_alt, 'Lists'),
+    _NavDestination('/trainings', Icons.quiz_outlined, Icons.quiz, 'Training'),
     _NavDestination('/subscription', Icons.card_membership_outlined, Icons.card_membership, 'Subscription'),
   ];
 
