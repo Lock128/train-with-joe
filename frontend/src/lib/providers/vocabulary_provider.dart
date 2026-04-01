@@ -392,16 +392,8 @@ class VocabularyProvider extends ChangeNotifier {
     });
 
     final content = lines.join('\n');
-    final fileName =
-        '${title.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_')}.txt';
 
-    await SharePlus.instance.share(
-      ShareParams(
-        text: content,
-        subject: title,
-        title: fileName,
-      ),
-    );
+    await Share.share(content, subject: title);
   }
 
   /// Clear vocabulary data (on sign out)
