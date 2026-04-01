@@ -21,6 +21,7 @@ import 'screens/home_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/image_vocabulary_screen.dart';
 import 'screens/vocabulary_lists_screen.dart';
+import 'widgets/app_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -290,21 +291,26 @@ class _MyAppState extends State<MyApp> {
             return VerifyEmailScreen(email: email);
           },
         ),
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-          path: '/subscription',
-          builder: (context, state) => const SubscriptionScreen(),
-        ),
-        GoRoute(
-          path: '/vocabulary',
-          builder: (context, state) => const VocabularyListsScreen(),
-        ),
-        GoRoute(
-          path: '/vocabulary/analyze',
-          builder: (context, state) => const ImageVocabularyScreen(),
+        ShellRoute(
+          builder: (context, state, child) => AppShell(child: child),
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+            GoRoute(
+              path: '/subscription',
+              builder: (context, state) => const SubscriptionScreen(),
+            ),
+            GoRoute(
+              path: '/vocabulary',
+              builder: (context, state) => const VocabularyListsScreen(),
+            ),
+            GoRoute(
+              path: '/vocabulary/analyze',
+              builder: (context, state) => const ImageVocabularyScreen(),
+            ),
+          ],
         ),
       ],
     );

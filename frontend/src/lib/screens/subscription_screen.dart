@@ -273,10 +273,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Subscription'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: Consumer<SubscriptionProvider>(
         builder: (context, subscriptionProvider, _) {

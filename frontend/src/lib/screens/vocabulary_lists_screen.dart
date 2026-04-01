@@ -48,10 +48,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Vocabulary Lists'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: Consumer<VocabularyProvider>(
         builder: (context, vocabularyProvider, _) {

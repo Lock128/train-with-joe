@@ -36,13 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _handleSignOut,
-            tooltip: 'Sign Out',
-          ),
-        ],
+        automaticallyImplyLeading: false,
       ),
       body: Consumer2<AuthProvider, UserProvider>(
         builder: (context, authProvider, userProvider, _) {
@@ -184,16 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPressed: () => context.go('/subscription'),
                       icon: const Icon(Icons.upgrade),
                       label: const Text('Manage Subscription'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.all(16),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    
-                    OutlinedButton.icon(
-                      onPressed: _handleSignOut,
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Sign Out'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                       ),
