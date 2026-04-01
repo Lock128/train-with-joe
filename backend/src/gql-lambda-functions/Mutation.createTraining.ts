@@ -1,0 +1,45 @@
+import { TrainingService } from '../services/training-service';
+import type { TrainingMode } from '../model/domain/Training';
+
+/**
+ * Lambda resolver for Mutation.createTraining
+ * Creates a new training from vocabulary lists
+ */
+
+interface Event {
+  arguments: {
+    input: {
+      vocabularyListIds: string[];
+      mode: TrainingMode;
+      name?: string;
+    };
+  };
+  identity: {
+    sub: string;
+  };
+}
+
+export const handler = async (event: Event) => {
+  const userId = event.identity?.sub;
+  const { vocabularyListIds, mode, name } = event.arguments.input;
+
+  if (!userId) {
+    return {
+      success: false,
+      training: null,
+      error: 'Authentication required',
+    };
+  }
+
+  try {
+    const service = TrainingService.getInstance();
+    return await service.createTraining(userId, vocabularyListIds, mode, name);
+  } catch (error) {
+    console.error('Error creating training:', error);
+    return {
+      success: false,
+      training: null,
+      error: error instanceof Error ? error.message : 'Failed to create training',
+    };
+  }
+};

@@ -16,6 +16,7 @@ interface APIStackProps extends cdk.StackProps {
   usersTable: Table;
   subscriptionsTable: Table;
   vocabularyListsTable: Table;
+  trainingsTable: Table;
   assetsBucket: Bucket;
 }
 
@@ -25,7 +26,8 @@ export class APIStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: APIStackProps) {
     super(scope, id, props);
 
-    const { namespace, userPool, usersTable, subscriptionsTable, vocabularyListsTable, assetsBucket } = props;
+    const { namespace, userPool, usersTable, subscriptionsTable, vocabularyListsTable, trainingsTable, assetsBucket } =
+      props;
 
     // Create CloudWatch Logs role for AppSync
     const cwRole = new Role(this, 'APICWRole', {
@@ -304,6 +306,158 @@ export class APIStack extends cdk.Stack {
     getAppInfoDataSource.createResolver('GetAppInfoResolver', {
       typeName: 'Query',
       fieldName: 'getAppInfo',
+    });
+
+    // Create training Lambda functions
+    const trainingLambdaProps = {
+      runtime: Runtime.NODEJS_20_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        NAMESPACE: namespace,
+        TRAININGS_TABLE_NAME: trainingsTable.tableName,
+        VOCABULARY_LISTS_TABLE_NAME: vocabularyListsTable.tableName,
+      },
+    };
+
+    // Create createTraining Lambda function
+    const createTrainingFunction = new NodejsFunction(this, 'CreateTrainingFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.createTraining.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(createTrainingFunction);
+    vocabularyListsTable.grantReadData(createTrainingFunction);
+
+    const createTrainingDataSource = api.addLambdaDataSource('CreateTrainingDataSource', createTrainingFunction);
+
+    createTrainingDataSource.createResolver('CreateTrainingResolver', {
+      typeName: 'Mutation',
+      fieldName: 'createTraining',
+    });
+
+    // Create updateTraining Lambda function
+    const updateTrainingFunction = new NodejsFunction(this, 'UpdateTrainingFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.updateTraining.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(updateTrainingFunction);
+
+    const updateTrainingDataSource = api.addLambdaDataSource('UpdateTrainingDataSource', updateTrainingFunction);
+
+    updateTrainingDataSource.createResolver('UpdateTrainingResolver', {
+      typeName: 'Mutation',
+      fieldName: 'updateTraining',
+    });
+
+    // Create startTraining Lambda function
+    const startTrainingFunction = new NodejsFunction(this, 'StartTrainingFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.startTraining.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(startTrainingFunction);
+
+    const startTrainingDataSource = api.addLambdaDataSource('StartTrainingDataSource', startTrainingFunction);
+
+    startTrainingDataSource.createResolver('StartTrainingResolver', {
+      typeName: 'Mutation',
+      fieldName: 'startTraining',
+    });
+
+    // Create submitAnswer Lambda function
+    const submitAnswerFunction = new NodejsFunction(this, 'SubmitAnswerFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.submitAnswer.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(submitAnswerFunction);
+
+    const submitAnswerDataSource = api.addLambdaDataSource('SubmitAnswerDataSource', submitAnswerFunction);
+
+    submitAnswerDataSource.createResolver('SubmitAnswerResolver', {
+      typeName: 'Mutation',
+      fieldName: 'submitAnswer',
+    });
+
+    // Create getTraining Lambda function
+    const getTrainingFunction = new NodejsFunction(this, 'GetTrainingFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getTraining.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(getTrainingFunction);
+
+    const getTrainingDataSource = api.addLambdaDataSource('GetTrainingDataSource', getTrainingFunction);
+
+    getTrainingDataSource.createResolver('GetTrainingResolver', {
+      typeName: 'Query',
+      fieldName: 'getTraining',
+    });
+
+    // Create getTrainings Lambda function
+    const getTrainingsFunction = new NodejsFunction(this, 'GetTrainingsFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getTrainings.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(getTrainingsFunction);
+
+    const getTrainingsDataSource = api.addLambdaDataSource('GetTrainingsDataSource', getTrainingsFunction);
+
+    getTrainingsDataSource.createResolver('GetTrainingsResolver', {
+      typeName: 'Query',
+      fieldName: 'getTrainings',
+    });
+
+    // Create getTrainingStatistics Lambda function
+    const getTrainingStatisticsFunction = new NodejsFunction(this, 'GetTrainingStatisticsFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getTrainingStatistics.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(getTrainingStatisticsFunction);
+
+    const getTrainingStatisticsDataSource = api.addLambdaDataSource(
+      'GetTrainingStatisticsDataSource',
+      getTrainingStatisticsFunction,
+    );
+
+    getTrainingStatisticsDataSource.createResolver('GetTrainingStatisticsResolver', {
+      typeName: 'Query',
+      fieldName: 'getTrainingStatistics',
+    });
+
+    // Create getTrainingDayStatistics Lambda function
+    const getTrainingDayStatisticsFunction = new NodejsFunction(this, 'GetTrainingDayStatisticsFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getTrainingDayStatistics.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(getTrainingDayStatisticsFunction);
+
+    const getTrainingDayStatisticsDataSource = api.addLambdaDataSource(
+      'GetTrainingDayStatisticsDataSource',
+      getTrainingDayStatisticsFunction,
+    );
+
+    getTrainingDayStatisticsDataSource.createResolver('GetTrainingDayStatisticsResolver', {
+      typeName: 'Query',
+      fieldName: 'getTrainingDayStatistics',
     });
 
     // Export API endpoint URL and API ID
