@@ -111,10 +111,13 @@ jobs:
         working-directory: frontend/src
         run: dart run build_runner build --delete-conflicting-outputs
 
+      - name: Analyze Flutter code
+        working-directory: frontend/src
+        run: flutter analyze
+
       - name: Run tests
         working-directory: frontend/src
         run: flutter test
-
 
       - name: Upload test coverage
         uses: actions/upload-artifact@v7
@@ -246,11 +249,6 @@ jobs:
       - name: Inject Amplify config
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         run: bash scripts/inject-amplify-config.sh sandbox eu-central-1
-
-      - name: Analyze Flutter code
-        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
-        working-directory: frontend/src
-        run: flutter analyze
 
       - name: Build Flutter web app
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
