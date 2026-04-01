@@ -61,6 +61,7 @@ const apiStack = new APIStack(app, `APIStack-${namespace}`, {
   usersTable: baseStack.usersTable,
   subscriptionsTable: baseStack.subscriptionsTable,
   vocabularyListsTable: baseStack.vocabularyListsTable,
+  trainingsTable: baseStack.trainingsTable,
   assetsBucket: baseStack.assetsBucket,
 });
 apiStack.addDependency(baseStack);

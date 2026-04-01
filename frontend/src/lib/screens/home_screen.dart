@@ -165,6 +165,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 12),
 
+                    ElevatedButton.icon(
+                      onPressed: () => context.go('/trainings'),
+                      icon: const Icon(Icons.quiz),
+                      label: const Text('My Trainings'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        backgroundColor: const Color(0xFFE17055),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
                     OutlinedButton.icon(
                       onPressed: () => context.go('/subscription'),
                       icon: const Icon(Icons.upgrade),

@@ -29,6 +29,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -64,6 +65,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -98,6 +100,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -136,6 +139,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -179,6 +183,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -232,13 +237,14 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
     const template = Template.fromStack(apiStack);
 
     // Verify data sources exist (2 DynamoDB + 8 Lambda)
-    template.resourceCountIs('AWS::AppSync::DataSource', 10);
+    template.resourceCountIs('AWS::AppSync::DataSource', 18);
 
     // Verify DynamoDB data sources have correct type
     const templateJson = template.toJSON();
@@ -246,14 +252,14 @@ describe('APIStack CDK Integration Tests', () => {
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
     );
 
-    expect(dataSources.length).toBe(10);
+    expect(dataSources.length).toBe(18);
 
     // Count data source types
     const dynamoDbSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AMAZON_DYNAMODB');
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(8); // Stripe Checkout + 6 Vocabulary Lambdas + getAppInfo
+    expect(lambdaSources.length).toBe(16); // Stripe Checkout + 6 Vocabulary Lambdas + 8 Training Lambdas
   });
 
   test('should export API endpoint URL and ID', { timeout: 60000 }, () => {
@@ -277,6 +283,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -319,6 +326,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -326,7 +334,7 @@ describe('APIStack CDK Integration Tests', () => {
 
     // Verify expected resource counts
     template.resourceCountIs('AWS::AppSync::GraphQLApi', 1);
-    template.resourceCountIs('AWS::AppSync::DataSource', 10); // users, subscriptions, and 8 Lambdas
+    template.resourceCountIs('AWS::AppSync::DataSource', 18); // users, subscriptions, 7 Vocabulary Lambdas, and 8 Training Lambdas
 
     // Verify at least 3 IAM roles exist (CloudWatch role + 2 data source roles, CDK may create additional service roles)
     const templateJson = template.toJSON();
@@ -355,6 +363,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -406,6 +415,7 @@ describe('APIStack CDK Integration Tests', () => {
       usersTable: baseStack.usersTable,
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
+      trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
 

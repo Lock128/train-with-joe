@@ -1,0 +1,235 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import '../providers/training_provider.dart';
+import '../providers/vocabulary_provider.dart';
+
+/// Screen for viewing and managing a single training
+class TrainingDetailScreen extends StatefulWidget {
+  final String trainingId;
+  const TrainingDetailScreen({super.key, required this.trainingId});
+
+  @override
+  State<TrainingDetailScreen> createState() => _TrainingDetailScreenState();
+}
+
+class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
+  Map<String, dynamic>? _training;
+  bool _isLoading = true;
+  bool _isStarting = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadTraining());
+  }
+
+  Future<void> _loadTraining() async {
+    setState(() { _isLoading = true; _error = null; });
+    final result = await context.read<TrainingProvider>().getTraining(widget.trainingId);
+    if (mounted) {
+      setState(() {
+        _training = result;
+        _isLoading = false;
+        _error = result == null ? 'Failed to load training' : null;
+      });
+    }
+  }
+
+  Future<void> _deleteWord(int index) async {
+    if (_training == null) return;
+    final words = List<Map<String, dynamic>>.from(
+      (_training!['words'] as List<dynamic>).map((w) => Map<String, dynamic>.from(w as Map)),
+    );
+    words.removeAt(index);
+    final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, words);
+    if (!mounted) return;
+    if (updated != null) {
+      setState(() => _training = updated);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Word removed')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to remove word'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<void> _showAddWordsSheet() async {
+    await context.read<VocabularyProvider>().loadVocabularyLists();
+    if (!mounted) return;
+    final vocabLists = context.read<VocabularyProvider>().vocabularyLists;
+    final trainingWords = (_training!['words'] as List<dynamic>?) ?? [];
+    final existingKeys = trainingWords.map((w) {
+      final m = w as Map<String, dynamic>;
+      return '${m['word']}::${m['translation']}';
+    }).toSet();
+
+    final availableWords = <Map<String, dynamic>>[];
+    for (final list in vocabLists) {
+      for (final w in (list['words'] as List<dynamic>?) ?? []) {
+        final m = Map<String, dynamic>.from(w as Map);
+        if (!existingKeys.contains('${m['word']}::${m['translation']}')) {
+          availableWords.add({'word': m['word'], 'translation': m['translation'], 'vocabularyListId': list['id']});
+        }
+      }
+    }
+    if (!mounted) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetCtx) => _AddWordsSheet(
+        availableWords: availableWords,
+        onAdd: (selected) async {
+          Navigator.of(sheetCtx).pop();
+          final current = List<Map<String, dynamic>>.from(
+            (_training!['words'] as List<dynamic>).map((w) => Map<String, dynamic>.from(w as Map)),
+          );
+          current.addAll(selected);
+          final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, current);
+          if (mounted && updated != null) setState(() => _training = updated);
+        },
+      ),
+    );
+  }
+
+  Future<void> _startTraining() async {
+    setState(() => _isStarting = true);
+    final execution = await context.read<TrainingProvider>().startTraining(widget.trainingId);
+    if (!mounted) return;
+    setState(() => _isStarting = false);
+    if (execution != null) {
+      context.go('/trainings/${widget.trainingId}/execute/${execution['id']}');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(context.read<TrainingProvider>().error ?? 'Failed to start training'),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+  Color _modeColor(String? m) => m == 'MULTIPLE_CHOICE' ? const Color(0xFF00B894) : const Color(0xFF6C5CE7);
+  String _modeLabel(String? m) => m == 'MULTIPLE_CHOICE' ? 'Multiple Choice' : 'Text Input';
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(appBar: AppBar(title: const Text('Training')),
+        body: const Center(child: CircularProgressIndicator()));
+    }
+    if (_error != null || _training == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Training')),
+        body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(_error ?? 'Training not found', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(onPressed: _loadTraining, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+        ])),
+      );
+    }
+
+    final name = _training!['name'] as String? ?? 'Untitled Training';
+    final mode = _training!['mode'] as String?;
+    final words = (_training!['words'] as List<dynamic>?) ?? [];
+    final isMcTooFew = mode == 'MULTIPLE_CHOICE' && words.length < 3;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(name), actions: [
+        IconButton(icon: const Icon(Icons.history), tooltip: 'History',
+          onPressed: () => context.go('/trainings/${widget.trainingId}/history')),
+      ]),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Chip(label: Text(_modeLabel(mode), style: TextStyle(color: _modeColor(mode))),
+            backgroundColor: _modeColor(mode).withOpacity(0.1)),
+          const SizedBox(height: 16),
+          Text('Words (${words.length})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          if (words.isEmpty)
+            const Padding(padding: EdgeInsets.symmetric(vertical: 24),
+              child: Text('No words in this training.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)))
+          else
+            ListView.builder(
+              shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: words.length,
+              itemBuilder: (context, index) {
+                final word = words[index] as Map<String, dynamic>;
+                return ListTile(
+                  title: Text(word['word'] as String? ?? ''),
+                  subtitle: Text(word['translation'] as String? ?? ''),
+                  trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteWord(index)),
+                );
+              },
+            ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(onPressed: _showAddWordsSheet, icon: const Icon(Icons.add),
+            label: const Text('Add Words'), style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(12))),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: isMcTooFew || _isStarting ? null : _startTraining,
+            style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+            child: _isStarting
+                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Text('Start Training'),
+          ),
+          if (isMcTooFew)
+            const Padding(padding: EdgeInsets.only(top: 8), child: Text(
+              'Multiple choice mode requires at least 3 words.',
+              style: TextStyle(color: Colors.orange, fontSize: 13), textAlign: TextAlign.center)),
+        ]),
+      ),
+    );
+  }
+}
+
+class _AddWordsSheet extends StatefulWidget {
+  final List<Map<String, dynamic>> availableWords;
+  final Function(List<Map<String, dynamic>>) onAdd;
+  const _AddWordsSheet({required this.availableWords, required this.onAdd});
+
+  @override
+  State<_AddWordsSheet> createState() => _AddWordsSheetState();
+}
+
+class _AddWordsSheetState extends State<_AddWordsSheet> {
+  final Set<int> _selected = {};
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6, maxChildSize: 0.9, minChildSize: 0.3, expand: false,
+      builder: (context, scrollController) => Column(children: [
+        Padding(padding: const EdgeInsets.all(16), child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Add Words', style: Theme.of(context).textTheme.titleMedium),
+            ElevatedButton(
+              onPressed: _selected.isEmpty ? null : () => widget.onAdd(_selected.map((i) => widget.availableWords[i]).toList()),
+              child: Text('Add ${_selected.length}'),
+            ),
+          ],
+        )),
+        Expanded(
+          child: widget.availableWords.isEmpty
+              ? const Center(child: Text('No additional words available.', style: TextStyle(color: Colors.grey)))
+              : ListView.builder(
+                  controller: scrollController, itemCount: widget.availableWords.length,
+                  itemBuilder: (context, index) {
+                    final word = widget.availableWords[index];
+                    return CheckboxListTile(
+                      title: Text(word['word'] as String? ?? ''),
+                      subtitle: Text(word['translation'] as String? ?? ''),
+                      value: _selected.contains(index),
+                      onChanged: (checked) => setState(() {
+                        if (checked == true) { _selected.add(index); } else { _selected.remove(index); }
+                      }),
+                    );
+                  },
+                ),
+        ),
+      ]),
+    );
+  }
+}
