@@ -59,7 +59,7 @@ export class TrainingService {
 
       const now = new Date().toISOString();
       const training: Training = {
-        id: `training#${crypto.randomUUID()}`,
+        id: crypto.randomUUID(),
         userId,
         name: name || `Training - ${new Date().toLocaleDateString()}`,
         mode,
@@ -85,7 +85,8 @@ export class TrainingService {
   async updateTraining(
     trainingId: string,
     userId: string,
-    words: TrainingWord[],
+    words?: TrainingWord[],
+    name?: string,
   ): Promise<{ success: boolean; training?: Training; error?: string }> {
     try {
       const trainingRepo = TrainingRepository.getInstance();
@@ -99,11 +100,19 @@ export class TrainingService {
         return { success: false, error: 'Not authorized' };
       }
 
-      if (words.length === 0) {
+      if (words !== undefined && words.length === 0) {
         return { success: false, error: 'Cannot remove last word from training' };
       }
 
-      const updated = await trainingRepo.update(trainingId, { words });
+      const updates: Partial<Training> = {};
+      if (words !== undefined) updates.words = words;
+      if (name !== undefined && name.trim().length > 0) updates.name = name.trim();
+
+      if (Object.keys(updates).length === 0) {
+        return { success: true, training };
+      }
+
+      const updated = await trainingRepo.update(trainingId, updates);
 
       return { success: true, training: updated };
     } catch (error) {
@@ -159,7 +168,7 @@ export class TrainingService {
       }
 
       const execution: TrainingExecution = {
-        id: `execution#${crypto.randomUUID()}`,
+        id: crypto.randomUUID(),
         trainingId,
         userId,
         startedAt: new Date().toISOString(),

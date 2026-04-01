@@ -43,11 +43,6 @@ class TrainingProvider extends ChangeNotifier {
           getTrainings {
             id userId name mode vocabularyListIds createdAt updatedAt
             words { word translation vocabularyListId }
-            executions {
-              id trainingId userId startedAt completedAt correctCount incorrectCount
-              results { wordIndex word expectedAnswer userAnswer correct }
-              multipleChoiceOptions { wordIndex options correctOptionIndex }
-            }
           }
         }
       ''';
@@ -78,8 +73,6 @@ class TrainingProvider extends ChangeNotifier {
               words { word translation vocabularyListId }
               executions {
                 id trainingId userId startedAt completedAt correctCount incorrectCount
-                results { wordIndex word expectedAnswer userAnswer correct }
-                multipleChoiceOptions { wordIndex options correctOptionIndex }
               }
             }
             error
@@ -168,11 +161,12 @@ class TrainingProvider extends ChangeNotifier {
     }
   }
 
-  /// Update training words
+  /// Update training words and/or name
   Future<Map<String, dynamic>?> updateTraining(
-    String id,
-    List<Map<String, dynamic>> words,
-  ) async {
+    String id, {
+    List<Map<String, dynamic>>? words,
+    String? name,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -191,14 +185,15 @@ class TrainingProvider extends ChangeNotifier {
         }
       ''';
 
+      final input = <String, dynamic>{
+        'trainingId': id,
+      };
+      if (words != null) input['words'] = words;
+      if (name != null) input['name'] = name;
+
       final response = await _apiService.mutate(
         mutation,
-        variables: {
-          'input': {
-            'trainingId': id,
-            'words': words,
-          },
-        },
+        variables: {'input': input},
       );
 
       final result = response['updateTraining'] as Map<String, dynamic>?;

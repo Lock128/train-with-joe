@@ -10,7 +10,8 @@ interface Event {
   arguments: {
     input: {
       trainingId: string;
-      words: TrainingWord[];
+      words?: TrainingWord[];
+      name?: string;
     };
   };
   identity: {
@@ -20,7 +21,7 @@ interface Event {
 
 export const handler = async (event: Event) => {
   const userId = event.identity?.sub;
-  const { trainingId, words } = event.arguments.input;
+  const { trainingId, words, name } = event.arguments.input;
 
   if (!userId) {
     return {
@@ -32,7 +33,7 @@ export const handler = async (event: Event) => {
 
   try {
     const service = TrainingService.getInstance();
-    return await service.updateTraining(trainingId, userId, words);
+    return await service.updateTraining(trainingId, userId, words, name);
   } catch (error) {
     console.error('Error updating training:', error);
     return {

@@ -43,7 +43,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
       (_training!['words'] as List<dynamic>).map((w) => Map<String, dynamic>.from(w as Map)),
     );
     words.removeAt(index);
-    final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, words);
+    final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, words: words);
     if (!mounted) return;
     if (updated != null) {
       setState(() => _training = updated);
@@ -86,7 +86,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
             (_training!['words'] as List<dynamic>).map((w) => Map<String, dynamic>.from(w as Map)),
           );
           current.addAll(selected);
-          final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, current);
+          final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, words: current);
           if (mounted && updated != null) setState(() => _training = updated);
         },
       ),
@@ -110,6 +110,38 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
 
   Color _modeColor(String? m) => m == 'MULTIPLE_CHOICE' ? const Color(0xFF00B894) : const Color(0xFF6C5CE7);
   String _modeLabel(String? m) => m == 'MULTIPLE_CHOICE' ? 'Multiple Choice' : 'Text Input';
+
+  Future<void> _showRenameDialog(String currentName) async {
+    final controller = TextEditingController(text: currentName);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename Training'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Training Name',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (value) => Navigator.of(ctx).pop(value.trim()),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (newName == null || newName.isEmpty || newName == currentName) return;
+    final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, name: newName);
+    if (mounted && updated != null) {
+      setState(() => _training = updated);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +169,8 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(name), actions: [
+        IconButton(icon: const Icon(Icons.edit), tooltip: 'Rename',
+          onPressed: () => _showRenameDialog(name)),
         IconButton(icon: const Icon(Icons.history), tooltip: 'History',
           onPressed: () => context.go('/trainings/${widget.trainingId}/history')),
       ]),

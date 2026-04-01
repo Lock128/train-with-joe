@@ -235,7 +235,8 @@ input TrainingWordInput @aws_cognito_user_pools {
 
 input UpdateTrainingInput @aws_cognito_user_pools {
   trainingId: ID!
-  words: [TrainingWordInput!]!
+  words: [TrainingWordInput!]
+  name: String
 }
 
 input SubmitAnswerInput @aws_cognito_user_pools {
