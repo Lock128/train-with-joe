@@ -221,13 +221,13 @@ void main() {
       expect(find.byType(SubscriptionScreen), findsOneWidget);
     });
 
-    testWidgets('should have back button in app bar', (tester) async {
+    testWidgets('should not have back button in app bar (navigation handled by shell)', (tester) async {
       // Arrange
       await tester.pumpWidget(createTestWidget(const SubscriptionScreen()));
       await tester.pump();
 
-      // Assert
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      // Assert - back button removed, navigation is via AppShell
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
       expect(find.text('Subscription'), findsOneWidget);
     });
 

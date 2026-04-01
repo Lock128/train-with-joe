@@ -238,8 +238,8 @@ void main() {
         // Assert - should be on subscription screen
         expect(find.text('Choose a Plan'), findsOneWidget);
 
-        // Act - tap back button in app bar
-        await tester.tap(find.byIcon(Icons.arrow_back));
+        // Act - navigate back to home using router (back button removed, navigation via shell)
+        router.go('/home');
         await tester.pumpAndSettle();
 
         // Assert - should be back on home screen
@@ -398,8 +398,12 @@ void main() {
         // Assert - should be on home screen
         expect(find.text('Home'), findsOneWidget);
 
-        // Act - sign out using the app bar logout button
-        await tester.tap(find.byTooltip('Sign Out'));
+        // Act - sign out programmatically (sign out button moved to AppShell navigation)
+        await authProvider.signOut();
+        await tester.pumpAndSettle();
+
+        // Navigate to trigger redirect
+        router.go('/home');
         await tester.pumpAndSettle();
 
         // Assert - should be redirected to signin

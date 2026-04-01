@@ -111,25 +111,14 @@ void main() {
       expect(find.text('Subscription'), findsOneWidget);
       expect(find.text('Quick Actions'), findsOneWidget);
       expect(find.text('Manage Subscription'), findsOneWidget);
-      expect(find.text('Sign Out'), findsOneWidget);
     });
 
-    testWidgets('should have sign out button in app bar', (tester) async {
+    testWidgets('should not have sign out button in app bar (moved to navigation shell)', (tester) async {
       await tester.pumpWidget(createTestWidget(const HomeScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.logout), findsWidgets);
-      expect(find.byTooltip('Sign Out'), findsOneWidget);
-    });
-
-    testWidgets('should call signOut when logout button tapped', (tester) async {
-      await tester.pumpWidget(createTestWidget(const HomeScreen()));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byTooltip('Sign Out'));
-      await tester.pumpAndSettle();
-
-      verify(mockAuthService.signOut()).called(1);
+      // Sign out is now in the AppShell navigation, not in the HomeScreen AppBar
+      expect(find.byTooltip('Sign Out'), findsNothing);
     });
 
     testWidgets('should display subscription status card', (tester) async {
@@ -198,13 +187,12 @@ void main() {
       expect(find.text('My Vocabulary Lists'), findsOneWidget);
     });
 
-    testWidgets('should have outlined buttons for subscription and sign out', (tester) async {
+    testWidgets('should have outlined button for subscription', (tester) async {
       await tester.pumpWidget(createTestWidget(const HomeScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.byType(OutlinedButton), findsNWidgets(2));
+      expect(find.byType(OutlinedButton), findsNWidgets(1));
       expect(find.text('Manage Subscription'), findsOneWidget);
-      expect(find.text('Sign Out'), findsOneWidget);
     });
 
     testWidgets('should display subscription status from user data', (tester) async {
