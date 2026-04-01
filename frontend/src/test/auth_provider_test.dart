@@ -8,46 +8,15 @@ import 'package:train_with_joe/services/auth_service.dart';
 import 'auth_provider_test.mocks.dart';
 
 // Mock implementations for testing
-class MockSignInDetails implements SignInDetails {
+class MockSignInDetails extends SignInDetails {
+  const MockSignInDetails();
   @override
-  AuthenticationFlowType get authFlowType => AuthenticationFlowType.userSrpAuth;
-
-  @override
-  String get runtimeTypeName => 'MockSignInDetails';
-
-  @override
-  Map<String, Object?> toJson() => {'authFlowType': authFlowType.name};
-
-  @override
-  List<Object?> get props => [authFlowType];
+  Map<String, Object?> toJson() => {};
 }
 
-class MockAuthUser implements AuthUser {
-  @override
-  final String username;
-
-  @override
-  final String userId;
-
-  MockAuthUser({required this.username, required this.userId});
-
-  @override
-  List<AuthUserAttribute> get userAttributes => [];
-
-  @override
-  SignInDetails get signInDetails => MockSignInDetails();
-
-  @override
-  String get runtimeTypeName => 'MockAuthUser';
-
-  @override
-  Map<String, Object?> toJson() => {'username': username, 'userId': userId};
-
-  @override
-  List<Object?> get props => [username, userId];
-
-  @override
-  bool? get stringify => true;
+class MockAuthUser extends AuthUser {
+  MockAuthUser({required super.username, required super.userId})
+      : super(signInDetails: const MockSignInDetails());
 }
 
 @GenerateMocks([AuthService])

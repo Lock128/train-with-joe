@@ -122,6 +122,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Future<void> _handleSubscribe(String planId) async {
     final subscriptionProvider = context.read<SubscriptionProvider>();
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     
     // Show loading dialog
     if (mounted) {
@@ -138,27 +140,30 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     
     // Close loading dialog
     if (mounted) {
-      Navigator.of(context).pop();
-    }
+      navigator.pop();
 
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Subscription created successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else if (mounted && subscriptionProvider.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(subscriptionProvider.error!),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (success) {
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Subscription created successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (subscriptionProvider.error != null) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(subscriptionProvider.error!),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _handleCancel() async {
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
@@ -184,11 +189,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     if (confirmed != true) return;
 
-    final subscriptionProvider = context.read<SubscriptionProvider>();
     final success = await subscriptionProvider.cancelSubscription();
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             success
@@ -203,6 +207,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   /// Handle restore purchases (iOS only)
   Future<void> _handleRestorePurchases() async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+
     try {
       // Show loading dialog
       if (mounted) {
@@ -226,14 +234,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       
       // Close loading dialog
       if (mounted) {
-        Navigator.of(context).pop();
+        navigator.pop();
       }
 
       // Reload subscription data
       if (mounted) {
-        await context.read<SubscriptionProvider>().loadSubscription();
+        await subscriptionProvider.loadSubscription();
         
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Purchases restored successfully!'),
             backgroundColor: Colors.green,
@@ -243,9 +251,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     } catch (e) {
       // Close loading dialog
       if (mounted) {
-        Navigator.of(context).pop();
+        navigator.pop();
         
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Failed to restore purchases: $e'),
             backgroundColor: Colors.red,

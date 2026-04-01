@@ -22,15 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _handleSignOut() async {
-    final authProvider = context.read<AuthProvider>();
-    await authProvider.signOut();
-    
-    if (mounted) {
-      context.go('/signin');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

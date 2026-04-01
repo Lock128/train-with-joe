@@ -100,7 +100,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         'Enter the verification code sent to your email',
                         style: TextStyle(
                           fontSize: 16,
-                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                         textAlign: TextAlign.center,
                       ),

@@ -5,4 +5,7 @@ include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
-    # Add custom lint rules here if needed
+    # use_null_aware_elements requires Dart 3.x null-aware map entry syntax
+    # which conflicts with typed maps (Map<K, V> where V is non-nullable).
+    # Disabling to avoid false positives on conditional map entries.
+    use_null_aware_elements: false

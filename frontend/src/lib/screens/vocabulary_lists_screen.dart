@@ -234,8 +234,8 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ExpansionTile(
         leading: CircleAvatar(
-          child: const Icon(Icons.list_alt),
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          child: const Icon(Icons.list_alt),
         ),
         title: Text(
           title,

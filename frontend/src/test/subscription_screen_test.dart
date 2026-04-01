@@ -108,14 +108,6 @@ void main() {
 
     testWidgets('should display active subscription details', (tester) async {
       // Arrange - set active subscription
-      final mockSubscription = {
-        'id': 'sub-123',
-        'userId': 'user-456',
-        'provider': 'STRIPE',
-        'status': 'ACTIVE',
-        'planId': 'pro-monthly',
-        'currentPeriodEnd': '2024-12-31T23:59:59Z',
-      };
 
       // Manually set subscription in provider
       await tester.pumpWidget(createTestWidget(const SubscriptionScreen()));
@@ -221,13 +213,13 @@ void main() {
       expect(find.byType(SubscriptionScreen), findsOneWidget);
     });
 
-    testWidgets('should have back button in app bar', (tester) async {
+    testWidgets('should not have back button in app bar (navigation handled by shell)', (tester) async {
       // Arrange
       await tester.pumpWidget(createTestWidget(const SubscriptionScreen()));
       await tester.pump();
 
-      // Assert
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      // Assert - back button removed, navigation is via AppShell
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
       expect(find.text('Subscription'), findsOneWidget);
     });
 

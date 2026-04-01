@@ -10,9 +10,6 @@ import 'models/amplifyconfiguration.dart';
 import 'providers/auth_provider.dart' as app;
 import 'providers/user_provider.dart';
 import 'providers/subscription_provider.dart';
-import 'services/auth_service.dart';
-import 'services/api_service.dart';
-import 'services/payment_service.dart';
 import 'providers/vocabulary_provider.dart';
 import 'providers/training_provider.dart';
 import 'screens/signin_screen.dart';
@@ -22,6 +19,7 @@ import 'screens/home_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/image_vocabulary_screen.dart';
 import 'screens/vocabulary_lists_screen.dart';
+import 'screens/info_screen.dart';
 import 'screens/training_list_screen.dart';
 import 'screens/training_creation_screen.dart';
 import 'screens/training_detail_screen.dart';
@@ -320,6 +318,10 @@ class _MyAppState extends State<MyApp> {
             GoRoute(
               path: '/vocabulary/analyze',
               builder: (context, state) => const ImageVocabularyScreen(),
+            ),
+            GoRoute(
+              path: '/info',
+              builder: (context, state) => const InfoScreen(),
             ),
             GoRoute(
               path: '/trainings',

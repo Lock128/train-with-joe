@@ -12,32 +12,15 @@ import 'package:train_with_joe/services/auth_service.dart';
 import 'register_screen_test.mocks.dart';
 
 // Mock implementations
-class MockAuthUser implements AuthUser {
+class _MockSignInDetails extends SignInDetails {
+  const _MockSignInDetails();
   @override
-  final String username;
+  Map<String, Object?> toJson() => {};
+}
 
-  @override
-  final String userId;
-
-  MockAuthUser({required this.username, required this.userId});
-
-  @override
-  List<AuthUserAttribute> get userAttributes => [];
-
-  @override
-  SignInDetails get signInDetails => throw UnimplementedError();
-
-  @override
-  String get runtimeTypeName => 'MockAuthUser';
-
-  @override
-  Map<String, Object?> toJson() => {'username': username, 'userId': userId};
-
-  @override
-  List<Object?> get props => [username, userId];
-
-  @override
-  bool? get stringify => true;
+class MockAuthUser extends AuthUser {
+  MockAuthUser({required super.username, required super.userId})
+      : super(signInDetails: const _MockSignInDetails());
 }
 
 @GenerateMocks([AuthService])

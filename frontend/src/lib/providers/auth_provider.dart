@@ -4,7 +4,7 @@ import '../services/auth_service.dart';
 
 /// Provider for managing authentication state
 class AuthProvider extends ChangeNotifier {
-  AuthService _authService;
+  final AuthService _authService;
 
   AuthUser? _currentUser;
   bool _isAuthenticated = false;

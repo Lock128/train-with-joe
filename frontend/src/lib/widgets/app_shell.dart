@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
-import '../providers/user_provider.dart';
 
 /// Shared shell widget that wraps authenticated screens with navigation.
 /// On narrow screens (mobile): bottom navigation bar.
@@ -18,6 +17,7 @@ class AppShell extends StatelessWidget {
     _NavDestination('/vocabulary', Icons.list_alt_outlined, Icons.list_alt, 'Lists'),
     _NavDestination('/trainings', Icons.quiz_outlined, Icons.quiz, 'Training'),
     _NavDestination('/subscription', Icons.card_membership_outlined, Icons.card_membership, 'Subscription'),
+    _NavDestination('/info', Icons.info_outline, Icons.info, 'Info'),
   ];
 
   int _currentIndex(BuildContext context) {

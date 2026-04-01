@@ -242,6 +242,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
           APP_VERSION: "1.0.0"
           COMMIT_ID: ${{ steps.commit-info.outputs.commit_full }}
+          BUILD_NUMBER: ${{ github.run_number }}
           COMMIT_SHORT: ${{ steps.commit-info.outputs.commit_short }}
           BUILD_TIME: ${{ github.run_started_at }}
           BRANCH: ${{ github.ref_name }}
@@ -293,7 +294,7 @@ jobs:
 
       - name: Build Flutter web app
         working-directory: frontend/src
-        run: flutter build web --release
+        run: flutter build web --release --dart-define=COMMIT_ID=${{ steps.commit-info.outputs.commit_full }} --dart-define=GITHUB_RUN_NUMBER=${{ github.run_number }}
 
       - name: Inject join page config
         run: bash scripts/inject-join-page-config.sh production ${{ env.AWS_REGION }}
