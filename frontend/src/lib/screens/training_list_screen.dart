@@ -152,7 +152,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _getModeColor(mode).withOpacity(0.15),
+          backgroundColor: _getModeColor(mode).withValues(alpha: 0.15),
           child: Icon(
             mode == 'MULTIPLE_CHOICE' ? Icons.checklist : Icons.keyboard,
             color: _getModeColor(mode),
@@ -176,7 +176,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                       color: _getModeColor(mode),
                     ),
                   ),
-                  backgroundColor: _getModeColor(mode).withOpacity(0.1),
+                  backgroundColor: _getModeColor(mode).withValues(alpha: 0.1),
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   visualDensity: VisualDensity.compact,
                 ),

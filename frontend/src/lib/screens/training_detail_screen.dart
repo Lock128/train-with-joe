@@ -144,7 +144,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Chip(label: Text(_modeLabel(mode), style: TextStyle(color: _modeColor(mode))),
-            backgroundColor: _modeColor(mode).withOpacity(0.1)),
+            backgroundColor: _modeColor(mode).withValues(alpha: 0.1)),
           const SizedBox(height: 16),
           Text('Words (${words.length})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),

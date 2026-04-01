@@ -168,14 +168,14 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     ChoiceChip(
                       label: const Text('Text Input'),
                       selected: _selectedMode == 'TEXT_INPUT',
-                      selectedColor: const Color(0xFF6C5CE7).withOpacity(0.2),
+                      selectedColor: const Color(0xFF6C5CE7).withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _selectedMode = 'TEXT_INPUT'),
                     ),
                     const SizedBox(width: 8),
                     ChoiceChip(
                       label: const Text('Multiple Choice'),
                       selected: _selectedMode == 'MULTIPLE_CHOICE',
-                      selectedColor: const Color(0xFF00B894).withOpacity(0.2),
+                      selectedColor: const Color(0xFF00B894).withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _selectedMode = 'MULTIPLE_CHOICE'),
                     ),
                   ],
