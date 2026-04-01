@@ -163,9 +163,10 @@ void main() {
       await tester.pumpWidget(createTestWidget(const HomeScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ElevatedButton), findsNWidgets(2));
+      expect(find.byType(ElevatedButton), findsNWidgets(3));
       expect(find.text('Scan Image for Vocabulary'), findsOneWidget);
       expect(find.text('My Vocabulary Lists'), findsOneWidget);
+      expect(find.text('My Trainings'), findsOneWidget);
     });
 
     testWidgets('should have outlined button for subscription', (tester) async {
