@@ -252,14 +252,14 @@ describe('APIStack CDK Integration Tests', () => {
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
     );
 
-    expect(dataSources.length).toBe(18);
+    expect(dataSources.length).toBe(19);
 
     // Count data source types
     const dynamoDbSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AMAZON_DYNAMODB');
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(16); // Stripe Checkout + 6 Vocabulary Lambdas + 8 Training Lambdas
+    expect(lambdaSources.length).toBe(17); // Stripe Checkout + 6 Vocabulary Lambdas + 1 AppInfo + 9 Training Lambdas
   });
 
   test('should export API endpoint URL and ID', { timeout: 60000 }, () => {
