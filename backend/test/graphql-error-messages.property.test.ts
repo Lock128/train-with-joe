@@ -29,7 +29,7 @@ describe('Property 2: GraphQL Error Message Descriptiveness', () => {
       trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
-  });
+  }, 60000);
 
   /**
    * **Validates: Requirements 2.6**

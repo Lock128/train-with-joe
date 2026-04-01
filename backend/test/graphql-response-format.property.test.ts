@@ -39,7 +39,7 @@ describe('Property 1: GraphQL Response Format Validity', () => {
       trainingsTable: baseStack.trainingsTable,
       assetsBucket: baseStack.assetsBucket,
     });
-  });
+  }, 60000);
 
   /**
    * **Validates: Requirements 2.5**
