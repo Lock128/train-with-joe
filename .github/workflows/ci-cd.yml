@@ -16,11 +16,11 @@ jobs:
     name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
-      backend: ${{ steps.changes.outputs.backend || github.event_name == 'workflow_dispatch' }}
-      frontend: ${{ steps.changes.outputs.frontend || github.event_name == 'workflow_dispatch' }}
-      join_page: ${{ steps.changes.outputs.join_page || github.event_name == 'workflow_dispatch' }}
-      competitors_page: ${{ steps.changes.outputs.competitors_page || github.event_name == 'workflow_dispatch' }}
-      profile_cards: ${{ steps.changes.outputs.profile_cards || github.event_name == 'workflow_dispatch' }}
+      backend: ${{ steps.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch' }}
+      frontend: ${{ steps.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch' }}
+      join_page: ${{ steps.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch' }}
+      competitors_page: ${{ steps.changes.outputs.competitors_page == 'true' || github.event_name == 'workflow_dispatch' }}
+      profile_cards: ${{ steps.changes.outputs.profile_cards == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

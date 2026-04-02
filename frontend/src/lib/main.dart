@@ -26,6 +26,7 @@ import 'screens/training_detail_screen.dart';
 import 'screens/training_execution_screen.dart';
 import 'screens/training_results_screen.dart';
 import 'screens/training_history_screen.dart';
+import 'screens/training_statistics_screen.dart';
 import 'widgets/app_shell.dart';
 
 void main() {
@@ -356,6 +357,10 @@ class _MyAppState extends State<MyApp> {
               builder: (context, state) => TrainingHistoryScreen(
                 trainingId: state.pathParameters['id']!,
               ),
+            ),
+            GoRoute(
+              path: '/statistics',
+              builder: (context, state) => const TrainingStatisticsScreen(),
             ),
           ],
         ),

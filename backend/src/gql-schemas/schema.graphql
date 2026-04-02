@@ -29,6 +29,11 @@ enum TrainingMode @aws_cognito_user_pools {
   MULTIPLE_CHOICE
 }
 
+enum TrainingDirection @aws_cognito_user_pools {
+  WORD_TO_TRANSLATION
+  TRANSLATION_TO_WORD
+}
+
 # ============================================================================
 # TYPES
 # ============================================================================
@@ -114,6 +119,7 @@ type Training @aws_cognito_user_pools {
   userId: ID!
   name: String!
   mode: TrainingMode!
+  direction: TrainingDirection!
   vocabularyListIds: [String!]!
   words: [TrainingWord!]!
   executions: [TrainingExecution!]
@@ -161,6 +167,19 @@ type TrainingDayStatistics @aws_cognito_user_pools {
   totalExecutions: Int!
   totalCorrect: Int!
   totalIncorrect: Int!
+}
+
+type DailySummary @aws_cognito_user_pools {
+  date: String!
+  trainingCount: Int!
+  totalLearningTimeSeconds: Float!
+}
+
+type TrainingOverviewStatistics @aws_cognito_user_pools {
+  dailySummaries: [DailySummary!]!
+  totalDays: Int!
+  totalTrainings: Int!
+  totalLearningTimeSeconds: Float!
 }
 
 # ============================================================================
@@ -223,6 +242,7 @@ input GetImageUploadUrlsInput @aws_cognito_user_pools {
 input CreateTrainingInput @aws_cognito_user_pools {
   vocabularyListIds: [String!]!
   mode: TrainingMode!
+  direction: TrainingDirection
   name: String
   wordCount: Int
 }
@@ -323,6 +343,12 @@ type TrainingDayStatisticsResponse @aws_cognito_user_pools {
   error: String
 }
 
+type TrainingOverviewStatisticsResponse @aws_cognito_user_pools {
+  success: Boolean!
+  statistics: TrainingOverviewStatistics
+  error: String
+}
+
 # ============================================================================
 # APP INFO
 # ============================================================================
@@ -347,6 +373,7 @@ type Query {
   getTrainings: [Training] @aws_cognito_user_pools
   getTrainingStatistics(trainingId: ID!): TrainingStatisticsResponse @aws_cognito_user_pools
   getTrainingDayStatistics(date: String!): TrainingDayStatisticsResponse @aws_cognito_user_pools
+  getTrainingOverviewStatistics(fromDate: String!, toDate: String!): TrainingOverviewStatisticsResponse @aws_cognito_user_pools
 }
 
 # ============================================================================

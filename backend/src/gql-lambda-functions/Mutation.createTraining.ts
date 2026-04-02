@@ -1,5 +1,5 @@
 import { TrainingService } from '../services/training-service';
-import type { TrainingMode } from '../model/domain/Training';
+import type { TrainingMode, TrainingDirection } from '../model/domain/Training';
 
 /**
  * Lambda resolver for Mutation.createTraining
@@ -11,6 +11,7 @@ interface Event {
     input: {
       vocabularyListIds: string[];
       mode: TrainingMode;
+      direction?: TrainingDirection;
       name?: string;
       wordCount?: number;
     };
@@ -22,7 +23,7 @@ interface Event {
 
 export const handler = async (event: Event) => {
   const userId = event.identity?.sub;
-  const { vocabularyListIds, mode, name, wordCount } = event.arguments.input;
+  const { vocabularyListIds, mode, name, wordCount, direction } = event.arguments.input;
 
   if (!userId) {
     return {
@@ -34,7 +35,7 @@ export const handler = async (event: Event) => {
 
   try {
     const service = TrainingService.getInstance();
-    return await service.createTraining(userId, vocabularyListIds, mode, name, wordCount);
+    return await service.createTraining(userId, vocabularyListIds, mode, name, wordCount, direction);
   } catch (error) {
     console.error('Error creating training:', error);
     return {

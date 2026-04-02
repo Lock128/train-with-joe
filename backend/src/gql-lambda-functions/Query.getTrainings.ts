@@ -21,18 +21,23 @@ export const handler = async (event: Event) => {
   try {
     const service = TrainingService.getInstance();
     const trainings = await service.getTrainings(userId);
-    // Filter out corrupt/incomplete records (e.g. TrainingExecution records from the same table)
-    return trainings.filter(
-      (t) =>
-        t.name != null &&
-        t.mode != null &&
-        Array.isArray(t.vocabularyListIds) &&
-        t.vocabularyListIds.length > 0 &&
-        Array.isArray(t.words) &&
-        t.words.length > 0 &&
-        t.createdAt != null &&
-        t.updatedAt != null,
-    );
+    // Filter out corrupt/incomplete records, then backfill missing direction for older records
+    return trainings
+      .filter(
+        (t) =>
+          t.name != null &&
+          t.mode != null &&
+          Array.isArray(t.vocabularyListIds) &&
+          t.vocabularyListIds.length > 0 &&
+          Array.isArray(t.words) &&
+          t.words.length > 0 &&
+          t.createdAt != null &&
+          t.updatedAt != null,
+      )
+      .map((t) => ({
+        ...t,
+        direction: t.direction || 'WORD_TO_TRANSLATION',
+      }));
   } catch (error) {
     console.error('Error getting trainings:', error);
     return [];

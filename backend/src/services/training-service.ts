@@ -4,6 +4,7 @@ import { VocabularyListRepository } from '../repositories/vocabulary-list-reposi
 import type {
   Training,
   TrainingMode,
+  TrainingDirection,
   TrainingWord,
   TrainingExecution,
   TrainingResult,
@@ -35,6 +36,7 @@ export class TrainingService {
     mode: TrainingMode,
     name?: string,
     wordCount?: number,
+    direction?: TrainingDirection,
   ): Promise<{ success: boolean; training?: Training; error?: string }> {
     try {
       const vocabRepo = VocabularyListRepository.getInstance();
@@ -77,6 +79,7 @@ export class TrainingService {
         userId,
         name: name || `Training - ${new Date().toLocaleDateString()}`,
         mode,
+        direction: direction || 'WORD_TO_TRANSLATION',
         vocabularyListIds,
         words,
         createdAt: now,
@@ -160,18 +163,22 @@ export class TrainingService {
 
       let multipleChoiceOptions: MultipleChoiceOption[] | undefined;
       if (training.mode === 'MULTIPLE_CHOICE') {
+        const reversed = training.direction === 'TRANSLATION_TO_WORD';
         multipleChoiceOptions = training.words.map((word, index) => {
-          // Get distractor translations from other words
-          const otherTranslations = training.words.filter((_, i) => i !== index).map((w) => w.translation);
+          const correctAnswer = reversed ? word.word : word.translation;
+          // Get distractor answers from other words
+          const otherAnswers = training.words
+            .filter((_, i) => i !== index)
+            .map((w) => (reversed ? w.word : w.translation));
 
           // Pick 2 random distractors
-          const shuffled = otherTranslations.sort(() => Math.random() - 0.5);
+          const shuffled = otherAnswers.sort(() => Math.random() - 0.5);
           const distractors = shuffled.slice(0, 2);
 
           // Build options array with correct answer + distractors, then shuffle
-          const options = [word.translation, ...distractors];
+          const options = [correctAnswer, ...distractors];
           const shuffledOptions = options.sort(() => Math.random() - 0.5);
-          const correctOptionIndex = shuffledOptions.indexOf(word.translation);
+          const correctOptionIndex = shuffledOptions.indexOf(correctAnswer);
 
           return {
             wordIndex: index,
@@ -247,12 +254,15 @@ export class TrainingService {
         return { success: false, error: 'Invalid word index' };
       }
 
-      const correct = answer.trim().toLowerCase() === word.translation.trim().toLowerCase();
+      const reversed = training.direction === 'TRANSLATION_TO_WORD';
+      const expectedAnswer = reversed ? word.word : word.translation;
+      const promptWord = reversed ? word.translation : word.word;
+      const correct = answer.trim().toLowerCase() === expectedAnswer.trim().toLowerCase();
 
       const result: TrainingResult = {
         wordIndex,
-        word: word.word,
-        expectedAnswer: word.translation,
+        word: promptWord,
+        expectedAnswer,
         userAnswer: answer,
         correct,
       };
@@ -304,7 +314,10 @@ export class TrainingService {
       const executions = await trainingRepo.getExecutionsByTrainingId(trainingId);
       executions.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 
-      return { success: true, training: { ...training, executions } };
+      return {
+        success: true,
+        training: { ...training, direction: training.direction || 'WORD_TO_TRANSLATION', executions },
+      };
     } catch (error) {
       console.error('Error getting training:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Failed to get training' };
@@ -539,6 +552,79 @@ export class TrainingService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get training day statistics',
+      };
+    }
+  }
+
+  /**
+   * Get overview statistics across a date range — per-day training count and total learning time
+   */
+  async getTrainingOverviewStatistics(
+    userId: string,
+    fromDate: string,
+    toDate: string,
+  ): Promise<{
+    success: boolean;
+    statistics?: {
+      dailySummaries: { date: string; trainingCount: number; totalLearningTimeSeconds: number }[];
+      totalDays: number;
+      totalTrainings: number;
+      totalLearningTimeSeconds: number;
+    };
+    error?: string;
+  }> {
+    try {
+      const trainingRepo = TrainingRepository.getInstance();
+      const trainings = await trainingRepo.getAllByUserId(userId);
+
+      const dayMap: Record<string, { trainingCount: number; totalLearningTimeSeconds: number }> = {};
+
+      for (const training of trainings) {
+        const executions = await trainingRepo.getExecutionsByTrainingId(training.id);
+
+        for (const execution of executions) {
+          const executionDate = execution.startedAt.substring(0, 10);
+          if (executionDate < fromDate || executionDate > toDate) continue;
+
+          if (!dayMap[executionDate]) {
+            dayMap[executionDate] = { trainingCount: 0, totalLearningTimeSeconds: 0 };
+          }
+
+          dayMap[executionDate].trainingCount++;
+
+          if (execution.completedAt) {
+            const start = new Date(execution.startedAt).getTime();
+            const end = new Date(execution.completedAt).getTime();
+            dayMap[executionDate].totalLearningTimeSeconds += (end - start) / 1000;
+          }
+        }
+      }
+
+      const dailySummaries = Object.entries(dayMap)
+        .map(([date, data]) => ({ date, ...data }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      let totalTrainings = 0;
+      let totalLearningTimeSeconds = 0;
+      for (const day of dailySummaries) {
+        totalTrainings += day.trainingCount;
+        totalLearningTimeSeconds += day.totalLearningTimeSeconds;
+      }
+
+      return {
+        success: true,
+        statistics: {
+          dailySummaries,
+          totalDays: dailySummaries.length,
+          totalTrainings,
+          totalLearningTimeSeconds,
+        },
+      };
+    } catch (error) {
+      console.error('Error getting training overview statistics:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get training overview statistics',
       };
     }
   }

@@ -41,7 +41,7 @@ class TrainingProvider extends ChangeNotifier {
       const query = '''
         query GetTrainings {
           getTrainings {
-            id userId name mode vocabularyListIds createdAt updatedAt
+            id userId name mode direction vocabularyListIds createdAt updatedAt
             words { word translation vocabularyListId }
           }
         }
@@ -69,7 +69,7 @@ class TrainingProvider extends ChangeNotifier {
           getTraining(trainingId: \$trainingId) {
             success
             training {
-              id userId name mode vocabularyListIds createdAt updatedAt
+              id userId name mode direction vocabularyListIds createdAt updatedAt
               words { word translation vocabularyListId }
               executions {
                 id trainingId userId startedAt completedAt correctCount incorrectCount
@@ -106,6 +106,7 @@ class TrainingProvider extends ChangeNotifier {
     String mode,
     String? name, {
     int? wordCount,
+    String? direction,
   }) async {
     _isLoading = true;
     _error = null;
@@ -117,7 +118,7 @@ class TrainingProvider extends ChangeNotifier {
           createTraining(input: \$input) {
             success
             training {
-              id userId name mode vocabularyListIds createdAt updatedAt
+              id userId name mode direction vocabularyListIds createdAt updatedAt
               words { word translation vocabularyListId }
             }
             error
@@ -133,6 +134,7 @@ class TrainingProvider extends ChangeNotifier {
             'mode': mode,
             if (name != null) 'name': name,
             if (wordCount != null) 'wordCount': wordCount,
+            if (direction != null) 'direction': direction,
           },
         },
       );
@@ -179,7 +181,7 @@ class TrainingProvider extends ChangeNotifier {
           updateTraining(input: \$input) {
             success
             training {
-              id userId name mode vocabularyListIds createdAt updatedAt
+              id userId name mode direction vocabularyListIds createdAt updatedAt
               words { word translation vocabularyListId }
             }
             error
@@ -436,6 +438,45 @@ class TrainingProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error getting training day statistics: $e');
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Get overview statistics across a date range (per-day training count + learning time)
+  Future<Map<String, dynamic>?> getTrainingOverviewStatistics(String fromDate, String toDate) async {
+    try {
+      const query = '''
+        query GetTrainingOverviewStatistics(\$fromDate: String!, \$toDate: String!) {
+          getTrainingOverviewStatistics(fromDate: \$fromDate, toDate: \$toDate) {
+            success
+            statistics {
+              totalDays totalTrainings totalLearningTimeSeconds
+              dailySummaries {
+                date trainingCount totalLearningTimeSeconds
+              }
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.query(
+        query,
+        variables: {'fromDate': fromDate, 'toDate': toDate},
+      );
+      final result = response['getTrainingOverviewStatistics'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        return result['statistics'] as Map<String, dynamic>?;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to get overview statistics';
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error getting training overview statistics: $e');
       _error = e.toString();
       notifyListeners();
       return null;

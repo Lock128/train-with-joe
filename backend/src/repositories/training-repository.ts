@@ -97,11 +97,13 @@ export class TrainingRepository {
           TableName: this.tableName,
           IndexName: 'userId-index',
           KeyConditionExpression: 'userId = :userId',
-          FilterExpression: 'attribute_exists(#mode) AND attribute_exists(vocabularyListIds)',
+          FilterExpression:
+            'attribute_exists(#name) AND attribute_exists(#mode) AND attribute_exists(vocabularyListIds) AND attribute_exists(words) AND attribute_exists(createdAt) AND attribute_exists(updatedAt)',
           ExpressionAttributeValues: {
             ':userId': userId,
           },
           ExpressionAttributeNames: {
+            '#name': 'name',
             '#mode': 'mode',
           },
         }),

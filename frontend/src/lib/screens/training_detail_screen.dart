@@ -144,6 +144,34 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     }
   }
 
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Training'),
+        content: const Text('Are you sure you want to delete this training? This cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final success = await context.read<TrainingProvider>().deleteTraining(widget.trainingId);
+    if (!mounted) return;
+    if (success) {
+      context.go('/trainings');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete training'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -174,6 +202,8 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
           onPressed: () => _showRenameDialog(name)),
         IconButton(icon: const Icon(Icons.history), tooltip: 'History',
           onPressed: () => context.go('/trainings/${widget.trainingId}/history')),
+        IconButton(icon: const Icon(Icons.delete), tooltip: 'Delete',
+          onPressed: _confirmDelete),
       ]),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -207,7 +237,6 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
                   final word = words[index] as Map<String, dynamic>;
                   return ListTile(
                     title: Text(word['word'] as String? ?? ''),
-                    subtitle: Text(word['translation'] as String? ?? ''),
                     trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteWord(index)),
                   );
                 },

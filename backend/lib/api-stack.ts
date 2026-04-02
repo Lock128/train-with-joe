@@ -476,6 +476,25 @@ export class APIStack extends cdk.Stack {
       fieldName: 'getTrainingDayStatistics',
     });
 
+    // Create getTrainingOverviewStatistics Lambda function
+    const getTrainingOverviewStatisticsFunction = new NodejsFunction(this, 'GetTrainingOverviewStatisticsFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getTrainingOverviewStatistics.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(getTrainingOverviewStatisticsFunction);
+
+    const getTrainingOverviewStatisticsDataSource = api.addLambdaDataSource(
+      'GetTrainingOverviewStatisticsDataSource',
+      getTrainingOverviewStatisticsFunction,
+    );
+
+    getTrainingOverviewStatisticsDataSource.createResolver('GetTrainingOverviewStatisticsResolver', {
+      typeName: 'Query',
+      fieldName: 'getTrainingOverviewStatistics',
+    });
+
     // Export API endpoint URL and API ID
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.graphqlUrl,

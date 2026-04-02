@@ -3,6 +3,7 @@
  */
 
 export type TrainingMode = 'TEXT_INPUT' | 'MULTIPLE_CHOICE';
+export type TrainingDirection = 'WORD_TO_TRANSLATION' | 'TRANSLATION_TO_WORD';
 
 export interface TrainingWord {
   word: string;
@@ -15,6 +16,7 @@ export interface Training {
   userId: string;
   name: string;
   mode: TrainingMode;
+  direction: TrainingDirection;
   vocabularyListIds: string[];
   words: TrainingWord[];
   createdAt: string;
