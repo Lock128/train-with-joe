@@ -27,8 +27,13 @@ export const handler = async (event: Event) => {
   }
 
   try {
+    console.log('getTraining called with trainingId:', JSON.stringify(trainingId), 'userId:', userId);
     const service = TrainingService.getInstance();
-    return await service.getTraining(trainingId, userId);
+    const result = await service.getTraining(trainingId, userId);
+    if (!result.success) {
+      console.warn('getTraining failed for trainingId:', trainingId, 'error:', result.error);
+    }
+    return result;
   } catch (error) {
     console.error('Error getting training:', error);
     return {

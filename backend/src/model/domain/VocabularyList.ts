@@ -11,6 +11,7 @@ export interface VocabularyWord {
   partOfSpeech?: string;
   exampleSentence?: string;
   difficulty?: string;
+  unit?: string;
 }
 
 export interface VocabularyList {

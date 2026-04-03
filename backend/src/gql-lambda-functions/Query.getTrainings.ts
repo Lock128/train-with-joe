@@ -22,7 +22,7 @@ export const handler = async (event: Event) => {
     const service = TrainingService.getInstance();
     const trainings = await service.getTrainings(userId);
     // Filter out corrupt/incomplete records, then backfill missing direction for older records
-    return trainings
+    const filtered = trainings
       .filter(
         (t) =>
           t.name != null &&
@@ -38,6 +38,13 @@ export const handler = async (event: Event) => {
         ...t,
         direction: t.direction || 'WORD_TO_TRANSLATION',
       }));
+    console.log(
+      'getTrainings returning',
+      filtered.length,
+      'trainings, IDs:',
+      filtered.map((t) => t.id),
+    );
+    return filtered;
   } catch (error) {
     console.error('Error getting trainings:', error);
     return [];

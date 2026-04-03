@@ -37,6 +37,7 @@ export class TrainingService {
     name?: string,
     wordCount?: number,
     direction?: TrainingDirection,
+    units?: string[],
   ): Promise<{ success: boolean; training?: Training; error?: string }> {
     try {
       const vocabRepo = VocabularyListRepository.getInstance();
@@ -46,12 +47,19 @@ export class TrainingService {
         const list = await vocabRepo.getById(listId);
         if (!list) continue;
 
-        const validWords = list.words.filter((w) => w.translation);
+        let validWords = list.words.filter((w) => w.translation);
+
+        // Filter by units if specified
+        if (units && units.length > 0) {
+          validWords = validWords.filter((w) => w.unit && units.includes(w.unit));
+        }
+
         for (const word of validWords) {
           words.push({
             word: word.word,
             translation: word.translation!,
             vocabularyListId: list.id,
+            unit: word.unit,
           });
         }
       }

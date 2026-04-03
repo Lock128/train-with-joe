@@ -98,14 +98,18 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Training History')),
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
+          title: const Text('Training History')),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_error != null || _training == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Training History')),
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
+          title: const Text('Training History')),
         body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red), const SizedBox(height: 16),
           Text(_error ?? 'Training not found', style: Theme.of(context).textTheme.titleLarge),
@@ -124,7 +128,9 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
       });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Training History')),
+      appBar: AppBar(
+        leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
+        title: const Text('Training History')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -276,15 +282,18 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
         const SizedBox(height: 8),
         ...(((_dayStatistics!['executions'] as List<dynamic>?) ?? []).map((exec) {
           final e = exec as Map<String, dynamic>;
-          final dur = e['durationSeconds'] as int? ?? 0;
+          final dur = (e['durationSeconds'] as num?)?.toDouble() ?? 0;
           final correct = e['correctCount'] as int? ?? 0;
           final incorrect = e['incorrectCount'] as int? ?? 0;
           final total = correct + incorrect;
           final acc = total > 0 ? (correct / total * 100).round() : 0;
+          final durMinutes = (dur / 60).floor();
+          final durSeconds = (dur % 60).round();
+          final durStr = durMinutes > 0 ? '${durMinutes}m ${durSeconds}s' : '${durSeconds}s';
           return ListTile(
             dense: true,
             title: Text(e['trainingName'] as String? ?? 'Training'),
-            subtitle: Text('${_formatDate(e['startedAt'] as String?)}  |  ${dur}s'),
+            subtitle: Text('${_formatDate(e['startedAt'] as String?)}  |  $durStr'),
             trailing: Text('$acc%', style: TextStyle(
               fontWeight: FontWeight.bold,
               color: acc >= 80 ? Colors.green : acc >= 50 ? Colors.orange : Colors.red,

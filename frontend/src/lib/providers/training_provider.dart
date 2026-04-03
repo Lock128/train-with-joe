@@ -42,7 +42,7 @@ class TrainingProvider extends ChangeNotifier {
         query GetTrainings {
           getTrainings {
             id userId name mode direction vocabularyListIds createdAt updatedAt
-            words { word translation vocabularyListId }
+            words { word vocabularyListId }
           }
         }
       ''';

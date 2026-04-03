@@ -175,12 +175,16 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(appBar: AppBar(title: const Text('Training')),
+      return Scaffold(appBar: AppBar(
+        leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to trainings', onPressed: () => context.go('/trainings')),
+        title: const Text('Training')),
         body: const Center(child: CircularProgressIndicator()));
     }
     if (_error != null || _training == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Training')),
+        appBar: AppBar(
+          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to trainings', onPressed: () => context.go('/trainings')),
+          title: const Text('Training')),
         body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
           const SizedBox(height: 16),
@@ -197,7 +201,14 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     final isMcTooFew = mode == 'MULTIPLE_CHOICE' && words.length < 3;
 
     return Scaffold(
-      appBar: AppBar(title: Text(name), actions: [
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Back to trainings',
+          onPressed: () => context.go('/trainings'),
+        ),
+        title: Text(name),
+        actions: [
         IconButton(icon: const Icon(Icons.edit), tooltip: 'Rename',
           onPressed: () => _showRenameDialog(name)),
         IconButton(icon: const Icon(Icons.history), tooltip: 'History',

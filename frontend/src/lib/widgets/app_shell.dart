@@ -23,10 +23,18 @@ class AppShell extends StatelessWidget {
 
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
+    // Check longest paths first to avoid false prefix matches (e.g.
+    // '/vocabulary/analyze' must not match '/vocabulary').
+    int bestIndex = 0;
+    int bestLength = 0;
     for (var i = 0; i < _destinations.length; i++) {
-      if (location == _destinations[i].path) return i;
+      final path = _destinations[i].path;
+      if (location.startsWith(path) && path.length > bestLength) {
+        bestIndex = i;
+        bestLength = path.length;
+      }
     }
-    return 0;
+    return bestIndex;
   }
 
   void _onDestinationSelected(BuildContext context, int index) {

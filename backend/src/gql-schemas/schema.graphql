@@ -67,6 +67,7 @@ type VocabularyWord @aws_cognito_user_pools {
   partOfSpeech: String
   exampleSentence: String
   difficulty: String
+  unit: String
 }
 
 type VocabularyList @aws_cognito_user_pools {
@@ -87,6 +88,7 @@ type TrainingWord @aws_cognito_user_pools {
   word: String!
   translation: String!
   vocabularyListId: String!
+  unit: String
 }
 
 type TrainingResult @aws_cognito_user_pools {
@@ -245,12 +247,14 @@ input CreateTrainingInput @aws_cognito_user_pools {
   direction: TrainingDirection
   name: String
   wordCount: Int
+  units: [String!]
 }
 
 input TrainingWordInput @aws_cognito_user_pools {
   word: String!
   translation: String!
   vocabularyListId: String!
+  unit: String
 }
 
 input UpdateTrainingInput @aws_cognito_user_pools {

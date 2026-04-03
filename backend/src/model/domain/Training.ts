@@ -9,6 +9,7 @@ export interface TrainingWord {
   word: string;
   translation: string;
   vocabularyListId: string;
+  unit?: string;
 }
 
 export interface Training {

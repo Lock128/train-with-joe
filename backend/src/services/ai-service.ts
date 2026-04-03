@@ -292,6 +292,7 @@ Provide an improved version that maintains the original meaning but is more poli
       partOfSpeech?: string;
       exampleSentence?: string;
       difficulty?: string;
+      unit?: string;
     }>;
     sourceLanguage: string;
     targetLanguage: string;
@@ -331,6 +332,7 @@ Return a JSON object with ONLY these fields:
   - "partOfSpeech": noun, verb, adjective, adverb, or other
   - "exampleSentence": a simple example sentence (max 15 words)
   - "difficulty": easy, medium, or hard
+  - "unit": the unit, chapter, or section label the word belongs to if visible in the image (e.g. "Unit 3", "Chapter 5", "Lesson 2"). If no unit information is visible, omit this field.
 
 Return ONLY valid JSON, no markdown, no code blocks, no extra text.`;
 

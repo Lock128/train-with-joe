@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/training_provider.dart';
 
 /// Screen showing per-day training statistics overview
@@ -16,6 +17,9 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
   String? _error;
   late DateTime _fromDate;
   late DateTime _toDate;
+  String? _expandedDate;
+  Map<String, dynamic>? _dayStatistics;
+  bool _isDayLoading = false;
 
   @override
   void initState() {
@@ -62,6 +66,27 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
     if (hours > 0) return '${hours}h ${minutes}m';
     if (minutes > 0) return '${minutes}m ${seconds}s';
     return '${seconds}s';
+  }
+
+  Future<void> _toggleDay(String date) async {
+    if (_expandedDate == date) {
+      setState(() { _expandedDate = null; _dayStatistics = null; });
+      return;
+    }
+    setState(() { _expandedDate = date; _dayStatistics = null; _isDayLoading = true; });
+    final result = await context.read<TrainingProvider>().getTrainingDayStatistics(date);
+    if (!mounted) return;
+    setState(() { _dayStatistics = result; _isDayLoading = false; });
+  }
+
+  String _formatTime(String? dateStr) {
+    if (dateStr == null) return '--';
+    try {
+      final dt = DateTime.parse(dateStr);
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return '--';
+    }
   }
 
   @override
@@ -173,22 +198,74 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
                   final date = day['date'] as String? ?? '--';
                   final count = day['trainingCount'] as int? ?? 0;
                   final time = (day['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0;
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      child: Text('$count', style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      )),
-                    ),
-                    title: Text(date),
-                    subtitle: Text('$count training${count == 1 ? '' : 's'}'),
-                    trailing: Text(_formatDuration(time), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  final isExpanded = _expandedDate == date;
+                  return Column(
+                    children: [
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                          child: Text('$count', style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          )),
+                        ),
+                        title: Text(date),
+                        subtitle: Text('$count training${count == 1 ? '' : 's'}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(_formatDuration(time), style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Icon(isExpanded ? Icons.expand_less : Icons.expand_more, size: 20),
+                          ],
+                        ),
+                        onTap: () => _toggleDay(date),
+                      ),
+                      if (isExpanded) _buildDayExecutions(),
+                    ],
                   );
                 },
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDayExecutions() {
+    if (_isDayLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Center(child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+      );
+    }
+    final executions = (_dayStatistics?['executions'] as List<dynamic>?) ?? [];
+    if (executions.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        child: Text('No execution details available.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, right: 8, bottom: 8),
+      child: Column(
+        children: executions.map((e) {
+          final exec = e as Map<String, dynamic>;
+          final name = exec['trainingName'] as String? ?? 'Training';
+          final trainingId = exec['trainingId'] as String?;
+          final dur = (exec['durationSeconds'] as num?)?.toDouble() ?? 0;
+          final correct = exec['correctCount'] as int? ?? 0;
+          final incorrect = exec['incorrectCount'] as int? ?? 0;
+          final total = correct + incorrect;
+          final acc = total > 0 ? (correct / total * 100).round() : 0;
+          return ListTile(
+            dense: true,
+            leading: Icon(Icons.fitness_center, size: 18, color: Theme.of(context).colorScheme.primary),
+            title: Text(name, overflow: TextOverflow.ellipsis),
+            subtitle: Text('${_formatTime(exec['startedAt'] as String?)}  ·  ${_formatDuration(dur)}  ·  $acc%'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+            onTap: trainingId != null ? () => context.go('/trainings/$trainingId') : null,
+          );
+        }).toList(),
       ),
     );
   }
