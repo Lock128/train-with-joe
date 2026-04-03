@@ -166,7 +166,7 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: dailySummaries.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   // Show most recent first
                   final day = dailySummaries[dailySummaries.length - 1 - index];

@@ -243,8 +243,8 @@ describe('APIStack CDK Integration Tests', () => {
 
     const template = Template.fromStack(apiStack);
 
-    // Verify data sources exist (2 DynamoDB + 8 Lambda)
-    template.resourceCountIs('AWS::AppSync::DataSource', 19);
+    // Verify data sources exist (2 DynamoDB + 18 Lambda)
+    template.resourceCountIs('AWS::AppSync::DataSource', 20);
 
     // Verify DynamoDB data sources have correct type
     const templateJson = template.toJSON();
@@ -252,14 +252,14 @@ describe('APIStack CDK Integration Tests', () => {
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
     );
 
-    expect(dataSources.length).toBe(19);
+    expect(dataSources.length).toBe(20);
 
     // Count data source types
     const dynamoDbSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AMAZON_DYNAMODB');
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(17); // Stripe Checkout + 6 Vocabulary Lambdas + 1 AppInfo + 9 Training Lambdas
+    expect(lambdaSources.length).toBe(18); // Stripe Checkout + 6 Vocabulary Lambdas + 1 AppInfo + 10 Training Lambdas
   });
 
   test('should export API endpoint URL and ID', { timeout: 60000 }, () => {
@@ -334,7 +334,7 @@ describe('APIStack CDK Integration Tests', () => {
 
     // Verify expected resource counts
     template.resourceCountIs('AWS::AppSync::GraphQLApi', 1);
-    template.resourceCountIs('AWS::AppSync::DataSource', 19); // users, subscriptions, 7 Vocabulary Lambdas, and 9 Training Lambdas (incl. deleteTraining)
+    template.resourceCountIs('AWS::AppSync::DataSource', 20); // users, subscriptions, 7 Vocabulary Lambdas, and 10 Training Lambdas (incl. deleteTraining, getTrainingOverviewStatistics)
 
     // Verify at least 3 IAM roles exist (CloudWatch role + 2 data source roles, CDK may create additional service roles)
     const templateJson = template.toJSON();
