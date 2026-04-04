@@ -275,7 +275,13 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
               const SizedBox(height: 8),
               Text('Total executions: ${_dayStatistics!['totalExecutions'] ?? 0}'),
               Text('Correct: ${_dayStatistics!['totalCorrect'] ?? 0}  |  Incorrect: ${_dayStatistics!['totalIncorrect'] ?? 0}'),
-              Text('Overall accuracy: ${((_dayStatistics!['overallAccuracy'] as num?)?.round() ?? 0)}%'),
+              Builder(builder: (_) {
+                final correct = _dayStatistics!['totalCorrect'] as int? ?? 0;
+                final incorrect = _dayStatistics!['totalIncorrect'] as int? ?? 0;
+                final total = correct + incorrect;
+                final acc = total > 0 ? (correct / total * 100).round() : 0;
+                return Text('Overall accuracy: $acc%');
+              }),
             ]),
           ),
         ),

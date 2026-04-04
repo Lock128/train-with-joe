@@ -13,6 +13,8 @@ class TrainingListScreen extends StatefulWidget {
 }
 
 class _TrainingListScreenState extends State<TrainingListScreen> {
+  bool _adminMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -47,8 +49,15 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Trainings'),
+        title: Text(_adminMode ? 'Admin Mode' : 'My Trainings'),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: Icon(_adminMode ? Icons.admin_panel_settings : Icons.admin_panel_settings_outlined),
+            tooltip: 'Toggle admin mode',
+            onPressed: () => setState(() => _adminMode = !_adminMode),
+          ),
+        ],
       ),
       body: Consumer<TrainingProvider>(
         builder: (context, trainingProvider, _) {
@@ -143,6 +152,31 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
     );
   }
 
+  void _confirmForceRemove(Map<String, dynamic> training) {
+    final name = training['name'] as String? ?? 'Untitled Training';
+    final id = training['id'] as String;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Force Remove Training'),
+        content: Text('Remove "$name" from the list? This will also attempt to delete it from the server.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<TrainingProvider>().forceRemoveTraining(id);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Removed "$name"')),
+              );
+            },
+            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTrainingCard(Map<String, dynamic> training) {
     final name = training['name'] as String? ?? 'Untitled Training';
     final mode = training['mode'] as String?;
@@ -206,8 +240,14 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
             ),
           ],
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () => context.go('/trainings/${training['id']}'),
+        trailing: _adminMode
+            ? IconButton(
+                icon: const Icon(Icons.delete_forever, color: Colors.red),
+                tooltip: 'Force remove',
+                onPressed: () => _confirmForceRemove(training),
+              )
+            : const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: _adminMode ? null : () => context.go('/trainings/${training['id']}'),
       ),
     );
   }

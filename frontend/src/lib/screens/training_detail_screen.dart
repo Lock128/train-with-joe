@@ -246,8 +246,12 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
                 itemCount: words.length,
                 itemBuilder: (context, index) {
                   final word = words[index] as Map<String, dynamic>;
+                  final unit = word['unit'] as String?;
                   return ListTile(
                     title: Text(word['word'] as String? ?? ''),
+                    subtitle: unit != null && unit.isNotEmpty
+                        ? Text(unit, style: TextStyle(fontSize: 12, color: Colors.blueGrey.shade600))
+                        : null,
                     trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteWord(index)),
                   );
                 },

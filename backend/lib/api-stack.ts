@@ -406,6 +406,22 @@ export class APIStack extends cdk.Stack {
       fieldName: 'submitAnswer',
     });
 
+    // Create abortTraining Lambda function
+    const abortTrainingFunction = new NodejsFunction(this, 'AbortTrainingFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.abortTraining.ts'),
+      handler: 'handler',
+    });
+
+    trainingsTable.grantReadWriteData(abortTrainingFunction);
+
+    const abortTrainingDataSource = api.addLambdaDataSource('AbortTrainingDataSource', abortTrainingFunction);
+
+    abortTrainingDataSource.createResolver('AbortTrainingResolver', {
+      typeName: 'Mutation',
+      fieldName: 'abortTraining',
+    });
+
     // Create getTraining Lambda function
     const getTrainingFunction = new NodejsFunction(this, 'GetTrainingFunction', {
       ...trainingLambdaProps,

@@ -102,7 +102,7 @@ class VocabularyProvider extends ChangeNotifier {
             success
             vocabularyList {
               id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty }
+              words { word translation definition partOfSpeech exampleSentence difficulty unit }
             }
             error
           }
@@ -171,7 +171,7 @@ class VocabularyProvider extends ChangeNotifier {
         query GetVocabularyLists {
           getVocabularyLists {
             id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
-            words { word translation definition partOfSpeech exampleSentence difficulty }
+            words { word translation definition partOfSpeech exampleSentence difficulty unit }
           }
         }
       ''';
@@ -197,7 +197,7 @@ class VocabularyProvider extends ChangeNotifier {
         query GetVocabularyList(\$id: ID!) {
           getVocabularyList(id: \$id) {
             id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
-            words { word translation definition partOfSpeech exampleSentence difficulty }
+            words { word translation definition partOfSpeech exampleSentence difficulty unit }
           }
         }
       ''';
@@ -238,7 +238,7 @@ class VocabularyProvider extends ChangeNotifier {
               errorMessage
               createdAt
               updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty }
+              words { word translation definition partOfSpeech exampleSentence difficulty unit }
             }
           }
         ''';

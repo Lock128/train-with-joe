@@ -55,12 +55,15 @@ export class TrainingService {
         }
 
         for (const word of validWords) {
-          words.push({
+          const trainingWord: TrainingWord = {
             word: word.word,
             translation: word.translation!,
             vocabularyListId: list.id,
-            unit: word.unit,
-          });
+          };
+          if (word.unit) {
+            trainingWord.unit = word.unit;
+          }
+          words.push(trainingWord);
         }
       }
 
@@ -247,6 +250,10 @@ export class TrainingService {
         return { success: false, error: 'Training execution already completed' };
       }
 
+      if (execution.abortedAt) {
+        return { success: false, error: 'Training execution was aborted' };
+      }
+
       const alreadyAnswered = execution.results.some((r) => r.wordIndex === wordIndex);
       if (alreadyAnswered) {
         return { success: false, error: 'Answer already submitted for this word' };
@@ -297,6 +304,43 @@ export class TrainingService {
     } catch (error) {
       console.error('Error submitting answer:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Failed to submit answer' };
+    }
+  }
+
+  /**
+   * Abort an in-progress training execution, capturing time spent
+   */
+  async abortTraining(
+    executionId: string,
+    userId: string,
+  ): Promise<{ success: boolean; execution?: TrainingExecution; error?: string }> {
+    try {
+      const trainingRepo = TrainingRepository.getInstance();
+      const execution = await trainingRepo.getExecutionById(executionId);
+
+      if (!execution) {
+        return { success: false, error: 'Training execution not found' };
+      }
+
+      if (execution.userId !== userId) {
+        return { success: false, error: 'Not authorized' };
+      }
+
+      if (execution.completedAt) {
+        return { success: false, error: 'Training execution already completed' };
+      }
+
+      if (execution.abortedAt) {
+        return { success: false, error: 'Training execution already aborted' };
+      }
+
+      const abortedAt = new Date().toISOString();
+      const updated = await trainingRepo.updateExecution(executionId, { abortedAt });
+
+      return { success: true, execution: updated };
+    } catch (error) {
+      console.error('Error aborting training:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to abort training' };
     }
   }
 
@@ -410,16 +454,16 @@ export class TrainingService {
 
       const overallAccuracy = totalAnswers > 0 ? (totalCorrect / totalAnswers) * 100 : 0;
 
-      // Average time from completed executions
-      const completedExecutions = executions.filter((e) => e.completedAt && e.startedAt);
+      // Average time from completed and aborted executions
+      const timedExecutions = executions.filter((e) => (e.completedAt || e.abortedAt) && e.startedAt);
       let averageTimeSeconds = 0;
-      if (completedExecutions.length > 0) {
-        const totalTime = completedExecutions.reduce((sum, e) => {
+      if (timedExecutions.length > 0) {
+        const totalTime = timedExecutions.reduce((sum, e) => {
           const start = new Date(e.startedAt).getTime();
-          const end = new Date(e.completedAt!).getTime();
+          const end = new Date((e.completedAt || e.abortedAt)!).getTime();
           return sum + (end - start) / 1000;
         }, 0);
-        averageTimeSeconds = totalTime / completedExecutions.length;
+        averageTimeSeconds = totalTime / timedExecutions.length;
       }
 
       const perWordStatistics = training.words.map((word) => {
@@ -518,9 +562,9 @@ export class TrainingService {
           const executionDate = execution.startedAt.substring(0, 10);
           if (executionDate === date) {
             let durationSeconds: number | undefined;
-            if (execution.completedAt) {
+            if (execution.completedAt || execution.abortedAt) {
               const start = new Date(execution.startedAt).getTime();
-              const end = new Date(execution.completedAt).getTime();
+              const end = new Date((execution.completedAt || execution.abortedAt)!).getTime();
               durationSeconds = (end - start) / 1000;
             }
 
@@ -600,9 +644,9 @@ export class TrainingService {
 
           dayMap[executionDate].trainingCount++;
 
-          if (execution.completedAt) {
+          if (execution.completedAt || execution.abortedAt) {
             const start = new Date(execution.startedAt).getTime();
-            const end = new Date(execution.completedAt).getTime();
+            const end = new Date((execution.completedAt || execution.abortedAt)!).getTime();
             dayMap[executionDate].totalLearningTimeSeconds += (end - start) / 1000;
           }
         }

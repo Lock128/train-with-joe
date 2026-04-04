@@ -521,6 +521,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
     final partOfSpeech = word['partOfSpeech'] as String?;
     final exampleSentence = word['exampleSentence'] as String?;
     final difficulty = word['difficulty'] as String?;
+    final unit = word['unit'] as String?;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -574,6 +575,19 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             ),
             const SizedBox(height: 8),
             Text(definition),
+            if (unit != null && unit.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(Icons.bookmark_outline, size: 14, color: Colors.blueGrey.shade600),
+                  const SizedBox(width: 4),
+                  Text(
+                    unit,
+                    style: TextStyle(fontSize: 12, color: Colors.blueGrey.shade600),
+                  ),
+                ],
+              ),
+            ],
             if (exampleSentence != null) ...[
               const SizedBox(height: 8),
               Text(

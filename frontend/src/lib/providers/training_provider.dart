@@ -42,7 +42,7 @@ class TrainingProvider extends ChangeNotifier {
         query GetTrainings {
           getTrainings {
             id userId name mode direction vocabularyListIds createdAt updatedAt
-            words { word vocabularyListId }
+            words { word vocabularyListId unit }
           }
         }
       ''';
@@ -70,7 +70,7 @@ class TrainingProvider extends ChangeNotifier {
             success
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
-              words { word translation vocabularyListId }
+              words { word translation vocabularyListId unit }
               executions {
                 id trainingId userId startedAt completedAt correctCount incorrectCount
               }
@@ -88,7 +88,12 @@ class TrainingProvider extends ChangeNotifier {
         notifyListeners();
         return _currentTraining;
       } else {
-        _error = result?['error'] as String? ?? 'Failed to get training';
+        final errorMsg = result?['error'] as String? ?? 'Failed to get training';
+        // Remove stale entry from local list if the backend says it no longer exists
+        if (errorMsg == 'Training not found') {
+          _trainings.removeWhere((t) => t['id'] == id);
+        }
+        _error = errorMsg;
         notifyListeners();
         return null;
       }
@@ -119,7 +124,7 @@ class TrainingProvider extends ChangeNotifier {
             success
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
-              words { word translation vocabularyListId }
+              words { word translation vocabularyListId unit }
             }
             error
           }
@@ -182,7 +187,7 @@ class TrainingProvider extends ChangeNotifier {
             success
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
-              words { word translation vocabularyListId }
+              words { word translation vocabularyListId unit }
             }
             error
           }
@@ -266,6 +271,18 @@ class TrainingProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Force-remove a stale training from the local list.
+  /// Also attempts a backend delete (best-effort) to clean up any residual data.
+  void forceRemoveTraining(String id) {
+    _trainings.removeWhere((t) => t['id'] == id);
+    if (_currentTraining?['id'] == id) {
+      _currentTraining = null;
+    }
+    notifyListeners();
+    // Best-effort backend cleanup — ignore failures
+    deleteTraining(id).catchError((_) {});
   }
 
   /// Start a training execution
@@ -378,8 +395,8 @@ class TrainingProvider extends ChangeNotifier {
             success
             statistics {
               overallAccuracy averageTimeSeconds totalExecutions
-              perWordStatistics { word translation correctCount incorrectCount accuracyPercentage }
-              mostMissedWords { word translation correctCount incorrectCount accuracyPercentage }
+              perWordStatistics { word translation correctCount totalCount accuracyPercentage }
+              mostMissedWords { word translation correctCount totalCount accuracyPercentage }
               accuracyTrend { executionId startedAt accuracy }
             }
             error
@@ -415,7 +432,7 @@ class TrainingProvider extends ChangeNotifier {
           getTrainingDayStatistics(date: \$date) {
             success
             dayStatistics {
-              date totalExecutions totalCorrect totalIncorrect overallAccuracy
+              date totalExecutions totalCorrect totalIncorrect
               executions {
                 executionId trainingId trainingName startedAt completedAt
                 correctCount incorrectCount durationSeconds

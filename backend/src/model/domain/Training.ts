@@ -44,6 +44,7 @@ export interface TrainingExecution {
   userId: string;
   startedAt: string;
   completedAt?: string;
+  abortedAt?: string;
   results: TrainingResult[];
   multipleChoiceOptions?: MultipleChoiceOption[];
   correctCount: number;

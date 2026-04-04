@@ -280,6 +280,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
     final definition = word['definition'] as String? ?? '';
     final partOfSpeech = word['partOfSpeech'] as String?;
     final difficulty = word['difficulty'] as String?;
+    final unit = word['unit'] as String?;
 
     return ListTile(
       title: Row(
@@ -306,7 +307,20 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
           ],
         ],
       ),
-      subtitle: Text(definition),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(definition),
+          if (unit != null && unit.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                unit,
+                style: TextStyle(fontSize: 11, color: Colors.blueGrey.shade600),
+              ),
+            ),
+        ],
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
