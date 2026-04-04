@@ -282,7 +282,7 @@ class TrainingProvider extends ChangeNotifier {
     }
     notifyListeners();
     // Best-effort backend cleanup — ignore failures
-    deleteTraining(id).catchError((_) {});
+    deleteTraining(id).catchError((_) => false);
   }
 
   /// Start a training execution
