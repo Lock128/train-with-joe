@@ -28,9 +28,13 @@ import 'screens/training_results_screen.dart';
 import 'screens/training_history_screen.dart';
 import 'screens/training_statistics_screen.dart';
 import 'widgets/app_shell.dart';
+import 'services/feedback_sound_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Pre-generate feedback jingles so playback is instant
+  FeedbackSoundService().init();
   
   // Set up global error handling
   FlutterError.onError = (FlutterErrorDetails details) {

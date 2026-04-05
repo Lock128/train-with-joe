@@ -32,6 +32,9 @@ dependencies:
   # Sharing / export
   share_plus: ^10.1.4
 
+  # Audio feedback
+  audioplayers: ^6.1.0
+
   # Utilities
   intl: ^0.20.2
   shared_preferences: ^2.5.3

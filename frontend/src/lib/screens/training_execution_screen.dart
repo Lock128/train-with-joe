@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/training_provider.dart';
+import '../widgets/answer_feedback_animation.dart';
 
 /// Screen for executing a training session
 class TrainingExecutionScreen extends StatefulWidget {
@@ -90,7 +91,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
     _answerController.clear();
 
-    Timer(const Duration(milliseconds: 1500), () {
+    Timer(const Duration(milliseconds: 2000), () {
       if (!mounted) return;
 
       if (completed) {
@@ -243,34 +244,12 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
   Widget _buildFeedback() {
     final isCorrect = _lastResult?['correct'] as bool? ?? false;
-    final expected = _lastResult?['expectedAnswer'] as String? ?? '';
+    final expected = _lastResult?['expectedAnswer'] as String?;
 
-    return Center(
-      child: Column(
-        children: [
-          Icon(
-            isCorrect ? Icons.check_circle : Icons.cancel,
-            color: isCorrect ? Colors.green : Colors.red,
-            size: 72,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            isCorrect ? 'Correct!' : 'Incorrect',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: isCorrect ? Colors.green : Colors.red,
-            ),
-          ),
-          if (!isCorrect) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Correct answer: $expected',
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
-        ],
-      ),
+    return AnswerFeedbackAnimation(
+      key: ValueKey('feedback_${_currentWordIndex}_$isCorrect'),
+      isCorrect: isCorrect,
+      expectedAnswer: isCorrect ? null : expected,
     );
   }
 }
