@@ -113,6 +113,7 @@ type TrainingExecution @aws_cognito_user_pools {
   abortedAt: AWSDateTime
   results: [TrainingResult!]!
   multipleChoiceOptions: [MultipleChoiceOption!]
+  words: [TrainingWord!]
   correctCount: Int!
   incorrectCount: Int!
 }
@@ -125,6 +126,8 @@ type Training @aws_cognito_user_pools {
   direction: TrainingDirection!
   vocabularyListIds: [String!]!
   words: [TrainingWord!]!
+  isRandomized: Boolean
+  randomizedWordCount: Int
   executions: [TrainingExecution!]
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
@@ -249,6 +252,8 @@ input CreateTrainingInput @aws_cognito_user_pools {
   name: String
   wordCount: Int
   units: [String!]
+  isRandomized: Boolean
+  randomizedWordCount: Int
 }
 
 input TrainingWordInput @aws_cognito_user_pools {

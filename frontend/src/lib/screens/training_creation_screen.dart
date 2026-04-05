@@ -19,6 +19,10 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   final TextEditingController _nameController = TextEditingController();
   bool _listsLoaded = false;
   int _wordCount = 20;
+  bool _isRandomized = false;
+  int _randomizedWordCount = 10;
+  final TextEditingController _randomizedWordCountController =
+      TextEditingController(text: '10');
 
   @override
   void initState() {
@@ -31,6 +35,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _randomizedWordCountController.dispose();
     super.dispose();
   }
 
@@ -57,6 +62,8 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
       name,
       wordCount: _wordCount,
       direction: _selectedDirection,
+      isRandomized: _isRandomized ? true : null,
+      randomizedWordCount: _isRandomized ? _randomizedWordCount : null,
     );
 
     if (!mounted) return;
@@ -244,6 +251,44 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     },
                   ),
                   const SizedBox(height: 8),
+                ],
+
+                // Randomized mode toggle
+                if (_selectedListIds.isNotEmpty) ...[
+                  SwitchListTile(
+                    title: const Text('Randomized Mode'),
+                    subtitle: const Text(
+                      'Pick different words each time you start this training',
+                    ),
+                    value: _isRandomized,
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (value) {
+                      setState(() {
+                        _isRandomized = value;
+                      });
+                    },
+                  ),
+                  if (_isRandomized) ...[
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _randomizedWordCountController,
+                      decoration: const InputDecoration(
+                        labelText: 'Words per session',
+                        border: OutlineInputBorder(),
+                        hintText: 'Number of words to pick each time (1–100)',
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        final parsed = int.tryParse(value);
+                        if (parsed != null) {
+                          setState(() {
+                            _randomizedWordCount = parsed.clamp(1, 100);
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                  const SizedBox(height: 24),
                 ],
 
                 // Create button

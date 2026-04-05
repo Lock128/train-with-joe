@@ -42,6 +42,7 @@ class TrainingProvider extends ChangeNotifier {
         query GetTrainings {
           getTrainings {
             id userId name mode direction vocabularyListIds createdAt updatedAt
+            isRandomized randomizedWordCount
             words { word vocabularyListId unit }
           }
         }
@@ -70,6 +71,7 @@ class TrainingProvider extends ChangeNotifier {
             success
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
+              isRandomized randomizedWordCount
               words { word translation vocabularyListId unit }
               executions {
                 id trainingId userId startedAt completedAt correctCount incorrectCount
@@ -112,6 +114,8 @@ class TrainingProvider extends ChangeNotifier {
     String? name, {
     int? wordCount,
     String? direction,
+    bool? isRandomized,
+    int? randomizedWordCount,
   }) async {
     _isLoading = true;
     _error = null;
@@ -124,6 +128,7 @@ class TrainingProvider extends ChangeNotifier {
             success
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
+              isRandomized randomizedWordCount
               words { word translation vocabularyListId unit }
             }
             error
@@ -140,6 +145,8 @@ class TrainingProvider extends ChangeNotifier {
             if (name != null) 'name': name,
             if (wordCount != null) 'wordCount': wordCount,
             if (direction != null) 'direction': direction,
+            if (isRandomized != null && isRandomized) 'isRandomized': isRandomized,
+            if (isRandomized != null && isRandomized && randomizedWordCount != null) 'randomizedWordCount': randomizedWordCount,
           },
         },
       );
@@ -300,6 +307,7 @@ class TrainingProvider extends ChangeNotifier {
               id trainingId userId startedAt completedAt correctCount incorrectCount
               results { wordIndex word expectedAnswer userAnswer correct }
               multipleChoiceOptions { wordIndex options }
+              words { word translation vocabularyListId unit }
             }
             error
           }

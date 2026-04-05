@@ -20,6 +20,9 @@ export interface Training {
   direction: TrainingDirection;
   vocabularyListIds: string[];
   words: TrainingWord[];
+  isRandomized?: boolean;
+  randomizedWordCount?: number;
+  units?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -47,6 +50,7 @@ export interface TrainingExecution {
   abortedAt?: string;
   results: TrainingResult[];
   multipleChoiceOptions?: MultipleChoiceOption[];
+  words?: TrainingWord[];
   correctCount: number;
   incorrectCount: number;
 }

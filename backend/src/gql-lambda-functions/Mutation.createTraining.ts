@@ -15,6 +15,8 @@ interface Event {
       name?: string;
       wordCount?: number;
       units?: string[];
+      isRandomized?: boolean;
+      randomizedWordCount?: number;
     };
   };
   identity: {
@@ -24,7 +26,8 @@ interface Event {
 
 export const handler = async (event: Event) => {
   const userId = event.identity?.sub;
-  const { vocabularyListIds, mode, name, wordCount, direction, units } = event.arguments.input;
+  const { vocabularyListIds, mode, name, wordCount, direction, units, isRandomized, randomizedWordCount } =
+    event.arguments.input;
 
   if (!userId) {
     return {
@@ -36,7 +39,17 @@ export const handler = async (event: Event) => {
 
   try {
     const service = TrainingService.getInstance();
-    return await service.createTraining(userId, vocabularyListIds, mode, name, wordCount, direction, units);
+    return await service.createTraining(
+      userId,
+      vocabularyListIds,
+      mode,
+      name,
+      wordCount,
+      direction,
+      units,
+      isRandomized,
+      randomizedWordCount,
+    );
   } catch (error) {
     console.error('Error creating training:', error);
     return {

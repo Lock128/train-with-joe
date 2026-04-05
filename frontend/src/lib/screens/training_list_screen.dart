@@ -183,6 +183,8 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
     final words = (training['words'] as List<dynamic>?) ?? [];
     final executions = (training['executions'] as List<dynamic>?) ?? [];
     final vocabularyListIds = (training['vocabularyListIds'] as List<dynamic>?) ?? [];
+    final isRandomized = training['isRandomized'] as bool? ?? false;
+    final randomizedWordCount = training['randomizedWordCount'] as int?;
 
     final vocabLists = context.read<VocabularyProvider>().vocabularyLists;
     final listNames = vocabularyListIds.map((id) {
@@ -200,9 +202,27 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
             color: _getModeColor(mode),
           ),
         ),
-        title: Text(
-          name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isRandomized) ...[
+              const SizedBox(width: 6),
+              Tooltip(
+                message: 'Randomized training',
+                child: Icon(
+                  Icons.shuffle,
+                  size: 16,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,7 +255,9 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
             ],
             const SizedBox(height: 4),
             Text(
-              '${words.length} words - ${executions.length} executions',
+              isRandomized
+                  ? '${randomizedWordCount ?? 10} random words - ${executions.length} executions'
+                  : '${words.length} words - ${executions.length} executions',
               style: const TextStyle(color: Colors.grey),
             ),
           ],

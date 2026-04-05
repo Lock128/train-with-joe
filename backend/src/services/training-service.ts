@@ -38,8 +38,47 @@ export class TrainingService {
     wordCount?: number,
     direction?: TrainingDirection,
     units?: string[],
+    isRandomized?: boolean,
+    randomizedWordCount?: number,
   ): Promise<{ success: boolean; training?: Training; error?: string }> {
     try {
+      // Randomized training path: store configuration only, skip word fetching
+      if (isRandomized) {
+        // Validate randomizedWordCount
+        let effectiveWordCount = randomizedWordCount ?? 10;
+        if (effectiveWordCount < 1) {
+          return { success: false, error: 'Randomized word count must be at least 1' };
+        }
+        if (effectiveWordCount > 100) {
+          effectiveWordCount = 100;
+        }
+
+        const now = new Date().toISOString();
+        const training: Training = {
+          id: crypto.randomUUID(),
+          userId,
+          name: name || `Training - ${new Date().toLocaleDateString()}`,
+          mode,
+          direction: direction || 'WORD_TO_TRANSLATION',
+          vocabularyListIds,
+          words: [],
+          isRandomized: true,
+          randomizedWordCount: effectiveWordCount,
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        if (units && units.length > 0) {
+          training.units = units;
+        }
+
+        const trainingRepo = TrainingRepository.getInstance();
+        await trainingRepo.create(training);
+
+        return { success: true, training };
+      }
+
+      // Static training path: existing behavior unchanged
       const vocabRepo = VocabularyListRepository.getInstance();
       let words: TrainingWord[] = [];
 
@@ -150,6 +189,33 @@ export class TrainingService {
   }
 
   /**
+   * Generate multiple choice options from a word list
+   */
+  private generateMultipleChoiceOptions(words: TrainingWord[], direction: TrainingDirection): MultipleChoiceOption[] {
+    const reversed = direction === 'TRANSLATION_TO_WORD';
+    return words.map((word, index) => {
+      const correctAnswer = reversed ? word.word : word.translation;
+      // Get distractor answers from other words
+      const otherAnswers = words.filter((_, i) => i !== index).map((w) => (reversed ? w.word : w.translation));
+
+      // Pick 2 random distractors
+      const shuffled = otherAnswers.sort(() => Math.random() - 0.5);
+      const distractors = shuffled.slice(0, 2);
+
+      // Build options array with correct answer + distractors, then shuffle
+      const options = [correctAnswer, ...distractors];
+      const shuffledOptions = options.sort(() => Math.random() - 0.5);
+      const correctOptionIndex = shuffledOptions.indexOf(correctAnswer);
+
+      return {
+        wordIndex: index,
+        options: shuffledOptions,
+        correctOptionIndex,
+      };
+    });
+  }
+
+  /**
    * Start a new training execution
    */
   async startTraining(
@@ -168,35 +234,82 @@ export class TrainingService {
         return { success: false, error: 'Not authorized' };
       }
 
+      if (training.isRandomized) {
+        // Randomized path: fetch words dynamically from vocabulary lists
+        const vocabRepo = VocabularyListRepository.getInstance();
+        const collectedWords: TrainingWord[] = [];
+
+        for (const listId of training.vocabularyListIds) {
+          const list = await vocabRepo.getById(listId);
+          if (!list) continue; // skip deleted lists
+
+          let validWords = list.words.filter((w) => w.translation && w.translation.length > 0);
+
+          // Filter by units if present
+          if (training.units && training.units.length > 0) {
+            validWords = validWords.filter((w) => w.unit && training.units!.includes(w.unit));
+          }
+
+          for (const word of validWords) {
+            const trainingWord: TrainingWord = {
+              word: word.word,
+              translation: word.translation!,
+              vocabularyListId: list.id,
+            };
+            if (word.unit) {
+              trainingWord.unit = word.unit;
+            }
+            collectedWords.push(trainingWord);
+          }
+        }
+
+        if (collectedWords.length === 0) {
+          return { success: false, error: 'No words available from the selected vocabulary lists' };
+        }
+
+        // Fisher-Yates shuffle
+        for (let i = collectedWords.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [collectedWords[i], collectedWords[j]] = [collectedWords[j], collectedWords[i]];
+        }
+
+        // Select up to randomizedWordCount words
+        const selectedWords = collectedWords.slice(0, training.randomizedWordCount ?? 10);
+
+        if (training.mode === 'MULTIPLE_CHOICE' && selectedWords.length < 3) {
+          return { success: false, error: 'Multiple-choice requires at least 3 words' };
+        }
+
+        let multipleChoiceOptions: MultipleChoiceOption[] | undefined;
+        if (training.mode === 'MULTIPLE_CHOICE') {
+          multipleChoiceOptions = this.generateMultipleChoiceOptions(selectedWords, training.direction);
+        }
+
+        const execution: TrainingExecution = {
+          id: crypto.randomUUID(),
+          trainingId,
+          userId,
+          startedAt: new Date().toISOString(),
+          results: [],
+          multipleChoiceOptions,
+          words: selectedWords,
+          correctCount: 0,
+          incorrectCount: 0,
+        };
+
+        await trainingRepo.createExecution(execution);
+
+        return { success: true, execution };
+      }
+
+      // Static path: existing behavior unchanged
       if (training.mode === 'MULTIPLE_CHOICE' && training.words.length < 3) {
         return { success: false, error: 'Multiple-choice requires at least 3 words' };
       }
 
       let multipleChoiceOptions: MultipleChoiceOption[] | undefined;
       if (training.mode === 'MULTIPLE_CHOICE') {
-        const reversed = training.direction === 'TRANSLATION_TO_WORD';
-        multipleChoiceOptions = training.words.map((word, index) => {
-          const correctAnswer = reversed ? word.word : word.translation;
-          // Get distractor answers from other words
-          const otherAnswers = training.words
-            .filter((_, i) => i !== index)
-            .map((w) => (reversed ? w.word : w.translation));
-
-          // Pick 2 random distractors
-          const shuffled = otherAnswers.sort(() => Math.random() - 0.5);
-          const distractors = shuffled.slice(0, 2);
-
-          // Build options array with correct answer + distractors, then shuffle
-          const options = [correctAnswer, ...distractors];
-          const shuffledOptions = options.sort(() => Math.random() - 0.5);
-          const correctOptionIndex = shuffledOptions.indexOf(correctAnswer);
-
-          return {
-            wordIndex: index,
-            options: shuffledOptions,
-            correctOptionIndex,
-          };
-        });
+        multipleChoiceOptions = this.generateMultipleChoiceOptions(training.words, training.direction);
       }
 
       const execution: TrainingExecution = {
@@ -264,7 +377,9 @@ export class TrainingService {
         return { success: false, error: 'Training not found' };
       }
 
-      const word = training.words[wordIndex];
+      // Dual-path word resolution: randomized uses execution.words, static uses training.words
+      const wordList = training.isRandomized ? execution.words! : training.words;
+      const word = wordList[wordIndex];
       if (!word) {
         return { success: false, error: 'Invalid word index' };
       }
@@ -289,7 +404,8 @@ export class TrainingService {
         execution.incorrectCount++;
       }
 
-      if (execution.results.length === training.words.length) {
+      // Completion check: compare against the appropriate word list length
+      if (execution.results.length === wordList.length) {
         execution.completedAt = new Date().toISOString();
       }
 

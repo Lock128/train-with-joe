@@ -198,7 +198,10 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     final name = _training!['name'] as String? ?? 'Untitled Training';
     final mode = _training!['mode'] as String?;
     final words = (_training!['words'] as List<dynamic>?) ?? [];
-    final isMcTooFew = mode == 'MULTIPLE_CHOICE' && words.length < 3;
+    final isRandomized = _training!['isRandomized'] as bool? ?? false;
+    final randomizedWordCount = _training!['randomizedWordCount'] as int? ?? 10;
+    final vocabularyListIds = (_training!['vocabularyListIds'] as List<dynamic>?) ?? [];
+    final isMcTooFew = !isRandomized && mode == 'MULTIPLE_CHOICE' && words.length < 3;
 
     return Scaffold(
       appBar: AppBar(
@@ -219,8 +222,18 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Chip(label: Text(_modeLabel(mode), style: TextStyle(color: _modeColor(mode))),
-            backgroundColor: _modeColor(mode).withValues(alpha: 0.1)),
+          Row(children: [
+            Chip(label: Text(_modeLabel(mode), style: TextStyle(color: _modeColor(mode))),
+              backgroundColor: _modeColor(mode).withValues(alpha: 0.1)),
+            if (isRandomized) ...[
+              const SizedBox(width: 8),
+              Chip(
+                avatar: Icon(Icons.shuffle, size: 16, color: Colors.grey.shade700),
+                label: Text('Randomized', style: TextStyle(color: Colors.grey.shade700)),
+                backgroundColor: Colors.grey.shade200,
+              ),
+            ],
+          ]),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: isMcTooFew || _isStarting ? null : _startTraining,
@@ -234,32 +247,58 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
               'Multiple choice mode requires at least 3 words.',
               style: TextStyle(color: Colors.orange, fontSize: 13), textAlign: TextAlign.center)),
           const SizedBox(height: 16),
-          Text('Words (${words.length})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          if (words.isEmpty)
-            const Padding(padding: EdgeInsets.symmetric(vertical: 24),
-              child: Text('No words in this training.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)))
-          else
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 300),
-              child: ListView.builder(
-                itemCount: words.length,
-                itemBuilder: (context, index) {
-                  final word = words[index] as Map<String, dynamic>;
-                  final unit = word['unit'] as String?;
-                  return ListTile(
-                    title: Text(word['word'] as String? ?? ''),
-                    subtitle: unit != null && unit.isNotEmpty
-                        ? Text(unit, style: TextStyle(fontSize: 12, color: Colors.blueGrey.shade600))
-                        : null,
-                    trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteWord(index)),
-                  );
-                },
+          if (isRandomized) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(children: [
+                    Icon(Icons.shuffle, color: Colors.grey.shade600),
+                    const SizedBox(width: 8),
+                    Text('$randomizedWordCount random words per session',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ]),
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    Icon(Icons.list_alt, color: Colors.grey.shade600),
+                    const SizedBox(width: 8),
+                    Text('From ${vocabularyListIds.length} vocabulary ${vocabularyListIds.length == 1 ? 'list' : 'lists'}',
+                      style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+                  ]),
+                  const SizedBox(height: 8),
+                  Text('Words are randomly selected each time you start this training.',
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+                ]),
               ),
             ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(onPressed: _showAddWordsSheet, icon: const Icon(Icons.add),
-            label: const Text('Add Words'), style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(12))),
+          ] else ...[
+            Text('Words (${words.length})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            if (words.isEmpty)
+              const Padding(padding: EdgeInsets.symmetric(vertical: 24),
+                child: Text('No words in this training.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)))
+            else
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 300),
+                child: ListView.builder(
+                  itemCount: words.length,
+                  itemBuilder: (context, index) {
+                    final word = words[index] as Map<String, dynamic>;
+                    final unit = word['unit'] as String?;
+                    return ListTile(
+                      title: Text(word['word'] as String? ?? ''),
+                      subtitle: unit != null && unit.isNotEmpty
+                          ? Text(unit, style: TextStyle(fontSize: 12, color: Colors.blueGrey.shade600))
+                          : null,
+                      trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteWord(index)),
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(onPressed: _showAddWordsSheet, icon: const Icon(Icons.add),
+              label: const Text('Add Words'), style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(12))),
+          ],
         ]),
       ),
     );
