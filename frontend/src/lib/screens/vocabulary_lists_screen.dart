@@ -252,6 +252,20 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
+              icon: Icon(
+                list['isPublic'] == true ? Icons.public : Icons.public_off,
+                color: list['isPublic'] == true ? const Color(0xFF6C5CE7) : null,
+              ),
+              tooltip: list['isPublic'] == true ? 'Make private' : 'Make public',
+              onPressed: () {
+                final isPublic = list['isPublic'] == true;
+                context.read<VocabularyProvider>().setVocabularyListPublic(
+                  list['id'] as String,
+                  !isPublic,
+                );
+              },
+            ),
+            IconButton(
               icon: const Icon(Icons.edit_outlined),
               tooltip: 'Rename list',
               onPressed: () => _showRenameDialog(context, list),

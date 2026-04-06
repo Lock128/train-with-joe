@@ -52,6 +52,9 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   }
 
   List<dynamic> get _words {
+    // For randomized trainings the words are returned per-execution, not on the training itself.
+    final executionWords = (_execution?['words'] as List<dynamic>?) ?? [];
+    if (executionWords.isNotEmpty) return executionWords;
     final training = context.read<TrainingProvider>().currentTraining;
     return (training?['words'] as List<dynamic>?) ?? [];
   }
