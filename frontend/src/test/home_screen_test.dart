@@ -88,7 +88,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Welcome!'), findsOneWidget);
-      expect(find.byIcon(Icons.school), findsOneWidget);
+      expect(find.byType(CircleAvatar), findsOneWidget);
       expect(find.text('Subscription'), findsOneWidget);
       expect(find.text('Quick Actions'), findsOneWidget);
       expect(find.text('Manage Subscription'), findsOneWidget);
