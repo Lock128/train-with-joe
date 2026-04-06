@@ -203,9 +203,37 @@ class _MyAppState extends State<MyApp> {
           update: (_, auth, previous) => previous!..updateAuth(auth),
         ),
       ],
-      child: Consumer<app.AuthProvider>(
-        builder: (context, authProvider, _) {
-          return MaterialApp.router(
+      child: _AuthenticatedApp(),
+    );
+  }
+}
+
+class _AuthenticatedApp extends StatefulWidget {
+  @override
+  State<_AuthenticatedApp> createState() => _AuthenticatedAppState();
+}
+
+class _AuthenticatedAppState extends State<_AuthenticatedApp> {
+  GoRouter? _router;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_router == null) {
+      final authProvider = context.read<app.AuthProvider>();
+      _router = _createRouter(authProvider);
+    }
+  }
+
+  @override
+  void dispose() {
+    _router?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
             title: 'Train with Joe',
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
@@ -261,16 +289,14 @@ class _MyAppState extends State<MyApp> {
                 elevation: 0,
               ),
             ),
-            routerConfig: _createRouter(authProvider),
-          );
-        },
-      ),
+            routerConfig: _router,
     );
   }
 
   GoRouter _createRouter(app.AuthProvider authProvider) {
     return GoRouter(
       initialLocation: authProvider.isAuthenticated ? '/home' : '/signin',
+      refreshListenable: authProvider,
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
         final isAuthRoute = state.matchedLocation == '/signin' || 

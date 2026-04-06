@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../models/app_version.dart';
+import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 
 /// Info screen showing app and backend version details.
@@ -52,6 +55,14 @@ class _InfoScreenState extends State<InfoScreen> {
         _error = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _handleSignOut(BuildContext context) async {
+    final authProvider = context.read<AuthProvider>();
+    await authProvider.signOut();
+    if (context.mounted) {
+      context.go('/signin');
     }
   }
 
@@ -139,6 +150,12 @@ class _InfoScreenState extends State<InfoScreen> {
                       ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 32),
+                FilledButton.tonalIcon(
+                  onPressed: () => _handleSignOut(context),
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Sign Out'),
                 ),
               ],
             ),
