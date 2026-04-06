@@ -400,6 +400,8 @@ class _VocabularyListDetailScreenState
                 'difficulty': w['difficulty'],
               if ((w['unit'] as String?)?.isNotEmpty == true)
                 'unit': w['unit'],
+              if (w['flagged'] == true)
+                'flagged': true,
             })
         .toList();
 
@@ -547,10 +549,16 @@ class _VocabularyListDetailScreenState
     final partOfSpeech = word['partOfSpeech'] as String?;
     final difficulty = word['difficulty'] as String?;
     final unit = word['unit'] as String?;
+    final flagged = word['flagged'] == true;
 
     return ListTile(
       title: Row(
         children: [
+          if (flagged)
+            const Padding(
+              padding: EdgeInsets.only(right: 6),
+              child: Icon(Icons.flag, size: 16, color: Colors.orange),
+            ),
           Text(wordText, style: const TextStyle(fontWeight: FontWeight.bold)),
           if (translation != null && translation.isNotEmpty) ...[
             const Padding(

@@ -11,9 +11,17 @@ class UserProvider extends ChangeNotifier {
   String? _error;
   AuthProvider? _authProvider;
 
+  static const _adminEmails = ['johannes.koch@gmail.com'];
+
   Map<String, dynamic>? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  /// Whether the current user is an admin
+  bool get isAdmin {
+    final email = _user?['email'] as String?;
+    return email != null && _adminEmails.contains(email);
+  }
 
   /// Update auth provider reference
   void updateAuth(AuthProvider authProvider) {

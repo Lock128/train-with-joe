@@ -102,7 +102,7 @@ class VocabularyProvider extends ChangeNotifier {
             success
             vocabularyList {
               id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty unit }
+              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
             }
             error
           }
@@ -171,7 +171,7 @@ class VocabularyProvider extends ChangeNotifier {
         query GetVocabularyLists {
           getVocabularyLists {
             id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
-            words { word translation definition partOfSpeech exampleSentence difficulty unit }
+            words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
           }
         }
       ''';
@@ -197,7 +197,7 @@ class VocabularyProvider extends ChangeNotifier {
         query GetVocabularyList(\$id: ID!) {
           getVocabularyList(id: \$id) {
             id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
-            words { word translation definition partOfSpeech exampleSentence difficulty unit }
+            words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
           }
         }
       ''';
@@ -238,7 +238,7 @@ class VocabularyProvider extends ChangeNotifier {
               errorMessage
               createdAt
               updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty unit }
+              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
             }
           }
         ''';
@@ -445,7 +445,7 @@ class VocabularyProvider extends ChangeNotifier {
         query GetPublicVocabularyLists {
           getPublicVocabularyLists {
             id userId title sourceLanguage targetLanguage status isPublic createdAt updatedAt
-            words { word translation definition partOfSpeech exampleSentence difficulty unit }
+            words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
           }
         }
       ''';
@@ -479,7 +479,7 @@ class VocabularyProvider extends ChangeNotifier {
             success
             vocabularyList {
               id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty unit }
+              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
             }
             error
           }
@@ -539,6 +539,44 @@ class VocabularyProvider extends ChangeNotifier {
     final content = lines.join('\n');
 
     await Share.share(content, subject: title);
+  }
+
+  /// Flag a word in a vocabulary list for review by the list owner
+  Future<bool> flagWord(String vocabularyListId, String word) async {
+    try {
+      const mutation = '''
+        mutation FlagWord(\$input: FlagWordInput!) {
+          flagWord(input: \$input) {
+            success
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {
+          'input': {
+            'vocabularyListId': vocabularyListId,
+            'word': word,
+          },
+        },
+      );
+
+      final result = response['flagWord'] as Map<String, dynamic>?;
+      if (result != null && result['success'] == true) {
+        return true;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to flag word';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error flagging word: $e');
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 
   /// Clear vocabulary data (on sign out)

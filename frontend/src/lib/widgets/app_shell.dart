@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../providers/user_provider.dart';
 
 /// Shared shell widget that wraps authenticated screens with navigation.
 /// On narrow screens (mobile): bottom navigation bar.
@@ -22,14 +23,23 @@ class AppShell extends StatelessWidget {
     _NavDestination('/settings', Icons.settings_outlined, Icons.settings, 'Settings'),
   ];
 
+  static const _adminDestination = _NavDestination('/admin', Icons.admin_panel_settings_outlined, Icons.admin_panel_settings, 'Admin');
+
+  List<_NavDestination> _effectiveDestinations(BuildContext context) {
+    final isAdmin = context.watch<UserProvider>().isAdmin;
+    if (isAdmin) {
+      return [..._destinations, _adminDestination];
+    }
+    return _destinations;
+  }
+
   int _currentIndex(BuildContext context) {
+    final destinations = _effectiveDestinations(context);
     final location = GoRouterState.of(context).matchedLocation;
-    // Check longest paths first to avoid false prefix matches (e.g.
-    // '/vocabulary/analyze' must not match '/vocabulary').
     int bestIndex = 0;
     int bestLength = 0;
-    for (var i = 0; i < _destinations.length; i++) {
-      final path = _destinations[i].path;
+    for (var i = 0; i < destinations.length; i++) {
+      final path = destinations[i].path;
       if (location.startsWith(path) && path.length > bestLength) {
         bestIndex = i;
         bestLength = path.length;
@@ -39,7 +49,8 @@ class AppShell extends StatelessWidget {
   }
 
   void _onDestinationSelected(BuildContext context, int index) {
-    context.go(_destinations[index].path);
+    final destinations = _effectiveDestinations(context);
+    context.go(destinations[index].path);
   }
 
   Future<void> _handleSignOut(BuildContext context) async {
@@ -64,7 +75,10 @@ class AppShell extends StatelessWidget {
   /// Wide layout: NavigationRail on the left side
   Widget _buildWideLayout(BuildContext context, int selectedIndex) {
     return Scaffold(
-      body: Row(
+      body: SafeArea(
+        bottom: false,
+        right: false,
+        child: Row(
         children: [
           NavigationRail(
             selectedIndex: selectedIndex,
@@ -102,7 +116,7 @@ class AppShell extends StatelessWidget {
                 ),
               ),
             ),
-            destinations: _destinations
+            destinations: _effectiveDestinations(context)
                 .map((d) => NavigationRailDestination(
                       icon: Icon(d.icon),
                       selectedIcon: Icon(d.selectedIcon),
@@ -113,6 +127,7 @@ class AppShell extends StatelessWidget {
           const VerticalDivider(thickness: 1, width: 1),
           Expanded(child: child),
         ],
+        ),
       ),
     );
   }
@@ -124,7 +139,7 @@ class AppShell extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         onDestinationSelected: (i) => _onDestinationSelected(context, i),
-        destinations: _destinations
+        destinations: _effectiveDestinations(context)
             .map((d) => NavigationDestination(
                   icon: Icon(d.icon),
                   selectedIcon: Icon(d.selectedIcon),

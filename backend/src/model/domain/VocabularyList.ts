@@ -12,6 +12,7 @@ export interface VocabularyWord {
   exampleSentence?: string;
   difficulty?: string;
   unit?: string;
+  flagged?: boolean;
 }
 
 export interface VocabularyList {

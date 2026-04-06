@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/training_provider.dart';
+import '../providers/vocabulary_provider.dart';
 import '../services/feedback_sound_service.dart';
 import '../widgets/answer_feedback_animation.dart';
 
@@ -29,6 +30,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   Map<String, dynamic>? _lastResult;
   bool _soundMuted = FeedbackSoundService().isMuted;
   final TextEditingController _answerController = TextEditingController();
+  final Set<int> _flaggedIndices = {};
 
   @override
   void initState() {
@@ -124,6 +126,29 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     });
   }
 
+  Future<void> _flagCurrentWord() async {
+    if (_flaggedIndices.contains(_currentWordIndex)) return;
+
+    final currentWord = _words[_currentWordIndex] as Map<String, dynamic>;
+    final wordText = currentWord['word'] as String? ?? '';
+    final vocabListId = currentWord['vocabularyListId'] as String? ?? '';
+
+    if (vocabListId.isEmpty || wordText.isEmpty) return;
+
+    final ok = await context.read<VocabularyProvider>().flagWord(vocabListId, wordText);
+    if (ok && mounted) {
+      setState(() => _flaggedIndices.add(_currentWordIndex));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Word flagged for review'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _confirmAbort() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -153,7 +178,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Training'),
-          actions: [_buildSoundToggle()],
+          actions: [_buildFlagButton(), _buildSoundToggle()],
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -172,7 +197,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
           tooltip: 'Abort training',
           onPressed: _confirmAbort,
         ),
-        actions: [_buildSoundToggle()],
+        actions: [_buildFlagButton(), _buildSoundToggle()],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -209,6 +234,18 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFlagButton() {
+    final isFlagged = _flaggedIndices.contains(_currentWordIndex);
+    return IconButton(
+      icon: Icon(
+        isFlagged ? Icons.flag : Icons.flag_outlined,
+        color: isFlagged ? Colors.orange : null,
+      ),
+      tooltip: isFlagged ? 'Word flagged' : 'Flag wrong translation',
+      onPressed: isFlagged ? null : _flagCurrentWord,
     );
   }
 

@@ -519,4 +519,89 @@ class TrainingProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+
+  // ── Admin methods (pass userId to view another user's statistics) ──
+
+  /// Get overview statistics for a specific user (admin only)
+  Future<Map<String, dynamic>?> getTrainingOverviewStatisticsForUser(
+    String fromDate, String toDate, String userId,
+  ) async {
+    try {
+      const query = '''
+        query GetTrainingOverviewStatistics(\$fromDate: String!, \$toDate: String!, \$userId: ID) {
+          getTrainingOverviewStatistics(fromDate: \$fromDate, toDate: \$toDate, userId: \$userId) {
+            success
+            statistics {
+              totalDays totalTrainings totalLearningTimeSeconds
+              dailySummaries {
+                date trainingCount totalLearningTimeSeconds
+              }
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.query(
+        query,
+        variables: {'fromDate': fromDate, 'toDate': toDate, 'userId': userId},
+      );
+      final result = response['getTrainingOverviewStatistics'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        return result['statistics'] as Map<String, dynamic>?;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to get overview statistics';
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error getting training overview statistics for user: $e');
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Get day statistics for a specific user (admin only)
+  Future<Map<String, dynamic>?> getTrainingDayStatisticsForUser(
+    String date, String userId,
+  ) async {
+    try {
+      const query = '''
+        query GetTrainingDayStatistics(\$date: String!, \$userId: ID) {
+          getTrainingDayStatistics(date: \$date, userId: \$userId) {
+            success
+            dayStatistics {
+              date totalExecutions totalCorrect totalIncorrect
+              executions {
+                executionId trainingId trainingName startedAt completedAt
+                correctCount incorrectCount durationSeconds
+              }
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.query(
+        query,
+        variables: {'date': date, 'userId': userId},
+      );
+      final result = response['getTrainingDayStatistics'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        return result['dayStatistics'] as Map<String, dynamic>?;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to get day statistics';
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error getting training day statistics for user: $e');
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
 }

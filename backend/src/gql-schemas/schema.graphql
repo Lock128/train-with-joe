@@ -68,6 +68,7 @@ type VocabularyWord @aws_cognito_user_pools {
   exampleSentence: String
   difficulty: String
   unit: String
+  flagged: Boolean
 }
 
 type VocabularyList @aws_cognito_user_pools {
@@ -255,6 +256,12 @@ input VocabularyWordInput @aws_cognito_user_pools {
   exampleSentence: String
   difficulty: String
   unit: String
+  flagged: Boolean
+}
+
+input FlagWordInput @aws_cognito_user_pools {
+  vocabularyListId: ID!
+  word: String!
 }
 
 input UpdateVocabularyListInput @aws_cognito_user_pools {
@@ -406,9 +413,9 @@ type Query {
   getImageUploadUrls(input: GetImageUploadUrlsInput!): ImageUploadUrlsResponse @aws_cognito_user_pools
   getTraining(trainingId: ID!): TrainingResponse @aws_cognito_user_pools
   getTrainings: [Training] @aws_cognito_user_pools
-  getTrainingStatistics(trainingId: ID!): TrainingStatisticsResponse @aws_cognito_user_pools
-  getTrainingDayStatistics(date: String!): TrainingDayStatisticsResponse @aws_cognito_user_pools
-  getTrainingOverviewStatistics(fromDate: String!, toDate: String!): TrainingOverviewStatisticsResponse @aws_cognito_user_pools
+  getTrainingStatistics(trainingId: ID!, userId: ID): TrainingStatisticsResponse @aws_cognito_user_pools
+  getTrainingDayStatistics(date: String!, userId: ID): TrainingDayStatisticsResponse @aws_cognito_user_pools
+  getTrainingOverviewStatistics(fromDate: String!, toDate: String!, userId: ID): TrainingOverviewStatisticsResponse @aws_cognito_user_pools
 }
 
 # ============================================================================
@@ -434,6 +441,7 @@ type Mutation {
   renameVocabularyList(input: RenameVocabularyListInput!): VocabularyListResponse @aws_cognito_user_pools
   setVocabularyListPublic(input: SetVocabularyListPublicInput!): VocabularyListResponse @aws_cognito_user_pools
   updateVocabularyList(input: UpdateVocabularyListInput!): VocabularyListResponse @aws_cognito_user_pools
+  flagWord(input: FlagWordInput!): VocabularyListResponse @aws_cognito_user_pools
 
   # AI operations
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools

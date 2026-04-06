@@ -1,24 +1,32 @@
 import { TrainingService } from '../services/training-service';
 
+const ADMIN_EMAILS = ['johannes.koch@gmail.com'];
+
 /**
  * Lambda resolver for Query.getTrainingDayStatistics
  * Returns training statistics for a specific date
+ * Admins can view statistics for other users by providing a userId
  */
 
 interface Event {
   arguments: {
     date: string;
+    userId?: string;
   };
   identity: {
     sub: string;
+    claims?: {
+      email?: string;
+    };
   };
 }
 
 export const handler = async (event: Event) => {
-  const userId = event.identity?.sub;
-  const { date } = event.arguments;
+  const callerUserId = event.identity?.sub;
+  const callerEmail = event.identity?.claims?.email;
+  const { date, userId: targetUserId } = event.arguments;
 
-  if (!userId) {
+  if (!callerUserId) {
     return {
       success: false,
       dayStatistics: null,
@@ -26,9 +34,21 @@ export const handler = async (event: Event) => {
     };
   }
 
+  let effectiveUserId = callerUserId;
+  if (targetUserId) {
+    if (!callerEmail || !ADMIN_EMAILS.includes(callerEmail)) {
+      return {
+        success: false,
+        dayStatistics: null,
+        error: "Not authorized to view other users' statistics",
+      };
+    }
+    effectiveUserId = targetUserId;
+  }
+
   try {
     const service = TrainingService.getInstance();
-    return await service.getTrainingDayStatistics(userId, date);
+    return await service.getTrainingDayStatistics(effectiveUserId, date);
   } catch (error) {
     console.error('Error getting training day statistics:', error);
     return {
