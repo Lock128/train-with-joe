@@ -1,39 +1,75 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// Generates and plays short melodic jingles for correct/incorrect answers.
-/// Tones are synthesized in memory as WAV — no asset files needed.
+/// Tones are synthesized in memory as WAV, written to temp files for reliable
+/// iOS playback via AVAudioPlayer.
 class FeedbackSoundService {
   static final FeedbackSoundService _instance = FeedbackSoundService._();
   factory FeedbackSoundService() => _instance;
   FeedbackSoundService._();
 
   final _player = AudioPlayer();
-  Uint8List? _successWav;
-  Uint8List? _errorWav;
+  String? _successPath;
+  String? _errorPath;
+  bool _initialized = false;
 
-  /// Pre-generate both jingles so playback is instant.
+  /// Pre-generate both jingles and write to temp files.
+  /// Must be called before playSuccess/playError.
   Future<void> init() async {
-    _successWav = _buildSuccessJingle();
-    _errorWav = _buildErrorJingle();
+    if (_initialized) return;
+    try {
+      final dir = await getTemporaryDirectory();
+
+      final successFile = File('${dir.path}/feedback_success.wav');
+      await successFile.writeAsBytes(_buildSuccessJingle(), flush: true);
+      _successPath = successFile.path;
+
+      final errorFile = File('${dir.path}/feedback_error.wav');
+      await errorFile.writeAsBytes(_buildErrorJingle(), flush: true);
+      _errorPath = errorFile.path;
+
+      // Configure audio session for playback that mixes with other audio
+      // and plays even when the iOS silent switch is on.
+      await _player.setAudioContext(AudioContext(
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: {AVAudioSessionOptions.mixWithOthers},
+        ),
+        android: AudioContextAndroid(
+          usageType: AndroidUsageType.game,
+          contentType: AndroidContentType.sonification,
+        ),
+      ));
+
+      _initialized = true;
+    } catch (e) {
+      debugPrint('FeedbackSoundService.init failed: $e');
+    }
   }
 
   Future<void> playSuccess() async {
+    if (!_initialized) await init();
     try {
-      final wav = _successWav ?? _buildSuccessJingle();
+      final path = _successPath;
+      if (path == null) return;
       await _player.stop();
-      await _player.play(BytesSource(wav));
+      await _player.play(DeviceFileSource(path));
     } catch (e) {
       debugPrint('FeedbackSoundService: could not play success sound: $e');
     }
   }
 
   Future<void> playError() async {
+    if (!_initialized) await init();
     try {
-      final wav = _errorWav ?? _buildErrorJingle();
+      final path = _errorPath;
+      if (path == null) return;
       await _player.stop();
-      await _player.play(BytesSource(wav));
+      await _player.play(DeviceFileSource(path));
     } catch (e) {
       debugPrint('FeedbackSoundService: could not play error sound: $e');
     }
@@ -68,7 +104,6 @@ class FeedbackSoundService {
   }
 
   Uint8List _renderNotes(List<_Note> notes, {double volume = 0.3}) {
-    // Calculate total samples
     var totalSeconds = 0.0;
     for (final n in notes) {
       totalSeconds += n.duration;
@@ -81,7 +116,6 @@ class FeedbackSoundService {
       final count = (n.duration * _sampleRate).ceil();
       for (var i = 0; i < count && (offset + i) < totalSamples; i++) {
         final t = i / _sampleRate;
-        // Envelope: quick attack, smooth release
         final env = _envelope(i, count);
         samples[offset + i] = sin(2 * pi * n.frequency * t) * env * volume;
       }
@@ -91,24 +125,21 @@ class FeedbackSoundService {
     return _encodeWav(samples);
   }
 
-  /// Simple attack-sustain-release envelope.
   double _envelope(int sample, int total) {
     final pos = sample / total;
-    if (pos < 0.05) return pos / 0.05; // 5% attack
-    if (pos > 0.6) return (1.0 - pos) / 0.4; // 40% release
-    return 1.0; // sustain
+    if (pos < 0.05) return pos / 0.05;
+    if (pos > 0.6) return (1.0 - pos) / 0.4;
+    return 1.0;
   }
 
-  /// Encode Float64 samples (-1..1) into a 16-bit mono WAV byte buffer.
   Uint8List _encodeWav(Float64List samples) {
     final numSamples = samples.length;
-    final dataSize = numSamples * 2; // 16-bit = 2 bytes per sample
+    final dataSize = numSamples * 2;
     final fileSize = 44 + dataSize;
 
     final buffer = ByteData(fileSize);
     var p = 0;
 
-    // RIFF header
     void writeString(String s) {
       for (var i = 0; i < s.length; i++) {
         buffer.setUint8(p++, s.codeUnitAt(i));
@@ -119,17 +150,15 @@ class FeedbackSoundService {
     buffer.setUint32(p, fileSize - 8, Endian.little); p += 4;
     writeString('WAVE');
 
-    // fmt chunk
     writeString('fmt ');
-    buffer.setUint32(p, 16, Endian.little); p += 4; // chunk size
-    buffer.setUint16(p, 1, Endian.little); p += 2;  // PCM
-    buffer.setUint16(p, 1, Endian.little); p += 2;  // mono
+    buffer.setUint32(p, 16, Endian.little); p += 4;
+    buffer.setUint16(p, 1, Endian.little); p += 2;
+    buffer.setUint16(p, 1, Endian.little); p += 2;
     buffer.setUint32(p, _sampleRate, Endian.little); p += 4;
-    buffer.setUint32(p, _sampleRate * 2, Endian.little); p += 4; // byte rate
-    buffer.setUint16(p, 2, Endian.little); p += 2;  // block align
-    buffer.setUint16(p, 16, Endian.little); p += 2; // bits per sample
+    buffer.setUint32(p, _sampleRate * 2, Endian.little); p += 4;
+    buffer.setUint16(p, 2, Endian.little); p += 2;
+    buffer.setUint16(p, 16, Endian.little); p += 2;
 
-    // data chunk
     writeString('data');
     buffer.setUint32(p, dataSize, Endian.little); p += 4;
 
@@ -146,6 +175,6 @@ class FeedbackSoundService {
 
 class _Note {
   final double frequency;
-  final double duration; // seconds
+  final double duration;
   const _Note(this.frequency, this.duration);
 }

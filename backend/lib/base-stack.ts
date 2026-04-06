@@ -329,6 +329,19 @@ export class BaseStack extends Stack {
       },
     });
 
+    // Add GSI for querying public vocabulary lists
+    table.addGlobalSecondaryIndex({
+      indexName: 'isPublic-createdAt-index',
+      partitionKey: {
+        name: 'isPublic',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'createdAt',
+        type: AttributeType.STRING,
+      },
+    });
+
     return table;
   }
 

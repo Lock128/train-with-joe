@@ -201,4 +201,40 @@ export class VocabularyListRepository {
       throw new Error(`Failed to delete vocabulary list: ${err.message}`);
     }
   }
+
+  /**
+   * Get all public vocabulary lists (with COMPLETED status), ordered by createdAt descending
+   * @returns Array of public vocabulary lists
+   * @throws Error if retrieval fails
+   */
+  async getPublicLists(): Promise<VocabularyList[]> {
+    try {
+      const response = await this.dynamoClient.send(
+        new QueryCommand({
+          TableName: this.tableName,
+          IndexName: 'isPublic-createdAt-index',
+          KeyConditionExpression: 'isPublic = :isPublic',
+          FilterExpression: '#status = :status',
+          ExpressionAttributeNames: {
+            '#status': 'status',
+          },
+          ExpressionAttributeValues: {
+            ':isPublic': 'true',
+            ':status': 'COMPLETED',
+          },
+          ScanIndexForward: false,
+        }),
+      );
+
+      if (!response.Items || response.Items.length === 0) {
+        return [];
+      }
+
+      return response.Items as VocabularyList[];
+    } catch (error) {
+      const err = error as Error;
+      console.error('Error getting public vocabulary lists:', error);
+      throw new Error(`Failed to get public vocabulary lists: ${err.message}`);
+    }
+  }
 }

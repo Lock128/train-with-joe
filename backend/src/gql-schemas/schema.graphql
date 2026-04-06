@@ -80,6 +80,7 @@ type VocabularyList @aws_cognito_user_pools {
   targetLanguage: String
   status: VocabularyListStatus
   errorMessage: String
+  isPublic: Boolean
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -241,6 +242,11 @@ input RenameVocabularyListInput @aws_cognito_user_pools {
   title: String!
 }
 
+input SetVocabularyListPublicInput @aws_cognito_user_pools {
+  id: ID!
+  isPublic: Boolean!
+}
+
 input GetImageUploadUrlsInput @aws_cognito_user_pools {
   count: Int!
 }
@@ -378,6 +384,7 @@ type Query {
   getSubscriptionStatus: Subscription @aws_cognito_user_pools
   getVocabularyLists: [VocabularyList] @aws_cognito_user_pools
   getVocabularyList(id: ID!): VocabularyList @aws_cognito_user_pools
+  getPublicVocabularyLists: [VocabularyList] @aws_cognito_user_pools
   getImageUploadUrls(input: GetImageUploadUrlsInput!): ImageUploadUrlsResponse @aws_cognito_user_pools
   getTraining(trainingId: ID!): TrainingResponse @aws_cognito_user_pools
   getTrainings: [Training] @aws_cognito_user_pools
@@ -407,6 +414,7 @@ type Mutation {
   # Vocabulary operations
   deleteVocabularyList(id: ID!): VocabularyListResponse @aws_cognito_user_pools
   renameVocabularyList(input: RenameVocabularyListInput!): VocabularyListResponse @aws_cognito_user_pools
+  setVocabularyListPublic(input: SetVocabularyListPublicInput!): VocabularyListResponse @aws_cognito_user_pools
 
   # AI operations
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools

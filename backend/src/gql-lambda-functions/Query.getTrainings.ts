@@ -29,8 +29,7 @@ export const handler = async (event: Event) => {
           t.mode != null &&
           Array.isArray(t.vocabularyListIds) &&
           t.vocabularyListIds.length > 0 &&
-          Array.isArray(t.words) &&
-          t.words.length > 0 &&
+          (t.isRandomized || (Array.isArray(t.words) && t.words.length > 0)) &&
           t.createdAt != null &&
           t.updatedAt != null,
       )

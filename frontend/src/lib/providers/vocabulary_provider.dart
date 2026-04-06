@@ -170,7 +170,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyLists {
           getVocabularyLists {
-            id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
+            id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
             words { word translation definition partOfSpeech exampleSentence difficulty unit }
           }
         }
@@ -196,7 +196,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyList(\$id: ID!) {
           getVocabularyList(id: \$id) {
-            id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
+            id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
             words { word translation definition partOfSpeech exampleSentence difficulty unit }
           }
         }
@@ -381,6 +381,86 @@ class VocabularyProvider extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Set a vocabulary list's public visibility
+  Future<bool> setVocabularyListPublic(String id, bool isPublic) async {
+    try {
+      const mutation = '''
+        mutation SetVocabularyListPublic(\$input: SetVocabularyListPublicInput!) {
+          setVocabularyListPublic(input: \$input) {
+            success
+            vocabularyList {
+              id isPublic
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {
+          'input': {'id': id, 'isPublic': isPublic},
+        },
+      );
+
+      final result = response['setVocabularyListPublic'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        final idx = _vocabularyLists.indexWhere((list) => list['id'] == id);
+        if (idx != -1) {
+          _vocabularyLists[idx]['isPublic'] = isPublic ? 'true' : 'false';
+        }
+        if (_currentList?['id'] == id) {
+          _currentList?['isPublic'] = isPublic ? 'true' : 'false';
+        }
+        notifyListeners();
+        return true;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to update visibility';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error setting vocabulary list public: $e');
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  List<Map<String, dynamic>> _publicVocabularyLists = [];
+  List<Map<String, dynamic>> get publicVocabularyLists => _publicVocabularyLists;
+
+  /// Load all public vocabulary lists
+  Future<void> loadPublicVocabularyLists() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      const query = '''
+        query GetPublicVocabularyLists {
+          getPublicVocabularyLists {
+            id userId title sourceLanguage targetLanguage status isPublic createdAt updatedAt
+            words { word translation definition partOfSpeech exampleSentence difficulty unit }
+          }
+        }
+      ''';
+
+      final response = await _apiService.query(query);
+      final lists = response['getPublicVocabularyLists'] as List<dynamic>?;
+      _publicVocabularyLists = lists?.map((item) => item as Map<String, dynamic>).toList() ?? [];
+      _error = null;
+    } catch (e) {
+      debugPrint('Error loading public vocabulary lists: $e');
+      _error = e.toString();
+      _publicVocabularyLists = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

@@ -24,6 +24,7 @@ export interface VocabularyList {
   targetLanguage?: string;
   status?: VocabularyListStatus;
   errorMessage?: string;
+  isPublic?: string; // Stored as 'true'/'false' string for DynamoDB GSI compatibility
   createdAt: string;
   updatedAt: string;
 }

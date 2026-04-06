@@ -2,7 +2,8 @@ import { VocabularyListRepository } from '../repositories/vocabulary-list-reposi
 
 /**
  * Lambda resolver for Query.getVocabularyList
- * Returns a single vocabulary list by ID for the authenticated user
+ * Returns a single vocabulary list by ID for the authenticated user,
+ * or any public vocabulary list
  */
 
 interface Event {
@@ -34,8 +35,8 @@ export const handler = async (event: Event) => {
       return null;
     }
 
-    // Authorization check: verify the list belongs to the requesting user
-    if (vocabularyList.userId !== userId) {
+    // Allow access if the user owns the list OR the list is public
+    if (vocabularyList.userId !== userId && vocabularyList.isPublic !== 'true') {
       return null;
     }
 

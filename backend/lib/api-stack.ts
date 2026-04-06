@@ -283,6 +283,44 @@ export class APIStack extends cdk.Stack {
       fieldName: 'renameVocabularyList',
     });
 
+    // Create setVocabularyListPublic Lambda function
+    const setVocabularyListPublicFunction = new NodejsFunction(this, 'SetVocabularyListPublicFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.setVocabularyListPublic.ts'),
+      handler: 'handler',
+    });
+
+    vocabularyListsTable.grantReadWriteData(setVocabularyListPublicFunction);
+
+    const setVocabularyListPublicDataSource = api.addLambdaDataSource(
+      'SetVocabularyListPublicDataSource',
+      setVocabularyListPublicFunction,
+    );
+
+    setVocabularyListPublicDataSource.createResolver('SetVocabularyListPublicResolver', {
+      typeName: 'Mutation',
+      fieldName: 'setVocabularyListPublic',
+    });
+
+    // Create getPublicVocabularyLists Lambda function
+    const getPublicVocabularyListsFunction = new NodejsFunction(this, 'GetPublicVocabularyListsFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getPublicVocabularyLists.ts'),
+      handler: 'handler',
+    });
+
+    vocabularyListsTable.grantReadData(getPublicVocabularyListsFunction);
+
+    const getPublicVocabularyListsDataSource = api.addLambdaDataSource(
+      'GetPublicVocabularyListsDataSource',
+      getPublicVocabularyListsFunction,
+    );
+
+    getPublicVocabularyListsDataSource.createResolver('GetPublicVocabularyListsResolver', {
+      typeName: 'Query',
+      fieldName: 'getPublicVocabularyLists',
+    });
+
     // Create getAppInfo Lambda function
     const getAppInfoFunction = new NodejsFunction(this, 'GetAppInfoFunction', {
       runtime: Runtime.NODEJS_20_X,
@@ -382,6 +420,7 @@ export class APIStack extends cdk.Stack {
     });
 
     trainingsTable.grantReadWriteData(startTrainingFunction);
+    vocabularyListsTable.grantReadData(startTrainingFunction);
 
     const startTrainingDataSource = api.addLambdaDataSource('StartTrainingDataSource', startTrainingFunction);
 
