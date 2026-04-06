@@ -36,7 +36,11 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   }
 
   Future<void> _loadVocabularyLists() async {
-    await context.read<VocabularyProvider>().loadVocabularyLists();
+    final provider = context.read<VocabularyProvider>();
+    await Future.wait([
+      provider.loadVocabularyLists(),
+      provider.loadPublicVocabularyLists(),
+    ]);
     if (mounted) {
       setState(() {
         _listsLoaded = true;
@@ -118,9 +122,15 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
             );
           }
 
-          final lists = vocabProvider.vocabularyLists;
+          final myLists = vocabProvider.vocabularyLists;
+          // Public lists that the user doesn't own
+          final myListIds = myLists.map((l) => l['id'] as String).toSet();
+          final publicLists = vocabProvider.publicVocabularyLists
+              .where((l) => !myListIds.contains(l['id'] as String))
+              .toList();
+          final allLists = [...myLists, ...publicLists];
 
-          if (lists.isEmpty) {
+          if (allLists.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -149,7 +159,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
           }
 
           // Count total words across selected lists
-          final totalWords = lists
+          final totalWords = allLists
               .where((l) => _selectedListIds.contains(l['id'] as String))
               .fold<int>(0, (sum, l) => sum + ((l['words'] as List<dynamic>?)?.length ?? 0));
           final effectiveMax = totalWords > 100 ? 100 : (totalWords > 0 ? totalWords : 1);
@@ -197,11 +207,19 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
 
                 // Vocabulary lists
                 const Text(
-                  'Select Vocabulary Lists',
+                  'Your Vocabulary Lists',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                ...lists.map((list) {
+                if (myLists.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'You have no vocabulary lists yet.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ...myLists.map((list) {
                   final id = list['id'] as String;
                   final title = list['title'] as String? ?? 'Untitled List';
                   final words = (list['words'] as List<dynamic>?) ?? [];
@@ -220,6 +238,34 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     },
                   );
                 }),
+                if (publicLists.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Public Vocabulary Lists',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ...publicLists.map((list) {
+                    final id = list['id'] as String;
+                    final title = list['title'] as String? ?? 'Untitled List';
+                    final words = (list['words'] as List<dynamic>?) ?? [];
+                    return CheckboxListTile(
+                      title: Text(title),
+                      subtitle: Text('${words.length} words'),
+                      secondary: const Icon(Icons.public, size: 20, color: Colors.grey),
+                      value: _selectedListIds.contains(id),
+                      onChanged: (checked) {
+                        setState(() {
+                          if (checked == true) {
+                            _selectedListIds.add(id);
+                          } else {
+                            _selectedListIds.remove(id);
+                          }
+                        });
+                      },
+                    );
+                  }),
+                ],
                 const SizedBox(height: 16),
 
                 // Word count selector
