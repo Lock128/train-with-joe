@@ -1,4 +1,5 @@
 import { TrainingService } from '../services/training-service';
+import { TrainingRepository } from '../repositories/training-repository';
 
 /**
  * Lambda resolver for Query.getTrainings
@@ -20,6 +21,7 @@ export const handler = async (event: Event) => {
 
   try {
     const service = TrainingService.getInstance();
+    const trainingRepo = TrainingRepository.getInstance();
     const trainings = await service.getTrainings(userId);
     // Filter out corrupt/incomplete records, then backfill missing direction for older records
     const filtered = trainings
@@ -37,13 +39,22 @@ export const handler = async (event: Event) => {
         ...t,
         direction: t.direction || 'WORD_TO_TRANSLATION',
       }));
+
+    // Attach executions for each training
+    const withExecutions = await Promise.all(
+      filtered.map(async (t) => {
+        const executions = await trainingRepo.getExecutionsByTrainingId(t.id);
+        return { ...t, executions };
+      }),
+    );
+
     console.log(
       'getTrainings returning',
-      filtered.length,
+      withExecutions.length,
       'trainings, IDs:',
-      filtered.map((t) => t.id),
+      withExecutions.map((t) => t.id),
     );
-    return filtered;
+    return withExecutions;
   } catch (error) {
     console.error('Error getting trainings:', error);
     return [];
