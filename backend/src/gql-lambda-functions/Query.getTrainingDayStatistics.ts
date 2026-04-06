@@ -1,6 +1,6 @@
 import { TrainingService } from '../services/training-service';
 
-const ADMIN_EMAILS = ['johannes.koch@gmail.com'];
+const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
 
 /**
  * Lambda resolver for Query.getTrainingDayStatistics
