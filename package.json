@@ -63,7 +63,7 @@
     "aws-cdk-lib": "^2.244.0",
     "constructs": "^10.6.0",
     "glob": "^13.0.6",
-    "stripe": "^21.0.1"
+    "stripe": "^22.0.0"
   },
   "lint-staged": {
     "*.{js,ts}": "eslint --fix --cache"
