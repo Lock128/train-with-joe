@@ -1,4 +1,5 @@
 import { TrainingService } from '../services/training-service';
+import { UserRepository } from '../repositories/user-repository';
 
 const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
 
@@ -15,15 +16,11 @@ interface Event {
   };
   identity: {
     sub: string;
-    claims?: {
-      email?: string;
-    };
   };
 }
 
 export const handler = async (event: Event) => {
   const callerUserId = event.identity?.sub;
-  const callerEmail = event.identity?.claims?.email;
   const { trainingId, userId: targetUserId } = event.arguments;
 
   if (!callerUserId) {
@@ -37,6 +34,9 @@ export const handler = async (event: Event) => {
   // If a targetUserId is provided, only admins may use it
   let effectiveUserId = callerUserId;
   if (targetUserId) {
+    const userRepo = UserRepository.getInstance();
+    const callerUser = await userRepo.getById(callerUserId);
+    const callerEmail = callerUser?.email;
     if (!callerEmail || !ADMIN_EMAILS.includes(callerEmail)) {
       return {
         success: false,
