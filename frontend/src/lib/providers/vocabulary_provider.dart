@@ -464,6 +464,67 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
+  /// Update a vocabulary list (title, languages, words)
+  Future<bool> updateVocabularyList(
+    String id, {
+    String? title,
+    String? sourceLanguage,
+    String? targetLanguage,
+    List<Map<String, dynamic>>? words,
+  }) async {
+    try {
+      const mutation = '''
+        mutation UpdateVocabularyList(\$input: UpdateVocabularyListInput!) {
+          updateVocabularyList(input: \$input) {
+            success
+            vocabularyList {
+              id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
+              words { word translation definition partOfSpeech exampleSentence difficulty unit }
+            }
+            error
+          }
+        }
+      ''';
+
+      final input = <String, dynamic>{'id': id};
+      if (title != null) input['title'] = title;
+      if (sourceLanguage != null) input['sourceLanguage'] = sourceLanguage;
+      if (targetLanguage != null) input['targetLanguage'] = targetLanguage;
+      if (words != null) input['words'] = words;
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {'input': input},
+      );
+
+      final result = response['updateVocabularyList'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        final updated = result['vocabularyList'] as Map<String, dynamic>?;
+        if (updated != null) {
+          final idx = _vocabularyLists.indexWhere((l) => l['id'] == id);
+          if (idx != -1) {
+            _vocabularyLists[idx] = updated;
+          }
+          if (_currentList?['id'] == id) {
+            _currentList = updated;
+          }
+        }
+        notifyListeners();
+        return true;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to update vocabulary list';
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error updating vocabulary list: $e');
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Export a vocabulary list as a txt file in "word = translation" format
   Future<void> exportAsText(Map<String, dynamic> list) async {
     final title = list['title'] as String? ?? 'vocabulary';

@@ -247,6 +247,24 @@ input SetVocabularyListPublicInput @aws_cognito_user_pools {
   isPublic: Boolean!
 }
 
+input VocabularyWordInput @aws_cognito_user_pools {
+  word: String!
+  translation: String
+  definition: String!
+  partOfSpeech: String
+  exampleSentence: String
+  difficulty: String
+  unit: String
+}
+
+input UpdateVocabularyListInput @aws_cognito_user_pools {
+  id: ID!
+  title: String
+  sourceLanguage: String
+  targetLanguage: String
+  words: [VocabularyWordInput!]
+}
+
 input GetImageUploadUrlsInput @aws_cognito_user_pools {
   count: Int!
 }
@@ -415,6 +433,7 @@ type Mutation {
   deleteVocabularyList(id: ID!): VocabularyListResponse @aws_cognito_user_pools
   renameVocabularyList(input: RenameVocabularyListInput!): VocabularyListResponse @aws_cognito_user_pools
   setVocabularyListPublic(input: SetVocabularyListPublicInput!): VocabularyListResponse @aws_cognito_user_pools
+  updateVocabularyList(input: UpdateVocabularyListInput!): VocabularyListResponse @aws_cognito_user_pools
 
   # AI operations
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools

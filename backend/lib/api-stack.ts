@@ -302,6 +302,25 @@ export class APIStack extends cdk.Stack {
       fieldName: 'setVocabularyListPublic',
     });
 
+    // Create updateVocabularyList Lambda function
+    const updateVocabularyListFunction = new NodejsFunction(this, 'UpdateVocabularyListFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.updateVocabularyList.ts'),
+      handler: 'handler',
+    });
+
+    vocabularyListsTable.grantReadWriteData(updateVocabularyListFunction);
+
+    const updateVocabularyListDataSource = api.addLambdaDataSource(
+      'UpdateVocabularyListDataSource',
+      updateVocabularyListFunction,
+    );
+
+    updateVocabularyListDataSource.createResolver('UpdateVocabularyListResolver', {
+      typeName: 'Mutation',
+      fieldName: 'updateVocabularyList',
+    });
+
     // Create getPublicVocabularyLists Lambda function
     const getPublicVocabularyListsFunction = new NodejsFunction(this, 'GetPublicVocabularyListsFunction', {
       ...vocabularyLambdaProps,
