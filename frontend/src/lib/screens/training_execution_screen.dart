@@ -24,6 +24,7 @@ class TrainingExecutionScreen extends StatefulWidget {
 class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   int _currentWordIndex = 0;
   Map<String, dynamic>? _execution;
+  List<dynamic> _words = [];
   bool _showFeedback = false;
   Map<String, dynamic>? _lastResult;
   bool _soundMuted = FeedbackSoundService().isMuted;
@@ -32,13 +33,19 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   @override
   void initState() {
     super.initState();
+    _answerController.addListener(_onAnswerTextChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadExecution();
     });
   }
 
+  void _onAnswerTextChanged() {
+    setState(() {});
+  }
+
   @override
   void dispose() {
+    _answerController.removeListener(_onAnswerTextChanged);
     _answerController.dispose();
     super.dispose();
   }
@@ -47,16 +54,20 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final provider = context.read<TrainingProvider>();
     final execution = provider.currentExecution;
     if (execution != null && mounted) {
-      setState(() => _execution = execution);
+      setState(() {
+        _execution = execution;
+        // Capture words once from the execution (randomized) or the training.
+        if (_words.isEmpty) {
+          final execWords = (execution['words'] as List<dynamic>?) ?? [];
+          if (execWords.isNotEmpty) {
+            _words = execWords;
+          } else {
+            final training = provider.currentTraining;
+            _words = (training?['words'] as List<dynamic>?) ?? [];
+          }
+        }
+      });
     }
-  }
-
-  List<dynamic> get _words {
-    // For randomized trainings the words are returned per-execution, not on the training itself.
-    final executionWords = (_execution?['words'] as List<dynamic>?) ?? [];
-    if (executionWords.isNotEmpty) return executionWords;
-    final training = context.read<TrainingProvider>().currentTraining;
-    return (training?['words'] as List<dynamic>?) ?? [];
   }
 
   String get _currentMode {

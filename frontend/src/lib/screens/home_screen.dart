@@ -89,7 +89,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             const CircleAvatar(
                               radius: 50,
                               backgroundColor: Color(0xFFE8F4FD),
-                              child: Icon(Icons.school, size: 50, color: Color(0xFF2B6CB0)),
+                              child: ClipOval(
+                                child: Image(
+                                  image: AssetImage('assets/images/app_icon.png'),
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
