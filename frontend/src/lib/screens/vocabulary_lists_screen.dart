@@ -125,13 +125,16 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: vocabularyProvider.vocabularyLists.length,
-            itemBuilder: (context, index) {
-              final list = vocabularyProvider.vocabularyLists[index];
-              return _buildListTile(list);
-            },
+          return RefreshIndicator(
+            onRefresh: () => vocabularyProvider.loadVocabularyLists(),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: vocabularyProvider.vocabularyLists.length,
+              itemBuilder: (context, index) {
+                final list = vocabularyProvider.vocabularyLists[index];
+                return _buildListTile(list);
+              },
+            ),
           );
         },
       ),

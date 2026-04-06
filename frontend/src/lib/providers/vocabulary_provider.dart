@@ -411,10 +411,10 @@ class VocabularyProvider extends ChangeNotifier {
       if (result != null && result['success'] == true) {
         final idx = _vocabularyLists.indexWhere((list) => list['id'] == id);
         if (idx != -1) {
-          _vocabularyLists[idx]['isPublic'] = isPublic ? 'true' : 'false';
+          _vocabularyLists[idx]['isPublic'] = isPublic;
         }
         if (_currentList?['id'] == id) {
-          _currentList?['isPublic'] = isPublic ? 'true' : 'false';
+          _currentList?['isPublic'] = isPublic;
         }
         notifyListeners();
         return true;

@@ -40,7 +40,11 @@ export const handler = async (event: Event) => {
     // Store as string 'true'/'false' for DynamoDB GSI partition key
     const updated = await repository.update(id, { isPublic: isPublic ? 'true' : 'false' });
 
-    return { success: true, vocabularyList: updated, error: null };
+    return {
+      success: true,
+      vocabularyList: { ...updated, isPublic: updated.isPublic === 'true' },
+      error: null,
+    };
   } catch (error) {
     console.error('Error setting vocabulary list public:', error);
     return {

@@ -20,7 +20,10 @@ export const handler = async (event: Event) => {
 
   try {
     const repository = VocabularyListRepository.getInstance();
-    return await repository.getAllByUserId(userId);
+    return (await repository.getAllByUserId(userId)).map((list) => ({
+      ...list,
+      isPublic: list.isPublic === 'true',
+    }));
   } catch (error) {
     console.error('Error getting vocabulary lists:', error);
     return [];

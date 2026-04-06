@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/app_version.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import '../services/feedback_sound_service.dart';
 
 /// Info screen showing app and backend version details.
 class InfoScreen extends StatefulWidget {
@@ -15,14 +16,17 @@ class InfoScreen extends StatefulWidget {
 
 class _InfoScreenState extends State<InfoScreen> {
   final ApiService _apiService = ApiService();
+  final FeedbackSoundService _soundService = FeedbackSoundService();
   String? _backendCommitId;
   String? _backendBuildNumber;
   bool _isLoading = true;
   String? _error;
+  bool _soundMuted = false;
 
   @override
   void initState() {
     super.initState();
+    _soundMuted = _soundService.isMuted;
     _loadBackendVersion();
   }
 
@@ -152,6 +156,34 @@ class _InfoScreenState extends State<InfoScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              _soundMuted ? Icons.volume_off : Icons.volume_up,
+                              color: const Color(0xFF6C5CE7),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text('Training sounds'),
+                          ],
+                        ),
+                        Switch.adaptive(
+                          value: !_soundMuted,
+                          onChanged: (enabled) {
+                            setState(() => _soundMuted = !enabled);
+                            _soundService.setMuted(!enabled);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 FilledButton.tonalIcon(
                   onPressed: () => _handleSignOut(context),
                   icon: const Icon(Icons.logout),

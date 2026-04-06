@@ -40,7 +40,7 @@ export const handler = async (event: Event) => {
       return null;
     }
 
-    return vocabularyList;
+    return { ...vocabularyList, isPublic: vocabularyList.isPublic === 'true' };
   } catch (error) {
     console.error('Error getting vocabulary list:', error);
     return null;

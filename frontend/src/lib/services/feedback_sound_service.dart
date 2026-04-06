@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Generates and plays short melodic jingles for correct/incorrect answers.
 /// Tones are synthesized in memory as WAV, written to temp files for reliable
@@ -12,16 +13,33 @@ class FeedbackSoundService {
   factory FeedbackSoundService() => _instance;
   FeedbackSoundService._();
 
+  static const _mutedKey = 'feedback_sound_muted';
+
   final _player = AudioPlayer();
   String? _successPath;
   String? _errorPath;
   bool _initialized = false;
+  bool _muted = false;
+
+  /// Whether sound feedback is currently muted.
+  bool get isMuted => _muted;
+
+  /// Toggle mute on/off. Persists the preference.
+  Future<void> setMuted(bool muted) async {
+    _muted = muted;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_mutedKey, muted);
+  }
 
   /// Pre-generate both jingles and write to temp files.
   /// Must be called before playSuccess/playError.
   Future<void> init() async {
     if (_initialized) return;
     try {
+      // Restore mute preference
+      final prefs = await SharedPreferences.getInstance();
+      _muted = prefs.getBool(_mutedKey) ?? false;
+
       final dir = await getTemporaryDirectory();
 
       final successFile = File('${dir.path}/feedback_success.wav');
@@ -52,6 +70,7 @@ class FeedbackSoundService {
   }
 
   Future<void> playSuccess() async {
+    if (_muted) return;
     if (!_initialized) await init();
     try {
       final path = _successPath;
@@ -64,6 +83,7 @@ class FeedbackSoundService {
   }
 
   Future<void> playError() async {
+    if (_muted) return;
     if (!_initialized) await init();
     try {
       final path = _errorPath;

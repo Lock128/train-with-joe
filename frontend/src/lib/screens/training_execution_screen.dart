@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/training_provider.dart';
+import '../services/feedback_sound_service.dart';
 import '../widgets/answer_feedback_animation.dart';
 
 /// Screen for executing a training session
@@ -25,6 +26,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   Map<String, dynamic>? _execution;
   bool _showFeedback = false;
   Map<String, dynamic>? _lastResult;
+  bool _soundMuted = FeedbackSoundService().isMuted;
   final TextEditingController _answerController = TextEditingController();
 
   @override
@@ -135,7 +137,10 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
     if (_execution == null || words.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Training')),
+        appBar: AppBar(
+          title: const Text('Training'),
+          actions: [_buildSoundToggle()],
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -153,6 +158,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
           tooltip: 'Abort training',
           onPressed: _confirmAbort,
         ),
+        actions: [_buildSoundToggle()],
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -189,6 +195,18 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSoundToggle() {
+    return IconButton(
+      icon: Icon(_soundMuted ? Icons.volume_off : Icons.volume_up),
+      tooltip: _soundMuted ? 'Unmute sounds' : 'Mute sounds',
+      onPressed: () {
+        final newMuted = !_soundMuted;
+        setState(() => _soundMuted = newMuted);
+        FeedbackSoundService().setMuted(newMuted);
+      },
     );
   }
 

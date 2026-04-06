@@ -44,6 +44,7 @@ class TrainingProvider extends ChangeNotifier {
             id userId name mode direction vocabularyListIds createdAt updatedAt
             isRandomized randomizedWordCount
             words { word vocabularyListId unit }
+            executions { id }
           }
         }
       ''';

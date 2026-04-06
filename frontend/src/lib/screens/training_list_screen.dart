@@ -134,13 +134,16 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: trainingProvider.trainings.length,
-            itemBuilder: (context, index) {
-              final training = trainingProvider.trainings[index];
-              return _buildTrainingCard(training);
-            },
+          return RefreshIndicator(
+            onRefresh: () => trainingProvider.loadTrainings(),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: trainingProvider.trainings.length,
+              itemBuilder: (context, index) {
+                final training = trainingProvider.trainings[index];
+                return _buildTrainingCard(training);
+              },
+            ),
           );
         },
       ),

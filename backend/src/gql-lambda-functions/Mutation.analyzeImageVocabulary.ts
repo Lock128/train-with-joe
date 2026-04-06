@@ -58,6 +58,7 @@ export const handler = async (event: Event) => {
       sourceLanguage: input.sourceLanguage,
       targetLanguage: input.targetLanguage,
       status: 'PENDING',
+      isPublic: 'false',
       createdAt: now,
       updatedAt: now,
     });
@@ -77,7 +78,11 @@ export const handler = async (event: Event) => {
       }),
     );
 
-    return { success: true, vocabularyList: pendingList, error: null };
+    return {
+      success: true,
+      vocabularyList: { ...pendingList, isPublic: pendingList.isPublic === 'true' },
+      error: null,
+    };
   } catch (error) {
     console.error('Error initiating image vocabulary analysis:', error);
     return {
