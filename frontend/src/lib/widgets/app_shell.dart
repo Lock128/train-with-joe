@@ -19,6 +19,7 @@ class AppShell extends StatelessWidget {
     _NavDestination('/statistics', Icons.bar_chart_outlined, Icons.bar_chart, 'Statistics'),
     _NavDestination('/subscription', Icons.card_membership_outlined, Icons.card_membership, 'Subscription'),
     _NavDestination('/info', Icons.info_outline, Icons.info, 'Info'),
+    _NavDestination('/settings', Icons.settings_outlined, Icons.settings, 'Settings'),
   ];
 
   int _currentIndex(BuildContext context) {

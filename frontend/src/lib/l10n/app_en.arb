@@ -1,0 +1,60 @@
+{
+  "@@locale": "en",
+  "appTitle": "Train with Joe",
+  "home": "Home",
+  "scan": "Scan",
+  "lists": "Lists",
+  "training": "Training",
+  "statistics": "Statistics",
+  "subscription": "Subscription",
+  "info": "Info",
+  "settings": "Settings",
+  "signOut": "Sign Out",
+  "welcome": "Welcome!",
+  "quickActions": "Quick Actions",
+  "scanImageForVocabulary": "Scan Image for Vocabulary",
+  "myVocabularyLists": "My Vocabulary Lists",
+  "myTrainings": "My Trainings",
+  "manageSubscription": "Manage Subscription",
+  "noActiveSubscription": "No active subscription",
+  "subscriptionStatus": "Status: {status}",
+  "@subscriptionStatus": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "errorLoadingUserData": "Error loading user data",
+  "retry": "Retry",
+  "language": "Language",
+  "trainingSounds": "Training sounds",
+  "enableTrainingSounds": "Enable training sounds",
+  "appInfo": "App Info",
+  "frontend": "Frontend",
+  "backend": "Backend",
+  "commitId": "Commit ID",
+  "buildNumber": "Build Number",
+  "failedToLoadBackendInfo": "Failed to load backend info",
+  "configurationError": "Configuration Error",
+  "abortTraining": "Abort Training?",
+  "abortTrainingMessage": "Your progress in this session will be lost.",
+  "continueText": "Continue",
+  "abort": "Abort",
+  "wordProgress": "Word {current} of {total}",
+  "@wordProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "yourAnswer": "Your answer",
+  "typeTheTranslation": "Type the translation",
+  "submit": "Submit",
+  "muteSounds": "Mute sounds",
+  "unmuteSounds": "Unmute sounds",
+  "english": "English",
+  "german": "German",
+  "spanish": "Spanish",
+  "japanese": "Japanese",
+  "french": "French",
+  "portuguese": "Portuguese"
+}

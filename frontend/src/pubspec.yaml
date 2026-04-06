@@ -68,6 +68,7 @@ flutter_launcher_icons:
     theme_color: "#FF9800"
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/images/

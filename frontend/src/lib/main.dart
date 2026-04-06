@@ -27,8 +27,11 @@ import 'screens/training_execution_screen.dart';
 import 'screens/training_results_screen.dart';
 import 'screens/training_history_screen.dart';
 import 'screens/training_statistics_screen.dart';
+import 'screens/settings_screen.dart';
 import 'widgets/app_shell.dart';
 import 'services/feedback_sound_service.dart';
+import 'providers/locale_provider.dart';
+import 'l10n/generated/app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -185,6 +188,7 @@ class _MyAppState extends State<MyApp> {
 
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => app.AuthProvider()),
         ChangeNotifierProxyProvider<app.AuthProvider, UserProvider>(
           create: (_) => UserProvider(),
@@ -233,8 +237,12 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = context.watch<LocaleProvider>();
     return MaterialApp.router(
             title: 'Train with Joe',
+            locale: localeProvider.locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: const Color(0xFF2B6CB0),
@@ -353,6 +361,10 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
             GoRoute(
               path: '/info',
               builder: (context, state) => const InfoScreen(),
+            ),
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) => const SettingsScreen(),
             ),
             GoRoute(
               path: '/trainings',
