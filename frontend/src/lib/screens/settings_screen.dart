@@ -46,8 +46,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final localeProvider = context.watch<LocaleProvider>();
-    final currentLocale =
-        localeProvider.locale ?? Localizations.localeOf(context);
+    final currentLocale = localeProvider.locale;
 
     return Scaffold(
       appBar: AppBar(
@@ -80,23 +79,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                         const Divider(),
-                        ...LocaleProvider.supportedLocales.map((locale) {
-                          final isSelected =
-                              locale.languageCode == currentLocale.languageCode;
-                          return RadioListTile<String>(
-                            title: Text(_languageLabel(locale, l10n)),
-                            value: locale.languageCode,
-                            groupValue: currentLocale.languageCode,
-                            onChanged: (_) =>
-                                localeProvider.setLocale(locale),
-                            dense: true,
-                            activeColor: const Color(0xFF2B6CB0),
-                            secondary: isSelected
-                                ? const Icon(Icons.check,
-                                    color: Color(0xFF2B6CB0))
-                                : null,
-                          );
-                        }),
+                        RadioGroup<String>(
+                          groupValue: currentLocale.languageCode,
+                          onChanged: (code) {
+                            if (code != null) {
+                              localeProvider.setLocale(Locale(code));
+                            }
+                          },
+                          child: Column(
+                            children: LocaleProvider.supportedLocales
+                                .map((locale) => RadioListTile<String>(
+                                      title: Text(
+                                          _languageLabel(locale, l10n)),
+                                      value: locale.languageCode,
+                                      dense: true,
+                                      activeColor: const Color(0xFF2B6CB0),
+                                      secondary: locale.languageCode ==
+                                              currentLocale.languageCode
+                                          ? const Icon(Icons.check,
+                                              color: Color(0xFF2B6CB0))
+                                          : null,
+                                    ))
+                                .toList(),
+                          ),
+                        ),
                       ],
                     ),
                   ),
