@@ -379,7 +379,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             label: Text('Analyze ${_selectedImages.length} Image${_selectedImages.length == 1 ? '' : 's'}'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.all(16),
-              backgroundColor: const Color(0xFF6C5CE7),
+              backgroundColor: const Color(0xFF2B6CB0),
               foregroundColor: Colors.white,
             ),
           ),
@@ -546,7 +546,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF6C5CE7),
+                            color: Color(0xFF2B6CB0),
                           ),
                         ),
                     ],

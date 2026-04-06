@@ -26,9 +26,9 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
   Color _getModeColor(String? mode) {
     switch (mode) {
       case 'TEXT_INPUT':
-        return const Color(0xFF6C5CE7);
+        return const Color(0xFF2B6CB0);
       case 'MULTIPLE_CHOICE':
-        return const Color(0xFF00B894);
+        return const Color(0xFFF0932B);
       default:
         return Colors.grey;
     }

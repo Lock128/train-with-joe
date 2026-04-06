@@ -88,8 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             const CircleAvatar(
                               radius: 50,
-                              backgroundColor: Color(0xFFF0EDFF),
-                              child: Icon(Icons.school, size: 50, color: Color(0xFF6C5CE7)),
+                              backgroundColor: Color(0xFFE8F4FD),
+                              child: Icon(Icons.school, size: 50, color: Color(0xFF2B6CB0)),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -160,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: const Text('My Vocabulary Lists'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
-                        backgroundColor: const Color(0xFF00B894),
+                        backgroundColor: const Color(0xFFF0932B),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -171,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: const Text('My Trainings'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
-                        backgroundColor: const Color(0xFFE17055),
+                        backgroundColor: const Color(0xFF27AE60),
                       ),
                     ),
                     const SizedBox(height: 12),

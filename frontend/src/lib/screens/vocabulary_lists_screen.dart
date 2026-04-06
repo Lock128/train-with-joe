@@ -302,7 +302,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
                 translation,
                 style: const TextStyle(
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF6C5CE7),
+                  color: Color(0xFF2B6CB0),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

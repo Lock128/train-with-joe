@@ -237,17 +237,17 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
             title: 'Train with Joe',
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF6C5CE7),
+                seedColor: const Color(0xFF2B6CB0),
                 brightness: Brightness.light,
-                primary: const Color(0xFF6C5CE7),
-                secondary: const Color(0xFF00B894),
-                tertiary: const Color(0xFFFDCB6E),
+                primary: const Color(0xFF2B6CB0),
+                secondary: const Color(0xFFF0932B),
+                tertiary: const Color(0xFF5BC0DE),
               ),
               useMaterial3: true,
               fontFamily: 'Nunito',
               elevatedButtonTheme: ElevatedButtonThemeData(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6C5CE7),
+                  backgroundColor: const Color(0xFF2B6CB0),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -256,16 +256,16 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
               ),
               outlinedButtonTheme: OutlinedButtonThemeData(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF6C5CE7),
+                  foregroundColor: const Color(0xFF2B6CB0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  side: const BorderSide(color: Color(0xFF6C5CE7)),
+                  side: const BorderSide(color: Color(0xFF2B6CB0)),
                 ),
               ),
               textButtonTheme: TextButtonThemeData(
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF6C5CE7),
+                  foregroundColor: const Color(0xFF2B6CB0),
                 ),
               ),
               inputDecorationTheme: InputDecorationTheme(
@@ -274,7 +274,7 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Color(0xFF6C5CE7), width: 2),
+                  borderSide: const BorderSide(color: Color(0xFF2B6CB0), width: 2),
                 ),
               ),
               cardTheme: CardThemeData(
@@ -284,7 +284,7 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
                 elevation: 2,
               ),
               appBarTheme: const AppBarTheme(
-                backgroundColor: Color(0xFF6C5CE7),
+                backgroundColor: Color(0xFF2B6CB0),
                 foregroundColor: Colors.white,
                 elevation: 0,
               ),

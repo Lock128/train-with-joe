@@ -108,7 +108,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     }
   }
 
-  Color _modeColor(String? m) => m == 'MULTIPLE_CHOICE' ? const Color(0xFF00B894) : const Color(0xFF6C5CE7);
+  Color _modeColor(String? m) => m == 'MULTIPLE_CHOICE' ? const Color(0xFFF0932B) : const Color(0xFF2B6CB0);
   String _modeLabel(String? m) => m == 'MULTIPLE_CHOICE' ? 'Multiple Choice' : 'Text Input';
 
   Future<void> _showRenameDialog(String currentName) async {

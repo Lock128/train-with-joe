@@ -305,7 +305,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   children: [
                     // Platform info
                     Card(
-                      color: const Color(0xFFF0EDFF),
+                      color: const Color(0xFFE8F4FD),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
@@ -316,7 +316,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   : _detectedPlatform == PaymentProvider.appleAppStore
                                       ? Icons.apple
                                       : Icons.android,
-                              color: const Color(0xFF6C5CE7),
+                              color: const Color(0xFF2B6CB0),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -354,7 +354,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                 children: [
                                   const Icon(
                                     Icons.check_circle,
-                                    color: Color(0xFF00B894),
+                                    color: Color(0xFFF0932B),
                                     size: 32,
                                   ),
                                   const SizedBox(width: 12),
@@ -489,7 +489,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       child: Container(
         decoration: isPopular
             ? BoxDecoration(
-                border: Border.all(color: const Color(0xFF6C5CE7), width: 2),
+                border: Border.all(color: const Color(0xFF2B6CB0), width: 2),
                 borderRadius: BorderRadius.circular(12),
               )
             : null,
@@ -505,7 +505,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF6C5CE7),
+                    color: const Color(0xFF2B6CB0),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Text(
@@ -526,7 +526,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               Text(
                 price,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: const Color(0xFF6C5CE7),
+                      color: const Color(0xFF2B6CB0),
                       fontWeight: FontWeight.bold,
                     ),
               ),
@@ -536,7 +536,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Row(
                     children: [
-                      const Icon(Icons.check, color: Color(0xFF00B894), size: 20),
+                      const Icon(Icons.check, color: Color(0xFFF0932B), size: 20),
                       const SizedBox(width: 8),
                       Expanded(child: Text(feature)),
                     ],
@@ -550,7 +550,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   onPressed: () => _handleSubscribe(planId),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.all(16),
-                    backgroundColor: isPopular ? const Color(0xFF6C5CE7) : null,
+                    backgroundColor: isPopular ? const Color(0xFF2B6CB0) : null,
                   ),
                   child: const Text('Subscribe'),
                 ),

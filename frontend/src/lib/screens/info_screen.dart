@@ -92,8 +92,8 @@ class _InfoScreenState extends State<InfoScreen> {
                       children: [
                         const CircleAvatar(
                           radius: 40,
-                          backgroundColor: Color(0xFFF0EDFF),
-                          child: Icon(Icons.info_outline, size: 40, color: Color(0xFF6C5CE7)),
+                          backgroundColor: Color(0xFFE8F4FD),
+                          child: Icon(Icons.info_outline, size: 40, color: Color(0xFF2B6CB0)),
                         ),
                         const SizedBox(height: 16),
                         Text(AppVersion.appName, style: Theme.of(context).textTheme.headlineSmall),
@@ -166,7 +166,7 @@ class _InfoScreenState extends State<InfoScreen> {
                           children: [
                             Icon(
                               _soundMuted ? Icons.volume_off : Icons.volume_up,
-                              color: const Color(0xFF6C5CE7),
+                              color: const Color(0xFF2B6CB0),
                             ),
                             const SizedBox(width: 12),
                             const Text('Training sounds'),
