@@ -17,7 +17,7 @@ class UserProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  /// Whether the current user is an admin
+  /// Whether the current user is an admin or not
   bool get isAdmin {
     final email = _user?['email'] as String?;
     final trimmedEmail = email?.trim().toLowerCase();
