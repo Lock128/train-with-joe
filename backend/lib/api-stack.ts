@@ -395,6 +395,7 @@ export class APIStack extends cdk.Stack {
         NAMESPACE: namespace,
         TRAININGS_TABLE_NAME: trainingsTable.tableName,
         VOCABULARY_LISTS_TABLE_NAME: vocabularyListsTable.tableName,
+        USERS_TABLE_NAME: usersTable.tableName,
       },
     };
 
@@ -536,6 +537,7 @@ export class APIStack extends cdk.Stack {
     });
 
     trainingsTable.grantReadWriteData(getTrainingStatisticsFunction);
+    usersTable.grantReadData(getTrainingStatisticsFunction);
 
     const getTrainingStatisticsDataSource = api.addLambdaDataSource(
       'GetTrainingStatisticsDataSource',
@@ -555,6 +557,7 @@ export class APIStack extends cdk.Stack {
     });
 
     trainingsTable.grantReadWriteData(getTrainingDayStatisticsFunction);
+    usersTable.grantReadData(getTrainingDayStatisticsFunction);
 
     const getTrainingDayStatisticsDataSource = api.addLambdaDataSource(
       'GetTrainingDayStatisticsDataSource',
@@ -574,6 +577,7 @@ export class APIStack extends cdk.Stack {
     });
 
     trainingsTable.grantReadWriteData(getTrainingOverviewStatisticsFunction);
+    usersTable.grantReadData(getTrainingOverviewStatisticsFunction);
 
     const getTrainingOverviewStatisticsDataSource = api.addLambdaDataSource(
       'GetTrainingOverviewStatisticsDataSource',
