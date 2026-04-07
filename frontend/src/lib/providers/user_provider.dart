@@ -20,7 +20,9 @@ class UserProvider extends ChangeNotifier {
   /// Whether the current user is an admin
   bool get isAdmin {
     final email = _user?['email'] as String?;
-    return email != null && _adminEmails.contains(email);
+    final trimmedEmail = email?.trim().toLowerCase();
+    debugPrint('[UserProvider] isAdmin check — raw email: "$email", trimmed: "$trimmedEmail", adminList: $_adminEmails, match: ${trimmedEmail != null && _adminEmails.contains(trimmedEmail)}');
+    return trimmedEmail != null && _adminEmails.contains(trimmedEmail);
   }
 
   /// Update auth provider reference
