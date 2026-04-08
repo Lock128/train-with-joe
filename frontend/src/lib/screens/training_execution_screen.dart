@@ -6,6 +6,7 @@ import '../providers/training_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../services/feedback_sound_service.dart';
 import '../widgets/answer_feedback_animation.dart';
+import '../widgets/ai_exercise_widget.dart';
 
 /// Screen for executing a training session
 class TrainingExecutionScreen extends StatefulWidget {
@@ -31,6 +32,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   bool _soundMuted = FeedbackSoundService().isMuted;
   final TextEditingController _answerController = TextEditingController();
   final Set<int> _flaggedIndices = {};
+  int? _selectedAIOptionIndex;
 
   @override
   void initState() {
@@ -86,6 +88,16 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     return null;
   }
 
+  List<dynamic> get _aiExercises {
+    return (_execution?['aiExercises'] as List<dynamic>?) ?? [];
+  }
+
+  Future<void> _submitAIAnswer(int optionIndex) async {
+    if (_showFeedback) return;
+    setState(() => _selectedAIOptionIndex = optionIndex);
+    await _submitAnswer(optionIndex.toString());
+  }
+
   Future<void> _submitAnswer(String answer) async {
     if (_showFeedback) return;
 
@@ -121,6 +133,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
           _currentWordIndex++;
           _showFeedback = false;
           _lastResult = null;
+          _selectedAIOptionIndex = null;
         });
       }
     });
@@ -174,7 +187,10 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   Widget build(BuildContext context) {
     final words = _words;
 
-    if (_execution == null || words.isEmpty) {
+    final isAIMode = _currentMode == 'AI_TRAINING';
+    final totalWords = isAIMode ? _aiExercises.length : words.length;
+
+    if (_execution == null || totalWords == 0) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Training'),
@@ -184,10 +200,9 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
       );
     }
 
-    final totalWords = words.length;
     final progress = totalWords > 0 ? (_currentWordIndex + 1) / totalWords : 0.0;
-    final currentWord = words[_currentWordIndex] as Map<String, dynamic>;
-    final wordText = currentWord['word'] as String? ?? '';
+    final currentWord = isAIMode ? null : (words[_currentWordIndex] as Map<String, dynamic>);
+    final wordText = currentWord?['word'] as String? ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -214,19 +229,23 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
             ),
             const SizedBox(height: 32),
 
-            // Current word
-            Text(
-              wordText,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 32),
+            // Current word (hidden for AI mode - the exercise widget shows the prompt)
+            if (!isAIMode) ...[
+              Text(
+                wordText,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 32),
+            ],
 
             // Input area
-            if (_showFeedback)
+            if (_showFeedback && !isAIMode)
               _buildFeedback()
+            else if (_currentMode == 'AI_TRAINING')
+              _buildAIExercise()
             else if (_currentMode == 'MULTIPLE_CHOICE')
               _buildMultipleChoice()
             else
@@ -308,6 +327,21 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildAIExercise() {
+    final exercises = _aiExercises;
+    if (_currentWordIndex >= exercises.length) return const SizedBox.shrink();
+
+    final exercise = exercises[_currentWordIndex] as Map<String, dynamic>;
+
+    return AIExerciseWidget(
+      exercise: exercise,
+      onAnswerSelected: _submitAIAnswer,
+      showFeedback: _showFeedback,
+      selectedIndex: _selectedAIOptionIndex,
+      isCorrect: _lastResult?['correct'] as bool?,
     );
   }
 
