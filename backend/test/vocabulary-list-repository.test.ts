@@ -34,7 +34,7 @@ describe('VocabularyListRepository', () => {
             difficulty: 'easy',
           },
         ],
-        language: 'English',
+        sourceLanguage: 'English',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -49,7 +49,7 @@ describe('VocabularyListRepository', () => {
       expect(result.title).toBe(listData.title);
       expect(result.words).toHaveLength(1);
       expect(result.words[0].word).toBe('spatula');
-      expect(result.language).toBe('English');
+      expect(result.sourceLanguage).toBe('English');
       expect(result.createdAt).toBeDefined();
       expect(result.updatedAt).toBeDefined();
     });
@@ -87,7 +87,7 @@ describe('VocabularyListRepository', () => {
             definition: 'A large mammal with a trunk',
           },
         ],
-        language: 'English',
+        sourceLanguage: 'English',
         createdAt: '2024-01-01T00:00:00.000Z',
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
@@ -286,7 +286,7 @@ describe('VocabularyListRepository', () => {
       expect(result.id).toBe(listData.id);
       expect(result.title).toBeUndefined();
       expect(result.sourceImageKey).toBeUndefined();
-      expect(result.language).toBeUndefined();
+      expect(result.sourceLanguage).toBeUndefined();
       expect(result.words).toEqual([]);
     });
 
@@ -306,7 +306,7 @@ describe('VocabularyListRepository', () => {
             difficulty: 'easy',
           },
         ],
-        language: 'English',
+        sourceLanguage: 'English',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -318,7 +318,7 @@ describe('VocabularyListRepository', () => {
       expect(result).toBeDefined();
       expect(result.title).toBe(listData.title);
       expect(result.sourceImageKey).toBe(listData.sourceImageKey);
-      expect(result.language).toBe(listData.language);
+      expect(result.sourceLanguage).toBe(listData.sourceLanguage);
       expect(result.words[0].partOfSpeech).toBe('noun');
       expect(result.words[0].exampleSentence).toBe('Use the spatula to flip the pancake.');
       expect(result.words[0].difficulty).toBe('easy');
@@ -338,7 +338,7 @@ describe('VocabularyListRepository', () => {
         userId: 'user-123',
         title: 'Large Vocabulary List',
         words: manyWords,
-        language: 'English',
+        sourceLanguage: 'English',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
