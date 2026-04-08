@@ -30,6 +30,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
     'Japanese',
     'Korean',
     'Chinese',
+    'Latin',
   ];
 
   Future<void> _pickImages() async {

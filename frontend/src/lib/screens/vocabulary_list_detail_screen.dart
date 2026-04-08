@@ -111,43 +111,84 @@ class _VocabularyListDetailScreenState
     }
   }
 
+  static const List<String> _supportedLanguages = [
+    'English',
+    'Spanish',
+    'French',
+    'German',
+    'Italian',
+    'Portuguese',
+    'Japanese',
+    'Korean',
+    'Chinese',
+    'Latin',
+  ];
+
   void _showLanguageDialog() {
-    final srcCtrl =
-        TextEditingController(text: _list?['sourceLanguage'] as String? ?? '');
-    final tgtCtrl =
-        TextEditingController(text: _list?['targetLanguage'] as String? ?? '');
+    String? selectedSource = _list?['sourceLanguage'] as String?;
+    String? selectedTarget = _list?['targetLanguage'] as String?;
+
+    // Normalise current values: keep only if they match a supported language
+    if (selectedSource != null &&
+        !_supportedLanguages.contains(selectedSource)) {
+      selectedSource = null;
+    }
+    if (selectedTarget != null &&
+        !_supportedLanguages.contains(selectedTarget)) {
+      selectedTarget = null;
+    }
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Languages'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: srcCtrl,
-              decoration: const InputDecoration(
-                  labelText: 'Source language', border: OutlineInputBorder()),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: tgtCtrl,
-              decoration: const InputDecoration(
-                  labelText: 'Target language', border: OutlineInputBorder()),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Languages'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String?>(
+                value: selectedSource,
+                decoration: const InputDecoration(
+                    labelText: 'Source language', border: OutlineInputBorder()),
+                items: [
+                  const DropdownMenuItem<String?>(
+                      value: null, child: Text('None')),
+                  ..._supportedLanguages.map((lang) =>
+                      DropdownMenuItem(value: lang, child: Text(lang))),
+                ],
+                onChanged: (value) =>
+                    setDialogState(() => selectedSource = value),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String?>(
+                value: selectedTarget,
+                decoration: const InputDecoration(
+                    labelText: 'Target language', border: OutlineInputBorder()),
+                items: [
+                  const DropdownMenuItem<String?>(
+                      value: null, child: Text('None')),
+                  ..._supportedLanguages.map((lang) =>
+                      DropdownMenuItem(value: lang, child: Text(lang))),
+                ],
+                onChanged: (value) =>
+                    setDialogState(() => selectedTarget = value),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _updateLanguages(
+                    selectedSource ?? '', selectedTarget ?? '');
+              },
+              child: const Text('Save'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _updateLanguages(srcCtrl.text.trim(), tgtCtrl.text.trim());
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
   }

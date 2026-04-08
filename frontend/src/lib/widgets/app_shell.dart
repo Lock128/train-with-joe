@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Shared shell widget that wraps authenticated screens with navigation.
 /// On narrow screens (mobile): bottom navigation bar.
@@ -12,25 +13,26 @@ class AppShell extends StatelessWidget {
 
   const AppShell({super.key, required this.child});
 
-  static const _destinations = [
-    _NavDestination('/home', Icons.home_outlined, Icons.home, 'Home'),
-    _NavDestination('/vocabulary/analyze', Icons.camera_alt_outlined, Icons.camera_alt, 'Scan'),
-    _NavDestination('/vocabulary', Icons.list_alt_outlined, Icons.list_alt, 'Lists'),
-    _NavDestination('/trainings', Icons.quiz_outlined, Icons.quiz, 'Training'),
-    _NavDestination('/statistics', Icons.bar_chart_outlined, Icons.bar_chart, 'Statistics'),
-    _NavDestination('/subscription', Icons.card_membership_outlined, Icons.card_membership, 'Subscription'),
-    _NavDestination('/info', Icons.info_outline, Icons.info, 'Info'),
-    _NavDestination('/settings', Icons.settings_outlined, Icons.settings, 'Settings'),
+  /// Builds the navigation destinations using translated labels.
+  static List<_NavDestination> _buildDestinations(AppLocalizations l10n) => [
+    _NavDestination('/home', Icons.home_outlined, Icons.home, l10n.home),
+    _NavDestination('/vocabulary/analyze', Icons.camera_alt_outlined, Icons.camera_alt, l10n.scan),
+    _NavDestination('/vocabulary', Icons.list_alt_outlined, Icons.list_alt, l10n.lists),
+    _NavDestination('/trainings', Icons.quiz_outlined, Icons.quiz, l10n.training),
+    _NavDestination('/statistics', Icons.bar_chart_outlined, Icons.bar_chart, l10n.statistics),
+    _NavDestination('/subscription', Icons.card_membership_outlined, Icons.card_membership, l10n.subscription),
+    _NavDestination('/info', Icons.info_outline, Icons.info, l10n.info),
+    _NavDestination('/settings', Icons.settings_outlined, Icons.settings, l10n.settings),
   ];
 
-  static const _adminDestination = _NavDestination('/admin', Icons.admin_panel_settings_outlined, Icons.admin_panel_settings, 'Admin');
-
   List<_NavDestination> _effectiveDestinations(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final destinations = _buildDestinations(l10n);
     final isAdmin = context.watch<UserProvider>().isAdmin;
     if (isAdmin) {
-      return [..._destinations, _adminDestination];
+      return [...destinations, _NavDestination('/admin', Icons.admin_panel_settings_outlined, Icons.admin_panel_settings, 'Admin')];
     }
-    return _destinations;
+    return destinations;
   }
 
   int _currentIndex(BuildContext context) {
@@ -110,7 +112,7 @@ class AppShell extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: IconButton(
                     icon: const Icon(Icons.logout),
-                    tooltip: 'Sign Out',
+                    tooltip: AppLocalizations.of(context)!.signOut,
                     onPressed: () => _handleSignOut(context),
                   ),
                 ),

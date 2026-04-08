@@ -18,6 +18,9 @@ function request(ctx) {
   if (input.name !== void 0 && input.name !== null) {
     updates.name = input.name;
   }
+  if (input.email !== void 0 && input.email !== null) {
+    updates.email = input.email;
+  }
   updates.updatedAt = now;
   return update({
     key: {

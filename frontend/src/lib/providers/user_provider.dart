@@ -19,7 +19,8 @@ class UserProvider extends ChangeNotifier {
 
   /// Whether the current user is an admin or not
   bool get isAdmin {
-    final email = _user?['email'] as String?;
+    // Try DB email first, fall back to Cognito username (which is the email for email-based auth)
+    final email = (_user?['email'] as String?) ?? _authProvider?.currentUser?.username;
     final trimmedEmail = email?.trim().toLowerCase();
     debugPrint('[UserProvider] isAdmin check — raw email: "$email", trimmed: "$trimmedEmail", adminList: $_adminEmails, match: ${trimmedEmail != null && _adminEmails.contains(trimmedEmail)}');
     return trimmedEmail != null && _adminEmails.contains(trimmedEmail);
@@ -70,6 +71,9 @@ class UserProvider extends ChangeNotifier {
 
       _user = response['getUser'] as Map<String, dynamic>?;
       _error = null;
+
+      // Auto-repair: if DB email is missing but we have it from Cognito, backfill it
+      await _autoRepairEmail();
     } catch (e) {
       debugPrint('Error loading user: $e');
       _error = e.toString();
@@ -81,22 +85,26 @@ class UserProvider extends ChangeNotifier {
   }
 
   /// Update user data
-  Future<bool> updateUser(String userId, {String? name}) async {
+  Future<bool> updateUser(String userId, {String? name, String? email}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       const mutation = '''
-        mutation UpdateUser(\$id: ID!, \$name: String) {
-          updateUser(id: \$id, name: \$name) {
-            id
-            email
-            name
-            subscriptionStatus
-            subscriptionProvider
-            createdAt
-            updatedAt
+        mutation UpdateUser(\$input: UpdateUserInput!) {
+          updateUser(input: \$input) {
+            success
+            user {
+              id
+              email
+              name
+              subscriptionStatus
+              subscriptionProvider
+              createdAt
+              updatedAt
+            }
+            error
           }
         }
       ''';
@@ -104,12 +112,18 @@ class UserProvider extends ChangeNotifier {
       final response = await _apiService.mutate(
         mutation,
         variables: {
-          'id': userId,
-          if (name != null) 'name': name,
+          'input': {
+            'id': userId,
+            if (name != null) 'name': name,
+            if (email != null) 'email': email,
+          },
         },
       );
 
-      _user = response['updateUser'] as Map<String, dynamic>?;
+      final result = response['updateUser'] as Map<String, dynamic>?;
+      if (result != null && result['success'] == true) {
+        _user = result['user'] as Map<String, dynamic>?;
+      }
       _error = null;
       _isLoading = false;
       notifyListeners();
@@ -120,6 +134,20 @@ class UserProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Auto-repair: backfill email in DynamoDB if missing
+  Future<void> _autoRepairEmail() async {
+    if (_user == null) return;
+    final dbEmail = _user!['email'] as String?;
+    final cognitoEmail = _authProvider?.currentUser?.username;
+    if ((dbEmail == null || dbEmail.isEmpty) && cognitoEmail != null && cognitoEmail.isNotEmpty) {
+      debugPrint('[UserProvider] Auto-repairing missing email in DB with Cognito email: $cognitoEmail');
+      final userId = _user!['id'] as String?;
+      if (userId != null) {
+        await updateUser(userId, email: cognitoEmail);
+      }
     }
   }
 

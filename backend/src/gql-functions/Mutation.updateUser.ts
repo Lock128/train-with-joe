@@ -8,7 +8,7 @@ import { update } from '@aws-appsync/utils/dynamodb';
  */
 
 type Context = {
-  args: { input: { id: string; name?: string } };
+  args: { input: { id: string; name?: string; email?: string } };
   identity: { sub: string };
   error?: { message: string; type?: string };
   result?: Record<string, unknown>;
@@ -36,6 +36,10 @@ export function request(ctx: Context): DynamoDBUpdateItemRequest {
 
   if (input.name !== undefined && input.name !== null) {
     updates.name = input.name;
+  }
+
+  if (input.email !== undefined && input.email !== null) {
+    updates.email = input.email;
   }
 
   updates.updatedAt = now;
