@@ -55,6 +55,7 @@ describe('Training Service Unit Tests', () => {
         userId,
         name: 'Test Training',
         mode: 'TEXT_INPUT',
+        direction: 'WORD_TO_TRANSLATION',
         vocabularyListIds: ['list-1'],
         words: [{ word: 'hello', translation: 'hola', vocabularyListId: 'list-1' }],
         createdAt: '2024-01-01T00:00:00.000Z',
@@ -86,6 +87,7 @@ describe('Training Service Unit Tests', () => {
         userId,
         name: 'MC Training',
         mode: 'MULTIPLE_CHOICE',
+        direction: 'WORD_TO_TRANSLATION',
         vocabularyListIds: ['list-1'],
         words: [
           { word: 'hello', translation: 'hola', vocabularyListId: 'list-1' },
@@ -197,6 +199,7 @@ describe('Training Service Unit Tests', () => {
         userId,
         name: 'Empty Stats Training',
         mode: 'TEXT_INPUT',
+        direction: 'WORD_TO_TRANSLATION',
         vocabularyListIds: ['list-1'],
         words: [
           { word: 'hello', translation: 'hola', vocabularyListId: 'list-1' },
