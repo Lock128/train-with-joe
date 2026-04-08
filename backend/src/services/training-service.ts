@@ -10,6 +10,7 @@ import type {
   TrainingResult,
   MultipleChoiceOption,
 } from '../model/domain/Training';
+import { getAIService } from './ai-service';
 
 /**
  * Service for managing vocabulary trainings
@@ -276,6 +277,67 @@ export class TrainingService {
         // Select up to randomizedWordCount words
         const selectedWords = collectedWords.slice(0, training.randomizedWordCount ?? 10);
 
+        if (training.mode === 'AI_TRAINING') {
+          if (selectedWords.length < 1) {
+            return { success: false, error: 'No words available from the selected vocabulary lists' };
+          }
+
+          // Fetch vocabulary lists for full word details and language info
+          const vocabRepoAI = VocabularyListRepository.getInstance();
+          let sourceLanguage = 'English';
+          let targetLanguage = 'English';
+          const enrichedWords: {
+            word: string;
+            translation?: string;
+            definition?: string;
+            partOfSpeech?: string;
+            exampleSentence?: string;
+          }[] = [];
+
+          for (const listId of training.vocabularyListIds) {
+            const list = await vocabRepoAI.getById(listId);
+            if (!list) continue;
+            if (list.sourceLanguage) sourceLanguage = list.sourceLanguage;
+            if (list.targetLanguage) targetLanguage = list.targetLanguage;
+
+            for (const selectedWord of selectedWords) {
+              if (selectedWord.vocabularyListId === listId) {
+                const fullWord = list.words.find((w) => w.word === selectedWord.word);
+                enrichedWords.push({
+                  word: selectedWord.word,
+                  translation: selectedWord.translation,
+                  definition: fullWord?.definition,
+                  partOfSpeech: fullWord?.partOfSpeech,
+                  exampleSentence: fullWord?.exampleSentence,
+                });
+              }
+            }
+          }
+
+          try {
+            const aiService = getAIService();
+            const aiExercises = await aiService.generateExercises(enrichedWords, sourceLanguage, targetLanguage, userId);
+
+            const execution: TrainingExecution = {
+              id: crypto.randomUUID(),
+              trainingId,
+              userId,
+              startedAt: new Date().toISOString(),
+              results: [],
+              words: selectedWords,
+              aiExercises,
+              correctCount: 0,
+              incorrectCount: 0,
+            };
+
+            await trainingRepo.createExecution(execution);
+            return { success: true, execution };
+          } catch (aiError) {
+            const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
+            return { success: false, error: 'Failed to generate AI exercises: ' + errorMessage };
+          }
+        }
+
         if (training.mode === 'MULTIPLE_CHOICE' && selectedWords.length < 3) {
           return { success: false, error: 'Multiple-choice requires at least 3 words' };
         }
@@ -303,6 +365,66 @@ export class TrainingService {
       }
 
       // Static path: existing behavior unchanged
+      if (training.mode === 'AI_TRAINING') {
+        if (training.words.length < 1) {
+          return { success: false, error: 'No words available from the selected vocabulary lists' };
+        }
+
+        // Fetch vocabulary lists for full word details and language info
+        const vocabRepoAI = VocabularyListRepository.getInstance();
+        let sourceLanguage = 'English';
+        let targetLanguage = 'English';
+        const enrichedWords: {
+          word: string;
+          translation?: string;
+          definition?: string;
+          partOfSpeech?: string;
+          exampleSentence?: string;
+        }[] = [];
+
+        for (const listId of training.vocabularyListIds) {
+          const list = await vocabRepoAI.getById(listId);
+          if (!list) continue;
+          if (list.sourceLanguage) sourceLanguage = list.sourceLanguage;
+          if (list.targetLanguage) targetLanguage = list.targetLanguage;
+
+          for (const trainingWord of training.words) {
+            if (trainingWord.vocabularyListId === listId) {
+              const fullWord = list.words.find((w) => w.word === trainingWord.word);
+              enrichedWords.push({
+                word: trainingWord.word,
+                translation: trainingWord.translation,
+                definition: fullWord?.definition,
+                partOfSpeech: fullWord?.partOfSpeech,
+                exampleSentence: fullWord?.exampleSentence,
+              });
+            }
+          }
+        }
+
+        try {
+          const aiService = getAIService();
+          const aiExercises = await aiService.generateExercises(enrichedWords, sourceLanguage, targetLanguage, userId);
+
+          const execution: TrainingExecution = {
+            id: crypto.randomUUID(),
+            trainingId,
+            userId,
+            startedAt: new Date().toISOString(),
+            results: [],
+            aiExercises,
+            correctCount: 0,
+            incorrectCount: 0,
+          };
+
+          await trainingRepo.createExecution(execution);
+          return { success: true, execution };
+        } catch (aiError) {
+          const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
+          return { success: false, error: 'Failed to generate AI exercises: ' + errorMessage };
+        }
+      }
+
       if (training.mode === 'MULTIPLE_CHOICE' && training.words.length < 3) {
         return { success: false, error: 'Multiple-choice requires at least 3 words' };
       }
@@ -375,6 +497,47 @@ export class TrainingService {
       const training = await trainingRepo.getById(execution.trainingId);
       if (!training) {
         return { success: false, error: 'Training not found' };
+      }
+
+      // AI_TRAINING answer submission path
+      if (training.mode === 'AI_TRAINING') {
+        const aiExercises = execution.aiExercises;
+        if (!aiExercises || wordIndex < 0 || wordIndex >= aiExercises.length) {
+          return { success: false, error: 'Invalid word index' };
+        }
+
+        const exercise = aiExercises[wordIndex];
+        const selectedIndex = parseInt(answer, 10);
+        const correct = selectedIndex === exercise.correctOptionIndex;
+
+        const result: TrainingResult = {
+          wordIndex,
+          word: exercise.prompt,
+          expectedAnswer: exercise.options[exercise.correctOptionIndex],
+          userAnswer: answer,
+          correct,
+        };
+
+        execution.results.push(result);
+        if (correct) {
+          execution.correctCount++;
+        } else {
+          execution.incorrectCount++;
+        }
+
+        // Completion check: all AI exercises answered
+        if (execution.results.length === aiExercises.length) {
+          execution.completedAt = new Date().toISOString();
+        }
+
+        await trainingRepo.updateExecution(executionId, {
+          results: execution.results,
+          correctCount: execution.correctCount,
+          incorrectCount: execution.incorrectCount,
+          completedAt: execution.completedAt,
+        });
+
+        return { success: true, result, completed: !!execution.completedAt, execution };
       }
 
       // Dual-path word resolution: randomized uses execution.words, static uses training.words
