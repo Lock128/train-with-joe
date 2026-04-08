@@ -147,7 +147,7 @@ class _VocabularyListDetailScreenState
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String?>(
-                value: selectedSource,
+                initialValue: selectedSource,
                 decoration: const InputDecoration(
                     labelText: 'Source language', border: OutlineInputBorder()),
                 items: [
@@ -161,7 +161,7 @@ class _VocabularyListDetailScreenState
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String?>(
-                value: selectedTarget,
+                initialValue: selectedTarget,
                 decoration: const InputDecoration(
                     labelText: 'Target language', border: OutlineInputBorder()),
                 items: [
