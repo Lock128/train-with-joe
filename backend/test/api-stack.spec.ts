@@ -243,8 +243,8 @@ describe('APIStack CDK Integration Tests', () => {
 
     const template = Template.fromStack(apiStack);
 
-    // Verify data sources exist (2 DynamoDB + 23 Lambda)
-    template.resourceCountIs('AWS::AppSync::DataSource', 25);
+    // Verify data sources exist (2 DynamoDB + 24 Lambda)
+    template.resourceCountIs('AWS::AppSync::DataSource', 26);
 
     // Verify DynamoDB data sources have correct type
     const templateJson = template.toJSON();
