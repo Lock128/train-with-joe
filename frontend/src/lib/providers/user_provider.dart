@@ -151,6 +151,28 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  /// Fetch all users (admin only). Returns a list of {id, email, name}.
+  Future<List<Map<String, dynamic>>> getUsers() async {
+    try {
+      const query = '''
+        query GetUsers {
+          getUsers {
+            id
+            email
+            name
+          }
+        }
+      ''';
+      final response = await _apiService.query(query);
+      final list = response['getUsers'] as List<dynamic>?;
+      if (list == null) return [];
+      return list.cast<Map<String, dynamic>>();
+    } catch (e) {
+      debugPrint('Error fetching users: $e');
+      return [];
+    }
+  }
+
   /// Clear user data (on sign out)
   void clear() {
     _user = null;

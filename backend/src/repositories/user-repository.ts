@@ -1,5 +1,12 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  GetCommand,
+  UpdateCommand,
+  DeleteCommand,
+  ScanCommand,
+} from '@aws-sdk/lib-dynamodb';
 import type { User } from '../model/domain/User';
 
 /**
@@ -141,6 +148,35 @@ export class UserRepository {
       }
       console.error('Error updating user:', error);
       throw new Error(`Failed to update user: ${err.message}`);
+    }
+  }
+
+  /**
+   * Get all users (admin only — performs a full table scan)
+   * @returns Array of all users
+   * @throws Error if retrieval fails
+   */
+  async getAll(): Promise<User[]> {
+    try {
+      const items: User[] = [];
+      let lastKey: Record<string, unknown> | undefined;
+      do {
+        const response = await this.dynamoClient.send(
+          new ScanCommand({
+            TableName: this.tableName,
+            ExclusiveStartKey: lastKey,
+          }),
+        );
+        if (response.Items) {
+          items.push(...(response.Items as User[]));
+        }
+        lastKey = response.LastEvaluatedKey;
+      } while (lastKey);
+      return items;
+    } catch (error) {
+      const err = error as Error;
+      console.error('Error scanning users:', error);
+      throw new Error(`Failed to get users: ${err.message}`);
     }
   }
 

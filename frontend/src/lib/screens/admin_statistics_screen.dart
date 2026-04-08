@@ -14,6 +14,7 @@ class AdminStatisticsScreen extends StatefulWidget {
 class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
   final _userIdController = TextEditingController();
   String? _activeUserId;
+  String? _activeUserLabel;
   Map<String, dynamic>? _statistics;
   bool _isLoading = false;
   String? _error;
@@ -23,11 +24,22 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
   Map<String, dynamic>? _dayStatistics;
   bool _isDayLoading = false;
 
+  List<Map<String, dynamic>> _allUsers = [];
+  bool _usersLoaded = false;
+
   @override
   void initState() {
     super.initState();
     _toDate = DateTime.now();
     _fromDate = _toDate.subtract(const Duration(days: 30));
+    _fetchUsers();
+  }
+
+  Future<void> _fetchUsers() async {
+    final users = await context.read<UserProvider>().getUsers();
+    if (mounted) {
+      setState(() { _allUsers = users; _usersLoaded = true; });
+    }
   }
 
   @override
@@ -39,10 +51,22 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
   String _formatDateParam(DateTime dt) =>
       '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
 
-  Future<void> _loadData() async {
-    final userId = _userIdController.text.trim();
+  Future<void> _loadData([String? overrideUserId]) async {
+    final userId = overrideUserId ?? _userIdController.text.trim();
     if (userId.isEmpty) return;
-    setState(() { _isLoading = true; _error = null; _activeUserId = userId; _expandedDate = null; _dayStatistics = null; });
+
+    // Build a display label from the user list if possible
+    String label = userId;
+    for (final u in _allUsers) {
+      if (u['id'] == userId) {
+        final email = u['email'] as String? ?? '';
+        final name = u['name'] as String?;
+        label = name != null && name.isNotEmpty ? '$name ($email)' : email;
+        break;
+      }
+    }
+
+    setState(() { _isLoading = true; _error = null; _activeUserId = userId; _activeUserLabel = label; _expandedDate = null; _dayStatistics = null; });
     final provider = context.read<TrainingProvider>();
     final result = await provider.getTrainingOverviewStatisticsForUser(
       _formatDateParam(_fromDate),
@@ -122,20 +146,49 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
       ),
       body: Column(
         children: [
-          // User ID input
+          // User search
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _userIdController,
-                    decoration: const InputDecoration(
-                      labelText: 'User ID (Cognito sub)',
-                      hintText: 'Enter user ID to view their statistics',
-                      prefixIcon: Icon(Icons.person_search),
-                    ),
-                    onSubmitted: (_) => _loadData(),
+                  child: Autocomplete<Map<String, dynamic>>(
+                    displayStringForOption: (user) {
+                      final email = user['email'] as String? ?? '';
+                      final name = user['name'] as String?;
+                      return name != null && name.isNotEmpty ? '$name ($email)' : email;
+                    },
+                    optionsBuilder: (textEditingValue) {
+                      final query = textEditingValue.text.toLowerCase();
+                      if (query.isEmpty) return _allUsers;
+                      return _allUsers.where((u) {
+                        final email = (u['email'] as String? ?? '').toLowerCase();
+                        final name = (u['name'] as String? ?? '').toLowerCase();
+                        final id = (u['id'] as String? ?? '').toLowerCase();
+                        return email.contains(query) || name.contains(query) || id.contains(query);
+                      });
+                    },
+                    onSelected: (user) {
+                      final userId = user['id'] as String? ?? '';
+                      _userIdController.text = userId;
+                      _loadData(userId);
+                    },
+                    fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                      // Keep our controller in sync for manual ID entry
+                      controller.addListener(() => _userIdController.text = controller.text);
+                      return TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: 'User email or ID',
+                          hintText: _usersLoaded
+                              ? 'Search by email, name, or paste a user ID'
+                              : 'Loading users…',
+                          prefixIcon: const Icon(Icons.person_search),
+                        ),
+                        onSubmitted: (_) => _loadData(),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -157,7 +210,7 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
   Widget _buildBody() {
     if (_activeUserId == null) {
       return const Center(
-        child: Text('Enter a user ID above to view their statistics.', style: TextStyle(color: Colors.grey)),
+        child: Text('Search for a user above to view their statistics.', style: TextStyle(color: Colors.grey)),
       );
     }
 
@@ -212,7 +265,7 @@ class _AdminStatisticsScreenState extends State<AdminStatisticsScreen> {
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    Text('User: $_activeUserId',
+                    Text('User: ${_activeUserLabel ?? _activeUserId}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
                     const SizedBox(height: 12),
                     Row(

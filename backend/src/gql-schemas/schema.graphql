@@ -417,6 +417,7 @@ type Query {
   getTrainingStatistics(trainingId: ID!, userId: ID): TrainingStatisticsResponse @aws_cognito_user_pools
   getTrainingDayStatistics(date: String!, userId: ID): TrainingDayStatisticsResponse @aws_cognito_user_pools
   getTrainingOverviewStatistics(fromDate: String!, toDate: String!, userId: ID): TrainingOverviewStatisticsResponse @aws_cognito_user_pools
+  getUsers: [User] @aws_cognito_user_pools
 }
 
 # ============================================================================
