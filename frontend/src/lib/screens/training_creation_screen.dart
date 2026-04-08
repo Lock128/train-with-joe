@@ -14,7 +14,7 @@ class TrainingCreationScreen extends StatefulWidget {
 
 class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   final Set<String> _selectedListIds = {};
-  String _selectedMode = 'TEXT_INPUT';
+  String _selectedMode = 'MULTIPLE_CHOICE';
   final String _selectedDirection = 'WORD_TO_TRANSLATION';
   final TextEditingController _nameController = TextEditingController();
   bool _listsLoaded = false;
