@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/app_version.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
@@ -158,6 +159,22 @@ class _InfoScreenState extends State<InfoScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Legal & Contact', style: Theme.of(context).textTheme.titleMedium),
+                        const Divider(),
+                        _linkRow(Icons.privacy_tip_outlined, 'Privacy Policy', 'https://trainwithjoe.app/privacy'),
+                        _linkRow(Icons.description_outlined, 'Terms of Service', 'https://trainwithjoe.app/terms'),
+                        _linkRow(Icons.mail_outline, 'Contact Us', 'mailto:hello@trainwithjoe.app'),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 32),
                 FilledButton.tonalIcon(
                   onPressed: () => _handleSignOut(context),
@@ -187,6 +204,24 @@ class _InfoScreenState extends State<InfoScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _linkRow(IconData icon, String label, String url) {
+    return InkWell(
+      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10.0),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: Colors.grey),
+            const SizedBox(width: 12),
+            Expanded(child: Text(label)),
+            const Icon(Icons.open_in_new, size: 16, color: Colors.grey),
+          ],
+        ),
       ),
     );
   }
