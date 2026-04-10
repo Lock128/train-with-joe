@@ -307,6 +307,11 @@ input SubmitAnswerInput @aws_cognito_user_pools {
   answer: String!
 }
 
+input MigrateUserDataInput @aws_cognito_user_pools {
+  sourceUserId: ID!
+  targetUserId: ID!
+}
+
 # ============================================================================
 # RESPONSE TYPES
 # ============================================================================
@@ -370,6 +375,14 @@ type SubmitAnswerResponse @aws_cognito_user_pools {
   result: TrainingResult
   completed: Boolean
   execution: TrainingExecution
+  error: String
+}
+
+type MigrateUserDataResponse @aws_cognito_user_pools {
+  success: Boolean!
+  migratedVocabularyLists: Int!
+  migratedTrainings: Int!
+  migratedExecutions: Int!
   error: String
 }
 
@@ -449,6 +462,9 @@ type Mutation {
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools
   generateContent(input: GenerateContentInput!): ContentResponse @aws_cognito_user_pools
   analyzeImageVocabulary(input: AnalyzeImageVocabularyInput!): VocabularyListResponse @aws_cognito_user_pools
+
+  # Admin operations
+  migrateUserData(input: MigrateUserDataInput!): MigrateUserDataResponse @aws_cognito_user_pools
 
   # Training operations
   createTraining(input: CreateTrainingInput!): TrainingResponse @aws_cognito_user_pools

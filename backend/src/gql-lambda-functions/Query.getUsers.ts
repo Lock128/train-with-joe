@@ -10,6 +10,9 @@ const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
 interface Event {
   identity: {
     sub: string;
+    claims: {
+      email?: string;
+    };
   };
 }
 
@@ -20,13 +23,12 @@ export const handler = async (event: Event) => {
     throw new Error('Authentication required');
   }
 
-  const userRepo = UserRepository.getInstance();
-  const callerUser = await userRepo.getById(callerUserId);
-  const callerEmail = callerUser?.email;
+  const callerEmail = event.identity?.claims?.email;
 
   if (!callerEmail || !ADMIN_EMAILS.includes(callerEmail)) {
     throw new Error('Not authorized');
   }
 
+  const userRepo = UserRepository.getInstance();
   return userRepo.getAll();
 };
