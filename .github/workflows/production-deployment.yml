@@ -326,6 +326,9 @@ jobs:
           npm ci
           npm run build
 
+      - name: Patch robots.txt for environment
+        run: bash scripts/patch-robots-for-environment.sh production
+
       - name: Get CloudFront distribution IDs
         id: cf-ids
         run: |

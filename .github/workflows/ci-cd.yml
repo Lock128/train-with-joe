@@ -287,6 +287,10 @@ jobs:
           npm ci
           npm run build
 
+      - name: Patch robots.txt for non-production
+        if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
+        run: bash scripts/patch-robots-for-environment.sh sandbox
+
       - name: Get CloudFront distribution IDs
         if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
         id: cf-ids

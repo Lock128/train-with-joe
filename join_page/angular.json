@@ -32,6 +32,16 @@
                 "glob": "favicon.png",
                 "input": "src/assets",
                 "output": "/"
+              },
+              {
+                "glob": "robots.txt",
+                "input": "src",
+                "output": "/"
+              },
+              {
+                "glob": "sitemap.xml",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": ["src/styles.css"],
