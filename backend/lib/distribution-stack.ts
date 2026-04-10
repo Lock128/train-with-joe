@@ -28,12 +28,11 @@ export class DistributionStack extends cdk.Stack {
     const { namespace } = props;
 
     // Import the certificate ARN from the CertificateStack (deployed in us-east-1).
-    // Pass via CERTIFICATE_ARN env var or deploy CertificateStack first and grab the output.
+    // When not set, distributions are created without custom domains (e.g. during CertificateStack-only deploy).
     const certificateArn = process.env.CERTIFICATE_ARN;
-    if (!certificateArn) {
-      throw new Error('CERTIFICATE_ARN environment variable is required. Deploy CertificateStack first and set it.');
-    }
-    const certificate = Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArn);
+    const certificate = certificateArn
+      ? Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArn)
+      : undefined;
 
     // Determine custom domain names based on namespace
     // prod: trainwithjoe.app / app.trainwithjoe.app
@@ -107,13 +106,12 @@ export class DistributionStack extends cdk.Stack {
     id: string,
     comment: string,
     bucket: Bucket,
-    certificate: ICertificate,
+    certificate: ICertificate | undefined,
     domainName: string,
   ): Distribution {
     return new Distribution(this, id, {
       comment,
-      domainNames: [domainName],
-      certificate,
+      ...(certificate ? { domainNames: [domainName], certificate } : {}),
       defaultBehavior: {
         origin: S3BucketOrigin.withOriginAccessControl(bucket),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
