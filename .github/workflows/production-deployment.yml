@@ -233,7 +233,7 @@ jobs:
           echo "commit_full=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Deploy Certificate stack (us-east-1)
-        run: npx cdk deploy CertificateStack-prod --require-approval never
+        run: npx cdk deploy CertificateStack-production --require-approval never
         env:
           NODE_ENV: production
           CDK_DEFAULT_REGION: us-east-1
