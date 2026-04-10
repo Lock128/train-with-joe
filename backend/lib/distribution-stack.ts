@@ -4,7 +4,8 @@ import type { Construct } from 'constructs';
 import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Distribution, ViewerProtocolPolicy, CachePolicy } from 'aws-cdk-lib/aws-cloudfront';
-import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import type { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
 
 interface DistributionStackProps extends cdk.StackProps {
   namespace: string;
@@ -26,20 +27,21 @@ export class DistributionStack extends cdk.Stack {
 
     const { namespace } = props;
 
+    // Import the certificate ARN from the CertificateStack (deployed in us-east-1).
+    // Pass via CERTIFICATE_ARN env var or deploy CertificateStack first and grab the output.
+    const certificateArn = process.env.CERTIFICATE_ARN;
+    if (!certificateArn) {
+      throw new Error('CERTIFICATE_ARN environment variable is required. Deploy CertificateStack first and set it.');
+    }
+    const certificate = Certificate.fromCertificateArn(this, 'ImportedCertificate', certificateArn);
+
     // Determine custom domain names based on namespace
     // prod: trainwithjoe.app / app.trainwithjoe.app
     // other: <namespace>.trainwithjoe.app / app.<namespace>.trainwithjoe.app
     const baseDomain = 'trainwithjoe.app';
-    const isProduction = namespace === 'prod';
+    const isProduction = namespace === 'prod' || namespace === 'production';
     const joinPageDomain = isProduction ? baseDomain : `${namespace}.${baseDomain}`;
     const frontendDomain = isProduction ? `app.${baseDomain}` : `app.${namespace}.${baseDomain}`;
-
-    // ACM certificate with email validation (must be in us-east-1 for CloudFront)
-    const certificate = new Certificate(this, 'CloudFrontCertificate', {
-      domainName: joinPageDomain,
-      subjectAlternativeNames: [frontendDomain],
-      validation: CertificateValidation.fromEmail(),
-    });
 
     // Create hosting buckets
     this.frontendBucket = new Bucket(this, 'FrontendBucket', {
@@ -105,7 +107,7 @@ export class DistributionStack extends cdk.Stack {
     id: string,
     comment: string,
     bucket: Bucket,
-    certificate: Certificate,
+    certificate: ICertificate,
     domainName: string,
   ): Distribution {
     return new Distribution(this, id, {

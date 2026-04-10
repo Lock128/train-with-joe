@@ -140,6 +140,23 @@ jobs:
       - name: Build AppSync functions
         run: npm run build:appsyncFunctions
 
+      - name: Deploy Certificate stack (us-east-1)
+        run: npx cdk deploy CertificateStack-beta --require-approval never
+        env:
+          NODE_ENV: beta
+          CDK_DEFAULT_REGION: us-east-1
+          AWS_REGION: us-east-1
+
+      - name: Get Certificate ARN
+        id: cert
+        run: |
+          CERT_ARN=$(aws cloudformation describe-stacks \
+            --stack-name "CertificateStack-beta" \
+            --region us-east-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='CertificateArn'].OutputValue" \
+            --output text)
+          echo "certificate_arn=$CERT_ARN" >> $GITHUB_OUTPUT
+
       - name: Deploy CDK stacks
         id: deploy
         run: |
@@ -150,6 +167,7 @@ jobs:
           NODE_ENV: beta
           COMMIT_ID: ${{ github.sha }}
           BUILD_NUMBER: ${{ github.run_number }}
+          CERTIFICATE_ARN: ${{ steps.cert.outputs.certificate_arn }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
