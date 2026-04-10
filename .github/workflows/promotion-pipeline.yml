@@ -134,6 +134,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_BETA }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Ensure SES identity is verified
+        run: bash scripts/ensure-ses-identity.sh beta ${{ env.AWS_REGION }}
+
       - name: Build AppSync functions
         run: npm run build:appsyncFunctions
 

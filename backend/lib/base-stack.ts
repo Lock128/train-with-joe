@@ -12,7 +12,6 @@ import {
 import { FederatedPrincipal, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
 import { AttributeType, BillingMode, StreamViewType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { BlockPublicAccess, Bucket, HttpMethods } from 'aws-cdk-lib/aws-s3';
-import { EmailIdentity, Identity } from 'aws-cdk-lib/aws-ses';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import type { Construct } from 'constructs';
 import type { StackProps } from 'aws-cdk-lib';
@@ -81,11 +80,10 @@ export class BaseStack extends Stack {
       simpleName: false,
     });
 
-    // Verify SES email identity for Cognito verification emails
-    const sesFromEmail = `lockhead+joe${namespace}@lockhead.info`;
-    new EmailIdentity(this, 'SesEmailIdentity', {
-      identity: Identity.email(sesFromEmail),
-    });
+    // SES email identity for Cognito verification emails must be created and
+    // verified manually before deploying this stack, since email verification
+    // requires human interaction (clicking a link) that CloudFormation can't wait for.
+    // To create/verify: aws ses verify-email-identity --email-address lockhead+joe<namespace>@lockhead.info --region eu-central-1
 
     const userPoolSetup = this.createUserPool(namespace);
     this.userPool = userPoolSetup.userPool;

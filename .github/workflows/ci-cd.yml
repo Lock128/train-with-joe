@@ -212,6 +212,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
 
+      - name: Ensure SES identity is verified
+        run: bash scripts/ensure-ses-identity.sh sandbox eu-central-1
+
       - name: Build AppSync functions
         run: npm run build:appsyncFunctions
 
