@@ -4,6 +4,7 @@ import type { Construct } from 'constructs';
 import { BlockPublicAccess, Bucket } from 'aws-cdk-lib/aws-s3';
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { Distribution, ViewerProtocolPolicy, CachePolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 
 interface DistributionStackProps extends cdk.StackProps {
   namespace: string;
@@ -25,6 +26,21 @@ export class DistributionStack extends cdk.Stack {
 
     const { namespace } = props;
 
+    // Determine custom domain names based on namespace
+    // prod: trainwithjoe.app / app.trainwithjoe.app
+    // other: <namespace>.trainwithjoe.app / app.<namespace>.trainwithjoe.app
+    const baseDomain = 'trainwithjoe.app';
+    const isProduction = namespace === 'prod';
+    const joinPageDomain = isProduction ? baseDomain : `${namespace}.${baseDomain}`;
+    const frontendDomain = isProduction ? `app.${baseDomain}` : `app.${namespace}.${baseDomain}`;
+
+    // ACM certificate with email validation (must be in us-east-1 for CloudFront)
+    const certificate = new Certificate(this, 'CloudFrontCertificate', {
+      domainName: joinPageDomain,
+      subjectAlternativeNames: [frontendDomain],
+      validation: CertificateValidation.fromEmail(),
+    });
+
     // Create hosting buckets
     this.frontendBucket = new Bucket(this, 'FrontendBucket', {
       bucketName: `train-with-joe-frontend-${namespace}`,
@@ -45,6 +61,8 @@ export class DistributionStack extends cdk.Stack {
       'FrontendDistribution',
       `Train with Joe ${namespace} - Frontend`,
       this.frontendBucket,
+      certificate,
+      frontendDomain,
     );
 
     // Join page distribution (Angular landing page)
@@ -52,6 +70,8 @@ export class DistributionStack extends cdk.Stack {
       'JoinPageDistribution',
       `Train with Joe ${namespace} - Join Page`,
       this.joinPageBucket,
+      certificate,
+      joinPageDomain,
     );
 
     // Outputs
@@ -81,9 +101,17 @@ export class DistributionStack extends cdk.Stack {
     });
   }
 
-  private createSpaDistribution(id: string, comment: string, bucket: Bucket): Distribution {
+  private createSpaDistribution(
+    id: string,
+    comment: string,
+    bucket: Bucket,
+    certificate: Certificate,
+    domainName: string,
+  ): Distribution {
     return new Distribution(this, id, {
       comment,
+      domainNames: [domainName],
+      certificate,
       defaultBehavior: {
         origin: S3BucketOrigin.withOriginAccessControl(bucket),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
