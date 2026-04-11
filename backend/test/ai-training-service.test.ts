@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach } from 'vitest';
 import { TrainingService } from '../src/services/training-service';
 import { mockClient } from 'aws-sdk-client-mock';
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { Training, TrainingExecution } from '../src/model/domain/Training';
 
@@ -408,6 +408,101 @@ describe('AI Training Service Unit Tests', () => {
 
       expect(result.success).toBe(true);
       expect(result.completed).toBe(true);
+    });
+  });
+
+  describe('getTrainingStatistics - AI_TRAINING', () => {
+    test('should return non-empty perWordStatistics from AI exercise results', async () => {
+      const userId = 'user-123';
+      const trainingId = 'training#ai-stats';
+
+      const training: Training = {
+        id: trainingId,
+        userId,
+        name: 'AI Stats Training',
+        mode: 'AI_TRAINING',
+        direction: 'WORD_TO_TRANSLATION',
+        vocabularyListIds: ['list-1'],
+        words: [
+          { word: 'hello', translation: 'hola', vocabularyListId: 'list-1' },
+          { word: 'goodbye', translation: 'adios', vocabularyListId: 'list-1' },
+        ],
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+      };
+
+      const executions: TrainingExecution[] = [
+        {
+          id: 'execution#ai-stats-1',
+          trainingId,
+          userId,
+          startedAt: '2024-01-01T10:00:00.000Z',
+          completedAt: '2024-01-01T10:05:00.000Z',
+          results: [
+            {
+              wordIndex: 0,
+              word: 'Fill in the blank: ___ is the word for hello',
+              expectedAnswer: 'hola',
+              userAnswer: '0',
+              correct: true,
+            },
+            {
+              wordIndex: 1,
+              word: 'Fill in the blank: ___ is the word for goodbye',
+              expectedAnswer: 'adios',
+              userAnswer: '2',
+              correct: false,
+            },
+          ],
+          correctCount: 1,
+          incorrectCount: 1,
+        },
+      ];
+
+      ddbMock.on(GetCommand).callsFake((input) => {
+        if (input.Key.id === trainingId) {
+          return { Item: { ...training } };
+        }
+        return {};
+      });
+
+      ddbMock.on(QueryCommand).resolves({
+        Items: executions,
+      });
+
+      const service = TrainingService.getInstance();
+      const result = await service.getTrainingStatistics(trainingId, userId);
+
+      expect(result.success).toBe(true);
+      expect(result.statistics).toBeDefined();
+      expect(result.statistics!.totalExecutions).toBe(1);
+      expect(result.statistics!.overallAccuracy).toBe(50);
+
+      // AI exercise results use prompt strings as word keys, not vocabulary words
+      const perWord = result.statistics!.perWordStatistics;
+      expect(perWord.length).toBeGreaterThanOrEqual(2);
+
+      // The AI prompt-based entries should be tracked
+      const aiPrompt1 = perWord.find((p) => p.word === 'Fill in the blank: ___ is the word for hello');
+      expect(aiPrompt1).toBeDefined();
+      expect(aiPrompt1!.correctCount).toBe(1);
+      expect(aiPrompt1!.totalCount).toBe(1);
+      expect(aiPrompt1!.accuracyPercentage).toBe(100);
+
+      const aiPrompt2 = perWord.find((p) => p.word === 'Fill in the blank: ___ is the word for goodbye');
+      expect(aiPrompt2).toBeDefined();
+      expect(aiPrompt2!.correctCount).toBe(0);
+      expect(aiPrompt2!.totalCount).toBe(1);
+      expect(aiPrompt2!.accuracyPercentage).toBe(0);
+
+      // AI prompt entries should have empty translation (no match in training.words)
+      expect(aiPrompt1!.translation).toBe('');
+      expect(aiPrompt2!.translation).toBe('');
+
+      // mostMissedWords should include the incorrect AI exercise
+      const missed = result.statistics!.mostMissedWords;
+      expect(missed.length).toBeGreaterThan(0);
+      expect(missed.some((m) => m.word === 'Fill in the blank: ___ is the word for goodbye')).toBe(true);
     });
   });
 

@@ -722,11 +722,12 @@ export class TrainingService {
         for (const result of execution.results) {
           totalCorrect += result.correct ? 1 : 0;
           totalAnswers++;
-          if (wordStats[result.word]) {
-            wordStats[result.word].total++;
-            if (result.correct) {
-              wordStats[result.word].correct++;
-            }
+          if (!wordStats[result.word]) {
+            wordStats[result.word] = { correct: 0, total: 0 };
+          }
+          wordStats[result.word].total++;
+          if (result.correct) {
+            wordStats[result.word].correct++;
           }
         }
       }
@@ -745,11 +746,11 @@ export class TrainingService {
         averageTimeSeconds = totalTime / timedExecutions.length;
       }
 
-      const perWordStatistics = training.words.map((word) => {
-        const stats = wordStats[word.word] || { correct: 0, total: 0 };
+      const perWordStatistics = Object.entries(wordStats).map(([word, stats]) => {
+        const trainingWord = training.words.find((w) => w.word === word);
         return {
-          word: word.word,
-          translation: word.translation,
+          word,
+          translation: trainingWord?.translation ?? '',
           correctCount: stats.correct,
           totalCount: stats.total,
           accuracyPercentage: stats.total > 0 ? (stats.correct / stats.total) * 100 : 0,
