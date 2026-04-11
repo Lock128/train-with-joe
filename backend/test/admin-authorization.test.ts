@@ -43,6 +43,9 @@ describe('Admin Authorization', () => {
     test('should deny when caller has no email claim', async () => {
       const callerId = 'non-existent-user';
 
+      // DB fallback lookup should return no user
+      ddbMock.on(GetCommand).resolves({ Item: undefined });
+
       const result = await getTrainingStatisticsHandler({
         arguments: { trainingId: 'training-1', userId: 'other-user-456' },
         identity: { sub: callerId, claims: {} },
@@ -101,6 +104,9 @@ describe('Admin Authorization', () => {
     test('should deny when caller has no email claim', async () => {
       const callerId = 'non-existent-user';
 
+      // DB fallback lookup should return no user
+      ddbMock.on(GetCommand).resolves({ Item: undefined });
+
       const result = await getTrainingOverviewStatisticsHandler({
         arguments: { fromDate: '2024-01-01', toDate: '2024-01-31', userId: 'other-user-456' },
         identity: { sub: callerId, claims: {} },
@@ -150,6 +156,9 @@ describe('Admin Authorization', () => {
 
     test('should deny when caller has no email claim', async () => {
       const callerId = 'non-existent-user';
+
+      // DB fallback lookup should return no user
+      ddbMock.on(GetCommand).resolves({ Item: undefined });
 
       const result = await getTrainingDayStatisticsHandler({
         arguments: { date: '2024-01-15', userId: 'other-user-456' },

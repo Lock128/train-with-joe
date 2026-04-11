@@ -247,7 +247,7 @@ class _VocabularyListDetailScreenState
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String?>(
-                  value: selectedSchoolForm,
+                  initialValue: selectedSchoolForm,
                   decoration: const InputDecoration(
                     labelText: 'School Form',
                     border: OutlineInputBorder(),
