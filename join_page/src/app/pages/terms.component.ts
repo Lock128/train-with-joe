@@ -62,7 +62,6 @@ import { RouterLink } from '@angular/router';
               <li>Attempt to gain unauthorized access to the Service or its systems</li>
               <li>Interfere with or disrupt the Service</li>
               <li>Use automated tools to scrape or extract data from the Service</li>
-              <li>Share your account credentials with others</li>
             </ul>
           </section>
 
@@ -71,7 +70,7 @@ import { RouterLink } from '@angular/router';
             <p>
               The Service, including its design, code, and content, is owned by Train with Joe and protected by
               intellectual property laws. Vocabulary lists you create are your own content, and you retain ownership of
-              them.
+              them. If you share them globally, others may use them but you can restrict the usage at any point in time.
             </p>
           </section>
 

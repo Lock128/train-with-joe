@@ -23,12 +23,23 @@ export const handler = async (event: Event) => {
     throw new Error('Authentication required');
   }
 
-  const callerEmail = event.identity?.claims?.email;
+  const userRepo = UserRepository.getInstance();
 
-  if (!callerEmail || !ADMIN_EMAILS.includes(callerEmail)) {
+  let callerEmail = event.identity?.claims?.email;
+  console.log('[AdminAuth] getUsers — callerUserId:', callerUserId, 'jwtEmail:', callerEmail);
+  if (!callerEmail) {
+    console.log('[AdminAuth] JWT email claim missing, falling back to DB lookup');
+    const callerUser = await userRepo.getById(callerUserId);
+    callerEmail = callerUser?.email;
+    console.log('[AdminAuth] DB email lookup result:', callerEmail);
+  }
+  const isAdmin = callerEmail != null && ADMIN_EMAILS.includes(callerEmail);
+  console.log('[AdminAuth] email:', callerEmail, 'isAdmin:', isAdmin);
+  if (!callerEmail || !isAdmin) {
+    console.warn('[AdminAuth] DENIED — getUsers');
     throw new Error('Not authorized');
   }
+  console.log('[AdminAuth] GRANTED — listing all users');
 
-  const userRepo = UserRepository.getInstance();
   return userRepo.getAll();
 };

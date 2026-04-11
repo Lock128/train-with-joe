@@ -41,6 +41,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         title: const Text('Admin'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(icon: Icon(Icons.bar_chart), text: 'Statistics'),
             Tab(icon: Icon(Icons.swap_horiz), text: 'Migrate Data'),

@@ -178,7 +178,7 @@ export class BaseStack extends Stack {
       // Email-only account recovery
       accountRecovery: AccountRecovery.EMAIL_ONLY,
       email: UserPoolEmail.withSES({
-        fromEmail: `lockhead+joe${namespace}@lockhead.info`,
+        fromEmail: `noreply@trainwithjoe.app`,
         fromName: 'Train with Joe',
         sesRegion: 'eu-central-1',
       }),

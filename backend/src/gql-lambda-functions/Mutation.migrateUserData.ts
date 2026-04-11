@@ -1,5 +1,6 @@
 import { VocabularyListRepository } from '../repositories/vocabulary-list-repository';
 import { TrainingRepository } from '../repositories/training-repository';
+import { UserRepository } from '../repositories/user-repository';
 
 const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
 
@@ -45,8 +46,19 @@ export const handler = async (event: Event): Promise<MigrateUserDataResponse> =>
     };
   }
 
-  const callerEmail = event.identity?.claims?.email;
-  if (!callerEmail || !ADMIN_EMAILS.includes(callerEmail)) {
+  let callerEmail = event.identity?.claims?.email;
+  console.log('[AdminAuth] migrateUserData — callerUserId:', callerUserId, 'jwtEmail:', callerEmail);
+  if (!callerEmail) {
+    console.log('[AdminAuth] JWT email claim missing, falling back to DB lookup');
+    const userRepo = UserRepository.getInstance();
+    const callerUser = await userRepo.getById(callerUserId);
+    callerEmail = callerUser?.email;
+    console.log('[AdminAuth] DB email lookup result:', callerEmail);
+  }
+  const isAdmin = callerEmail != null && ADMIN_EMAILS.includes(callerEmail);
+  console.log('[AdminAuth] email:', callerEmail, 'isAdmin:', isAdmin);
+  if (!callerEmail || !isAdmin) {
+    console.warn('[AdminAuth] DENIED — migrateUserData');
     return {
       success: false,
       migratedVocabularyLists: 0,
@@ -55,6 +67,7 @@ export const handler = async (event: Event): Promise<MigrateUserDataResponse> =>
       error: 'Not authorized',
     };
   }
+  console.log('[AdminAuth] GRANTED — migrating user data');
 
   const { sourceUserId, targetUserId } = event.arguments.input;
 
