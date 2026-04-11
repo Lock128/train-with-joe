@@ -187,7 +187,12 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final totalWords = words.length;
     final progress = totalWords > 0 ? (_currentWordIndex + 1) / totalWords : 0.0;
     final currentWord = words[_currentWordIndex] as Map<String, dynamic>;
-    final wordText = currentWord['word'] as String? ?? '';
+    final training = context.read<TrainingProvider>().currentTraining;
+    final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
+    final reversed = direction == 'TRANSLATION_TO_WORD';
+    final wordText = reversed
+        ? (currentWord['translation'] as String? ?? '')
+        : (currentWord['word'] as String? ?? '');
 
     return Scaffold(
       appBar: AppBar(
@@ -262,15 +267,20 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   }
 
   Widget _buildTextInput() {
+    final training = context.read<TrainingProvider>().currentTraining;
+    final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
+    final hintText = direction == 'TRANSLATION_TO_WORD'
+        ? 'Type the original word'
+        : 'Type the translation';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
           controller: _answerController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Your answer',
-            border: OutlineInputBorder(),
-            hintText: 'Type the translation',
+            border: const OutlineInputBorder(),
+            hintText: hintText,
           ),
           onSubmitted: (value) {
             if (value.trim().isNotEmpty) _submitAnswer(value.trim());

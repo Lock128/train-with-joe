@@ -15,7 +15,7 @@ class TrainingCreationScreen extends StatefulWidget {
 class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   final Set<String> _selectedListIds = {};
   String _selectedMode = 'MULTIPLE_CHOICE';
-  final String _selectedDirection = 'WORD_TO_TRANSLATION';
+  String _selectedDirection = 'WORD_TO_TRANSLATION';
   final TextEditingController _nameController = TextEditingController();
   bool _listsLoaded = false;
   int _wordCount = 20;
@@ -200,6 +200,35 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                       selected: _selectedMode == 'MULTIPLE_CHOICE',
                       selectedColor: const Color(0xFFF0932B).withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _selectedMode = 'MULTIPLE_CHOICE'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Direction selector
+                const Text(
+                  'Training Direction',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Flexible(
+                      child: ChoiceChip(
+                        label: const Text('Word → Translation'),
+                        selected: _selectedDirection == 'WORD_TO_TRANSLATION',
+                        selectedColor: const Color(0xFF38A169).withValues(alpha: 0.2),
+                        onSelected: (_) => setState(() => _selectedDirection = 'WORD_TO_TRANSLATION'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: ChoiceChip(
+                        label: const Text('Translation → Word'),
+                        selected: _selectedDirection == 'TRANSLATION_TO_WORD',
+                        selectedColor: const Color(0xFF805AD5).withValues(alpha: 0.2),
+                        onSelected: (_) => setState(() => _selectedDirection = 'TRANSLATION_TO_WORD'),
+                      ),
                     ),
                   ],
                 ),
