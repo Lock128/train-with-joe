@@ -17,9 +17,11 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   String _selectedMode = 'MULTIPLE_CHOICE';
   String _selectedDirection = 'WORD_TO_TRANSLATION';
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   bool _listsLoaded = false;
   int _wordCount = 20;
   bool _isRandomized = false;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -32,6 +34,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -78,6 +81,46 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
         ),
       );
     }
+  }
+
+  Widget _buildListTile(Map<String, dynamic> list, {required bool isPublic}) {
+    final id = list['id'] as String;
+    final title = list['title'] as String? ?? 'Untitled List';
+    final words = (list['words'] as List<dynamic>?) ?? [];
+    final publisher = list['publisher'] as String?;
+    final schoolForm = list['schoolForm'] as String?;
+    final grade = list['grade'] as String?;
+    final isbn = list['isbn'] as String?;
+    final sourceLang = list['sourceLanguage'] as String?;
+    final targetLang = list['targetLanguage'] as String?;
+
+    final metaParts = <String>['${words.length} words'];
+    if (sourceLang != null && sourceLang.isNotEmpty && targetLang != null && targetLang.isNotEmpty) {
+      metaParts.add('$sourceLang → $targetLang');
+    }
+    if (publisher != null && publisher.isNotEmpty) metaParts.add(publisher);
+    if (schoolForm != null && schoolForm.isNotEmpty) metaParts.add(schoolForm);
+    if (grade != null && grade.isNotEmpty) metaParts.add('Klasse $grade');
+    if (isbn != null && isbn.isNotEmpty) metaParts.add('ISBN: $isbn');
+
+    return CheckboxListTile(
+      title: Text(title),
+      subtitle: Text(
+        metaParts.join(' · '),
+        style: const TextStyle(fontSize: 12),
+      ),
+      secondary: isPublic ? const Icon(Icons.public, size: 20, color: Colors.grey) : null,
+      value: _selectedListIds.contains(id),
+      onChanged: (checked) {
+        setState(() {
+          if (checked == true) {
+            _selectedListIds.add(id);
+          } else {
+            _selectedListIds.remove(id);
+          }
+        });
+      },
+    );
   }
 
   @override
@@ -129,6 +172,25 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
               .where((l) => !myListIds.contains(l['id'] as String))
               .toList();
           final allLists = [...myLists, ...publicLists];
+
+          // Filter lists by search query
+          bool matchesSearch(Map<String, dynamic> list) {
+            if (_searchQuery.isEmpty) return true;
+            final q = _searchQuery.toLowerCase();
+            final fields = [
+              list['title'] as String?,
+              list['publisher'] as String?,
+              list['schoolForm'] as String?,
+              list['grade'] as String?,
+              list['isbn'] as String?,
+              list['sourceLanguage'] as String?,
+              list['targetLanguage'] as String?,
+            ];
+            return fields.any((f) => f != null && f.toLowerCase().contains(q));
+          }
+
+          final filteredMyLists = myLists.where(matchesSearch).toList();
+          final filteredPublicLists = publicLists.where(matchesSearch).toList();
 
           if (allLists.isEmpty) {
             return Center(
@@ -240,7 +302,32 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                if (myLists.isEmpty)
+                // Search bar
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    labelText: 'Search lists',
+                    hintText: 'Title, publisher, school, grade, ISBN, language…',
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                  ),
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.trim());
+                  },
+                ),
+                const SizedBox(height: 8),
+                if (filteredMyLists.isEmpty && _searchQuery.isEmpty)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
@@ -248,52 +335,23 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                       style: TextStyle(color: Colors.grey),
                     ),
                   ),
-                ...myLists.map((list) {
-                  final id = list['id'] as String;
-                  final title = list['title'] as String? ?? 'Untitled List';
-                  final words = (list['words'] as List<dynamic>?) ?? [];
-                  return CheckboxListTile(
-                    title: Text(title),
-                    subtitle: Text('${words.length} words'),
-                    value: _selectedListIds.contains(id),
-                    onChanged: (checked) {
-                      setState(() {
-                        if (checked == true) {
-                          _selectedListIds.add(id);
-                        } else {
-                          _selectedListIds.remove(id);
-                        }
-                      });
-                    },
-                  );
-                }),
-                if (publicLists.isNotEmpty) ...[
+                if (filteredMyLists.isEmpty && _searchQuery.isNotEmpty && filteredPublicLists.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'No lists match your search.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ...filteredMyLists.map((list) => _buildListTile(list, isPublic: false)),
+                if (filteredPublicLists.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   const Text(
                     'Public Vocabulary Lists',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  ...publicLists.map((list) {
-                    final id = list['id'] as String;
-                    final title = list['title'] as String? ?? 'Untitled List';
-                    final words = (list['words'] as List<dynamic>?) ?? [];
-                    return CheckboxListTile(
-                      title: Text(title),
-                      subtitle: Text('${words.length} words'),
-                      secondary: const Icon(Icons.public, size: 20, color: Colors.grey),
-                      value: _selectedListIds.contains(id),
-                      onChanged: (checked) {
-                        setState(() {
-                          if (checked == true) {
-                            _selectedListIds.add(id);
-                          } else {
-                            _selectedListIds.remove(id);
-                          }
-                        });
-                      },
-                    );
-                  }),
+                  ...filteredPublicLists.map((list) => _buildListTile(list, isPublic: true)),
                 ],
                 const SizedBox(height: 16),
 
