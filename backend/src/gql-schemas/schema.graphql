@@ -82,6 +82,10 @@ type VocabularyList @aws_cognito_user_pools {
   status: VocabularyListStatus
   errorMessage: String
   isPublic: Boolean
+  publisher: String
+  schoolForm: String
+  grade: String
+  isbn: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -271,6 +275,10 @@ input UpdateVocabularyListInput @aws_cognito_user_pools {
   sourceLanguage: String
   targetLanguage: String
   words: [VocabularyWordInput!]
+  publisher: String
+  schoolForm: String
+  grade: String
+  isbn: String
 }
 
 input GetImageUploadUrlsInput @aws_cognito_user_pools {

@@ -26,6 +26,10 @@ export interface VocabularyList {
   status?: VocabularyListStatus;
   errorMessage?: string;
   isPublic?: string; // Stored as 'true'/'false' string for DynamoDB GSI compatibility
+  publisher?: string;
+  schoolForm?: string;
+  grade?: string;
+  isbn?: string;
   createdAt: string;
   updatedAt: string;
 }

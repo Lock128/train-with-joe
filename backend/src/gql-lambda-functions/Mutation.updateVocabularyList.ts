@@ -14,6 +14,10 @@ interface Event {
       sourceLanguage?: string;
       targetLanguage?: string;
       words?: VocabularyWord[];
+      publisher?: string;
+      schoolForm?: string;
+      grade?: string;
+      isbn?: string;
     };
   };
   identity: {
@@ -23,7 +27,8 @@ interface Event {
 
 export const handler = async (event: Event) => {
   const userId = event.identity?.sub;
-  const { id, title, sourceLanguage, targetLanguage, words } = event.arguments.input;
+  const { id, title, sourceLanguage, targetLanguage, words, publisher, schoolForm, grade, isbn } =
+    event.arguments.input;
 
   if (!userId) {
     return { success: false, vocabularyList: null, error: 'Authentication required' };
@@ -46,6 +51,10 @@ export const handler = async (event: Event) => {
     if (sourceLanguage !== undefined) updates.sourceLanguage = sourceLanguage;
     if (targetLanguage !== undefined) updates.targetLanguage = targetLanguage;
     if (words !== undefined) updates.words = words;
+    if (publisher !== undefined) updates.publisher = publisher;
+    if (schoolForm !== undefined) updates.schoolForm = schoolForm;
+    if (grade !== undefined) updates.grade = grade;
+    if (isbn !== undefined) updates.isbn = isbn;
 
     if (Object.keys(updates).length === 0) {
       return { success: true, vocabularyList, error: null };

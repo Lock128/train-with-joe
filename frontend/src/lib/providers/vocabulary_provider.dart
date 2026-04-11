@@ -170,7 +170,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyLists {
           getVocabularyLists {
-            id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
+            id userId title sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
             words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
           }
         }
@@ -196,7 +196,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyList(\$id: ID!) {
           getVocabularyList(id: \$id) {
-            id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
+            id userId title sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
             words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
           }
         }
@@ -444,7 +444,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetPublicVocabularyLists {
           getPublicVocabularyLists {
-            id userId title sourceLanguage targetLanguage status isPublic createdAt updatedAt
+            id userId title sourceLanguage targetLanguage status isPublic publisher schoolForm grade isbn createdAt updatedAt
             words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
           }
         }
@@ -464,13 +464,17 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Update a vocabulary list (title, languages, words)
+  /// Update a vocabulary list (title, languages, words, metadata)
   Future<bool> updateVocabularyList(
     String id, {
     String? title,
     String? sourceLanguage,
     String? targetLanguage,
     List<Map<String, dynamic>>? words,
+    String? publisher,
+    String? schoolForm,
+    String? grade,
+    String? isbn,
   }) async {
     try {
       const mutation = '''
@@ -478,7 +482,7 @@ class VocabularyProvider extends ChangeNotifier {
           updateVocabularyList(input: \$input) {
             success
             vocabularyList {
-              id userId title sourceLanguage targetLanguage status errorMessage isPublic createdAt updatedAt
+              id userId title sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
               words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
             }
             error
@@ -491,6 +495,10 @@ class VocabularyProvider extends ChangeNotifier {
       if (sourceLanguage != null) input['sourceLanguage'] = sourceLanguage;
       if (targetLanguage != null) input['targetLanguage'] = targetLanguage;
       if (words != null) input['words'] = words;
+      if (publisher != null) input['publisher'] = publisher;
+      if (schoolForm != null) input['schoolForm'] = schoolForm;
+      if (grade != null) input['grade'] = grade;
+      if (isbn != null) input['isbn'] = isbn;
 
       final response = await _apiService.mutate(
         mutation,
