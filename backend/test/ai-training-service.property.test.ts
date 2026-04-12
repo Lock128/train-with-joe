@@ -204,117 +204,116 @@ describe('AI Training Service Property Tests', () => {
   /**
    * Feature: ai-training-mode, Property 6: AI answer submission and completion
    */
-  test(
-    'Feature: ai-training-mode, Property 6: AI answer submission and completion',
-    { timeout: 60000 },
-    async () => {
-      const aiExerciseArb = fc.record({
-        prompt: fc.string({ minLength: 1, maxLength: 40 }),
-        options: fc.array(fc.string({ minLength: 1, maxLength: 20 }), { minLength: 3, maxLength: 5 }),
-        correctOptionIndex: fc.nat({ max: 2 }),
-        exerciseType: fc.constantFrom('fill_in_the_blank', 'verb_conjugation', 'preposition', 'sentence_completion'),
-        sourceWord: fc.string({ minLength: 1, maxLength: 20 }),
-      });
+  test('Feature: ai-training-mode, Property 6: AI answer submission and completion', { timeout: 60000 }, async () => {
+    const aiExerciseArb = fc.record({
+      prompt: fc.string({ minLength: 1, maxLength: 40 }),
+      options: fc.array(fc.string({ minLength: 1, maxLength: 20 }), { minLength: 3, maxLength: 5 }),
+      correctOptionIndex: fc.nat({ max: 2 }),
+      exerciseType: fc.constantFrom('fill_in_the_blank', 'verb_conjugation', 'preposition', 'sentence_completion'),
+      sourceWord: fc.string({ minLength: 1, maxLength: 20 }),
+    });
 
-      await fc.assert(
-        fc.asyncProperty(
-          fc.uuid(),
-          fc.array(aiExerciseArb, { minLength: 2, maxLength: 5 }),
-          async (userId, exercises) => {
-            ddbMock.reset();
-            bedrockMock.reset();
+    await fc.assert(
+      fc.asyncProperty(
+        fc.uuid(),
+        fc.array(aiExerciseArb, { minLength: 2, maxLength: 5 }),
+        async (userId, exercises) => {
+          ddbMock.reset();
+          bedrockMock.reset();
 
-            // Ensure correctOptionIndex is valid for each exercise
-            const validExercises: AIExercise[] = exercises.map((e) => ({
-              ...e,
-              correctOptionIndex: e.correctOptionIndex % e.options.length,
-            }));
+          // Ensure correctOptionIndex is valid for each exercise
+          const validExercises: AIExercise[] = exercises.map((e) => ({
+            ...e,
+            correctOptionIndex: e.correctOptionIndex % e.options.length,
+          }));
 
-            const trainingId = `training#${crypto.randomUUID()}`;
-            const executionId = `execution#${crypto.randomUUID()}`;
+          const trainingId = `training#${crypto.randomUUID()}`;
+          const executionId = `execution#${crypto.randomUUID()}`;
 
-            const training: Training = {
-              id: trainingId,
-              userId,
-              name: 'AI Training',
-              mode: 'AI_TRAINING',
-              direction: 'WORD_TO_TRANSLATION',
-              vocabularyListIds: ['list-1'],
-              words: validExercises.map((e) => ({
-                word: e.sourceWord,
-                translation: 'translation',
-                vocabularyListId: 'list-1',
-              })),
-              createdAt: '2024-01-01T00:00:00.000Z',
-              updatedAt: '2024-01-01T00:00:00.000Z',
-            };
+          const training: Training = {
+            id: trainingId,
+            userId,
+            name: 'AI Training',
+            mode: 'AI_TRAINING',
+            direction: 'WORD_TO_TRANSLATION',
+            vocabularyListIds: ['list-1'],
+            words: validExercises.map((e) => ({
+              word: e.sourceWord,
+              translation: 'translation',
+              vocabularyListId: 'list-1',
+            })),
+            createdAt: '2024-01-01T00:00:00.000Z',
+            updatedAt: '2024-01-01T00:00:00.000Z',
+          };
 
-            // Track execution state across calls
-            const executionState: TrainingExecution = {
-              id: executionId,
-              trainingId,
-              userId,
-              startedAt: '2024-01-01T10:00:00.000Z',
-              results: [],
-              aiExercises: validExercises,
-              correctCount: 0,
-              incorrectCount: 0,
-            };
+          // Track execution state across calls
+          const executionState: TrainingExecution = {
+            id: executionId,
+            trainingId,
+            userId,
+            startedAt: '2024-01-01T10:00:00.000Z',
+            results: [],
+            aiExercises: validExercises,
+            correctCount: 0,
+            incorrectCount: 0,
+          };
 
-            ddbMock.on(GetCommand).callsFake((input) => {
-              if (input.Key.id === executionId) {
-                return { Item: { ...executionState, results: [...executionState.results] } };
-              }
-              if (input.Key.id === trainingId) {
-                return { Item: { ...training } };
-              }
-              return {};
-            });
-
-            ddbMock.on(UpdateCommand).callsFake((input) => {
-              // Reflect updates back to execution state
-              if (input.ExpressionAttributeValues) {
-                if (input.ExpressionAttributeValues[':results']) {
-                  executionState.results = input.ExpressionAttributeValues[':results'];
-                }
-                if (input.ExpressionAttributeValues[':correctCount'] !== undefined) {
-                  executionState.correctCount = input.ExpressionAttributeValues[':correctCount'];
-                }
-                if (input.ExpressionAttributeValues[':incorrectCount'] !== undefined) {
-                  executionState.incorrectCount = input.ExpressionAttributeValues[':incorrectCount'];
-                }
-                if (input.ExpressionAttributeValues[':completedAt']) {
-                  executionState.completedAt = input.ExpressionAttributeValues[':completedAt'];
-                }
-              }
-              return { Attributes: { ...executionState } };
-            });
-
-            const service = TrainingService.getInstance();
-
-            let lastResult;
-            for (let i = 0; i < validExercises.length; i++) {
-              // Alternate between correct and incorrect answers
-              const answerIndex = i % 2 === 0 ? validExercises[i].correctOptionIndex : (validExercises[i].correctOptionIndex + 1) % validExercises[i].options.length;
-              lastResult = await service.submitAnswer(executionId, userId, i, String(answerIndex));
-
-              expect(lastResult.success).toBe(true);
-              expect(lastResult.result).toBeDefined();
-
-              // Verify correctness: correct if submitted index === correctOptionIndex
-              const expectedCorrect = answerIndex === validExercises[i].correctOptionIndex;
-              expect(lastResult.result!.correct).toBe(expectedCorrect);
+          ddbMock.on(GetCommand).callsFake((input) => {
+            if (input.Key.id === executionId) {
+              return { Item: { ...executionState, results: [...executionState.results] } };
             }
+            if (input.Key.id === trainingId) {
+              return { Item: { ...training } };
+            }
+            return {};
+          });
 
-            // After all answers are submitted
-            expect(lastResult!.completed).toBe(true);
-            expect(executionState.correctCount + executionState.incorrectCount).toBe(validExercises.length);
-          },
-        ),
-        { numRuns: 100 },
-      );
-    },
-  );
+          ddbMock.on(UpdateCommand).callsFake((input) => {
+            // Reflect updates back to execution state
+            if (input.ExpressionAttributeValues) {
+              if (input.ExpressionAttributeValues[':results']) {
+                executionState.results = input.ExpressionAttributeValues[':results'];
+              }
+              if (input.ExpressionAttributeValues[':correctCount'] !== undefined) {
+                executionState.correctCount = input.ExpressionAttributeValues[':correctCount'];
+              }
+              if (input.ExpressionAttributeValues[':incorrectCount'] !== undefined) {
+                executionState.incorrectCount = input.ExpressionAttributeValues[':incorrectCount'];
+              }
+              if (input.ExpressionAttributeValues[':completedAt']) {
+                executionState.completedAt = input.ExpressionAttributeValues[':completedAt'];
+              }
+            }
+            return { Attributes: { ...executionState } };
+          });
+
+          const service = TrainingService.getInstance();
+
+          let lastResult;
+          for (let i = 0; i < validExercises.length; i++) {
+            // Alternate between correct and incorrect answers
+            const answerIndex =
+              i % 2 === 0
+                ? validExercises[i].correctOptionIndex
+                : (validExercises[i].correctOptionIndex + 1) % validExercises[i].options.length;
+            lastResult = await service.submitAnswer(executionId, userId, i, String(answerIndex));
+
+            expect(lastResult.success).toBe(true);
+            expect(lastResult.result).toBeDefined();
+
+            // Verify correctness: correct if submitted index === correctOptionIndex
+            const expectedCorrect = answerIndex === validExercises[i].correctOptionIndex;
+            expect(lastResult.result!.correct).toBe(expectedCorrect);
+          }
+
+          // After all answers are submitted
+          expect(lastResult!.completed).toBe(true);
+          expect(executionState.correctCount + executionState.incorrectCount).toBe(validExercises.length);
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
 
   /**
    * Feature: ai-training-mode, Property 8: Non-AI trainings backward compatibility

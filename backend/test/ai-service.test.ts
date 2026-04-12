@@ -188,12 +188,7 @@ describe('AI Service Unit Tests', () => {
       const service = AIService.getInstance();
 
       await expect(
-        service.generateExercises(
-          [{ word: 'hello', translation: 'hola' }],
-          'English',
-          'Spanish',
-          'user-bedrock-fail',
-        ),
+        service.generateExercises([{ word: 'hello', translation: 'hola' }], 'English', 'Spanish', 'user-bedrock-fail'),
       ).rejects.toThrow('Failed to generate AI exercises');
     });
 

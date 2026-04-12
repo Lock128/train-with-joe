@@ -140,59 +140,53 @@ describe('AI Service Property Tests', () => {
    * Property 3: Parsing validation
    * For any array mixing valid and invalid exercises, parseAndValidateExercises returns only valid ones.
    */
-  test(
-    'Property 3: Parsing returns only valid exercises from mixed input',
-    { timeout: 60000 },
-    async () => {
-      await fc.assert(
-        fc.property(
-          fc.array(validExerciseArb, { minLength: 0, maxLength: 5 }),
-          fc.array(invalidExerciseArb, { minLength: 0, maxLength: 5 }),
-          (validExercises, invalidExercises) => {
-            const mixed = [...validExercises, ...invalidExercises];
-            // Shuffle the array deterministically
-            const shuffled = mixed.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  test('Property 3: Parsing returns only valid exercises from mixed input', { timeout: 60000 }, async () => {
+    await fc.assert(
+      fc.property(
+        fc.array(validExerciseArb, { minLength: 0, maxLength: 5 }),
+        fc.array(invalidExerciseArb, { minLength: 0, maxLength: 5 }),
+        (validExercises, invalidExercises) => {
+          const mixed = [...validExercises, ...invalidExercises];
+          // Shuffle the array deterministically
+          const shuffled = mixed.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 
-            const service = AIService.getInstance();
-            const result = service.parseAndValidateExercises(JSON.stringify(shuffled));
+          const service = AIService.getInstance();
+          const result = service.parseAndValidateExercises(JSON.stringify(shuffled));
 
-            // All returned exercises must be valid
-            for (const exercise of result) {
-              expect(typeof exercise.prompt).toBe('string');
-              expect(exercise.prompt.length).toBeGreaterThan(0);
-              expect(Array.isArray(exercise.options)).toBe(true);
-              expect(exercise.options.length).toBeGreaterThanOrEqual(3);
-              expect(exercise.options.length).toBeLessThanOrEqual(5);
-              expect(typeof exercise.correctOptionIndex).toBe('number');
-              expect(exercise.correctOptionIndex).toBeGreaterThanOrEqual(0);
-              expect(exercise.correctOptionIndex).toBeLessThan(exercise.options.length);
-              expect(typeof exercise.exerciseType).toBe('string');
-              expect(exercise.exerciseType.length).toBeGreaterThan(0);
-              expect(typeof exercise.sourceWord).toBe('string');
-              expect(exercise.sourceWord.length).toBeGreaterThan(0);
-            }
+          // All returned exercises must be valid
+          for (const exercise of result) {
+            expect(typeof exercise.prompt).toBe('string');
+            expect(exercise.prompt.length).toBeGreaterThan(0);
+            expect(Array.isArray(exercise.options)).toBe(true);
+            expect(exercise.options.length).toBeGreaterThanOrEqual(3);
+            expect(exercise.options.length).toBeLessThanOrEqual(5);
+            expect(typeof exercise.correctOptionIndex).toBe('number');
+            expect(exercise.correctOptionIndex).toBeGreaterThanOrEqual(0);
+            expect(exercise.correctOptionIndex).toBeLessThan(exercise.options.length);
+            expect(typeof exercise.exerciseType).toBe('string');
+            expect(exercise.exerciseType.length).toBeGreaterThan(0);
+            expect(typeof exercise.sourceWord).toBe('string');
+            expect(exercise.sourceWord.length).toBeGreaterThan(0);
+          }
 
-            // Result count should be <= total input count
-            expect(result.length).toBeLessThanOrEqual(shuffled.length);
+          // Result count should be <= total input count
+          expect(result.length).toBeLessThanOrEqual(shuffled.length);
 
-            // Result count should be >= valid exercise count (all valid ones should pass)
-            // Note: some "invalid" exercises might accidentally be valid, so we just check
-            // that valid exercises pass through
-            for (const valid of validExercises) {
-              const found = result.some(
-                (r) =>
-                  r.prompt === valid.prompt &&
-                  r.sourceWord === valid.sourceWord &&
-                  r.exerciseType === valid.exerciseType,
-              );
-              expect(found).toBe(true);
-            }
-          },
-        ),
-        { numRuns: 100 },
-      );
-    },
-  );
+          // Result count should be >= valid exercise count (all valid ones should pass)
+          // Note: some "invalid" exercises might accidentally be valid, so we just check
+          // that valid exercises pass through
+          for (const valid of validExercises) {
+            const found = result.some(
+              (r) =>
+                r.prompt === valid.prompt && r.sourceWord === valid.sourceWord && r.exerciseType === valid.exerciseType,
+            );
+            expect(found).toBe(true);
+          }
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
 
   /**
    * Property 4: Round-trip serialization

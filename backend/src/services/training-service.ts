@@ -316,7 +316,12 @@ export class TrainingService {
 
           try {
             const aiService = getAIService();
-            const aiExercises = await aiService.generateExercises(enrichedWords, sourceLanguage, targetLanguage, userId);
+            const aiExercises = await aiService.generateExercises(
+              enrichedWords,
+              sourceLanguage,
+              targetLanguage,
+              userId,
+            );
 
             const execution: TrainingExecution = {
               id: crypto.randomUUID(),

@@ -111,9 +111,7 @@ describe('AI Training Service Unit Tests', () => {
         return { Item: undefined };
       });
 
-      bedrockMock.on(InvokeModelCommand).resolves(
-        createExercisesResponse([{ word: 'hello' }, { word: 'goodbye' }]),
-      );
+      bedrockMock.on(InvokeModelCommand).resolves(createExercisesResponse([{ word: 'hello' }, { word: 'goodbye' }]));
 
       ddbMock.on(PutCommand).resolves({});
 
@@ -550,9 +548,9 @@ describe('AI Training Service Unit Tests', () => {
         return { Item: undefined };
       });
 
-      bedrockMock.on(InvokeModelCommand).resolves(
-        createExercisesResponse([{ word: 'house' }, { word: 'car' }, { word: 'tree' }]),
-      );
+      bedrockMock
+        .on(InvokeModelCommand)
+        .resolves(createExercisesResponse([{ word: 'house' }, { word: 'car' }, { word: 'tree' }]));
 
       ddbMock.on(PutCommand).resolves({});
 

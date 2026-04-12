@@ -206,8 +206,8 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
     final reversed = direction == 'TRANSLATION_TO_WORD';
     final wordText = reversed
-        ? (currentWord['translation'] as String? ?? '')
-        : (currentWord['word'] as String? ?? '');
+        ? (currentWord?['translation'] as String? ?? '')
+        : (currentWord?['word'] as String? ?? '');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Training'),
