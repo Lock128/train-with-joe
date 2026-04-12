@@ -212,8 +212,28 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
 
+      - name: Ensure SES identity is verified
+        run: bash scripts/ensure-ses-identity.sh sandbox eu-central-1
+
       - name: Build AppSync functions
         run: npm run build:appsyncFunctions
+
+      - name: Deploy Certificate stack (us-east-1)
+        run: npx cdk deploy CertificateStack-sandbox --require-approval never
+        env:
+          NODE_ENV: sandbox
+          CDK_DEFAULT_REGION: us-east-1
+          AWS_REGION: us-east-1
+
+      - name: Get Certificate ARN
+        id: cert
+        run: |
+          CERT_ARN=$(aws cloudformation describe-stacks \
+            --stack-name "CertificateStack-sandbox" \
+            --region us-east-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='CertificateArn'].OutputValue" \
+            --output text)
+          echo "certificate_arn=$CERT_ARN" >> $GITHUB_OUTPUT
 
       - name: Deploy CDK stacks
         run: npm run deploy
@@ -221,6 +241,7 @@ jobs:
           NODE_ENV: sandbox
           COMMIT_ID: ${{ github.sha }}
           BUILD_NUMBER: ${{ github.run_number }}
+          CERTIFICATE_ARN: ${{ steps.cert.outputs.certificate_arn }}
         timeout-minutes: 60
 
       - name: Setup Flutter
@@ -265,6 +286,10 @@ jobs:
         run: |
           npm ci
           npm run build
+
+      - name: Patch robots.txt for non-production
+        if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
+        run: bash scripts/patch-robots-for-environment.sh sandbox
 
       - name: Get CloudFront distribution IDs
         if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'

@@ -151,6 +151,61 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  /// Fetch all users (admin only). Returns a list of {id, email, name}.
+  Future<List<Map<String, dynamic>>> getUsers() async {
+    try {
+      const query = '''
+        query GetUsers {
+          getUsers {
+            id
+            email
+            name
+          }
+        }
+      ''';
+      final response = await _apiService.query(query);
+      final list = response['getUsers'] as List<dynamic>?;
+      if (list == null) return [];
+      return list.cast<Map<String, dynamic>>();
+    } catch (e) {
+      debugPrint('Error fetching users: $e');
+      return [];
+    }
+  }
+
+  /// Migrate vocabulary lists, trainings, and executions from one user to another (admin only).
+  /// Returns the response map with success, counts, and error.
+  Future<Map<String, dynamic>?> migrateUserData(String sourceUserId, String targetUserId) async {
+    try {
+      const mutation = '''
+        mutation MigrateUserData(\$input: MigrateUserDataInput!) {
+          migrateUserData(input: \$input) {
+            success
+            migratedVocabularyLists
+            migratedTrainings
+            migratedExecutions
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {
+          'input': {
+            'sourceUserId': sourceUserId,
+            'targetUserId': targetUserId,
+          },
+        },
+      );
+
+      return response['migrateUserData'] as Map<String, dynamic>?;
+    } catch (e) {
+      debugPrint('Error migrating user data: $e');
+      return {'success': false, 'error': e.toString(), 'migratedVocabularyLists': 0, 'migratedTrainings': 0, 'migratedExecutions': 0};
+    }
+  }
+
   /// Clear user data (on sign out)
   void clear() {
     _user = null;

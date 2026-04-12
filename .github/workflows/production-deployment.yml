@@ -33,7 +33,7 @@ permissions:
   issues: write
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-central-1
 
 jobs:
   create-deployment-tag:
@@ -220,6 +220,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Ensure SES identity is verified
+        run: bash scripts/ensure-ses-identity.sh production ${{ env.AWS_REGION }}
+
       - name: Build AppSync functions
         run: npm run build:appsyncFunctions
 
@@ -228,6 +231,23 @@ jobs:
         run: |
           echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "commit_full=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Deploy Certificate stack (us-east-1)
+        run: npx cdk deploy CertificateStack-production --require-approval never
+        env:
+          NODE_ENV: production
+          CDK_DEFAULT_REGION: us-east-1
+          AWS_REGION: us-east-1
+
+      - name: Get Certificate ARN
+        id: cert
+        run: |
+          CERT_ARN=$(aws cloudformation describe-stacks \
+            --stack-name "CertificateStack-production" \
+            --region us-east-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='CertificateArn'].OutputValue" \
+            --output text)
+          echo "certificate_arn=$CERT_ARN" >> $GITHUB_OUTPUT
 
       - name: Deploy CDK stacks to production
         id: deploy
@@ -247,6 +267,7 @@ jobs:
           BUILD_TIME: ${{ github.run_started_at }}
           BRANCH: ${{ github.ref_name }}
           TAG: ${{ needs.validate-production-deployment.outputs.ref }}
+          CERTIFICATE_ARN: ${{ steps.cert.outputs.certificate_arn }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -304,6 +325,9 @@ jobs:
         run: |
           npm ci
           npm run build
+
+      - name: Patch robots.txt for environment
+        run: bash scripts/patch-robots-for-environment.sh production
 
       - name: Get CloudFront distribution IDs
         id: cf-ids

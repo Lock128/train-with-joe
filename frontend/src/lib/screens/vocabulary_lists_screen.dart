@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/vocabulary_provider.dart';
+import '../utils/language_flags.dart';
 
 /// Screen for viewing all saved vocabulary lists
 class VocabularyListsScreen extends StatefulWidget {
@@ -123,12 +124,10 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
     final words = (list['words'] as List<dynamic>?) ?? [];
     final isPublic = list['isPublic'] == true;
 
+    final langPair = formatLanguagePair(sourceLang, targetLang);
+
     final subtitleParts = <String>['${words.length} words'];
-    if (sourceLang != null && targetLang != null && sourceLang != targetLang) {
-      subtitleParts.add('$sourceLang → $targetLang');
-    } else if (sourceLang != null) {
-      subtitleParts.add(sourceLang);
-    }
+    if (langPair != null) subtitleParts.add(langPair);
     if (createdAt != null) subtitleParts.add(_formatDate(createdAt));
 
     return Card(

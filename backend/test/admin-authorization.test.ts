@@ -7,18 +7,10 @@ import { handler as getTrainingDayStatisticsHandler } from '../src/gql-lambda-fu
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 
-const USERS_TABLE = 'train-with-joe-users-sandbox';
 const TRAININGS_TABLE = 'train-with-joe-trainings-sandbox';
 
 const ADMIN_EMAIL = 'johannes.koch@gmail.com';
 const NON_ADMIN_EMAIL = 'regular-user@example.com';
-
-const makeUser = (id: string, email: string) => ({
-  id,
-  email,
-  createdAt: '2024-01-01T00:00:00.000Z',
-  updatedAt: '2024-01-01T00:00:00.000Z',
-});
 
 describe('Admin Authorization', () => {
   beforeEach(() => {
@@ -39,35 +31,24 @@ describe('Admin Authorization', () => {
     test('should deny non-admin user from viewing other user statistics', async () => {
       const callerId = 'caller-123';
 
-      ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return { Item: makeUser(callerId, NON_ADMIN_EMAIL) };
-        }
-        return {};
-      });
-
       const result = await getTrainingStatisticsHandler({
         arguments: { trainingId: 'training-1', userId: 'other-user-456' },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: { email: NON_ADMIN_EMAIL } },
       } as any);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Not authorized to view other users' statistics");
     });
 
-    test('should deny when caller user not found in DynamoDB', async () => {
+    test('should deny when caller has no email claim', async () => {
       const callerId = 'non-existent-user';
 
-      ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return {};
-        }
-        return {};
-      });
+      // DB fallback lookup should return no user
+      ddbMock.on(GetCommand).resolves({ Item: undefined });
 
       const result = await getTrainingStatisticsHandler({
         arguments: { trainingId: 'training-1', userId: 'other-user-456' },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: {} },
       } as any);
 
       expect(result.success).toBe(false);
@@ -79,9 +60,6 @@ describe('Admin Authorization', () => {
       const targetUserId = 'target-456';
 
       ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return { Item: makeUser(callerId, ADMIN_EMAIL) };
-        }
         if (input.TableName === TRAININGS_TABLE) {
           return {};
         }
@@ -92,7 +70,7 @@ describe('Admin Authorization', () => {
 
       const result = await getTrainingStatisticsHandler({
         arguments: { trainingId: 'training-1', userId: targetUserId },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: { email: ADMIN_EMAIL } },
       } as any);
 
       // Should not return the authorization error
@@ -114,35 +92,24 @@ describe('Admin Authorization', () => {
     test('should deny non-admin user from viewing other user statistics', async () => {
       const callerId = 'caller-123';
 
-      ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return { Item: makeUser(callerId, NON_ADMIN_EMAIL) };
-        }
-        return {};
-      });
-
       const result = await getTrainingOverviewStatisticsHandler({
         arguments: { fromDate: '2024-01-01', toDate: '2024-01-31', userId: 'other-user-456' },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: { email: NON_ADMIN_EMAIL } },
       } as any);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Not authorized to view other users' statistics");
     });
 
-    test('should deny when caller user not found in DynamoDB', async () => {
+    test('should deny when caller has no email claim', async () => {
       const callerId = 'non-existent-user';
 
-      ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return {};
-        }
-        return {};
-      });
+      // DB fallback lookup should return no user
+      ddbMock.on(GetCommand).resolves({ Item: undefined });
 
       const result = await getTrainingOverviewStatisticsHandler({
         arguments: { fromDate: '2024-01-01', toDate: '2024-01-31', userId: 'other-user-456' },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: {} },
       } as any);
 
       expect(result.success).toBe(false);
@@ -153,18 +120,11 @@ describe('Admin Authorization', () => {
       const callerId = 'admin-123';
       const targetUserId = 'target-456';
 
-      ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return { Item: makeUser(callerId, ADMIN_EMAIL) };
-        }
-        return {};
-      });
-
       ddbMock.on(QueryCommand).resolves({ Items: [] });
 
       const result = await getTrainingOverviewStatisticsHandler({
         arguments: { fromDate: '2024-01-01', toDate: '2024-01-31', userId: targetUserId },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: { email: ADMIN_EMAIL } },
       } as any);
 
       expect(result.error).not.toBe("Not authorized to view other users' statistics");
@@ -185,35 +145,24 @@ describe('Admin Authorization', () => {
     test('should deny non-admin user from viewing other user statistics', async () => {
       const callerId = 'caller-123';
 
-      ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return { Item: makeUser(callerId, NON_ADMIN_EMAIL) };
-        }
-        return {};
-      });
-
       const result = await getTrainingDayStatisticsHandler({
         arguments: { date: '2024-01-15', userId: 'other-user-456' },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: { email: NON_ADMIN_EMAIL } },
       } as any);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe("Not authorized to view other users' statistics");
     });
 
-    test('should deny when caller user not found in DynamoDB', async () => {
+    test('should deny when caller has no email claim', async () => {
       const callerId = 'non-existent-user';
 
-      ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return {};
-        }
-        return {};
-      });
+      // DB fallback lookup should return no user
+      ddbMock.on(GetCommand).resolves({ Item: undefined });
 
       const result = await getTrainingDayStatisticsHandler({
         arguments: { date: '2024-01-15', userId: 'other-user-456' },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: {} },
       } as any);
 
       expect(result.success).toBe(false);
@@ -224,18 +173,11 @@ describe('Admin Authorization', () => {
       const callerId = 'admin-123';
       const targetUserId = 'target-456';
 
-      ddbMock.on(GetCommand).callsFake((input) => {
-        if (input.TableName === USERS_TABLE) {
-          return { Item: makeUser(callerId, ADMIN_EMAIL) };
-        }
-        return {};
-      });
-
       ddbMock.on(QueryCommand).resolves({ Items: [] });
 
       const result = await getTrainingDayStatisticsHandler({
         arguments: { date: '2024-01-15', userId: targetUserId },
-        identity: { sub: callerId },
+        identity: { sub: callerId, claims: { email: ADMIN_EMAIL } },
       } as any);
 
       expect(result.error).not.toBe("Not authorized to view other users' statistics");

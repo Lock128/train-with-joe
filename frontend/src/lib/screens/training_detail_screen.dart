@@ -205,6 +205,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
 
     final name = _training!['name'] as String? ?? 'Untitled Training';
     final mode = _training!['mode'] as String?;
+    final direction = _training!['direction'] as String? ?? 'WORD_TO_TRANSLATION';
     final words = (_training!['words'] as List<dynamic>?) ?? [];
     final isRandomized = _training!['isRandomized'] as bool? ?? false;
     final randomizedWordCount = _training!['randomizedWordCount'] as int? ?? 10;
@@ -233,6 +234,21 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
           Row(children: [
             Chip(label: Text(_modeLabel(mode), style: TextStyle(color: _modeColor(mode))),
               backgroundColor: _modeColor(mode).withValues(alpha: 0.1)),
+            const SizedBox(width: 8),
+            Chip(
+              avatar: Icon(
+                direction == 'TRANSLATION_TO_WORD' ? Icons.swap_horiz : Icons.arrow_forward,
+                size: 16,
+                color: direction == 'TRANSLATION_TO_WORD' ? const Color(0xFF805AD5) : const Color(0xFF38A169),
+              ),
+              label: Text(
+                direction == 'TRANSLATION_TO_WORD' ? 'Translation → Word' : 'Word → Translation',
+                style: TextStyle(
+                  color: direction == 'TRANSLATION_TO_WORD' ? const Color(0xFF805AD5) : const Color(0xFF38A169),
+                ),
+              ),
+              backgroundColor: (direction == 'TRANSLATION_TO_WORD' ? const Color(0xFF805AD5) : const Color(0xFF38A169)).withValues(alpha: 0.1),
+            ),
             if (isRandomized) ...[
               const SizedBox(width: 8),
               Chip(

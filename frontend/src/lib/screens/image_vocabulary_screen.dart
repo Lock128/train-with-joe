@@ -14,6 +14,8 @@ class ImageVocabularyScreen extends StatefulWidget {
 }
 
 class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
+  final ImagePicker _picker = ImagePicker();
+  bool _isPickerActive = false;
   final List<Uint8List> _selectedImages = [];
   String? _selectedSourceLanguage;
   String? _selectedTargetLanguage;
@@ -34,9 +36,10 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   ];
 
   Future<void> _pickImages() async {
+    if (_isPickerActive) return;
+    _isPickerActive = true;
     try {
-      final picker = ImagePicker();
-      final pickedFiles = await picker.pickMultiImage();
+      final pickedFiles = await _picker.pickMultiImage();
       if (pickedFiles.isNotEmpty) {
         final newImages = <Uint8List>[];
         for (final file in pickedFiles) {
@@ -54,13 +57,16 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           SnackBar(content: Text('Failed to pick images: $e'), backgroundColor: Colors.red),
         );
       }
+    } finally {
+      _isPickerActive = false;
     }
   }
 
   Future<void> _takePhoto() async {
+    if (_isPickerActive) return;
+    _isPickerActive = true;
     try {
-      final picker = ImagePicker();
-      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+      final pickedFile = await _picker.pickImage(source: ImageSource.camera);
       if (pickedFile != null) {
         final bytes = await pickedFile.readAsBytes();
         setState(() {
@@ -75,6 +81,8 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           SnackBar(content: Text('Failed to take photo: $e'), backgroundColor: Colors.red),
         );
       }
+    } finally {
+      _isPickerActive = false;
     }
   }
 

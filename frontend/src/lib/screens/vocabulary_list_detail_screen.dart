@@ -147,7 +147,7 @@ class _VocabularyListDetailScreenState
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String?>(
-                value: selectedSource,
+                initialValue: selectedSource,
                 decoration: const InputDecoration(
                     labelText: 'Source language', border: OutlineInputBorder()),
                 items: [
@@ -161,7 +161,7 @@ class _VocabularyListDetailScreenState
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String?>(
-                value: selectedTarget,
+                initialValue: selectedTarget,
                 decoration: const InputDecoration(
                     labelText: 'Target language', border: OutlineInputBorder()),
                 items: [
@@ -203,6 +203,124 @@ class _VocabularyListDetailScreenState
       setState(() {
         _list?['sourceLanguage'] = src;
         _list?['targetLanguage'] = tgt;
+      });
+    }
+  }
+
+  static const List<String> _schoolForms = [
+    'Grundschule',
+    'Hauptschule',
+    'Realschule',
+    'Gymnasium',
+    'Gesamtschule',
+    'Berufsschule',
+  ];
+
+  void _showBookDetailsDialog() {
+    final publisherCtrl =
+        TextEditingController(text: _list?['publisher'] as String? ?? '');
+    final isbnCtrl =
+        TextEditingController(text: _list?['isbn'] as String? ?? '');
+    final gradeCtrl =
+        TextEditingController(text: _list?['grade'] as String? ?? '');
+    String? selectedSchoolForm = _list?['schoolForm'] as String?;
+    if (selectedSchoolForm != null &&
+        !_schoolForms.contains(selectedSchoolForm)) {
+      selectedSchoolForm = null;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Book Details'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: publisherCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Publisher (Verlag)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String?>(
+                  initialValue: selectedSchoolForm,
+                  decoration: const InputDecoration(
+                    labelText: 'School Form',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    const DropdownMenuItem<String?>(
+                        value: null, child: Text('None')),
+                    ..._schoolForms.map((f) =>
+                        DropdownMenuItem(value: f, child: Text(f))),
+                  ],
+                  onChanged: (value) =>
+                      setDialogState(() => selectedSchoolForm = value),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: gradeCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Grade (Klasse)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: isbnCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'ISBN',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _updateBookDetails(
+                  publisher: publisherCtrl.text.trim(),
+                  schoolForm: selectedSchoolForm ?? '',
+                  grade: gradeCtrl.text.trim(),
+                  isbn: isbnCtrl.text.trim(),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateBookDetails({
+    required String publisher,
+    required String schoolForm,
+    required String grade,
+    required String isbn,
+  }) async {
+    final ok = await context.read<VocabularyProvider>().updateVocabularyList(
+          widget.listId,
+          publisher: publisher,
+          schoolForm: schoolForm,
+          grade: grade,
+          isbn: isbn,
+        );
+    if (ok && mounted) {
+      setState(() {
+        _list?['publisher'] = publisher;
+        _list?['schoolForm'] = schoolForm;
+        _list?['grade'] = grade;
+        _list?['isbn'] = isbn;
       });
     }
   }
@@ -477,6 +595,12 @@ class _VocabularyListDetailScreenState
     final targetLang = _list!['targetLanguage'] as String?;
     final isPublic = _list!['isPublic'] == true;
     final words = (_list!['words'] as List<dynamic>?) ?? [];
+    final publisher = _list!['publisher'] as String?;
+    final schoolForm = _list!['schoolForm'] as String?;
+    final grade = _list!['grade'] as String?;
+    final isbn = _list!['isbn'] as String?;
+    final hasBookDetails = [publisher, schoolForm, grade, isbn]
+        .any((v) => v != null && v.isNotEmpty);
 
     return Scaffold(
       appBar: AppBar(
@@ -493,6 +617,8 @@ class _VocabularyListDetailScreenState
                   _showRenameDialog();
                 case 'languages':
                   _showLanguageDialog();
+                case 'bookDetails':
+                  _showBookDetailsDialog();
                 case 'public':
                   _togglePublic();
                 case 'export':
@@ -505,6 +631,8 @@ class _VocabularyListDetailScreenState
               const PopupMenuItem(value: 'rename', child: Text('Rename')),
               const PopupMenuItem(
                   value: 'languages', child: Text('Languages')),
+              const PopupMenuItem(
+                  value: 'bookDetails', child: Text('Book Details')),
               PopupMenuItem(
                 value: 'public',
                 child: Text(isPublic ? 'Make private' : 'Make public'),
@@ -537,6 +665,32 @@ class _VocabularyListDetailScreenState
                   const Spacer(),
                   Text('${words.length} words',
                       style: const TextStyle(color: Colors.grey)),
+                ],
+              ),
+            ),
+          // Book details bar
+          if (hasBookDetails)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Wrap(
+                spacing: 12,
+                children: [
+                  if (publisher != null && publisher.isNotEmpty)
+                    Text(publisher,
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.blueGrey.shade600)),
+                  if (schoolForm != null && schoolForm.isNotEmpty)
+                    Text(schoolForm,
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.blueGrey.shade600)),
+                  if (grade != null && grade.isNotEmpty)
+                    Text('Klasse $grade',
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.blueGrey.shade600)),
+                  if (isbn != null && isbn.isNotEmpty)
+                    Text('ISBN: $isbn',
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.blueGrey.shade600)),
                 ],
               ),
             ),

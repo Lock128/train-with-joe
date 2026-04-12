@@ -83,6 +83,10 @@ type VocabularyList @aws_cognito_user_pools {
   status: VocabularyListStatus
   errorMessage: String
   isPublic: Boolean
+  publisher: String
+  schoolForm: String
+  grade: String
+  isbn: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -281,6 +285,10 @@ input UpdateVocabularyListInput @aws_cognito_user_pools {
   sourceLanguage: String
   targetLanguage: String
   words: [VocabularyWordInput!]
+  publisher: String
+  schoolForm: String
+  grade: String
+  isbn: String
 }
 
 input GetImageUploadUrlsInput @aws_cognito_user_pools {
@@ -315,6 +323,11 @@ input SubmitAnswerInput @aws_cognito_user_pools {
   executionId: ID!
   wordIndex: Int!
   answer: String!
+}
+
+input MigrateUserDataInput @aws_cognito_user_pools {
+  sourceUserId: ID!
+  targetUserId: ID!
 }
 
 # ============================================================================
@@ -383,6 +396,14 @@ type SubmitAnswerResponse @aws_cognito_user_pools {
   error: String
 }
 
+type MigrateUserDataResponse @aws_cognito_user_pools {
+  success: Boolean!
+  migratedVocabularyLists: Int!
+  migratedTrainings: Int!
+  migratedExecutions: Int!
+  error: String
+}
+
 type TrainingStatisticsResponse @aws_cognito_user_pools {
   success: Boolean!
   statistics: TrainingStatistics
@@ -427,6 +448,7 @@ type Query {
   getTrainingStatistics(trainingId: ID!, userId: ID): TrainingStatisticsResponse @aws_cognito_user_pools
   getTrainingDayStatistics(date: String!, userId: ID): TrainingDayStatisticsResponse @aws_cognito_user_pools
   getTrainingOverviewStatistics(fromDate: String!, toDate: String!, userId: ID): TrainingOverviewStatisticsResponse @aws_cognito_user_pools
+  getUsers: [User] @aws_cognito_user_pools
 }
 
 # ============================================================================
@@ -458,6 +480,9 @@ type Mutation {
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools
   generateContent(input: GenerateContentInput!): ContentResponse @aws_cognito_user_pools
   analyzeImageVocabulary(input: AnalyzeImageVocabularyInput!): VocabularyListResponse @aws_cognito_user_pools
+
+  # Admin operations
+  migrateUserData(input: MigrateUserDataInput!): MigrateUserDataResponse @aws_cognito_user_pools
 
   # Training operations
   createTraining(input: CreateTrainingInput!): TrainingResponse @aws_cognito_user_pools

@@ -19,7 +19,7 @@ permissions:
   actions: write
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-central-1
 
 jobs:
   validate-inputs:
@@ -134,8 +134,28 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_BETA }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Ensure SES identity is verified
+        run: bash scripts/ensure-ses-identity.sh beta ${{ env.AWS_REGION }}
+
       - name: Build AppSync functions
         run: npm run build:appsyncFunctions
+
+      - name: Deploy Certificate stack (us-east-1)
+        run: npx cdk deploy CertificateStack-beta --require-approval never
+        env:
+          NODE_ENV: beta
+          CDK_DEFAULT_REGION: us-east-1
+          AWS_REGION: us-east-1
+
+      - name: Get Certificate ARN
+        id: cert
+        run: |
+          CERT_ARN=$(aws cloudformation describe-stacks \
+            --stack-name "CertificateStack-beta" \
+            --region us-east-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='CertificateArn'].OutputValue" \
+            --output text)
+          echo "certificate_arn=$CERT_ARN" >> $GITHUB_OUTPUT
 
       - name: Deploy CDK stacks
         id: deploy
@@ -147,6 +167,7 @@ jobs:
           NODE_ENV: beta
           COMMIT_ID: ${{ github.sha }}
           BUILD_NUMBER: ${{ github.run_number }}
+          CERTIFICATE_ARN: ${{ steps.cert.outputs.certificate_arn }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -173,6 +194,9 @@ jobs:
         run: |
           npm ci
           npm run build
+
+      - name: Patch robots.txt for non-production
+        run: bash scripts/patch-robots-for-environment.sh beta
 
       - name: Get CloudFront distribution IDs
         id: cf-ids

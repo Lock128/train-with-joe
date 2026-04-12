@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/training_provider.dart';
 import '../providers/vocabulary_provider.dart';
+import '../utils/language_flags.dart';
 
 /// Screen for viewing all user trainings
 class TrainingListScreen extends StatefulWidget {
@@ -194,10 +195,27 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
     final randomizedWordCount = training['randomizedWordCount'] as int?;
 
     final vocabLists = context.read<VocabularyProvider>().vocabularyLists;
-    final listNames = vocabularyListIds.map((id) {
-      final match = vocabLists.where((l) => l['id'] == id).firstOrNull;
-      return match?['title'] as String? ?? 'Unknown list';
-    }).toList();
+    final matchedLists = vocabularyListIds
+        .map((id) => vocabLists.where((l) => l['id'] == id).firstOrNull)
+        .whereType<Map<String, dynamic>>()
+        .toList();
+    final listNames = matchedLists
+        .map((l) => l['title'] as String? ?? 'Unknown list')
+        .toList();
+
+    // Derive language pair from linked vocabulary lists
+    final sourceLangs = matchedLists
+        .map((l) => l['sourceLanguage'] as String?)
+        .whereType<String>()
+        .toSet();
+    final targetLangs = matchedLists
+        .map((l) => l['targetLanguage'] as String?)
+        .whereType<String>()
+        .toSet();
+    final langPair = formatLanguagePair(
+      sourceLangs.length == 1 ? sourceLangs.first : null,
+      targetLangs.length == 1 ? targetLangs.first : null,
+    );
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -257,11 +275,24 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
             ),
             if (listNames.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text(
-                listNames.join(', '),
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  if (langPair != null) ...[
+                    Text(
+                      langPair,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Flexible(
+                    child: Text(
+                      listNames.join(', '),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ],
             const SizedBox(height: 4),

@@ -41,7 +41,7 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
       arguments: {
         input: {
           imageS3Keys: ['uploads/user-123/image1.jpg'],
-          language: 'English',
+          sourceLanguage: 'English',
         },
       },
       identity: { sub: 'user-123' },

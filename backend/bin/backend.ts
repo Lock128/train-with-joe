@@ -9,6 +9,7 @@ import { APIStack } from '../lib/api-stack';
 import { BedrockStack } from '../lib/bedrock-stack';
 import { SubscriptionStack } from '../lib/subscription-stack';
 import { DistributionStack } from '../lib/distribution-stack';
+import { CertificateStack } from '../lib/certificate-stack';
 
 const app = new cdk.App();
 
@@ -81,7 +82,15 @@ const subscriptionStack = new SubscriptionStack(app, `SubscriptionStack-${namesp
 });
 subscriptionStack.addDependency(baseStack);
 
+// Create ACM certificate in us-east-1 (required for CloudFront)
+// Deploy this stack first: cdk deploy CertificateStack-<namespace>
+new CertificateStack(app, `CertificateStack-${namespace}`, {
+  env: { account: env.account, region: 'us-east-1' },
+  namespace,
+});
+
 // Create CloudFront distributions for frontend and join page
+// Imports the certificate ARN from SSM (written by CertificateStack)
 new DistributionStack(app, `DistributionStack-${namespace}`, {
   env,
   namespace,

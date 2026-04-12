@@ -589,6 +589,40 @@ export class APIStack extends cdk.Stack {
       fieldName: 'getTrainingOverviewStatistics',
     });
 
+    // Create migrateUserData Lambda function (admin only)
+    const migrateUserDataFunction = new NodejsFunction(this, 'MigrateUserDataFunction', {
+      ...trainingLambdaProps,
+      timeout: cdk.Duration.minutes(5),
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.migrateUserData.ts'),
+      handler: 'handler',
+    });
+
+    vocabularyListsTable.grantReadWriteData(migrateUserDataFunction);
+    trainingsTable.grantReadWriteData(migrateUserDataFunction);
+
+    const migrateUserDataDataSource = api.addLambdaDataSource('MigrateUserDataDataSource', migrateUserDataFunction);
+
+    migrateUserDataDataSource.createResolver('MigrateUserDataResolver', {
+      typeName: 'Mutation',
+      fieldName: 'migrateUserData',
+    });
+
+    // Create getUsers Lambda function (admin only)
+    const getUsersFunction = new NodejsFunction(this, 'GetUsersFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getUsers.ts'),
+      handler: 'handler',
+    });
+
+    usersTable.grantReadData(getUsersFunction);
+
+    const getUsersDataSource = api.addLambdaDataSource('GetUsersDataSource', getUsersFunction);
+
+    getUsersDataSource.createResolver('GetUsersResolver', {
+      typeName: 'Query',
+      fieldName: 'getUsers',
+    });
+
     // Export API endpoint URL and API ID
     new cdk.CfnOutput(this, 'ApiUrl', {
       value: api.graphqlUrl,

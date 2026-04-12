@@ -17,6 +17,9 @@ interface Event {
   };
   identity: {
     sub: string;
+    claims: {
+      email?: string;
+    };
   };
 }
 
@@ -34,16 +37,34 @@ export const handler = async (event: Event) => {
 
   let effectiveUserId = callerUserId;
   if (targetUserId) {
-    const userRepo = UserRepository.getInstance();
-    const callerUser = await userRepo.getById(callerUserId);
-    const callerEmail = callerUser?.email;
-    if (!callerEmail || !ADMIN_EMAILS.includes(callerEmail)) {
+    // Try JWT claim first, fall back to DB lookup
+    let callerEmail = event.identity?.claims?.email;
+    console.log(
+      '[AdminAuth] getTrainingOverviewStatistics — callerUserId:',
+      callerUserId,
+      'targetUserId:',
+      targetUserId,
+      'jwtEmail:',
+      callerEmail,
+    );
+    if (!callerEmail) {
+      console.log('[AdminAuth] JWT email claim missing, falling back to DB lookup');
+      const userRepo = UserRepository.getInstance();
+      const callerUser = await userRepo.getById(callerUserId);
+      callerEmail = callerUser?.email;
+      console.log('[AdminAuth] DB email lookup result:', callerEmail);
+    }
+    const isAdmin = callerEmail != null && ADMIN_EMAILS.includes(callerEmail);
+    console.log('[AdminAuth] email:', callerEmail, 'isAdmin:', isAdmin);
+    if (!callerEmail || !isAdmin) {
+      console.warn('[AdminAuth] DENIED — getTrainingOverviewStatistics for targetUserId:', targetUserId);
       return {
         success: false,
         statistics: null,
         error: "Not authorized to view other users' statistics",
       };
     }
+    console.log('[AdminAuth] GRANTED — viewing stats for user:', targetUserId);
     effectiveUserId = targetUserId;
   }
 
