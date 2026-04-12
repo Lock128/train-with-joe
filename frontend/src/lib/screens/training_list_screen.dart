@@ -30,6 +30,8 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         return const Color(0xFF2B6CB0);
       case 'MULTIPLE_CHOICE':
         return const Color(0xFFF0932B);
+      case 'AI_TRAINING':
+        return const Color(0xFF6B46C1);
       default:
         return Colors.grey;
     }
@@ -41,6 +43,8 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         return 'Text Input';
       case 'MULTIPLE_CHOICE':
         return 'Multiple Choice';
+      case 'AI_TRAINING':
+        return 'AI Training';
       default:
         return mode ?? 'Unknown';
     }
@@ -219,7 +223,11 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         leading: CircleAvatar(
           backgroundColor: _getModeColor(mode).withValues(alpha: 0.15),
           child: Icon(
-            mode == 'MULTIPLE_CHOICE' ? Icons.checklist : Icons.keyboard,
+            mode == 'MULTIPLE_CHOICE'
+                ? Icons.checklist
+                : mode == 'AI_TRAINING'
+                    ? Icons.psychology
+                    : Icons.keyboard,
             color: _getModeColor(mode),
           ),
         ),

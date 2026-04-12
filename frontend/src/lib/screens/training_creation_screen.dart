@@ -248,7 +248,9 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     ChoiceChip(
                       label: const Text('Text Input'),
@@ -256,12 +258,17 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                       selectedColor: const Color(0xFF2B6CB0).withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _selectedMode = 'TEXT_INPUT'),
                     ),
-                    const SizedBox(width: 8),
                     ChoiceChip(
                       label: const Text('Multiple Choice'),
                       selected: _selectedMode == 'MULTIPLE_CHOICE',
                       selectedColor: const Color(0xFFF0932B).withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _selectedMode = 'MULTIPLE_CHOICE'),
+                    ),
+                    ChoiceChip(
+                      label: const Text('AI Training'),
+                      selected: _selectedMode == 'AI_TRAINING',
+                      selectedColor: const Color(0xFF6B46C1).withValues(alpha: 0.2),
+                      onSelected: (_) => setState(() => _selectedMode = 'AI_TRAINING'),
                     ),
                   ],
                 ),

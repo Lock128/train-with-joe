@@ -309,6 +309,7 @@ class TrainingProvider extends ChangeNotifier {
               results { wordIndex word expectedAnswer userAnswer correct }
               multipleChoiceOptions { wordIndex options }
               words { word translation vocabularyListId unit }
+              aiExercises { prompt options correctOptionIndex exerciseType sourceWord }
             }
             error
           }
@@ -359,6 +360,7 @@ class TrainingProvider extends ChangeNotifier {
               id trainingId userId startedAt completedAt correctCount incorrectCount
               results { wordIndex word expectedAnswer userAnswer correct }
               multipleChoiceOptions { wordIndex options }
+              aiExercises { prompt options correctOptionIndex exerciseType sourceWord }
             }
             error
           }

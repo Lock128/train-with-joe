@@ -1,4 +1,5 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
+import type { AIExercise } from '../model/domain/Training';
 
 /**
  * Rate limiting tracker for AI service
@@ -145,6 +146,176 @@ export class AIService {
     // Fallback
     const fallbackResponse = responseBody as { completion?: string; text?: string };
     return fallbackResponse.completion || fallbackResponse.text || '';
+  }
+
+  /**
+   * Parse and validate exercises from AI response text
+   */
+  parseAndValidateExercises(responseText: string): AIExercise[] {
+    // Strip markdown code fences if present
+    const stripped = responseText
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```\s*$/, '')
+      .trim();
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(stripped);
+    } catch {
+      throw new Error('Failed to parse exercises response as JSON');
+    }
+
+    if (!Array.isArray(parsed)) {
+      throw new Error('Expected JSON array of exercises');
+    }
+
+    const validExercises: AIExercise[] = [];
+
+    for (const exercise of parsed) {
+      const isValid =
+        exercise &&
+        typeof exercise.prompt === 'string' &&
+        exercise.prompt.length > 0 &&
+        Array.isArray(exercise.options) &&
+        exercise.options.length >= 3 &&
+        exercise.options.length <= 5 &&
+        typeof exercise.correctOptionIndex === 'number' &&
+        exercise.correctOptionIndex >= 0 &&
+        exercise.correctOptionIndex < exercise.options.length &&
+        typeof exercise.exerciseType === 'string' &&
+        exercise.exerciseType.length > 0 &&
+        typeof exercise.sourceWord === 'string' &&
+        exercise.sourceWord.length > 0;
+
+      if (isValid) {
+        validExercises.push({
+          prompt: exercise.prompt,
+          options: exercise.options,
+          correctOptionIndex: exercise.correctOptionIndex,
+          exerciseType: exercise.exerciseType,
+          sourceWord: exercise.sourceWord,
+        });
+      } else {
+        console.warn('Invalid exercise filtered out:', JSON.stringify(exercise));
+      }
+    }
+
+    return validExercises;
+  }
+
+  /**
+   * Generate AI exercises for vocabulary words
+   */
+  async generateExercises(
+    words: {
+      word: string;
+      translation?: string;
+      definition?: string;
+      partOfSpeech?: string;
+      exampleSentence?: string;
+    }[],
+    sourceLanguage: string,
+    targetLanguage: string,
+    userId: string,
+  ): Promise<AIExercise[]> {
+    // Check rate limit
+    if (!this.checkRateLimit(userId)) {
+      throw new Error('Rate limit exceeded. Please wait before making more AI requests.');
+    }
+
+    if (!words || words.length === 0) {
+      throw new Error('Words array cannot be empty');
+    }
+
+    try {
+      const wordDescriptions = words
+        .map((w, i) => {
+          const parts = [`${i + 1}. word: "${w.word}"`];
+          if (w.translation) parts.push(`translation: "${w.translation}"`);
+          if (w.definition) parts.push(`definition: "${w.definition}"`);
+          if (w.partOfSpeech) parts.push(`partOfSpeech: "${w.partOfSpeech}"`);
+          if (w.exampleSentence) parts.push(`exampleSentence: "${w.exampleSentence}"`);
+          return parts.join(', ');
+        })
+        .join('\n');
+
+      const prompt = `Generate vocabulary exercises for language learners studying ${sourceLanguage} to ${targetLanguage}.
+
+Here are the words to create exercises for:
+${wordDescriptions}
+
+Create a JSON array of exercises with varied types including: verb_conjugation, preposition, fill_in_the_blank, sentence_completion.
+
+Each exercise must have:
+- "prompt": a question or instruction for the learner
+- "options": an array of 3 to 5 answer choices
+- "correctOptionIndex": the zero-based index of the correct answer in the options array
+- "exerciseType": one of verb_conjugation, preposition, fill_in_the_blank, sentence_completion
+- "sourceWord": the vocabulary word this exercise is based on
+
+Return ONLY a valid JSON array, no markdown, no code blocks, no extra text.`;
+
+      const requestBody = this.buildRequestBody(prompt, 2000);
+
+      const response = await this.bedrockClient.send(
+        new InvokeModelCommand({
+          modelId: this.modelId,
+          contentType: 'application/json',
+          accept: 'application/json',
+          body: JSON.stringify(requestBody),
+        }),
+      );
+
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+      const responseText = this.extractResponseText(responseBody);
+
+      if (!responseText) {
+        throw new Error('No content returned from Bedrock');
+      }
+
+      const validExercises = this.parseAndValidateExercises(responseText);
+
+      if (validExercises.length === 0) {
+        throw new Error('No valid exercises could be generated');
+      }
+
+      // Log usage
+      const tokenEstimate = responseText.length / 4;
+      this.logUsage(userId, 'generateExercises', tokenEstimate);
+
+      return validExercises;
+    } catch (error) {
+      console.error('Error generating AI exercises with Bedrock:', error);
+
+      if (error instanceof Error) {
+        if (error.message.includes('Rate limit')) {
+          throw error;
+        }
+        if (error.message.includes('No valid exercises')) {
+          throw error;
+        }
+        if (error.message.includes('Failed to parse') || error.message.includes('Expected JSON array')) {
+          throw error;
+        }
+        if (error.message.includes('throttling')) {
+          throw new Error('Bedrock service is currently throttling requests. Please try again later.');
+        }
+        if (error.message.includes('is not authorized to perform') || error.message.includes('AccessDeniedException')) {
+          throw new Error(
+            'Bedrock model access is not enabled. Please enable model access in the AWS Bedrock console.',
+          );
+        }
+        if (
+          error.message.includes('Could not resolve the foundation model') ||
+          error.message.includes('ValidationException') ||
+          error.name === 'ValidationException'
+        ) {
+          throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
+        }
+      }
+
+      throw new Error(`Failed to generate AI exercises: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   /**

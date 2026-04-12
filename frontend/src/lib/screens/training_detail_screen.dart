@@ -108,8 +108,16 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     }
   }
 
-  Color _modeColor(String? m) => m == 'MULTIPLE_CHOICE' ? const Color(0xFFF0932B) : const Color(0xFF2B6CB0);
-  String _modeLabel(String? m) => m == 'MULTIPLE_CHOICE' ? 'Multiple Choice' : 'Text Input';
+  Color _modeColor(String? m) => m == 'MULTIPLE_CHOICE'
+      ? const Color(0xFFF0932B)
+      : m == 'AI_TRAINING'
+          ? const Color(0xFF6B46C1)
+          : const Color(0xFF2B6CB0);
+  String _modeLabel(String? m) => m == 'MULTIPLE_CHOICE'
+      ? 'Multiple Choice'
+      : m == 'AI_TRAINING'
+          ? 'AI Training'
+          : 'Text Input';
 
   Future<void> _showRenameDialog(String currentName) async {
     final controller = TextEditingController(text: currentName);

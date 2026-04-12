@@ -27,6 +27,7 @@ enum PaymentProvider @aws_cognito_user_pools {
 enum TrainingMode @aws_cognito_user_pools {
   TEXT_INPUT
   MULTIPLE_CHOICE
+  AI_TRAINING
 }
 
 enum TrainingDirection @aws_cognito_user_pools {
@@ -110,6 +111,14 @@ type MultipleChoiceOption @aws_cognito_user_pools {
   options: [String!]!
 }
 
+type AIExercise @aws_cognito_user_pools {
+  prompt: String!
+  options: [String!]!
+  correctOptionIndex: Int!
+  exerciseType: String!
+  sourceWord: String!
+}
+
 type TrainingExecution @aws_cognito_user_pools {
   id: ID!
   trainingId: ID!
@@ -120,6 +129,7 @@ type TrainingExecution @aws_cognito_user_pools {
   results: [TrainingResult!]!
   multipleChoiceOptions: [MultipleChoiceOption!]
   words: [TrainingWord!]
+  aiExercises: [AIExercise!]
   correctCount: Int!
   incorrectCount: Int!
 }
