@@ -13,6 +13,7 @@ import 'package:train_with_joe/screens/signin_screen.dart';
 import 'package:train_with_joe/screens/register_screen.dart';
 import 'package:train_with_joe/screens/home_screen.dart';
 import 'package:train_with_joe/screens/subscription_screen.dart';
+import 'package:train_with_joe/l10n/generated/app_localizations.dart';
 
 import 'routing_test.mocks.dart';
 
@@ -102,6 +103,8 @@ void main() {
       ],
       child: MaterialApp.router(
         routerConfig: router,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       ),
     );
   }

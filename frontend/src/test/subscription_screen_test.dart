@@ -8,6 +8,7 @@ import 'package:train_with_joe/screens/subscription_screen.dart';
 import 'package:train_with_joe/providers/subscription_provider.dart';
 import 'package:train_with_joe/services/api_service.dart';
 import 'package:train_with_joe/services/payment_service.dart';
+import 'package:train_with_joe/l10n/generated/app_localizations.dart';
 
 import 'subscription_screen_test.mocks.dart';
 
@@ -50,6 +51,8 @@ void main() {
       value: subscriptionProvider,
       child: MaterialApp.router(
         routerConfig: testRouter,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       ),
     );
   }

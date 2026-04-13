@@ -10,6 +10,7 @@ import 'package:train_with_joe/providers/auth_provider.dart' as app;
 import 'package:train_with_joe/providers/user_provider.dart';
 import 'package:train_with_joe/services/auth_service.dart';
 import 'package:train_with_joe/services/api_service.dart';
+import 'package:train_with_joe/l10n/generated/app_localizations.dart';
 
 import 'home_screen_test.mocks.dart';
 
@@ -70,6 +71,8 @@ void main() {
       ],
       child: MaterialApp.router(
         routerConfig: testRouter,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
       ),
     );
   }
