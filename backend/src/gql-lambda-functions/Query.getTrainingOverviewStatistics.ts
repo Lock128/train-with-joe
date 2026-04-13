@@ -38,9 +38,12 @@ export const handler = async (event: Event) => {
 
   let effectiveUserId = callerUserId;
   if (targetUserId) {
-    // Extract email from JWT claims — AppSync may place it under different keys
+    // Extract email from JWT claims — AppSync may place it under different keys.
+    // Access tokens don't carry an email claim, so also check the username claim
+    // (which Cognito sets to the email when email is used as the sign-in alias).
     const claims = event.identity?.claims ?? {};
-    let callerEmail: string | undefined = claims.email ?? claims['cognito:email'] ?? claims['custom:email'];
+    let callerEmail: string | undefined =
+      claims.email ?? claims['cognito:email'] ?? claims['custom:email'] ?? claims.username ?? event.identity?.username;
     console.log(
       '[AdminAuth] getTrainingOverviewStatistics — callerUserId:',
       callerUserId,

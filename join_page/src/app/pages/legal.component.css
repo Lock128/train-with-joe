@@ -5,6 +5,30 @@
 
 .nav {
   padding: 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-lang-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  background: rgba(43, 108, 176, 0.08);
+  color: #2B6CB0;
+  border: 1px solid rgba(43, 108, 176, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-lang-dark:hover {
+  background: rgba(43, 108, 176, 0.15);
+  border-color: rgba(43, 108, 176, 0.4);
 }
 
 .logo-text {

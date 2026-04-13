@@ -138,7 +138,7 @@ export class APIStack extends cdk.Stack {
       environment: {
         NAMESPACE: namespace,
         VOCABULARY_LISTS_TABLE_NAME: vocabularyListsTable.tableName,
-        BEDROCK_MODEL_ID: process.env.BEDROCK_MODEL_ID || 'amazon.nova-lite-v1:0',
+        BEDROCK_MODEL_ID: process.env.BEDROCK_MODEL_ID || 'eu.amazon.nova-lite-v1:0',
         ASSETS_BUCKET_NAME: assetsBucket.bucketName,
       },
     };

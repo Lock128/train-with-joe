@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslationService } from '../services/translation.service';
 
 @Component({
   selector: 'app-terms',
@@ -11,9 +12,12 @@ import { RouterLink } from '@angular/router';
       <div class="container">
         <nav class="nav">
           <a routerLink="/" class="logo-text">Train with Joe</a>
+          <button class="btn-lang-dark" (click)="i18n.toggleLanguage()">
+            {{ i18n.currentLang() === 'en' ? '🇩🇪 DE' : '🇬🇧 EN' }}
+          </button>
         </nav>
 
-        <article class="legal-content">
+        <article class="legal-content" *ngIf="i18n.currentLang() === 'en'">
           <h1>Terms of Service</h1>
           <p class="last-updated">Last updated: {{ currentDate }}</p>
 
@@ -130,12 +134,137 @@ import { RouterLink } from '@angular/router';
           </section>
         </article>
 
+        <article class="legal-content" *ngIf="i18n.currentLang() === 'de'">
+          <h1>Nutzungsbedingungen</h1>
+          <p class="last-updated">Zuletzt aktualisiert: {{ currentDateDe }}</p>
+
+          <section>
+            <h2>1. Annahme der Bedingungen</h2>
+            <p>
+              Durch den Zugriff auf oder die Nutzung von Train with Joe („der Dienst") erklären Sie sich mit diesen
+              Nutzungsbedingungen einverstanden. Wenn Sie diesen Bedingungen nicht zustimmen, nutzen Sie den Dienst
+              bitte nicht.
+            </p>
+          </section>
+
+          <section>
+            <h2>2. Beschreibung des Dienstes</h2>
+            <p>
+              Train with Joe ist eine Vokabellern-App, die KI-gestützte Bildanalyse nutzt, um Nutzern beim Aufbau von
+              Vokabellisten mit Übersetzungen, Definitionen und Beispielsätzen zu helfen. Der Dienst ist auf iOS,
+              Android und im Web verfügbar.
+            </p>
+          </section>
+
+          <section>
+            <h2>3. Kontoregistrierung</h2>
+            <p>
+              Zur Nutzung des Dienstes müssen Sie ein Konto mit einer gültigen E-Mail-Adresse erstellen. Sie sind für
+              die Vertraulichkeit Ihrer Zugangsdaten und alle Aktivitäten unter Ihrem Konto verantwortlich.
+            </p>
+          </section>
+
+          <section>
+            <h2>4. Abonnements und Zahlungen</h2>
+            <p>
+              Einige Funktionen erfordern ein kostenpflichtiges Abonnement. Abonnements werden wiederkehrend (monatlich
+              oder jährlich) über die Plattform abgerechnet, auf der Sie sich angemeldet haben (App Store, Google Play
+              oder Stripe). Sie können Ihr Abonnement jederzeit kündigen; es bleibt bis zum Ende des aktuellen
+              Abrechnungszeitraums aktiv.
+            </p>
+            <p>
+              Erstattungen werden gemäß den Richtlinien der jeweiligen Plattform (Apple, Google oder Stripe) gehandhabt.
+            </p>
+          </section>
+
+          <section>
+            <h2>5. Akzeptable Nutzung</h2>
+            <p>Sie verpflichten sich, Folgendes zu unterlassen:</p>
+            <ul>
+              <li>Den Dienst für rechtswidrige Zwecke zu nutzen</li>
+              <li>Inhalte hochzuladen, die beleidigend, schädlich sind oder Rechte Dritter verletzen</li>
+              <li>Unbefugten Zugriff auf den Dienst oder seine Systeme zu erlangen</li>
+              <li>Den Dienst zu stören oder zu beeinträchtigen</li>
+              <li>Automatisierte Tools zum Scrapen oder Extrahieren von Daten aus dem Dienst zu verwenden</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>6. Geistiges Eigentum</h2>
+            <p>
+              Der Dienst, einschließlich Design, Code und Inhalte, ist Eigentum von Train with Joe und durch
+              Urheberrechtsgesetze geschützt. Von Ihnen erstellte Vokabellisten sind Ihre eigenen Inhalte, und Sie
+              behalten das Eigentum daran. Wenn Sie sie global teilen, können andere sie nutzen, aber Sie können die
+              Nutzung jederzeit einschränken.
+            </p>
+          </section>
+
+          <section>
+            <h2>7. KI-generierte Inhalte</h2>
+            <p>
+              Der Dienst nutzt KI zur Generierung von Vokabelinhalten einschließlich Übersetzungen, Definitionen und
+              Beispielsätzen. Obwohl wir nach Genauigkeit streben, können KI-generierte Inhalte Fehler enthalten. Wir
+              garantieren nicht die Richtigkeit KI-generierter Inhalte und empfehlen, wichtige Informationen unabhängig
+              zu überprüfen.
+            </p>
+          </section>
+
+          <section>
+            <h2>8. Verfügbarkeit und Änderungen</h2>
+            <p>
+              Wir bemühen uns, den Dienst jederzeit verfügbar zu halten, garantieren jedoch keinen ununterbrochenen
+              Zugang. Wir behalten uns das Recht vor, Teile des Dienstes jederzeit mit angemessener Vorankündigung zu
+              ändern, auszusetzen oder einzustellen.
+            </p>
+          </section>
+
+          <section>
+            <h2>9. Haftungsbeschränkung</h2>
+            <p>
+              Im gesetzlich zulässigen Rahmen haftet Train with Joe nicht für indirekte, zufällige, besondere oder
+              Folgeschäden, die aus Ihrer Nutzung des Dienstes entstehen. Unsere Gesamthaftung übersteigt nicht den
+              Betrag, den Sie in den 12 Monaten vor dem Anspruch für den Dienst gezahlt haben.
+            </p>
+          </section>
+
+          <section>
+            <h2>10. Kündigung</h2>
+            <p>
+              Wir können Ihr Konto kündigen oder sperren, wenn Sie gegen diese Bedingungen verstoßen. Sie können Ihr
+              Konto jederzeit löschen. Nach der Kündigung erlischt Ihr Recht zur Nutzung des Dienstes sofort.
+            </p>
+          </section>
+
+          <section>
+            <h2>11. Anwendbares Recht</h2>
+            <p>
+              Diese Bedingungen unterliegen dem Recht der Bundesrepublik Deutschland. Streitigkeiten werden vor den
+              Gerichten Deutschlands beigelegt.
+            </p>
+          </section>
+
+          <section>
+            <h2>12. Änderungen dieser Bedingungen</h2>
+            <p>
+              Wir können diese Bedingungen von Zeit zu Zeit aktualisieren. Über wesentliche Änderungen informieren wir
+              Sie durch Veröffentlichung der aktualisierten Bedingungen auf dieser Seite. Die fortgesetzte Nutzung des
+              Dienstes nach Änderungen gilt als Annahme der neuen Bedingungen.
+            </p>
+          </section>
+
+          <section>
+            <h2>13. Kontakt</h2>
+            <p>Bei Fragen zu diesen Bedingungen kontaktieren Sie uns unter:</p>
+            <p><a href="mailto:legal&#64;trainwithjoe.app">legal&#64;trainwithjoe.app</a></p>
+          </section>
+        </article>
+
         <footer class="legal-footer">
-          <a routerLink="/">← Back to Home</a>
+          <a routerLink="/">{{ i18n.t('footer.backToHome') }}</a>
           <span class="separator">•</span>
-          <a routerLink="/privacy">Privacy Policy</a>
+          <a routerLink="/privacy">{{ i18n.t('footer.privacy') }}</a>
           <span class="separator">•</span>
-          <a routerLink="/impressum">Impressum</a>
+          <a routerLink="/impressum">{{ i18n.t('footer.impressum') }}</a>
         </footer>
       </div>
     </div>
@@ -144,4 +273,7 @@ import { RouterLink } from '@angular/router';
 })
 export class TermsComponent {
   currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  currentDateDe = new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  constructor(public i18n: TranslationService) {}
 }

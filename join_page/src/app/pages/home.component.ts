@@ -2,6 +2,7 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { TranslationService } from '../services/translation.service';
 import { environment } from '../../environments/environment';
 
 type FormStep = 'register' | 'verify';
@@ -27,19 +28,20 @@ export class HomeComponent {
   constructor(
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
+    public i18n: TranslationService,
   ) {}
 
   async onRegister() {
     if (!this.validateEmail(this.email)) {
-      this.showError('Please enter a valid email');
+      this.showError(this.i18n.t('error.invalidEmail'));
       return;
     }
     if (this.password.length < 8) {
-      this.showError('Password must be at least 8 characters');
+      this.showError(this.i18n.t('error.shortPassword'));
       return;
     }
     if (this.password !== this.confirmPassword) {
-      this.showError('Passwords do not match');
+      this.showError(this.i18n.t('error.passwordMismatch'));
       return;
     }
 
@@ -62,14 +64,14 @@ export class HomeComponent {
       this.signInAndRedirect();
     } else {
       this.step = 'verify';
-      this.showSuccess('Check your email for a verification code.');
+      this.showSuccess(this.i18n.t('success.checkEmail'));
     }
     this.cdr.detectChanges();
   }
 
   async onVerify() {
     if (!this.verificationCode.trim()) {
-      this.showError('Please enter the verification code');
+      this.showError(this.i18n.t('error.enterCode'));
       return;
     }
 
@@ -88,7 +90,7 @@ export class HomeComponent {
     if (verifyError) {
       this.showError(this.parseError(verifyError));
     } else {
-      this.showSuccess('Email verified. Signing you in...');
+      this.showSuccess(this.i18n.t('success.verified'));
       this.signInAndRedirect();
     }
     this.cdr.detectChanges();
@@ -104,7 +106,7 @@ export class HomeComponent {
       });
       window.location.href = `${environment.appUrl}/auth/callback?${params.toString()}`;
     } catch (error: unknown) {
-      this.showError('Account created but auto-login failed. Redirecting to login...');
+      this.showError(this.i18n.t('error.autoLoginFailed'));
       this.cdr.detectChanges();
       setTimeout(() => {
         window.location.href = `${environment.appUrl}/login`;
@@ -123,13 +125,12 @@ export class HomeComponent {
   }
 
   private parseError(error: unknown): string {
-    const msg = error instanceof Error ? error.message : 'Something went wrong';
-    if (msg.includes('UsernameExistsException')) return 'An account with this email already exists.';
-    if (msg.includes('InvalidPasswordException'))
-      return 'Password must include uppercase, lowercase, number, and symbol.';
-    if (msg.includes('CodeMismatchException')) return 'Invalid verification code. Please try again.';
-    if (msg.includes('ExpiredCodeException')) return 'Verification code expired. Please register again.';
-    if (msg.includes('LimitExceededException')) return 'Too many attempts. Please try again later.';
+    const msg = error instanceof Error ? error.message : this.i18n.t('error.generic');
+    if (msg.includes('UsernameExistsException')) return this.i18n.t('error.usernameExists');
+    if (msg.includes('InvalidPasswordException')) return this.i18n.t('error.invalidPassword');
+    if (msg.includes('CodeMismatchException')) return this.i18n.t('error.codeMismatch');
+    if (msg.includes('ExpiredCodeException')) return this.i18n.t('error.expiredCode');
+    if (msg.includes('LimitExceededException')) return this.i18n.t('error.limitExceeded');
     return msg;
   }
 

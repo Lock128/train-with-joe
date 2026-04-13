@@ -10,9 +10,8 @@ const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
 interface Event {
   identity: {
     sub: string;
-    claims: {
-      email?: string;
-    };
+    username?: string;
+    claims: Record<string, string>;
   };
 }
 
@@ -25,7 +24,11 @@ export const handler = async (event: Event) => {
 
   const userRepo = UserRepository.getInstance();
 
-  let callerEmail = event.identity?.claims?.email;
+  // Access tokens don't carry an email claim, so also check the username claim
+  // (which Cognito sets to the email when email is used as the sign-in alias).
+  const claims = event.identity?.claims ?? {};
+  let callerEmail: string | undefined =
+    claims.email ?? claims['cognito:email'] ?? claims['custom:email'] ?? claims.username ?? event.identity?.username;
   console.log('[AdminAuth] getUsers — callerUserId:', callerUserId, 'jwtEmail:', callerEmail);
   if (!callerEmail) {
     console.log('[AdminAuth] JWT email claim missing, falling back to DB lookup');

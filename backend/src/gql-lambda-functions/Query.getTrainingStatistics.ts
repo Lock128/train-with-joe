@@ -36,8 +36,11 @@ export const handler = async (event: Event) => {
   // If a targetUserId is provided, only admins may use it
   let effectiveUserId = callerUserId;
   if (targetUserId) {
+    // Access tokens don't carry an email claim, so also check the username claim
+    // (which Cognito sets to the email when email is used as the sign-in alias).
     const claims = event.identity?.claims ?? {};
-    let callerEmail: string | undefined = claims.email ?? claims['cognito:email'] ?? claims['custom:email'];
+    let callerEmail: string | undefined =
+      claims.email ?? claims['cognito:email'] ?? claims['custom:email'] ?? claims.username ?? event.identity?.username;
     console.log(
       '[AdminAuth] getTrainingStatistics — callerUserId:',
       callerUserId,
