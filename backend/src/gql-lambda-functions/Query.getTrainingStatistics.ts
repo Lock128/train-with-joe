@@ -1,5 +1,6 @@
 import { TrainingService } from '../services/training-service';
 import { UserRepository } from '../repositories/user-repository';
+import { resolveUserIdFromEmail } from '../services/user-lookup-service';
 
 const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
 
@@ -73,22 +74,8 @@ export const handler = async (event: Event) => {
       };
     }
     console.log('[AdminAuth] GRANTED — viewing training stats for user:', targetUserId);
-    // If targetUserId looks like an email, resolve it to the actual user ID
-    effectiveUserId = targetUserId;
-    if (targetUserId.includes('@')) {
-      try {
-        const userRepo = UserRepository.getInstance();
-        const targetUser = await userRepo.getByEmail(targetUserId);
-        if (targetUser) {
-          console.log('[AdminAuth] Resolved email', targetUserId, 'to user ID:', targetUser.id);
-          effectiveUserId = targetUser.id;
-        } else {
-          console.warn('[AdminAuth] No user found for email:', targetUserId);
-        }
-      } catch (lookupError) {
-        console.error('[AdminAuth] Email lookup failed:', lookupError);
-      }
-    }
+    // Resolve email to actual user ID (Cognito sub) — tries DynamoDB then Cognito
+    effectiveUserId = await resolveUserIdFromEmail(targetUserId);
   }
 
   try {

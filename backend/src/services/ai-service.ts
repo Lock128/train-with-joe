@@ -244,13 +244,24 @@ export class AIService {
 Here are the words to create exercises for:
 ${wordDescriptions}
 
-Create a JSON array of exercises with varied types including: verb_conjugation, preposition, fill_in_the_blank, sentence_completion.
+Create a JSON array of exercises with a good mix of the following types:
+
+1. "fill_in_the_blank" — Write a sentence in ${targetLanguage} with one word replaced by a blank. The options are ${targetLanguage} words. Focus on correct grammar and usage (e.g. "He ____ the bus" with options "stops", "stop", "stopping", "stopped").
+2. "sentence_completion" — Write an incomplete sentence in ${targetLanguage}. The options are ${targetLanguage} phrases or words that complete it correctly.
+3. "verb_conjugation" — Test correct verb forms in ${targetLanguage}. Show a sentence or instruction in ${targetLanguage} with a blank where a verb should go, and provide different ${targetLanguage} conjugations as options. Use ${targetLanguage} pronouns and grammar (e.g. for English: "he/she/it paints" not "er/sie/es malt").
+4. "sentence_translation" — Show a complete sentence in one language and ask the learner to pick the correct translation. Mix directions: some from ${sourceLanguage} to ${targetLanguage}, some from ${targetLanguage} to ${sourceLanguage}. The prompt should contain the sentence to translate and clearly state the task (e.g. "Translate to ${targetLanguage}: ..."). The options are full sentences in the other language.
+
+IMPORTANT language rules:
+- For fill_in_the_blank, sentence_completion, and verb_conjugation: BOTH the prompt AND the options MUST be entirely in ${targetLanguage}. The learner is practicing correct usage of ${targetLanguage}.
+- For sentence_translation: the prompt contains a sentence in one language, and the options are translations in the other language.
+- Prioritize testing correct grammar and natural usage of words in ${targetLanguage} (e.g. correct prepositions, verb forms, word order).
+- Make wrong options plausible — common mistakes learners actually make.
 
 Each exercise must have:
-- "prompt": a question or instruction for the learner
+- "prompt": the question or instruction for the learner
 - "options": an array of 3 to 5 answer choices
 - "correctOptionIndex": the zero-based index of the correct answer in the options array
-- "exerciseType": one of verb_conjugation, preposition, fill_in_the_blank, sentence_completion
+- "exerciseType": one of verb_conjugation, fill_in_the_blank, sentence_completion, sentence_translation
 - "sourceWord": the vocabulary word this exercise is based on
 
 Return ONLY a valid JSON array, no markdown, no code blocks, no extra text.`;

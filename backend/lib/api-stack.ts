@@ -434,6 +434,7 @@ export class APIStack extends cdk.Stack {
         TRAININGS_TABLE_NAME: trainingsTable.tableName,
         VOCABULARY_LISTS_TABLE_NAME: vocabularyListsTable.tableName,
         USERS_TABLE_NAME: usersTable.tableName,
+        USER_POOL_ID: userPool.userPoolId,
       },
     };
 
@@ -590,6 +591,13 @@ export class APIStack extends cdk.Stack {
 
     trainingsTable.grantReadWriteData(getTrainingStatisticsFunction);
     usersTable.grantReadData(getTrainingStatisticsFunction);
+    getTrainingStatisticsFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['cognito-idp:ListUsers'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
 
     const getTrainingStatisticsDataSource = api.addLambdaDataSource(
       'GetTrainingStatisticsDataSource',
@@ -610,6 +618,13 @@ export class APIStack extends cdk.Stack {
 
     trainingsTable.grantReadWriteData(getTrainingDayStatisticsFunction);
     usersTable.grantReadData(getTrainingDayStatisticsFunction);
+    getTrainingDayStatisticsFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['cognito-idp:ListUsers'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
 
     const getTrainingDayStatisticsDataSource = api.addLambdaDataSource(
       'GetTrainingDayStatisticsDataSource',
@@ -630,6 +645,13 @@ export class APIStack extends cdk.Stack {
 
     trainingsTable.grantReadWriteData(getTrainingOverviewStatisticsFunction);
     usersTable.grantReadData(getTrainingOverviewStatisticsFunction);
+    getTrainingOverviewStatisticsFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['cognito-idp:ListUsers'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
 
     const getTrainingOverviewStatisticsDataSource = api.addLambdaDataSource(
       'GetTrainingOverviewStatisticsDataSource',
