@@ -109,14 +109,21 @@ type TrainingResult @aws_cognito_user_pools {
 type MultipleChoiceOption @aws_cognito_user_pools {
   wordIndex: Int!
   options: [String!]!
+  ## correctOptionIndex is intentionally omitted to prevent answer leakage
 }
 
 type AIExercise @aws_cognito_user_pools {
   prompt: String!
   options: [String!]!
-  correctOptionIndex: Int!
   exerciseType: String!
   sourceWord: String!
+  ## correctOptionIndex is intentionally omitted to prevent answer leakage
+}
+
+type TrainingPromptWord @aws_cognito_user_pools {
+  word: String!
+  vocabularyListId: String!
+  unit: String
 }
 
 type TrainingExecution @aws_cognito_user_pools {
@@ -128,7 +135,7 @@ type TrainingExecution @aws_cognito_user_pools {
   abortedAt: AWSDateTime
   results: [TrainingResult!]!
   multipleChoiceOptions: [MultipleChoiceOption!]
-  words: [TrainingWord!]
+  promptWords: [TrainingPromptWord!]
   aiExercises: [AIExercise!]
   correctCount: Int!
   incorrectCount: Int!

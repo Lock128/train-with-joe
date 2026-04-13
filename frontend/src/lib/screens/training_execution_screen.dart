@@ -61,11 +61,12 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     if (execution != null && mounted) {
       setState(() {
         _execution = execution;
-        // Capture words once from the execution (randomized) or the training.
+        // Use promptWords from execution (direction-resolved, no answers).
+        // Falls back to training words for non-randomized trainings.
         if (_words.isEmpty) {
-          final execWords = (execution['words'] as List<dynamic>?) ?? [];
-          if (execWords.isNotEmpty) {
-            _words = execWords;
+          final promptWords = (execution['promptWords'] as List<dynamic>?) ?? [];
+          if (promptWords.isNotEmpty) {
+            _words = promptWords;
           } else {
             final training = provider.currentTraining;
             _words = (training?['words'] as List<dynamic>?) ?? [];
@@ -206,8 +207,11 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final training = context.read<TrainingProvider>().currentTraining;
     final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
     final reversed = direction == 'TRANSLATION_TO_WORD';
-    final wordText = reversed
-        ? (currentWord?['translation'] as String? ?? '')
+    // promptWords already have direction-resolved 'word'; training words need direction check
+    final wordText = currentWord?['translation'] != null
+        ? (reversed
+            ? (currentWord?['translation'] as String? ?? '')
+            : (currentWord?['word'] as String? ?? ''))
         : (currentWord?['word'] as String? ?? '');
     return Scaffold(
       appBar: AppBar(
@@ -247,14 +251,18 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
             ],
 
             // Input area
-            if (_showFeedback && !isAIMode)
-              _buildFeedback()
-            else if (_currentMode == 'AI_TRAINING')
+            if (_currentMode == 'AI_TRAINING')
               _buildAIExercise()
+            else if (_showFeedback)
+              _buildFeedback()
             else if (_currentMode == 'MULTIPLE_CHOICE')
               _buildMultipleChoice()
             else
               _buildTextInput(),
+
+            // Show feedback animation for AI mode too
+            if (_showFeedback && isAIMode)
+              _buildFeedback(),
           ],
         ),
       ),

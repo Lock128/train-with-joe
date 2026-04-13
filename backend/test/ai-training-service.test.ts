@@ -561,8 +561,8 @@ describe('AI Training Service Unit Tests', () => {
       expect(result.execution).toBeDefined();
       expect(result.execution!.aiExercises).toBeDefined();
       expect(result.execution!.aiExercises!.length).toBeGreaterThan(0);
-      expect(result.execution!.words).toBeDefined();
-      expect(result.execution!.words!.length).toBeGreaterThan(0);
+      expect(result.execution!.promptWords).toBeDefined();
+      expect(result.execution!.promptWords!.length).toBeGreaterThan(0);
     });
   });
 });

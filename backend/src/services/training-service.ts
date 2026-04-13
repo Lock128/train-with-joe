@@ -9,6 +9,7 @@ import type {
   TrainingExecution,
   TrainingResult,
   MultipleChoiceOption,
+  SanitizedExecution,
 } from '../model/domain/Training';
 import { getAIService } from './ai-service';
 
@@ -26,6 +27,31 @@ export class TrainingService {
       TrainingService.instance = new TrainingService();
     }
     return TrainingService.instance;
+  }
+
+  /**
+   * Strip sensitive answer data from an execution before returning to the client.
+   * Replaces words with promptWords (prompt-side only, no answers),
+   * strips correctOptionIndex from AI exercises and multiple-choice options.
+   */
+  private sanitizeExecution(
+    execution: TrainingExecution,
+    direction: TrainingDirection = 'WORD_TO_TRANSLATION',
+  ): SanitizedExecution {
+    const { words, ...rest } = execution;
+    const reversed = direction === 'TRANSLATION_TO_WORD';
+    return {
+      ...rest,
+      promptWords: words?.map((w) => ({
+        word: reversed ? w.translation : w.word,
+        vocabularyListId: w.vocabularyListId,
+        unit: w.unit,
+      })),
+      aiExercises: execution.aiExercises?.map(({ correctOptionIndex: _correctOptionIndex, ...ex }) => ex),
+      multipleChoiceOptions: execution.multipleChoiceOptions?.map(
+        ({ correctOptionIndex: _correctOptionIndex, ...opt }) => opt,
+      ),
+    };
   }
 
   /**
@@ -244,7 +270,7 @@ export class TrainingService {
   async startTraining(
     trainingId: string,
     userId: string,
-  ): Promise<{ success: boolean; execution?: TrainingExecution; error?: string }> {
+  ): Promise<{ success: boolean; execution?: SanitizedExecution; error?: string }> {
     try {
       const trainingRepo = TrainingRepository.getInstance();
       const training = await trainingRepo.getById(trainingId);
@@ -358,7 +384,7 @@ export class TrainingService {
             };
 
             await trainingRepo.createExecution(execution);
-            return { success: true, execution };
+            return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
           } catch (aiError) {
             const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
             return { success: false, error: 'Failed to generate AI exercises: ' + errorMessage };
@@ -392,7 +418,7 @@ export class TrainingService {
 
         await trainingRepo.createExecution(execution);
 
-        return { success: true, execution };
+        return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
       }
 
       // Static path: existing behavior unchanged
@@ -449,7 +475,7 @@ export class TrainingService {
           };
 
           await trainingRepo.createExecution(execution);
-          return { success: true, execution };
+          return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
         } catch (aiError) {
           const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
           return { success: false, error: 'Failed to generate AI exercises: ' + errorMessage };
@@ -482,7 +508,7 @@ export class TrainingService {
 
       await trainingRepo.createExecution(execution);
 
-      return { success: true, execution };
+      return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
     } catch (error) {
       console.error('Error starting training:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Failed to start training' };
@@ -501,7 +527,7 @@ export class TrainingService {
     success: boolean;
     result?: TrainingResult;
     completed?: boolean;
-    execution?: TrainingExecution;
+    execution?: SanitizedExecution;
     error?: string;
   }> {
     try {
@@ -549,7 +575,7 @@ export class TrainingService {
           wordIndex,
           word: exercise.prompt,
           expectedAnswer: exercise.options[exercise.correctOptionIndex],
-          userAnswer: answer,
+          userAnswer: exercise.options[selectedIndex] ?? answer,
           correct,
         };
 
@@ -572,7 +598,12 @@ export class TrainingService {
           completedAt: execution.completedAt,
         });
 
-        return { success: true, result, completed: !!execution.completedAt, execution };
+        return {
+          success: true,
+          result,
+          completed: !!execution.completedAt,
+          execution: this.sanitizeExecution(execution, training.direction),
+        };
       }
 
       // Dual-path word resolution: randomized uses execution.words, static uses training.words
@@ -614,7 +645,12 @@ export class TrainingService {
         completedAt: execution.completedAt,
       });
 
-      return { success: true, result, completed: !!execution.completedAt, execution };
+      return {
+        success: true,
+        result,
+        completed: !!execution.completedAt,
+        execution: this.sanitizeExecution(execution, training.direction),
+      };
     } catch (error) {
       console.error('Error submitting answer:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Failed to submit answer' };
@@ -627,7 +663,7 @@ export class TrainingService {
   async abortTraining(
     executionId: string,
     userId: string,
-  ): Promise<{ success: boolean; execution?: TrainingExecution; error?: string }> {
+  ): Promise<{ success: boolean; execution?: SanitizedExecution | TrainingExecution; error?: string }> {
     try {
       const trainingRepo = TrainingRepository.getInstance();
       const execution = await trainingRepo.getExecutionById(executionId);
@@ -651,7 +687,9 @@ export class TrainingService {
       const abortedAt = new Date().toISOString();
       const updated = await trainingRepo.updateExecution(executionId, { abortedAt });
 
-      return { success: true, execution: updated };
+      const training = await trainingRepo.getById(execution.trainingId);
+      const direction = training?.direction ?? 'WORD_TO_TRANSLATION';
+      return { success: true, execution: updated ? this.sanitizeExecution(updated, direction) : updated };
     } catch (error) {
       console.error('Error aborting training:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Failed to abort training' };

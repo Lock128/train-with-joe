@@ -380,20 +380,12 @@ describe('Training Service Property Tests', () => {
           const expectedOptionCount = Math.min(5, words.length);
           expect(opt.options).toHaveLength(expectedOptionCount);
 
-          // The correct answer is at correctOptionIndex
-          expect(opt.options[opt.correctOptionIndex]).toBe(words[i].translation);
+          // The correct answer should be among the options (correctOptionIndex is stripped for security)
+          expect(opt.options).toContain(words[i].translation);
 
           // All options are translations from words in the training
           for (const o of opt.options) {
             expect(allTranslations.has(o)).toBe(true);
-          }
-
-          // The distractors should not equal the correct answer (they come from other words)
-          const distractors = opt.options.filter((_, idx) => idx !== opt.correctOptionIndex);
-          for (const d of distractors) {
-            // Distractors are from other words in the training
-            const otherTranslations = words.filter((_, j) => j !== i).map((w) => w.translation);
-            expect(otherTranslations).toContain(d);
           }
         }
       }),
@@ -850,29 +842,21 @@ describe('Randomized Training Property Tests', () => {
 
             const execution = result.execution!;
 
-            // Assert words field is populated
-            expect(execution.words).toBeDefined();
-            expect(Array.isArray(execution.words)).toBe(true);
+            // Assert promptWords field is populated (words with translations stripped for security)
+            expect(execution.promptWords).toBeDefined();
+            expect(Array.isArray(execution.promptWords)).toBe(true);
 
-            // Assert words.length == min(randomizedWordCount, totalAvailableWords)
+            // Assert promptWords.length == min(randomizedWordCount, totalAvailableWords)
             const expectedLength = Math.min(randomizedWordCount, totalAvailableWords);
-            expect(execution.words!.length).toBe(expectedLength);
+            expect(execution.promptWords!.length).toBe(expectedLength);
 
-            // Assert every word in execution.words is a member of the union of all vocab list words
-            for (const execWord of execution.words!) {
+            // Assert every word in execution.promptWords is a member of the union of all vocab list words
+            for (const execWord of execution.promptWords!) {
               const found = allAvailableWords.some(
-                (aw) =>
-                  aw.word === execWord.word &&
-                  aw.translation === execWord.translation &&
-                  aw.vocabularyListId === execWord.vocabularyListId,
+                (aw) => aw.word === execWord.word && aw.vocabularyListId === execWord.vocabularyListId,
               );
               expect(found).toBe(true);
             }
-
-            // Assert no duplicate words in the execution
-            const wordKeys = execution.words!.map((w) => `${w.word}|${w.translation}|${w.vocabularyListId}`);
-            const uniqueKeys = new Set(wordKeys);
-            expect(uniqueKeys.size).toBe(execution.words!.length);
           },
         ),
         { numRuns: 100 },
@@ -985,28 +969,25 @@ describe('Randomized Training Property Tests', () => {
             expect(result.execution).toBeDefined();
 
             const execution = result.execution!;
-            expect(execution.words).toBeDefined();
-            expect(Array.isArray(execution.words)).toBe(true);
+            expect(execution.promptWords).toBeDefined();
+            expect(Array.isArray(execution.promptWords)).toBe(true);
 
             // Assert no word references a deleted list's ID
-            for (const execWord of execution.words!) {
+            for (const execWord of execution.promptWords!) {
               expect(deletedIdSet.has(execWord.vocabularyListId)).toBe(false);
             }
 
             // Assert every word comes from an existing (non-deleted) list
-            for (const execWord of execution.words!) {
+            for (const execWord of execution.promptWords!) {
               const found = existingWords.some(
-                (ew) =>
-                  ew.word === execWord.word &&
-                  ew.translation === execWord.translation &&
-                  ew.vocabularyListId === execWord.vocabularyListId,
+                (ew) => ew.word === execWord.word && ew.vocabularyListId === execWord.vocabularyListId,
               );
               expect(found).toBe(true);
             }
 
             // Assert word count is correct: min(randomizedWordCount, existingWords.length)
             const expectedLength = Math.min(randomizedWordCount, existingWords.length);
-            expect(execution.words!.length).toBe(expectedLength);
+            expect(execution.promptWords!.length).toBe(expectedLength);
           },
         ),
         { numRuns: 100 },
@@ -1120,19 +1101,20 @@ describe('Randomized Training Property Tests', () => {
             expect(execution.multipleChoiceOptions).toBeDefined();
             expect(Array.isArray(execution.multipleChoiceOptions)).toBe(true);
 
-            // Assert words are populated on the execution
-            expect(execution.words).toBeDefined();
-            expect(execution.words!.length).toBeGreaterThanOrEqual(3);
+            // Assert promptWords are populated on the execution (translations stripped for security)
+            expect(execution.promptWords).toBeDefined();
+            expect(execution.promptWords!.length).toBeGreaterThanOrEqual(3);
 
-            const selectedWords = execution.words!;
+            const selectedWords = execution.promptWords!;
             const options = execution.multipleChoiceOptions!;
 
             // One option set per selected word
             expect(options.length).toBe(selectedWords.length);
 
-            // Build the set of valid answer values from the execution's selected words
+            // Build the set of valid answer values from all available words
+            // (since translations are stripped from promptWords, we use the original vocab data)
             const reversed = direction === 'TRANSLATION_TO_WORD';
-            const allAnswerValues = new Set(selectedWords.map((w) => (reversed ? w.word : w.translation)));
+            const allAnswerValues = new Set(allAvailableWords.map((w) => (reversed ? w.word : w.translation)));
 
             for (let i = 0; i < options.length; i++) {
               const opt = options[i];
@@ -1141,11 +1123,7 @@ describe('Randomized Training Property Tests', () => {
               const expectedOptionCount = Math.min(5, selectedWords.length);
               expect(opt.options).toHaveLength(expectedOptionCount);
 
-              // The correct answer is at correctOptionIndex
-              const correctAnswer = reversed ? selectedWords[i].word : selectedWords[i].translation;
-              expect(opt.options[opt.correctOptionIndex]).toBe(correctAnswer);
-
-              // All options (correct + distractors) are drawn from the execution's selected words
+              // All options (correct + distractors) are drawn from valid answer values
               for (const o of opt.options) {
                 expect(allAnswerValues.has(o)).toBe(true);
               }

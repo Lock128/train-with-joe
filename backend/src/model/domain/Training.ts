@@ -66,3 +66,19 @@ export interface TrainingExecution {
   correctCount: number;
   incorrectCount: number;
 }
+
+/** Client-safe execution with answer data stripped */
+export interface SanitizedExecution {
+  id: string;
+  trainingId: string;
+  userId: string;
+  startedAt: string;
+  completedAt?: string;
+  abortedAt?: string;
+  results: TrainingResult[];
+  multipleChoiceOptions?: Omit<MultipleChoiceOption, 'correctOptionIndex'>[];
+  promptWords?: { word: string; vocabularyListId: string; unit?: string }[];
+  aiExercises?: Omit<AIExercise, 'correctOptionIndex'>[];
+  correctCount: number;
+  incorrectCount: number;
+}

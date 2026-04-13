@@ -32,7 +32,6 @@ class AIExerciseWidget extends StatelessWidget {
     final exerciseType = exercise['exerciseType'] as String? ?? '';
     final prompt = exercise['prompt'] as String? ?? '';
     final options = (exercise['options'] as List<dynamic>?) ?? [];
-    final correctIndex = exercise['correctOptionIndex'] as int? ?? 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -70,15 +69,14 @@ class AIExerciseWidget extends StatelessWidget {
         ...List.generate(options.length, (index) {
           final optionText = options[index] as String? ?? '';
           final isSelected = selectedIndex == index;
-          final isCorrectOption = index == correctIndex;
 
           Color? backgroundColor;
           Color? textColor;
-          if (showFeedback) {
-            if (isCorrectOption) {
+          if (showFeedback && isSelected) {
+            if (isCorrect == true) {
               backgroundColor = Colors.green.withValues(alpha: 0.2);
               textColor = Colors.green.shade800;
-            } else if (isSelected && !isCorrectOption) {
+            } else {
               backgroundColor = Colors.red.withValues(alpha: 0.2);
               textColor = Colors.red.shade800;
             }
