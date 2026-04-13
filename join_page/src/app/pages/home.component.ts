@@ -96,22 +96,12 @@ export class HomeComponent {
     this.cdr.detectChanges();
   }
 
-  private async signInAndRedirect() {
-    try {
-      const tokens = await this.authService.signIn(this.email, this.password);
-      const params = new URLSearchParams({
-        idToken: tokens.idToken,
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-      });
-      window.location.href = `${environment.appUrl}/auth/callback?${params.toString()}`;
-    } catch (error: unknown) {
-      this.showError(this.i18n.t('error.autoLoginFailed'));
-      this.cdr.detectChanges();
-      setTimeout(() => {
-        window.location.href = `${environment.appUrl}/login`;
-      }, 2000);
-    }
+  private signInAndRedirect() {
+    const params = new URLSearchParams({
+      email: this.email,
+      registered: 'true',
+    });
+    window.location.href = `${environment.appUrl}/signin?${params.toString()}`;
   }
 
   private showError(msg: string) {

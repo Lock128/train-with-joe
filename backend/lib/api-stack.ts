@@ -76,6 +76,44 @@ export class APIStack extends cdk.Stack {
     usersTable.grantReadWriteData(usersDataSource);
     subscriptionsTable.grantReadWriteData(subscriptionsDataSource);
 
+    // Create createUser Lambda function (with admin signup notification via SES)
+    const createUserFunction = new NodejsFunction(this, 'CreateUserFunction', {
+      runtime: Runtime.NODEJS_20_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(30),
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.createUser.ts'),
+      handler: 'handler',
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        NAMESPACE: namespace,
+        USERS_TABLE_NAME: usersTable.tableName,
+        ADMIN_NOTIFICATION_EMAIL: 'lockhead+joeadmin@trainwithjoe.app',
+        SES_FROM_EMAIL: 'noreply@trainwithjoe.app',
+      },
+    });
+
+    usersTable.grantReadWriteData(createUserFunction);
+
+    // Grant SES send permissions for admin signup notifications
+    createUserFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+        resources: [`arn:aws:ses:eu-central-1:${cdk.Stack.of(this).account}:identity/*`],
+      }),
+    );
+
+    const createUserDataSource = api.addLambdaDataSource('CreateUserDataSource', createUserFunction);
+
+    createUserDataSource.createResolver('CreateUserResolver', {
+      typeName: 'Mutation',
+      fieldName: 'createUser',
+    });
+
     // Create Lambda functions for resolvers
     const lambdaProps = {
       runtime: Runtime.NODEJS_20_X,

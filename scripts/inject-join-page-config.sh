@@ -32,9 +32,9 @@ APP_URL=$(aws ssm get-parameter \
 
 if [ -z "${APP_URL}" ]; then
   if [ "${NAMESPACE}" = "production" ]; then
-    APP_URL="https://app.trainwithjoe.com"
+    APP_URL="https://app.trainwithjoe.app"
   else
-    APP_URL="https://app.${NAMESPACE}.trainwithjoe.com"
+    APP_URL="https://app.${NAMESPACE}.trainwithjoe.app"
   fi
 fi
 echo "  App URL: ${APP_URL}"

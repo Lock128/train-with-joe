@@ -312,7 +312,8 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
         final isAuthenticated = authProvider.isAuthenticated;
         final isAuthRoute = state.matchedLocation == '/signin' || 
                            state.matchedLocation == '/register' ||
-                           state.matchedLocation == '/verify-email';
+                           state.matchedLocation == '/verify-email' ||
+                           state.matchedLocation == '/auth/callback';
 
         // Redirect to home if authenticated and trying to access auth routes
         if (isAuthenticated && isAuthRoute) {
@@ -329,7 +330,18 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
       routes: [
         GoRoute(
           path: '/signin',
-          builder: (context, state) => const SignInScreen(),
+          builder: (context, state) {
+            final email = state.uri.queryParameters['email'];
+            final registered = state.uri.queryParameters['registered'] == 'true';
+            return SignInScreen(initialEmail: email, showRegisteredBanner: registered);
+          },
+        ),
+        GoRoute(
+          path: '/auth/callback',
+          redirect: (context, state) {
+            final email = state.uri.queryParameters['email'] ?? '';
+            return '/signin?email=${Uri.encodeComponent(email)}&registered=true';
+          },
         ),
         GoRoute(
           path: '/register',

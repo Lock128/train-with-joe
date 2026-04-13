@@ -6,7 +6,14 @@ import '../providers/auth_provider.dart';
 
 /// Sign in screen for user authentication
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+  final String? initialEmail;
+  final bool showRegisteredBanner;
+
+  const SignInScreen({
+    super.key,
+    this.initialEmail,
+    this.showRegisteredBanner = false,
+  });
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -17,6 +24,16 @@ class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _showRegisteredBanner = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialEmail != null && widget.initialEmail!.isNotEmpty) {
+      _emailController.text = widget.initialEmail!;
+    }
+    _showRegisteredBanner = widget.showRegisteredBanner;
+  }
 
   @override
   void dispose() {
@@ -137,6 +154,30 @@ class _SignInScreenState extends State<SignInScreen> {
                         enabled: !authProvider.isLoading,
                       ),
                       const SizedBox(height: 24),
+
+                      // Registration success banner
+                      if (_showRegisteredBanner)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.check_circle_outline, color: Colors.green.shade700),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Account created! Sign in with your password.',
+                                  style: TextStyle(color: Colors.green.shade700),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
 
                       // Error message
                       if (authProvider.error != null)
