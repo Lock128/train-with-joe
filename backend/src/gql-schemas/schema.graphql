@@ -145,6 +145,8 @@ type Training @aws_cognito_user_pools {
   isRandomized: Boolean
   randomizedWordCount: Int
   multipleChoiceOptionCount: Int
+  sourceLanguage: String
+  targetLanguage: String
   executions: [TrainingExecution!]
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
@@ -306,6 +308,8 @@ input CreateTrainingInput @aws_cognito_user_pools {
   isRandomized: Boolean
   randomizedWordCount: Int
   multipleChoiceOptionCount: Int
+  sourceLanguage: String
+  targetLanguage: String
 }
 
 input TrainingWordInput @aws_cognito_user_pools {

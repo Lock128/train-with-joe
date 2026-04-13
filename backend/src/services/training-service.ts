@@ -42,6 +42,8 @@ export class TrainingService {
     isRandomized?: boolean,
     randomizedWordCount?: number,
     multipleChoiceOptionCount?: number,
+    sourceLanguage?: string,
+    targetLanguage?: string,
   ): Promise<{ success: boolean; training?: Training; error?: string }> {
     try {
       // Randomized training path: store configuration only, skip word fetching
@@ -69,6 +71,9 @@ export class TrainingService {
           createdAt: now,
           updatedAt: now,
         };
+
+        if (sourceLanguage) training.sourceLanguage = sourceLanguage;
+        if (targetLanguage) training.targetLanguage = targetLanguage;
 
         if (multipleChoiceOptionCount && [3, 4, 5].includes(multipleChoiceOptionCount)) {
           training.multipleChoiceOptionCount = multipleChoiceOptionCount;
@@ -141,6 +146,9 @@ export class TrainingService {
         createdAt: now,
         updatedAt: now,
       };
+
+      if (sourceLanguage) training.sourceLanguage = sourceLanguage;
+      if (targetLanguage) training.targetLanguage = targetLanguage;
 
       if (multipleChoiceOptionCount && [3, 4, 5].includes(multipleChoiceOptionCount)) {
         training.multipleChoiceOptionCount = multipleChoiceOptionCount;
@@ -298,8 +306,8 @@ export class TrainingService {
 
           // Fetch vocabulary lists for full word details and language info
           const vocabRepoAI = VocabularyListRepository.getInstance();
-          let sourceLanguage = 'English';
-          let targetLanguage = 'English';
+          let sourceLanguage = training.sourceLanguage || 'English';
+          let targetLanguage = training.targetLanguage || 'English';
           const enrichedWords: {
             word: string;
             translation?: string;
@@ -311,8 +319,8 @@ export class TrainingService {
           for (const listId of training.vocabularyListIds) {
             const list = await vocabRepoAI.getById(listId);
             if (!list) continue;
-            if (list.sourceLanguage) sourceLanguage = list.sourceLanguage;
-            if (list.targetLanguage) targetLanguage = list.targetLanguage;
+            if (!training.sourceLanguage && list.sourceLanguage) sourceLanguage = list.sourceLanguage;
+            if (!training.targetLanguage && list.targetLanguage) targetLanguage = list.targetLanguage;
 
             for (const selectedWord of selectedWords) {
               if (selectedWord.vocabularyListId === listId) {
@@ -395,8 +403,8 @@ export class TrainingService {
 
         // Fetch vocabulary lists for full word details and language info
         const vocabRepoAI = VocabularyListRepository.getInstance();
-        let sourceLanguage = 'English';
-        let targetLanguage = 'English';
+        let sourceLanguage = training.sourceLanguage || 'English';
+        let targetLanguage = training.targetLanguage || 'English';
         const enrichedWords: {
           word: string;
           translation?: string;
@@ -408,8 +416,8 @@ export class TrainingService {
         for (const listId of training.vocabularyListIds) {
           const list = await vocabRepoAI.getById(listId);
           if (!list) continue;
-          if (list.sourceLanguage) sourceLanguage = list.sourceLanguage;
-          if (list.targetLanguage) targetLanguage = list.targetLanguage;
+          if (!training.sourceLanguage && list.sourceLanguage) sourceLanguage = list.sourceLanguage;
+          if (!training.targetLanguage && list.targetLanguage) targetLanguage = list.targetLanguage;
 
           for (const trainingWord of training.words) {
             if (trainingWord.vocabularyListId === listId) {

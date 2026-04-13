@@ -43,6 +43,7 @@ class TrainingProvider extends ChangeNotifier {
           getTrainings {
             id userId name mode direction vocabularyListIds createdAt updatedAt
             isRandomized randomizedWordCount multipleChoiceOptionCount
+            sourceLanguage targetLanguage
             words { word vocabularyListId unit }
             executions { id }
           }
@@ -73,6 +74,7 @@ class TrainingProvider extends ChangeNotifier {
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
               isRandomized randomizedWordCount multipleChoiceOptionCount
+              sourceLanguage targetLanguage
               words { word translation vocabularyListId unit }
               executions {
                 id trainingId userId startedAt completedAt correctCount incorrectCount
@@ -118,6 +120,8 @@ class TrainingProvider extends ChangeNotifier {
     bool? isRandomized,
     int? randomizedWordCount,
     int? multipleChoiceOptionCount,
+    String? sourceLanguage,
+    String? targetLanguage,
   }) async {
     _isLoading = true;
     _error = null;
@@ -131,6 +135,7 @@ class TrainingProvider extends ChangeNotifier {
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
               isRandomized randomizedWordCount multipleChoiceOptionCount
+              sourceLanguage targetLanguage
               words { word translation vocabularyListId unit }
             }
             error
@@ -150,6 +155,8 @@ class TrainingProvider extends ChangeNotifier {
             if (isRandomized != null && isRandomized) 'isRandomized': isRandomized,
             if (isRandomized != null && isRandomized && randomizedWordCount != null) 'randomizedWordCount': randomizedWordCount,
             if (multipleChoiceOptionCount != null) 'multipleChoiceOptionCount': multipleChoiceOptionCount,
+            if (sourceLanguage != null) 'sourceLanguage': sourceLanguage,
+            if (targetLanguage != null) 'targetLanguage': targetLanguage,
           },
         },
       );

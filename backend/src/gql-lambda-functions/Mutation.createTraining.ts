@@ -18,6 +18,8 @@ interface Event {
       isRandomized?: boolean;
       randomizedWordCount?: number;
       multipleChoiceOptionCount?: number;
+      sourceLanguage?: string;
+      targetLanguage?: string;
     };
   };
   identity: {
@@ -37,6 +39,8 @@ export const handler = async (event: Event) => {
     isRandomized,
     randomizedWordCount,
     multipleChoiceOptionCount,
+    sourceLanguage,
+    targetLanguage,
   } = event.arguments.input;
 
   if (!userId) {
@@ -60,6 +64,8 @@ export const handler = async (event: Event) => {
       isRandomized,
       randomizedWordCount,
       multipleChoiceOptionCount,
+      sourceLanguage,
+      targetLanguage,
     );
   } catch (error) {
     console.error('Error creating training:', error);

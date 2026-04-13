@@ -244,24 +244,39 @@ export class AIService {
 Here are the words to create exercises for:
 ${wordDescriptions}
 
-Create a JSON array of exercises with a good mix of the following types:
+Create a JSON array of exercises with a good mix of the following types. Vary the types across exercises — do not use the same type for every exercise.
 
-1. "fill_in_the_blank" — Write a sentence in ${targetLanguage} with one word replaced by a blank. The options are ${targetLanguage} words. Focus on correct grammar and usage (e.g. "He ____ the bus" with options "stops", "stop", "stopping", "stopped").
-2. "sentence_completion" — Write an incomplete sentence in ${targetLanguage}. The options are ${targetLanguage} phrases or words that complete it correctly.
-3. "verb_conjugation" — Test correct verb forms in ${targetLanguage}. Show a sentence or instruction in ${targetLanguage} with a blank where a verb should go, and provide different ${targetLanguage} conjugations as options. Use ${targetLanguage} pronouns and grammar (e.g. for English: "he/she/it paints" not "er/sie/es malt").
-4. "sentence_translation" — Show a complete sentence in one language and ask the learner to pick the correct translation. Mix directions: some from ${sourceLanguage} to ${targetLanguage}, some from ${targetLanguage} to ${sourceLanguage}. The prompt should contain the sentence to translate and clearly state the task (e.g. "Translate to ${targetLanguage}: ..."). The options are full sentences in the other language.
+EXERCISE TYPES:
 
-IMPORTANT language rules:
-- For fill_in_the_blank, sentence_completion, and verb_conjugation: BOTH the prompt AND the options MUST be entirely in ${targetLanguage}. The learner is practicing correct usage of ${targetLanguage}.
-- For sentence_translation: the prompt contains a sentence in one language, and the options are translations in the other language.
-- Prioritize testing correct grammar and natural usage of words in ${targetLanguage} (e.g. correct prepositions, verb forms, word order).
+1. "fill_in_the_blank" — A sentence in ${targetLanguage} with one word replaced by a blank. Options are ${targetLanguage} words. Focus on correct grammar and usage (e.g. "He ____ the bus" → "stops", "stop", "stopping", "stopped").
+
+2. "sentence_completion" — An incomplete sentence in ${targetLanguage}. Options are ${targetLanguage} phrases or words that complete it correctly.
+
+3. "verb_conjugation" — Test correct verb forms in ${targetLanguage}. Show a sentence or instruction in ${targetLanguage} with a blank where a verb should go, and provide different ${targetLanguage} conjugations as options. Use ${targetLanguage} pronouns and grammar.
+
+4. "sentence_translation" — Show a complete sentence in one language and ask the learner to pick the correct translation. Mix directions: some from ${sourceLanguage} to ${targetLanguage}, some from ${targetLanguage} to ${sourceLanguage}. The prompt should contain the sentence and clearly state the task (e.g. "Translate to ${targetLanguage}: ..."). Options are full sentences in the other language.
+
+5. "preposition" — A sentence in ${targetLanguage} with a missing preposition. Options are different ${targetLanguage} prepositions (e.g. "She arrived ____ the airport" → "at", "in", "on", "to").
+
+6. "word_order" — Show a scrambled sentence and ask the learner to pick the correctly ordered version. All options are in ${targetLanguage}. One option has correct word order, the others have plausible but wrong arrangements.
+
+7. "synonym_antonym" — Ask which word means the same as (or the opposite of) a given ${targetLanguage} word. All options are in ${targetLanguage} (e.g. "Which word means the same as 'happy'?" → "joyful", "sad", "angry", "tired").
+
+8. "error_correction" — Show a sentence in ${targetLanguage} that contains a grammatical error. Options are different versions of the sentence — one is correct, the others still contain errors (e.g. "He don't like coffee" → "He doesn't like coffee", "He not like coffee", "He do like coffee").
+
+9. "context_word" — A sentence in ${targetLanguage} with a blank. The learner must pick the word that fits the meaning/context, not just grammar (e.g. "The weather is very ____ today, I need a jacket." → "cold", "tall", "fast", "loud").
+
+IMPORTANT RULES:
+- Unless the exercise type explicitly involves translation between languages (sentence_translation), BOTH the prompt AND the options MUST be entirely in ${targetLanguage}.
+- Prioritize testing correct grammar and natural usage of words in ${targetLanguage}.
 - Make wrong options plausible — common mistakes learners actually make.
+- Use a good variety of exercise types across the generated exercises.
 
 Each exercise must have:
 - "prompt": the question or instruction for the learner
 - "options": an array of 3 to 5 answer choices
 - "correctOptionIndex": the zero-based index of the correct answer in the options array
-- "exerciseType": one of verb_conjugation, fill_in_the_blank, sentence_completion, sentence_translation
+- "exerciseType": one of fill_in_the_blank, sentence_completion, verb_conjugation, sentence_translation, preposition, word_order, synonym_antonym, error_correction, context_word
 - "sourceWord": the vocabulary word this exercise is based on
 
 Return ONLY a valid JSON array, no markdown, no code blocks, no extra text.`;

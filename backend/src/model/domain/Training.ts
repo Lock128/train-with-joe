@@ -23,6 +23,8 @@ export interface Training {
   isRandomized?: boolean;
   randomizedWordCount?: number;
   multipleChoiceOptionCount?: number;
+  sourceLanguage?: string;
+  targetLanguage?: string;
   units?: string[];
   createdAt: string;
   updatedAt: string;
