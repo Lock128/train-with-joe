@@ -245,6 +245,26 @@ export class APIStack extends cdk.Stack {
       fieldName: 'getImageUploadUrls',
     });
 
+    // Create getImageDownloadUrl Lambda function
+    const getImageDownloadUrlFunction = new NodejsFunction(this, 'GetImageDownloadUrlFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getImageDownloadUrl.ts'),
+      handler: 'handler',
+    });
+
+    // Grant S3 read permissions for generating presigned GET URLs
+    assetsBucket.grantRead(getImageDownloadUrlFunction);
+
+    const getImageDownloadUrlDataSource = api.addLambdaDataSource(
+      'GetImageDownloadUrlDataSource',
+      getImageDownloadUrlFunction,
+    );
+
+    getImageDownloadUrlDataSource.createResolver('GetImageDownloadUrlResolver', {
+      typeName: 'Query',
+      fieldName: 'getImageDownloadUrl',
+    });
+
     // Create getVocabularyLists Lambda function
     const getVocabularyListsFunction = new NodejsFunction(this, 'GetVocabularyListsFunction', {
       ...vocabularyLambdaProps,

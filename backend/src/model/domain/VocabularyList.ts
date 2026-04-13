@@ -20,6 +20,7 @@ export interface VocabularyList {
   userId: string;
   title?: string;
   sourceImageKey?: string;
+  sourceImageKeys?: string[];
   words: VocabularyWord[];
   sourceLanguage?: string;
   targetLanguage?: string;

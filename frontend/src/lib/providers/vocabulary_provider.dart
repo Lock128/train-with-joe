@@ -170,7 +170,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyLists {
           getVocabularyLists {
-            id userId title sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
+            id userId title sourceImageKey sourceImageKeys sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
             words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
           }
         }
@@ -196,7 +196,7 @@ class VocabularyProvider extends ChangeNotifier {
       const query = '''
         query GetVocabularyList(\$id: ID!) {
           getVocabularyList(id: \$id) {
-            id userId title sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
+            id userId title sourceImageKey sourceImageKeys sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
             words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
           }
         }
@@ -584,6 +584,43 @@ class VocabularyProvider extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  /// Get a presigned download URL for a source image
+  Future<String?> getImageDownloadUrl(String s3Key) async {
+    final urls = await getImageDownloadUrls([s3Key]);
+    return urls?.isNotEmpty == true ? urls!.first['downloadUrl'] as String? : null;
+  }
+
+  /// Get presigned download URLs for multiple source images
+  Future<List<Map<String, dynamic>>?> getImageDownloadUrls(List<String> s3Keys) async {
+    try {
+      const query = '''
+        query GetImageDownloadUrl(\$input: GetImageDownloadUrlInput!) {
+          getImageDownloadUrl(input: \$input) {
+            success
+            downloadUrls { s3Key downloadUrl }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.query(
+        query,
+        variables: {'input': {'s3Keys': s3Keys}},
+      );
+
+      final result = response['getImageDownloadUrl'] as Map<String, dynamic>?;
+      if (result?['success'] == true) {
+        return (result!['downloadUrls'] as List<dynamic>)
+            .map((u) => u as Map<String, dynamic>)
+            .toList();
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error getting image download URLs: $e');
+      return null;
     }
   }
 

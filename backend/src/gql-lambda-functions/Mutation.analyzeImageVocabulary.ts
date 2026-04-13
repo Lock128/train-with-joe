@@ -68,6 +68,7 @@ export const handler = async (event: Event) => {
       title: 'Analyzing...',
       words: [],
       sourceImageKey: input.imageS3Keys[0],
+      sourceImageKeys: input.imageS3Keys,
       sourceLanguage: input.sourceLanguage,
       targetLanguage: input.targetLanguage,
       status: 'PENDING',

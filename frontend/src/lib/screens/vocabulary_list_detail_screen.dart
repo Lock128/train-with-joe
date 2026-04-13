@@ -22,6 +22,8 @@ class _VocabularyListDetailScreenState
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  List<String> _sourceImageUrls = [];
+  bool _isImageExpanded = false;
 
   @override
   void dispose() {
@@ -45,6 +47,7 @@ class _VocabularyListDetailScreenState
         _list = Map<String, dynamic>.from(match);
         _isLoading = false;
       });
+      _loadSourceImage(match);
     } else {
       provider.getVocabularyList(widget.listId).then((result) {
         if (mounted) {
@@ -52,7 +55,31 @@ class _VocabularyListDetailScreenState
             _list = result != null ? Map<String, dynamic>.from(result) : null;
             _isLoading = false;
           });
+          if (result != null) _loadSourceImage(result);
         }
+      });
+    }
+  }
+
+  Future<void> _loadSourceImage(Map<String, dynamic> list) async {
+    // Prefer sourceImageKeys (all images), fall back to sourceImageKey (legacy single)
+    final keys = (list['sourceImageKeys'] as List<dynamic>?)
+        ?.map((k) => k as String)
+        .toList();
+    final legacyKey = list['sourceImageKey'] as String?;
+
+    final s3Keys = keys != null && keys.isNotEmpty
+        ? keys
+        : (legacyKey != null && legacyKey.isNotEmpty ? [legacyKey] : <String>[]);
+
+    if (s3Keys.isEmpty) return;
+
+    final results = await context.read<VocabularyProvider>().getImageDownloadUrls(s3Keys);
+    if (results != null && mounted) {
+      setState(() {
+        _sourceImageUrls = results
+            .map((r) => r['downloadUrl'] as String)
+            .toList();
       });
     }
   }
@@ -666,7 +693,7 @@ class _VocabularyListDetailScreenState
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: l10n.searchLists,
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                   border: InputBorder.none,
                 ),
                 onChanged: (value) => setState(() => _searchQuery = value),
@@ -772,6 +799,9 @@ class _VocabularyListDetailScreenState
                 ],
               ),
             ),
+          // Source image
+          if (_sourceImageUrls.isNotEmpty)
+            _buildSourceImageSection(),
           const Divider(height: 1),
           // Word list
           Expanded(
@@ -825,6 +855,86 @@ class _VocabularyListDetailScreenState
         tooltip: 'Add word',
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _buildSourceImageSection() {
+    final imageCount = _sourceImageUrls.length;
+    final label = imageCount == 1
+        ? 'Source image'
+        : 'Source images ($imageCount)';
+
+    return Column(
+      children: [
+        InkWell(
+          onTap: () => setState(() => _isImageExpanded = !_isImageExpanded),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: [
+                const Icon(Icons.image, size: 18, color: Colors.blueGrey),
+                const SizedBox(width: 8),
+                Text(label,
+                    style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade700)),
+                const Spacer(),
+                Icon(
+                  _isImageExpanded ? Icons.expand_less : Icons.expand_more,
+                  size: 20,
+                  color: Colors.blueGrey,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_isImageExpanded)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              children: [
+                for (var i = 0; i < _sourceImageUrls.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      _sourceImageUrls[i],
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return SizedBox(
+                          height: 200,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) => const SizedBox(
+                        height: 100,
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.broken_image, color: Colors.grey),
+                              SizedBox(height: 4),
+                              Text('Failed to load image',
+                                  style: TextStyle(color: Colors.grey, fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
