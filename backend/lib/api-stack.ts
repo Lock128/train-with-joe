@@ -689,6 +689,13 @@ export class APIStack extends cdk.Stack {
     });
 
     usersTable.grantReadData(getUsersFunction);
+    getUsersFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['cognito-idp:ListUsers'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
 
     const getUsersDataSource = api.addLambdaDataSource('GetUsersDataSource', getUsersFunction);
 
