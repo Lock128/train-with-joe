@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 /// Screen for entering the email verification code after registration
@@ -262,7 +263,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         onPressed: authProvider.isLoading
                             ? null
                             : () => context.go('/signin'),
-                        child: const Text('Back to Sign In'),
+                        child: Text(AppLocalizations.of(context)!.backToSignIn),
                       ),
                     ],
                   ),

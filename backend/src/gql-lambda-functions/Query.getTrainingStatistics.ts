@@ -16,9 +16,8 @@ interface Event {
   };
   identity: {
     sub: string;
-    claims: {
-      email?: string;
-    };
+    username?: string;
+    claims: Record<string, string>;
   };
 }
 
@@ -37,7 +36,8 @@ export const handler = async (event: Event) => {
   // If a targetUserId is provided, only admins may use it
   let effectiveUserId = callerUserId;
   if (targetUserId) {
-    let callerEmail = event.identity?.claims?.email;
+    const claims = event.identity?.claims ?? {};
+    let callerEmail: string | undefined = claims.email ?? claims['cognito:email'] ?? claims['custom:email'];
     console.log(
       '[AdminAuth] getTrainingStatistics — callerUserId:',
       callerUserId,
@@ -45,13 +45,19 @@ export const handler = async (event: Event) => {
       targetUserId,
       'jwtEmail:',
       callerEmail,
+      'allClaimKeys:',
+      Object.keys(claims),
     );
     if (!callerEmail) {
       console.log('[AdminAuth] JWT email claim missing, falling back to DB lookup');
-      const userRepo = UserRepository.getInstance();
-      const callerUser = await userRepo.getById(callerUserId);
-      callerEmail = callerUser?.email;
-      console.log('[AdminAuth] DB email lookup result:', callerEmail);
+      try {
+        const userRepo = UserRepository.getInstance();
+        const callerUser = await userRepo.getById(callerUserId);
+        callerEmail = callerUser?.email;
+        console.log('[AdminAuth] DB email lookup result:', callerEmail);
+      } catch (dbError) {
+        console.error('[AdminAuth] DB lookup failed:', dbError);
+      }
     }
     const isAdmin = callerEmail != null && ADMIN_EMAILS.includes(callerEmail);
     console.log('[AdminAuth] email:', callerEmail, 'isAdmin:', isAdmin);

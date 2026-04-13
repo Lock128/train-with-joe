@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 /// Sign in screen for user authentication
@@ -190,7 +191,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         onPressed: authProvider.isLoading
                             ? null
                             : () => context.go('/verify-email?email=${Uri.encodeComponent(_emailController.text.trim())}'),
-                        child: const Text('Have a verification code?'),
+                        child: Text(AppLocalizations.of(context)!.haveVerificationCode),
                       ),
                     ],
                   ),

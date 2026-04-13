@@ -150,4 +150,342 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get portuguese => 'Portuguese';
+
+  @override
+  String get createTraining => 'Create Training';
+
+  @override
+  String get startTraining => 'Start Training';
+
+  @override
+  String get trainingHistory => 'Training History';
+
+  @override
+  String get results => 'Results';
+
+  @override
+  String get analyzeImagesForVocabulary => 'Analyze Images for Vocabulary';
+
+  @override
+  String get analyzeAnImage => 'Analyze an Image';
+
+  @override
+  String get vocabularyList => 'Vocabulary List';
+
+  @override
+  String get listNotFound => 'List not found';
+
+  @override
+  String get trainingNotFound => 'Training not found';
+
+  @override
+  String get executionNotFound => 'Execution not found';
+
+  @override
+  String get noVocabularyListsAvailable => 'No vocabulary lists available';
+
+  @override
+  String get createVocabularyListsFirst =>
+      'Create vocabulary lists first to build a training.';
+
+  @override
+  String get noVocabularyListsYet => 'No vocabulary lists yet';
+
+  @override
+  String get analyzeImageToCreate =>
+      'Analyze an image to create your first vocabulary list!';
+
+  @override
+  String get errorLoadingVocabularyLists => 'Error loading vocabulary lists';
+
+  @override
+  String get noTrainingsYet => 'No trainings yet';
+
+  @override
+  String get createFirstTraining => 'Create a training to start practicing!';
+
+  @override
+  String get errorLoadingTrainings => 'Error loading trainings';
+
+  @override
+  String get trainingName => 'Training Name (optional)';
+
+  @override
+  String get enterTrainingName => 'Enter a name for your training';
+
+  @override
+  String get trainingMode => 'Training Mode';
+
+  @override
+  String get textInput => 'Text Input';
+
+  @override
+  String get multipleChoice => 'Multiple Choice';
+
+  @override
+  String get aiTraining => 'AI Training';
+
+  @override
+  String get trainingDirection => 'Training Direction';
+
+  @override
+  String get wordToTranslation => 'Word → Translation';
+
+  @override
+  String get translationToWord => 'Translation → Word';
+
+  @override
+  String get yourVocabularyLists => 'Your Vocabulary Lists';
+
+  @override
+  String get publicVocabularyLists => 'Public Vocabulary Lists';
+
+  @override
+  String get searchLists => 'Search lists';
+
+  @override
+  String get searchListsHint =>
+      'Title, publisher, school, grade, ISBN, language…';
+
+  @override
+  String get noListsYet => 'You have no vocabulary lists yet.';
+
+  @override
+  String get noListsMatchSearch => 'No lists match your search.';
+
+  @override
+  String get noTrainingsMatchFilters => 'No trainings match your filters';
+
+  @override
+  String get clearFilters => 'Clear filters';
+
+  @override
+  String numberOfWords(int count) {
+    return 'Number of Words: $count';
+  }
+
+  @override
+  String wordsAvailable(int count) {
+    return '$count words available across selected lists';
+  }
+
+  @override
+  String maxWordsPicked(int count) {
+    return '$count words available across selected lists (max 100 will be randomly picked)';
+  }
+
+  @override
+  String get randomizedMode => 'Randomized Mode';
+
+  @override
+  String get randomizedModeDescription =>
+      'Pick different words each time you start this training';
+
+  @override
+  String get wordRemoved => 'Word removed';
+
+  @override
+  String get failedToRemoveWord => 'Failed to remove word';
+
+  @override
+  String get renameTraining => 'Rename Training';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get rename => 'Rename';
+
+  @override
+  String get deleteTraining => 'Delete Training';
+
+  @override
+  String get deleteTrainingConfirm =>
+      'Are you sure you want to delete this training? This cannot be undone.';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get failedToDeleteTraining => 'Failed to delete training';
+
+  @override
+  String get addWords => 'Add Words';
+
+  @override
+  String addCount(int count) {
+    return 'Add $count';
+  }
+
+  @override
+  String get renameList => 'Rename List';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get languages => 'Languages';
+
+  @override
+  String get none => 'None';
+
+  @override
+  String get bookDetails => 'Book Details';
+
+  @override
+  String get deleteList => 'Delete List';
+
+  @override
+  String deleteListConfirm(String title) {
+    return 'Delete \"$title\"? This cannot be undone.';
+  }
+
+  @override
+  String get editWord => 'Edit Word';
+
+  @override
+  String get addWord => 'Add Word';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get deleteWord => 'Delete Word';
+
+  @override
+  String deleteWordConfirm(String word) {
+    return 'Remove \"$word\" from this list?';
+  }
+
+  @override
+  String get exportAsText => 'Export as text';
+
+  @override
+  String get pickFromGallery => 'Pick from Gallery';
+
+  @override
+  String get takePhoto => 'Take Photo';
+
+  @override
+  String get addMore => 'Add More';
+
+  @override
+  String get autoDetect => 'Auto-detect';
+
+  @override
+  String get goToVocabularyLists => 'Go to Vocabulary Lists';
+
+  @override
+  String nWords(int count) {
+    return '$count words';
+  }
+
+  @override
+  String failedToPickImages(String error) {
+    return 'Failed to pick images: $error';
+  }
+
+  @override
+  String failedToTakePhoto(String error) {
+    return 'Failed to take photo: $error';
+  }
+
+  @override
+  String get cancelSubscription => 'Cancel Subscription';
+
+  @override
+  String get cancelSubscriptionConfirm =>
+      'Are you sure you want to cancel your subscription? You will still have access until the end of your billing period.';
+
+  @override
+  String get keepSubscription => 'Keep Subscription';
+
+  @override
+  String get subscriptionCreated => 'Subscription created successfully!';
+
+  @override
+  String purchaseFailed(String error) {
+    return 'Purchase failed: $error';
+  }
+
+  @override
+  String get restoringPurchases => 'Restoring purchases...';
+
+  @override
+  String get purchasesRestored => 'Purchases restored successfully!';
+
+  @override
+  String failedToRestorePurchases(String error) {
+    return 'Failed to restore purchases: $error';
+  }
+
+  @override
+  String get restorePurchases => 'Restore Purchases';
+
+  @override
+  String get subscribe => 'Subscribe';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get backToTraining => 'Back to Training';
+
+  @override
+  String overallAccuracy(int percent) {
+    return 'Overall accuracy: $percent%';
+  }
+
+  @override
+  String get wordFlaggedForReview => 'Word flagged for review';
+
+  @override
+  String get allModes => 'All modes';
+
+  @override
+  String get allLists => 'All lists';
+
+  @override
+  String get forceRemoveTraining => 'Force Remove Training';
+
+  @override
+  String forceRemoveConfirm(String name) {
+    return 'Remove \"$name\" from the list? This will also attempt to delete it from the server.';
+  }
+
+  @override
+  String removedTraining(String name) {
+    return 'Removed \"$name\"';
+  }
+
+  @override
+  String get admin => 'Admin';
+
+  @override
+  String get accessDenied => 'Access denied';
+
+  @override
+  String get load => 'Load';
+
+  @override
+  String get noDataAvailable => 'No data available';
+
+  @override
+  String get confirmMigration => 'Confirm Migration';
+
+  @override
+  String get sourceAndTargetMustDiffer =>
+      'Source and target user must be different.';
+
+  @override
+  String get migrate => 'Migrate';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Sign In';
+
+  @override
+  String get haveVerificationCode => 'Have a verification code?';
+
+  @override
+  String get backToSignIn => 'Back to Sign In';
 }

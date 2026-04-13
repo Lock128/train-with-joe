@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/vocabulary_provider.dart';
 import '../providers/training_provider.dart';
+import '../utils/language_flags.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Screen for creating a new training from vocabulary lists
 class TrainingCreationScreen extends StatefulWidget {
@@ -21,6 +23,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   bool _listsLoaded = false;
   int _wordCount = 20;
   bool _isRandomized = false;
+  int _multipleChoiceOptionCount = 5;
   String _searchQuery = '';
 
   @override
@@ -67,6 +70,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
       direction: _selectedDirection,
       isRandomized: _isRandomized ? true : null,
       randomizedWordCount: _isRandomized ? _wordCount : null,
+      multipleChoiceOptionCount: _selectedMode == 'MULTIPLE_CHOICE' ? _multipleChoiceOptionCount : null,
     );
 
     if (!mounted) return;
@@ -94,10 +98,9 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
     final sourceLang = list['sourceLanguage'] as String?;
     final targetLang = list['targetLanguage'] as String?;
 
-    final metaParts = <String>['${words.length} words'];
-    if (sourceLang != null && sourceLang.isNotEmpty && targetLang != null && targetLang.isNotEmpty) {
-      metaParts.add('$sourceLang → $targetLang');
-    }
+    final langPair = formatLanguagePair(sourceLang, targetLang);
+    final metaParts = <String>[AppLocalizations.of(context)!.nWords(words.length)];
+    if (langPair != null) metaParts.add(langPair);
     if (publisher != null && publisher.isNotEmpty) metaParts.add(publisher);
     if (schoolForm != null && schoolForm.isNotEmpty) metaParts.add(schoolForm);
     if (grade != null && grade.isNotEmpty) metaParts.add('Klasse $grade');
@@ -125,9 +128,10 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Training'),
+        title: Text(l10n.createTraining),
       ),
       body: Consumer2<VocabularyProvider, TrainingProvider>(
         builder: (context, vocabProvider, trainingProvider, _) {
@@ -145,7 +149,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(
-                    'Error loading vocabulary lists',
+                    l10n.errorLoadingVocabularyLists,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
@@ -158,7 +162,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   ElevatedButton.icon(
                     onPressed: _loadVocabularyLists,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -200,12 +204,12 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const Icon(Icons.library_books, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
                   Text(
-                    'No vocabulary lists available',
+                    l10n.noVocabularyListsAvailable,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Create vocabulary lists first to build a training.',
+                  Text(
+                    l10n.createVocabularyListsFirst,
                     style: TextStyle(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
@@ -213,7 +217,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   ElevatedButton.icon(
                     onPressed: () => context.go('/vocabulary/analyze'),
                     icon: const Icon(Icons.camera_alt),
-                    label: const Text('Analyze an Image'),
+                    label: Text(l10n.analyzeAnImage),
                   ),
                 ],
               ),
@@ -234,18 +238,18 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                 // Name field
                 TextField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Training Name (optional)',
-                    border: OutlineInputBorder(),
-                    hintText: 'Enter a name for your training',
+                  decoration: InputDecoration(
+                    labelText: l10n.trainingName,
+                    border: const OutlineInputBorder(),
+                    hintText: l10n.enterTrainingName,
                   ),
                 ),
                 const SizedBox(height: 24),
 
                 // Mode selector
-                const Text(
-                  'Training Mode',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.trainingMode,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -253,19 +257,19 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   runSpacing: 8,
                   children: [
                     ChoiceChip(
-                      label: const Text('Text Input'),
+                      label: Text(l10n.textInput),
                       selected: _selectedMode == 'TEXT_INPUT',
                       selectedColor: const Color(0xFF2B6CB0).withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _selectedMode = 'TEXT_INPUT'),
                     ),
                     ChoiceChip(
-                      label: const Text('Multiple Choice'),
+                      label: Text(l10n.multipleChoice),
                       selected: _selectedMode == 'MULTIPLE_CHOICE',
                       selectedColor: const Color(0xFFF0932B).withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _selectedMode = 'MULTIPLE_CHOICE'),
                     ),
                     ChoiceChip(
-                      label: const Text('AI Training'),
+                      label: Text(l10n.aiTraining),
                       selected: _selectedMode == 'AI_TRAINING',
                       selectedColor: const Color(0xFF6B46C1).withValues(alpha: 0.2),
                       onSelected: (_) => setState(() => _selectedMode = 'AI_TRAINING'),
@@ -274,17 +278,39 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                 ),
                 const SizedBox(height: 24),
 
+                // Multiple choice option count selector
+                if (_selectedMode == 'MULTIPLE_CHOICE') ...[
+                  const Text(
+                    'Number of Choices',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [3, 4, 5].map((count) {
+                      return ChoiceChip(
+                        label: Text('$count'),
+                        selected: _multipleChoiceOptionCount == count,
+                        selectedColor: const Color(0xFFF0932B).withValues(alpha: 0.2),
+                        onSelected: (_) => setState(() => _multipleChoiceOptionCount = count),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
                 // Direction selector
-                const Text(
-                  'Training Direction',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.trainingDirection,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     Flexible(
                       child: ChoiceChip(
-                        label: const Text('Word → Translation'),
+                        label: Text(l10n.wordToTranslation),
                         selected: _selectedDirection == 'WORD_TO_TRANSLATION',
                         selectedColor: const Color(0xFF38A169).withValues(alpha: 0.2),
                         onSelected: (_) => setState(() => _selectedDirection = 'WORD_TO_TRANSLATION'),
@@ -293,7 +319,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     const SizedBox(width: 8),
                     Flexible(
                       child: ChoiceChip(
-                        label: const Text('Translation → Word'),
+                        label: Text(l10n.translationToWord),
                         selected: _selectedDirection == 'TRANSLATION_TO_WORD',
                         selectedColor: const Color(0xFF805AD5).withValues(alpha: 0.2),
                         onSelected: (_) => setState(() => _selectedDirection = 'TRANSLATION_TO_WORD'),
@@ -304,17 +330,17 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                 const SizedBox(height: 24),
 
                 // Vocabulary lists
-                const Text(
-                  'Your Vocabulary Lists',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.yourVocabularyLists,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 // Search bar
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    labelText: 'Search lists',
-                    hintText: 'Title, publisher, school, grade, ISBN, language…',
+                    labelText: l10n.searchLists,
+                    hintText: l10n.searchListsHint,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchQuery.isNotEmpty
@@ -335,27 +361,27 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                 ),
                 const SizedBox(height: 8),
                 if (filteredMyLists.isEmpty && _searchQuery.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      'You have no vocabulary lists yet.',
-                      style: TextStyle(color: Colors.grey),
+                      l10n.noListsYet,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 if (filteredMyLists.isEmpty && _searchQuery.isNotEmpty && filteredPublicLists.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      'No lists match your search.',
-                      style: TextStyle(color: Colors.grey),
+                      l10n.noListsMatchSearch,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 ...filteredMyLists.map((list) => _buildListTile(list, isPublic: false)),
                 if (filteredPublicLists.isNotEmpty) ...[
                   const SizedBox(height: 24),
-                  const Text(
-                    'Public Vocabulary Lists',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.publicVocabularyLists,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   ...filteredPublicLists.map((list) => _buildListTile(list, isPublic: true)),
@@ -365,13 +391,16 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                 // Word count selector
                 if (_selectedListIds.isNotEmpty) ...[
                   Text(
-                    'Number of Words: $_wordCount',
+                    _selectedMode == 'AI_TRAINING'
+                        ? 'Number of Questions: $_wordCount'
+                        : l10n.numberOfWords(_wordCount),
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '$totalWords words available across selected lists'
-                        '${totalWords > 100 ? " (max 100 will be randomly picked)" : ""}',
+                    totalWords > 100
+                        ? l10n.maxWordsPicked(totalWords)
+                        : l10n.wordsAvailable(totalWords),
                     style: const TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                   Slider(
@@ -392,9 +421,11 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                 // Randomized mode toggle
                 if (_selectedListIds.isNotEmpty) ...[
                   SwitchListTile(
-                    title: const Text('Randomized Mode'),
-                    subtitle: const Text(
-                      'Pick different words each time you start this training',
+                    title: Text(l10n.randomizedMode),
+                    subtitle: Text(
+                      _selectedMode == 'AI_TRAINING'
+                          ? 'Pick different questions each time you start this training'
+                          : l10n.randomizedModeDescription,
                     ),
                     value: _isRandomized,
                     contentPadding: EdgeInsets.zero,
@@ -421,7 +452,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Create Training'),
+                      : Text(l10n.createTraining),
                 ),
               ],
             ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../services/feedback_sound_service.dart';
@@ -153,9 +154,9 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
       setState(() => _flaggedIndices.add(_currentWordIndex));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Word flagged for review'),
-            duration: Duration(seconds: 1),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.wordFlaggedForReview),
+            duration: const Duration(seconds: 1),
           ),
         );
       }

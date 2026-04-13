@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 
 /// Screen showing per-day training statistics overview
@@ -91,9 +92,10 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Statistics'),
+        title: Text(l10n.statistics),
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),
@@ -123,7 +125,7 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
             ElevatedButton.icon(
               onPressed: _loadData,
               icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              label: Text(AppLocalizations.of(context)!.retry),
             ),
           ],
         ),

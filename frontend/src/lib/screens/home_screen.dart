@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Home screen for authenticated users
 class HomeScreen extends StatefulWidget {
@@ -24,9 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: Text(l10n.home),
         automaticallyImplyLeading: false,
       ),
       body: Consumer2<AuthProvider, UserProvider>(
@@ -49,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Error loading user data',
+                    l10n.errorLoadingUserData,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 8),
@@ -62,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ElevatedButton.icon(
                     onPressed: () => userProvider.loadUser(),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -100,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Welcome!',
+                              l10n.welcome,
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                             const SizedBox(height: 8),
@@ -129,11 +131,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     Card(
                       child: ListTile(
                         leading: const Icon(Icons.card_membership),
-                        title: const Text('Subscription'),
+                        title: Text(l10n.subscription),
                         subtitle: Text(
                           user != null && user['subscriptionStatus'] != null
-                              ? 'Status: ${user['subscriptionStatus']}'
-                              : 'No active subscription',
+                              ? l10n.subscriptionStatus(user['subscriptionStatus'] as String)
+                              : l10n.noActiveSubscription,
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () => context.go('/subscription'),
@@ -142,8 +144,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
 
                     // Quick actions
-                    const Text(
-                      'Quick Actions',
+                    Text(
+                      l10n.quickActions,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -154,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ElevatedButton.icon(
                       onPressed: () => context.go('/vocabulary/analyze'),
                       icon: const Icon(Icons.camera_alt),
-                      label: const Text('Scan Image for Vocabulary'),
+                      label: Text(l10n.scanImageForVocabulary),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                       ),
@@ -164,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ElevatedButton.icon(
                       onPressed: () => context.go('/vocabulary'),
                       icon: const Icon(Icons.list_alt),
-                      label: const Text('My Vocabulary Lists'),
+                      label: Text(l10n.myVocabularyLists),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                         backgroundColor: const Color(0xFFF0932B),
@@ -175,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ElevatedButton.icon(
                       onPressed: () => context.go('/trainings'),
                       icon: const Icon(Icons.quiz),
-                      label: const Text('My Trainings'),
+                      label: Text(l10n.myTrainings),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                         backgroundColor: const Color(0xFF27AE60),
@@ -186,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     OutlinedButton.icon(
                       onPressed: () => context.go('/subscription'),
                       icon: const Icon(Icons.upgrade),
-                      label: const Text('Manage Subscription'),
+                      label: Text(l10n.manageSubscription),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.all(16),
                       ),

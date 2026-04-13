@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/vocabulary_provider.dart';
 
 /// Screen for capturing/uploading images and analyzing vocabulary
@@ -53,8 +54,9 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick images: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(l10n.failedToPickImages(e.toString())), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -77,8 +79,9 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to take photo: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(l10n.failedToTakePhoto(e.toString())), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -145,9 +148,10 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analyze Images for Vocabulary'),
+        title: Text(l10n.analyzeImagesForVocabulary),
         automaticallyImplyLeading: false,
       ),
       body: Consumer<VocabularyProvider>(
@@ -197,6 +201,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   }
 
   Widget _buildImagePicker() {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -215,7 +220,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             ElevatedButton.icon(
               onPressed: _pickImages,
               icon: const Icon(Icons.photo_library),
-              label: const Text('Pick from Gallery'),
+              label: Text(l10n.pickFromGallery),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
                 minimumSize: const Size(double.infinity, 0),
@@ -225,7 +230,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             ElevatedButton.icon(
               onPressed: _takePhoto,
               icon: const Icon(Icons.camera_alt),
-              label: const Text('Take Photo'),
+              label: Text(l10n.takePhoto),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
                 minimumSize: const Size(double.infinity, 0),
@@ -238,6 +243,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   }
 
   Widget _buildImageGrid(VocabularyProvider provider) {
+    final l10n = AppLocalizations.of(context)!;
     final isAnalyzing = provider.isAnalyzing;
 
     return Column(
@@ -298,7 +304,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _pickImages,
                   icon: const Icon(Icons.add_photo_alternate, size: 18),
-                  label: const Text('Add More'),
+                  label: Text(l10n.addMore),
                 ),
               ),
               const SizedBox(width: 8),
@@ -306,7 +312,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _takePhoto,
                   icon: const Icon(Icons.camera_alt, size: 18),
-                  label: const Text('Take Photo'),
+                  label: Text(l10n.takePhoto),
                 ),
               ),
             ],
@@ -335,12 +341,12 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                       child: DropdownButton<String?>(
                         value: _selectedSourceLanguage,
                         isExpanded: true,
-                        hint: const Text('Auto-detect'),
+                        hint: Text(l10n.autoDetect),
                         onChanged: isAnalyzing ? null : (value) {
                           setState(() => _selectedSourceLanguage = value);
                         },
                         items: [
-                          const DropdownMenuItem<String?>(value: null, child: Text('Auto-detect')),
+                          DropdownMenuItem<String?>(value: null, child: Text(l10n.autoDetect)),
                           ..._supportedLanguages.map((lang) {
                             return DropdownMenuItem(value: lang, child: Text(lang));
                           }),
@@ -360,12 +366,12 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                       child: DropdownButton<String?>(
                         value: _selectedTargetLanguage,
                         isExpanded: true,
-                        hint: const Text('Auto-detect'),
+                        hint: Text(l10n.autoDetect),
                         onChanged: isAnalyzing ? null : (value) {
                           setState(() => _selectedTargetLanguage = value);
                         },
                         items: [
-                          const DropdownMenuItem<String?>(value: null, child: Text('Auto-detect')),
+                          DropdownMenuItem<String?>(value: null, child: Text(l10n.autoDetect)),
                           ..._supportedLanguages.map((lang) {
                             return DropdownMenuItem(value: lang, child: Text(lang));
                           }),
@@ -420,6 +426,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   }
 
   Widget _buildErrorState(VocabularyProvider provider) {
+    final l10n = AppLocalizations.of(context)!;
     final isBackgroundProcessing = provider.error?.contains('background') ?? false;
     return Card(
       child: Padding(
@@ -447,13 +454,13 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
               ElevatedButton.icon(
                 onPressed: () => context.go('/vocabulary'),
                 icon: const Icon(Icons.list),
-                label: const Text('Go to Vocabulary Lists'),
+                label: Text(l10n.goToVocabularyLists),
               )
             else
               ElevatedButton.icon(
                 onPressed: () => _analyzeImages(provider),
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(l10n.retry),
               ),
           ],
         ),
@@ -462,6 +469,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   }
 
   Widget _buildResults() {
+    final l10n = AppLocalizations.of(context)!;
     if (_analysisResults.isEmpty) return const SizedBox.shrink();
     final result = _analysisResults.first;
     final title = result['title'] as String? ?? 'Vocabulary List';
@@ -503,7 +511,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                         avatar: const Icon(Icons.language, size: 16),
                       ),
                     Chip(
-                      label: Text('${words.length} words'),
+                      label: Text(l10n.nWords(words.length)),
                       avatar: const Icon(Icons.format_list_numbered, size: 16),
                     ),
                     if (_selectedImages.length > 1)

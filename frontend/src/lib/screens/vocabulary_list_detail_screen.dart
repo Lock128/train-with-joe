@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/vocabulary_provider.dart';
 
 /// Detail screen for viewing and editing a single vocabulary list.
@@ -65,10 +66,11 @@ class _VocabularyListDetailScreenState
   void _showRenameDialog() {
     final currentTitle = _list?['title'] as String? ?? '';
     final controller = TextEditingController(text: currentTitle);
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rename List'),
+        title: Text(l10n.renameList),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -86,7 +88,7 @@ class _VocabularyListDetailScreenState
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(l10n.cancel)),
           TextButton(
             onPressed: () {
               final v = controller.text.trim();
@@ -95,7 +97,7 @@ class _VocabularyListDetailScreenState
                 _rename(v);
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -138,11 +140,12 @@ class _VocabularyListDetailScreenState
       selectedTarget = null;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Languages'),
+          title: Text(l10n.languages),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -151,8 +154,8 @@ class _VocabularyListDetailScreenState
                 decoration: const InputDecoration(
                     labelText: 'Source language', border: OutlineInputBorder()),
                 items: [
-                  const DropdownMenuItem<String?>(
-                      value: null, child: Text('None')),
+                  DropdownMenuItem<String?>(
+                      value: null, child: Text(l10n.none)),
                   ..._supportedLanguages.map((lang) =>
                       DropdownMenuItem(value: lang, child: Text(lang))),
                 ],
@@ -165,8 +168,8 @@ class _VocabularyListDetailScreenState
                 decoration: const InputDecoration(
                     labelText: 'Target language', border: OutlineInputBorder()),
                 items: [
-                  const DropdownMenuItem<String?>(
-                      value: null, child: Text('None')),
+                  DropdownMenuItem<String?>(
+                      value: null, child: Text(l10n.none)),
                   ..._supportedLanguages.map((lang) =>
                       DropdownMenuItem(value: lang, child: Text(lang))),
                 ],
@@ -178,14 +181,14 @@ class _VocabularyListDetailScreenState
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel')),
+                child: Text(l10n.cancel)),
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
                 _updateLanguages(
                     selectedSource ?? '', selectedTarget ?? '');
               },
-              child: const Text('Save'),
+              child: Text(l10n.save),
             ),
           ],
         ),
@@ -229,11 +232,12 @@ class _VocabularyListDetailScreenState
       selectedSchoolForm = null;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Book Details'),
+          title: Text(l10n.bookDetails),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -253,8 +257,8 @@ class _VocabularyListDetailScreenState
                     border: OutlineInputBorder(),
                   ),
                   items: [
-                    const DropdownMenuItem<String?>(
-                        value: null, child: Text('None')),
+                    DropdownMenuItem<String?>(
+                        value: null, child: Text(l10n.none)),
                     ..._schoolForms.map((f) =>
                         DropdownMenuItem(value: f, child: Text(f))),
                   ],
@@ -283,7 +287,7 @@ class _VocabularyListDetailScreenState
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel')),
+                child: Text(l10n.cancel)),
             TextButton(
               onPressed: () {
                 Navigator.pop(ctx);
@@ -294,7 +298,7 @@ class _VocabularyListDetailScreenState
                   isbn: isbnCtrl.text.trim(),
                 );
               },
-              child: const Text('Save'),
+              child: Text(l10n.save),
             ),
           ],
         ),
@@ -337,15 +341,16 @@ class _VocabularyListDetailScreenState
 
   void _confirmDelete() {
     final title = _list?['title'] as String? ?? 'Untitled List';
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete List'),
-        content: Text('Delete "$title"? This cannot be undone.'),
+        title: Text(l10n.deleteList),
+        content: Text(l10n.deleteListConfirm(title)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(l10n.cancel)),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
@@ -355,7 +360,7 @@ class _VocabularyListDetailScreenState
               context.go('/vocabulary');
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -375,10 +380,11 @@ class _VocabularyListDetailScreenState
     final unitCtrl =
         TextEditingController(text: word['unit'] as String? ?? '');
 
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edit Word'),
+        title: Text(l10n.editWord),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -410,7 +416,7 @@ class _VocabularyListDetailScreenState
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(l10n.cancel)),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
@@ -422,7 +428,7 @@ class _VocabularyListDetailScreenState
                 'unit': unitCtrl.text.trim(),
               });
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -435,10 +441,11 @@ class _VocabularyListDetailScreenState
     final defCtrl = TextEditingController();
     final unitCtrl = TextEditingController();
 
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add Word'),
+        title: Text(l10n.addWord),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -471,7 +478,7 @@ class _VocabularyListDetailScreenState
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(l10n.cancel)),
           TextButton(
             onPressed: () {
               if (wordCtrl.text.trim().isEmpty) return;
@@ -483,7 +490,7 @@ class _VocabularyListDetailScreenState
                 'unit': unitCtrl.text.trim(),
               });
             },
-            child: const Text('Add'),
+            child: Text(l10n.add),
           ),
         ],
       ),
@@ -512,22 +519,23 @@ class _VocabularyListDetailScreenState
     final words = (_list?['words'] as List<dynamic>?) ?? [];
     final word = words[index] as Map<String, dynamic>;
     final wordText = word['word'] as String? ?? '';
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Word'),
-        content: Text('Remove "$wordText" from this list?'),
+        title: Text(l10n.deleteWord),
+        content: Text(l10n.deleteWordConfirm(wordText)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child: Text(l10n.cancel)),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               _deleteWord(index);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -576,17 +584,18 @@ class _VocabularyListDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Vocabulary List')),
+        appBar: AppBar(title: Text(l10n.vocabularyList)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_list == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Vocabulary List')),
-        body: const Center(child: Text('List not found')),
+        appBar: AppBar(title: Text(l10n.vocabularyList)),
+        body: Center(child: Text(l10n.listNotFound)),
       );
     }
 
@@ -628,20 +637,20 @@ class _VocabularyListDetailScreenState
               }
             },
             itemBuilder: (_) => [
-              const PopupMenuItem(value: 'rename', child: Text('Rename')),
-              const PopupMenuItem(
-                  value: 'languages', child: Text('Languages')),
-              const PopupMenuItem(
-                  value: 'bookDetails', child: Text('Book Details')),
+              PopupMenuItem(value: 'rename', child: Text(l10n.renameList)),
+              PopupMenuItem(
+                  value: 'languages', child: Text(l10n.languages)),
+              PopupMenuItem(
+                  value: 'bookDetails', child: Text(l10n.bookDetails)),
               PopupMenuItem(
                 value: 'public',
                 child: Text(isPublic ? 'Make private' : 'Make public'),
               ),
-              const PopupMenuItem(
-                  value: 'export', child: Text('Export as text')),
-              const PopupMenuItem(
+              PopupMenuItem(
+                  value: 'export', child: Text(l10n.exportAsText)),
+              PopupMenuItem(
                 value: 'delete',
-                child: Text('Delete', style: TextStyle(color: Colors.red)),
+                child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
               ),
             ],
           ),
@@ -663,7 +672,7 @@ class _VocabularyListDetailScreenState
                     Text(sourceLang,
                         style: const TextStyle(color: Colors.grey)),
                   const Spacer(),
-                  Text('${words.length} words',
+                  Text(l10n.nWords(words.length),
                       style: const TextStyle(color: Colors.grey)),
                 ],
               ),
@@ -711,7 +720,7 @@ class _VocabularyListDetailScreenState
                         ElevatedButton.icon(
                           onPressed: _showAddWordDialog,
                           icon: const Icon(Icons.add),
-                          label: const Text('Add Word'),
+                          label: Text(l10n.addWord),
                         ),
                       ],
                     ),

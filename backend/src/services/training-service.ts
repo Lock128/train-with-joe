@@ -41,6 +41,7 @@ export class TrainingService {
     units?: string[],
     isRandomized?: boolean,
     randomizedWordCount?: number,
+    multipleChoiceOptionCount?: number,
   ): Promise<{ success: boolean; training?: Training; error?: string }> {
     try {
       // Randomized training path: store configuration only, skip word fetching
@@ -68,6 +69,10 @@ export class TrainingService {
           createdAt: now,
           updatedAt: now,
         };
+
+        if (multipleChoiceOptionCount && [3, 4, 5].includes(multipleChoiceOptionCount)) {
+          training.multipleChoiceOptionCount = multipleChoiceOptionCount;
+        }
 
         if (units && units.length > 0) {
           training.units = units;
@@ -137,6 +142,10 @@ export class TrainingService {
         updatedAt: now,
       };
 
+      if (multipleChoiceOptionCount && [3, 4, 5].includes(multipleChoiceOptionCount)) {
+        training.multipleChoiceOptionCount = multipleChoiceOptionCount;
+      }
+
       const trainingRepo = TrainingRepository.getInstance();
       await trainingRepo.create(training);
 
@@ -192,16 +201,21 @@ export class TrainingService {
   /**
    * Generate multiple choice options from a word list
    */
-  private generateMultipleChoiceOptions(words: TrainingWord[], direction: TrainingDirection): MultipleChoiceOption[] {
+  private generateMultipleChoiceOptions(
+    words: TrainingWord[],
+    direction: TrainingDirection,
+    optionCount: number = 5,
+  ): MultipleChoiceOption[] {
     const reversed = direction === 'TRANSLATION_TO_WORD';
+    const distractorCount = optionCount - 1;
     return words.map((word, index) => {
       const correctAnswer = reversed ? word.word : word.translation;
       // Get distractor answers from other words
       const otherAnswers = words.filter((_, i) => i !== index).map((w) => (reversed ? w.word : w.translation));
 
-      // Pick 2 random distractors
+      // Pick random distractors based on optionCount
       const shuffled = otherAnswers.sort(() => Math.random() - 0.5);
-      const distractors = shuffled.slice(0, 2);
+      const distractors = shuffled.slice(0, distractorCount);
 
       // Build options array with correct answer + distractors, then shuffle
       const options = [correctAnswer, ...distractors];
@@ -349,7 +363,11 @@ export class TrainingService {
 
         let multipleChoiceOptions: MultipleChoiceOption[] | undefined;
         if (training.mode === 'MULTIPLE_CHOICE') {
-          multipleChoiceOptions = this.generateMultipleChoiceOptions(selectedWords, training.direction);
+          multipleChoiceOptions = this.generateMultipleChoiceOptions(
+            selectedWords,
+            training.direction,
+            training.multipleChoiceOptionCount ?? 5,
+          );
         }
 
         const execution: TrainingExecution = {
@@ -436,7 +454,11 @@ export class TrainingService {
 
       let multipleChoiceOptions: MultipleChoiceOption[] | undefined;
       if (training.mode === 'MULTIPLE_CHOICE') {
-        multipleChoiceOptions = this.generateMultipleChoiceOptions(training.words, training.direction);
+        multipleChoiceOptions = this.generateMultipleChoiceOptions(
+          training.words,
+          training.direction,
+          training.multipleChoiceOptionCount ?? 5,
+        );
       }
 
       const execution: TrainingExecution = {

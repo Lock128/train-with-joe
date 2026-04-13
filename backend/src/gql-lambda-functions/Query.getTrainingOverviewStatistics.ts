@@ -17,13 +17,14 @@ interface Event {
   };
   identity: {
     sub: string;
-    claims: {
-      email?: string;
-    };
+    username?: string;
+    claims: Record<string, string>;
   };
 }
 
 export const handler = async (event: Event) => {
+  console.log('[DEBUG] Full event.identity:', JSON.stringify(event.identity, null, 2));
+  console.log('[DEBUG] Full event.arguments:', JSON.stringify(event.arguments, null, 2));
   const callerUserId = event.identity?.sub;
   const { fromDate, toDate, userId: targetUserId } = event.arguments;
 
@@ -37,8 +38,9 @@ export const handler = async (event: Event) => {
 
   let effectiveUserId = callerUserId;
   if (targetUserId) {
-    // Try JWT claim first, fall back to DB lookup
-    let callerEmail = event.identity?.claims?.email;
+    // Extract email from JWT claims — AppSync may place it under different keys
+    const claims = event.identity?.claims ?? {};
+    let callerEmail: string | undefined = claims.email ?? claims['cognito:email'] ?? claims['custom:email'];
     console.log(
       '[AdminAuth] getTrainingOverviewStatistics — callerUserId:',
       callerUserId,
@@ -46,13 +48,21 @@ export const handler = async (event: Event) => {
       targetUserId,
       'jwtEmail:',
       callerEmail,
+      'allClaimKeys:',
+      Object.keys(claims),
     );
     if (!callerEmail) {
       console.log('[AdminAuth] JWT email claim missing, falling back to DB lookup');
-      const userRepo = UserRepository.getInstance();
-      const callerUser = await userRepo.getById(callerUserId);
-      callerEmail = callerUser?.email;
-      console.log('[AdminAuth] DB email lookup result:', callerEmail);
+      try {
+        const userRepo = UserRepository.getInstance();
+        console.log('[AdminAuth] Looking up user by id:', callerUserId, 'table:', process.env.USERS_TABLE_NAME);
+        const callerUser = await userRepo.getById(callerUserId);
+        console.log('[AdminAuth] DB lookup returned:', JSON.stringify(callerUser));
+        callerEmail = callerUser?.email;
+        console.log('[AdminAuth] DB email lookup result:', callerEmail);
+      } catch (dbError) {
+        console.error('[AdminAuth] DB lookup failed:', dbError);
+      }
     }
     const isAdmin = callerEmail != null && ADMIN_EMAILS.includes(callerEmail);
     console.log('[AdminAuth] email:', callerEmail, 'isAdmin:', isAdmin);

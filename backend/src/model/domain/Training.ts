@@ -22,6 +22,7 @@ export interface Training {
   words: TrainingWord[];
   isRandomized?: boolean;
   randomizedWordCount?: number;
+  multipleChoiceOptionCount?: number;
   units?: string[];
   createdAt: string;
   updatedAt: string;

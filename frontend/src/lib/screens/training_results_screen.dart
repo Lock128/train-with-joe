@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 
 /// Screen for displaying results of a completed training execution
@@ -88,22 +89,23 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Results')),
+        appBar: AppBar(title: Text(l10n.results)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_execution == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Results')),
+        appBar: AppBar(title: Text(l10n.results)),
         body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
           const SizedBox(height: 16),
-          Text('Execution not found', style: Theme.of(context).textTheme.titleLarge),
+          Text(l10n.executionNotFound, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 24),
-          ElevatedButton.icon(onPressed: _loadData, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+          ElevatedButton.icon(onPressed: _loadData, icon: const Icon(Icons.refresh), label: Text(l10n.retry)),
         ])),
       );
     }
@@ -119,7 +121,7 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Results')),
+      appBar: AppBar(title: Text(l10n.results)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -187,13 +189,13 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
             style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
             child: _isRetrying
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Try Again'),
+                : Text(l10n.tryAgain),
           ),
           const SizedBox(height: 12),
           OutlinedButton(
             onPressed: () => context.go('/trainings/${widget.trainingId}'),
             style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
-            child: const Text('Back to Training'),
+            child: Text(l10n.backToTraining),
           ),
         ]),
       ),

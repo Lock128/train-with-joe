@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/training_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../utils/language_flags.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Screen for viewing all user trainings
 class TrainingListScreen extends StatefulWidget {
@@ -16,12 +17,23 @@ class TrainingListScreen extends StatefulWidget {
 class _TrainingListScreenState extends State<TrainingListScreen> {
   bool _adminMode = false;
 
+  // Filter state
+  final TextEditingController _searchController = TextEditingController();
+  String? _selectedMode;
+  String? _selectedListId;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<TrainingProvider>().loadTrainings();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Color _getModeColor(String? mode) {
@@ -38,23 +50,66 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
   }
 
   String _getModeLabel(String? mode) {
+    final l10n = AppLocalizations.of(context)!;
     switch (mode) {
       case 'TEXT_INPUT':
-        return 'Text Input';
+        return l10n.textInput;
       case 'MULTIPLE_CHOICE':
-        return 'Multiple Choice';
+        return l10n.multipleChoice;
       case 'AI_TRAINING':
-        return 'AI Training';
+        return l10n.aiTraining;
       default:
         return mode ?? 'Unknown';
     }
   }
 
+  List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> trainings) {
+    var filtered = trainings;
+
+    // Filter by name search
+    final query = _searchController.text.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      filtered = filtered.where((t) {
+        final name = (t['name'] as String? ?? '').toLowerCase();
+        return name.contains(query);
+      }).toList();
+    }
+
+    // Filter by mode
+    if (_selectedMode != null) {
+      filtered = filtered.where((t) => t['mode'] == _selectedMode).toList();
+    }
+
+    // Filter by vocabulary list
+    if (_selectedListId != null) {
+      filtered = filtered.where((t) {
+        final ids = (t['vocabularyListIds'] as List<dynamic>?) ?? [];
+        return ids.contains(_selectedListId);
+      }).toList();
+    }
+
+    return filtered;
+  }
+
+  bool get _hasActiveFilters =>
+      _searchController.text.trim().isNotEmpty ||
+      _selectedMode != null ||
+      _selectedListId != null;
+
+  void _clearFilters() {
+    setState(() {
+      _searchController.clear();
+      _selectedMode = null;
+      _selectedListId = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_adminMode ? 'Admin Mode' : 'My Trainings'),
+        title: Text(_adminMode ? 'Admin Mode' : l10n.myTrainings),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -67,9 +122,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
       body: Consumer<TrainingProvider>(
         builder: (context, trainingProvider, _) {
           if (trainingProvider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (trainingProvider.error != null) {
@@ -77,16 +130,9 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red,
-                  ),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text(
-                    'Error loading trainings',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
+                  Text(l10n.errorLoadingTrainings, style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(
                     trainingProvider.error!,
@@ -97,7 +143,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                   ElevatedButton.icon(
                     onPressed: () => trainingProvider.loadTrainings(),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -109,19 +155,12 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.quiz_outlined,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
+                  const Icon(Icons.quiz_outlined, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  Text(
-                    'No trainings yet',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
+                  Text(l10n.noTrainingsYet, style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Create a training from your vocabulary lists!',
+                  Text(
+                    l10n.createFirstTraining,
                     style: TextStyle(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
@@ -129,26 +168,47 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                   ElevatedButton.icon(
                     onPressed: () => context.go('/trainings/create'),
                     icon: const Icon(Icons.add),
-                    label: const Text('Create Training'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                    ),
+                    label: Text(l10n.createTraining),
+                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
                   ),
                 ],
               ),
             );
           }
 
-          return RefreshIndicator(
-            onRefresh: () => trainingProvider.loadTrainings(),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: trainingProvider.trainings.length,
-              itemBuilder: (context, index) {
-                final training = trainingProvider.trainings[index];
-                return _buildTrainingCard(training);
-              },
-            ),
+          final filtered = _applyFilters(trainingProvider.trainings);
+
+          return Column(
+            children: [
+              _buildFilterBar(),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () => trainingProvider.loadTrainings(),
+                  child: filtered.isEmpty
+                      ? ListView(
+                          children: [
+                            const SizedBox(height: 80),
+                            Center(
+                              child: Column(
+                                children: [
+                                  Icon(Icons.filter_list_off, size: 48, color: Colors.grey.shade400),
+                                  const SizedBox(height: 12),
+                                  Text(l10n.noTrainingsMatchFilters, style: const TextStyle(color: Colors.grey)),
+                                  const SizedBox(height: 12),
+                                  TextButton(onPressed: _clearFilters, child: Text(l10n.clearFilters)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16.0),
+                          itemCount: filtered.length,
+                          itemBuilder: (context, index) => _buildTrainingCard(filtered[index]),
+                        ),
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -160,22 +220,116 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
     );
   }
 
+  Widget _buildFilterBar() {
+    final vocabLists = context.watch<VocabularyProvider>().vocabularyLists;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Column(
+        children: [
+          // Search field
+          TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search by name...',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, size: 18),
+                      onPressed: () => setState(() => _searchController.clear()),
+                    )
+                  : null,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 8),
+          // Mode + List dropdowns
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedMode,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: 'Mode',
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: null, child: Text(l10n.allModes)),
+                    DropdownMenuItem(value: 'TEXT_INPUT', child: Text(l10n.textInput)),
+                    DropdownMenuItem(value: 'MULTIPLE_CHOICE', child: Text(l10n.multipleChoice)),
+                    DropdownMenuItem(value: 'AI_TRAINING', child: Text(l10n.aiTraining)),
+                  ],
+                  onChanged: (v) => setState(() => _selectedMode = v),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedListId,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: 'List',
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  items: [
+                    DropdownMenuItem<String>(value: null, child: Text(l10n.allLists)),
+                    ...vocabLists.map((l) => DropdownMenuItem<String>(
+                          value: l['id'] as String,
+                          child: Text(
+                            l['title'] as String? ?? 'Untitled',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )),
+                  ],
+                  onChanged: (v) => setState(() => _selectedListId = v),
+                ),
+              ),
+            ],
+          ),
+          if (_hasActiveFilters) ...[
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _clearFilters,
+                icon: const Icon(Icons.clear_all, size: 16),
+                label: Text(l10n.clearFilters, style: const TextStyle(fontSize: 12)),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   void _confirmForceRemove(Map<String, dynamic> training) {
     final name = training['name'] as String? ?? 'Untitled Training';
     final id = training['id'] as String;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Force Remove Training'),
-        content: Text('Remove "$name" from the list? This will also attempt to delete it from the server.'),
+        title: Text(AppLocalizations.of(context)!.forceRemoveTraining),
+        content: Text(AppLocalizations.of(context)!.forceRemoveConfirm(name)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(AppLocalizations.of(context)!.cancel)),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               context.read<TrainingProvider>().forceRemoveTraining(id);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Removed "$name"')),
+                SnackBar(content: Text(AppLocalizations.of(context)!.removedTraining(name))),
               );
             },
             child: const Text('Remove', style: TextStyle(color: Colors.red)),
@@ -203,7 +357,6 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         .map((l) => l['title'] as String? ?? 'Unknown list')
         .toList();
 
-    // Derive language pair from linked vocabulary lists
     final sourceLangs = matchedLists
         .map((l) => l['sourceLanguage'] as String?)
         .whereType<String>()
@@ -244,11 +397,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
               const SizedBox(width: 6),
               Tooltip(
                 message: 'Randomized training',
-                child: Icon(
-                  Icons.shuffle,
-                  size: 16,
-                  color: Colors.grey.shade600,
-                ),
+                child: Icon(Icons.shuffle, size: 16, color: Colors.grey.shade600),
               ),
             ],
           ],
@@ -262,10 +411,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                 Chip(
                   label: Text(
                     _getModeLabel(mode),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: _getModeColor(mode),
-                    ),
+                    style: TextStyle(fontSize: 11, color: _getModeColor(mode)),
                   ),
                   backgroundColor: _getModeColor(mode).withValues(alpha: 0.1),
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -278,10 +424,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
               Row(
                 children: [
                   if (langPair != null) ...[
-                    Text(
-                      langPair,
-                      style: const TextStyle(fontSize: 13),
-                    ),
+                    Text(langPair, style: const TextStyle(fontSize: 13)),
                     const SizedBox(width: 8),
                   ],
                   Flexible(

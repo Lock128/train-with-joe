@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/vocabulary_provider.dart';
 import '../utils/language_flags.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Screen for viewing all saved vocabulary lists
 class VocabularyListsScreen extends StatefulWidget {
@@ -33,9 +34,10 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Vocabulary Lists'),
+        title: Text(l10n.myVocabularyLists),
         automaticallyImplyLeading: false,
       ),
       body: Consumer<VocabularyProvider>(
@@ -51,7 +53,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
                 children: [
                   const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text('Error loading vocabulary lists',
+                  Text(l10n.errorLoadingVocabularyLists,
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(vocabularyProvider.error!,
@@ -61,7 +63,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
                   ElevatedButton.icon(
                     onPressed: () => vocabularyProvider.loadVocabularyLists(),
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: Text(l10n.retry),
                   ),
                 ],
               ),
@@ -75,18 +77,18 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
                 children: [
                   const Icon(Icons.library_books, size: 64, color: Colors.grey),
                   const SizedBox(height: 16),
-                  Text('No vocabulary lists yet',
+                  Text(l10n.noVocabularyListsYet,
                       style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
-                  const Text(
-                      'Analyze an image to create your first vocabulary list!',
+                  Text(
+                      l10n.analyzeImageToCreate,
                       style: TextStyle(color: Colors.grey),
                       textAlign: TextAlign.center),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () => context.go('/vocabulary/analyze'),
                     icon: const Icon(Icons.camera_alt),
-                    label: const Text('Analyze an Image'),
+                    label: Text(l10n.analyzeAnImage),
                     style:
                         ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
                   ),
@@ -117,6 +119,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
   }
 
   Widget _buildListCard(Map<String, dynamic> list) {
+    final l10n = AppLocalizations.of(context)!;
     final title = list['title'] as String? ?? 'Untitled List';
     final sourceLang = list['sourceLanguage'] as String?;
     final targetLang = list['targetLanguage'] as String?;
@@ -126,7 +129,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
 
     final langPair = formatLanguagePair(sourceLang, targetLang);
 
-    final subtitleParts = <String>['${words.length} words'];
+    final subtitleParts = <String>[l10n.nWords(words.length)];
     if (langPair != null) subtitleParts.add(langPair);
     if (createdAt != null) subtitleParts.add(_formatDate(createdAt));
 

@@ -17,6 +17,7 @@ interface Event {
       units?: string[];
       isRandomized?: boolean;
       randomizedWordCount?: number;
+      multipleChoiceOptionCount?: number;
     };
   };
   identity: {
@@ -26,8 +27,17 @@ interface Event {
 
 export const handler = async (event: Event) => {
   const userId = event.identity?.sub;
-  const { vocabularyListIds, mode, name, wordCount, direction, units, isRandomized, randomizedWordCount } =
-    event.arguments.input;
+  const {
+    vocabularyListIds,
+    mode,
+    name,
+    wordCount,
+    direction,
+    units,
+    isRandomized,
+    randomizedWordCount,
+    multipleChoiceOptionCount,
+  } = event.arguments.input;
 
   if (!userId) {
     return {
@@ -49,6 +59,7 @@ export const handler = async (event: Event) => {
       units,
       isRandomized,
       randomizedWordCount,
+      multipleChoiceOptionCount,
     );
   } catch (error) {
     console.error('Error creating training:', error);

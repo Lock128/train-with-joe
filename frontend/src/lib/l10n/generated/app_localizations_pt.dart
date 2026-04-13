@@ -149,4 +149,344 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get portuguese => 'Português';
+
+  @override
+  String get createTraining => 'Criar treino';
+
+  @override
+  String get startTraining => 'Iniciar treino';
+
+  @override
+  String get trainingHistory => 'Histórico de treino';
+
+  @override
+  String get results => 'Resultados';
+
+  @override
+  String get analyzeImagesForVocabulary => 'Analisar imagens para vocabulário';
+
+  @override
+  String get analyzeAnImage => 'Analisar uma imagem';
+
+  @override
+  String get vocabularyList => 'Lista de vocabulário';
+
+  @override
+  String get listNotFound => 'Lista não encontrada';
+
+  @override
+  String get trainingNotFound => 'Treino não encontrado';
+
+  @override
+  String get executionNotFound => 'Execução não encontrada';
+
+  @override
+  String get noVocabularyListsAvailable =>
+      'Nenhuma lista de vocabulário disponível';
+
+  @override
+  String get createVocabularyListsFirst =>
+      'Crie listas de vocabulário primeiro para criar um treino.';
+
+  @override
+  String get noVocabularyListsYet => 'Ainda não há listas de vocabulário';
+
+  @override
+  String get analyzeImageToCreate =>
+      'Analise uma imagem para criar sua primeira lista de vocabulário!';
+
+  @override
+  String get errorLoadingVocabularyLists =>
+      'Erro ao carregar as listas de vocabulário';
+
+  @override
+  String get noTrainingsYet => 'Ainda não há treinos';
+
+  @override
+  String get createFirstTraining => 'Crie um treino para começar a praticar!';
+
+  @override
+  String get errorLoadingTrainings => 'Erro ao carregar os treinos';
+
+  @override
+  String get trainingName => 'Nome do treino (opcional)';
+
+  @override
+  String get enterTrainingName => 'Digite um nome para seu treino';
+
+  @override
+  String get trainingMode => 'Modo de treino';
+
+  @override
+  String get textInput => 'Entrada de texto';
+
+  @override
+  String get multipleChoice => 'Múltipla escolha';
+
+  @override
+  String get aiTraining => 'Treino com IA';
+
+  @override
+  String get trainingDirection => 'Direção do treino';
+
+  @override
+  String get wordToTranslation => 'Palavra → Tradução';
+
+  @override
+  String get translationToWord => 'Tradução → Palavra';
+
+  @override
+  String get yourVocabularyLists => 'Suas listas de vocabulário';
+
+  @override
+  String get publicVocabularyLists => 'Listas de vocabulário públicas';
+
+  @override
+  String get searchLists => 'Pesquisar listas';
+
+  @override
+  String get searchListsHint => 'Título, editora, escola, série, ISBN, idioma…';
+
+  @override
+  String get noListsYet => 'Você ainda não tem listas de vocabulário.';
+
+  @override
+  String get noListsMatchSearch => 'Nenhuma lista corresponde à sua pesquisa.';
+
+  @override
+  String get noTrainingsMatchFilters =>
+      'Nenhum treino corresponde aos seus filtros';
+
+  @override
+  String get clearFilters => 'Limpar filtros';
+
+  @override
+  String numberOfWords(int count) {
+    return 'Número de palavras: $count';
+  }
+
+  @override
+  String wordsAvailable(int count) {
+    return '$count palavras disponíveis nas listas selecionadas';
+  }
+
+  @override
+  String maxWordsPicked(int count) {
+    return '$count palavras disponíveis nas listas selecionadas (máx. 100 serão escolhidas aleatoriamente)';
+  }
+
+  @override
+  String get randomizedMode => 'Modo aleatório';
+
+  @override
+  String get randomizedModeDescription =>
+      'Escolher palavras diferentes cada vez que iniciar este treino';
+
+  @override
+  String get wordRemoved => 'Palavra removida';
+
+  @override
+  String get failedToRemoveWord => 'Falha ao remover a palavra';
+
+  @override
+  String get renameTraining => 'Renomear treino';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get rename => 'Renomear';
+
+  @override
+  String get deleteTraining => 'Excluir treino';
+
+  @override
+  String get deleteTrainingConfirm =>
+      'Tem certeza de que deseja excluir este treino? Isso não pode ser desfeito.';
+
+  @override
+  String get delete => 'Excluir';
+
+  @override
+  String get failedToDeleteTraining => 'Falha ao excluir o treino';
+
+  @override
+  String get addWords => 'Adicionar palavras';
+
+  @override
+  String addCount(int count) {
+    return 'Adicionar $count';
+  }
+
+  @override
+  String get renameList => 'Renomear lista';
+
+  @override
+  String get save => 'Salvar';
+
+  @override
+  String get languages => 'Idiomas';
+
+  @override
+  String get none => 'Nenhum';
+
+  @override
+  String get bookDetails => 'Detalhes do livro';
+
+  @override
+  String get deleteList => 'Excluir lista';
+
+  @override
+  String deleteListConfirm(String title) {
+    return 'Excluir \"$title\"? Isso não pode ser desfeito.';
+  }
+
+  @override
+  String get editWord => 'Editar palavra';
+
+  @override
+  String get addWord => 'Adicionar palavra';
+
+  @override
+  String get add => 'Adicionar';
+
+  @override
+  String get deleteWord => 'Excluir palavra';
+
+  @override
+  String deleteWordConfirm(String word) {
+    return 'Remover \"$word\" desta lista?';
+  }
+
+  @override
+  String get exportAsText => 'Exportar como texto';
+
+  @override
+  String get pickFromGallery => 'Escolher da galeria';
+
+  @override
+  String get takePhoto => 'Tirar foto';
+
+  @override
+  String get addMore => 'Adicionar mais';
+
+  @override
+  String get autoDetect => 'Detecção automática';
+
+  @override
+  String get goToVocabularyLists => 'Ir para listas de vocabulário';
+
+  @override
+  String nWords(int count) {
+    return '$count palavras';
+  }
+
+  @override
+  String failedToPickImages(String error) {
+    return 'Falha ao selecionar imagens: $error';
+  }
+
+  @override
+  String failedToTakePhoto(String error) {
+    return 'Falha ao tirar foto: $error';
+  }
+
+  @override
+  String get cancelSubscription => 'Cancelar assinatura';
+
+  @override
+  String get cancelSubscriptionConfirm =>
+      'Tem certeza de que deseja cancelar sua assinatura? Você ainda terá acesso até o final do seu período de faturamento.';
+
+  @override
+  String get keepSubscription => 'Manter assinatura';
+
+  @override
+  String get subscriptionCreated => 'Assinatura criada com sucesso!';
+
+  @override
+  String purchaseFailed(String error) {
+    return 'Compra falhou: $error';
+  }
+
+  @override
+  String get restoringPurchases => 'Restaurando compras...';
+
+  @override
+  String get purchasesRestored => 'Compras restauradas com sucesso!';
+
+  @override
+  String failedToRestorePurchases(String error) {
+    return 'Falha ao restaurar compras: $error';
+  }
+
+  @override
+  String get restorePurchases => 'Restaurar compras';
+
+  @override
+  String get subscribe => 'Assinar';
+
+  @override
+  String get tryAgain => 'Tentar novamente';
+
+  @override
+  String get backToTraining => 'Voltar ao treino';
+
+  @override
+  String overallAccuracy(int percent) {
+    return 'Precisão geral: $percent%';
+  }
+
+  @override
+  String get wordFlaggedForReview => 'Palavra marcada para revisão';
+
+  @override
+  String get allModes => 'Todos os modos';
+
+  @override
+  String get allLists => 'Todas as listas';
+
+  @override
+  String get forceRemoveTraining => 'Forçar remoção do treino';
+
+  @override
+  String forceRemoveConfirm(String name) {
+    return 'Remover \"$name\" da lista? Isso também tentará excluí-lo do servidor.';
+  }
+
+  @override
+  String removedTraining(String name) {
+    return '\"$name\" removido';
+  }
+
+  @override
+  String get admin => 'Admin';
+
+  @override
+  String get accessDenied => 'Acesso negado';
+
+  @override
+  String get load => 'Carregar';
+
+  @override
+  String get noDataAvailable => 'Nenhum dado disponível';
+
+  @override
+  String get confirmMigration => 'Confirmar migração';
+
+  @override
+  String get sourceAndTargetMustDiffer =>
+      'O usuário de origem e destino devem ser diferentes.';
+
+  @override
+  String get migrate => 'Migrar';
+
+  @override
+  String get alreadyHaveAccount => 'Já tem uma conta? Entrar';
+
+  @override
+  String get haveVerificationCode => 'Tem um código de verificação?';
+
+  @override
+  String get backToSignIn => 'Voltar ao login';
 }

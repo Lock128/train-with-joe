@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 
 /// Screen for displaying training history, statistics, and learning day view
@@ -96,11 +97,12 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
-          title: const Text('Training History')),
+          title: Text(l10n.trainingHistory)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -109,12 +111,12 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
-          title: const Text('Training History')),
+          title: Text(l10n.trainingHistory)),
         body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red), const SizedBox(height: 16),
-          Text(_error ?? 'Training not found', style: Theme.of(context).textTheme.titleLarge),
+          Text(_error ?? l10n.trainingNotFound, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 24),
-          ElevatedButton.icon(onPressed: _loadData, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+          ElevatedButton.icon(onPressed: _loadData, icon: const Icon(Icons.refresh), label: Text(l10n.retry)),
         ])),
       );
     }
@@ -130,7 +132,7 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
-        title: const Text('Training History')),
+        title: Text(l10n.trainingHistory)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -193,7 +195,7 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Statistics', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(AppLocalizations.of(context)!.statistics, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
             _statItem('Accuracy', '${overallAccuracy.round()}%'),
@@ -280,7 +282,7 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
                 final incorrect = _dayStatistics!['totalIncorrect'] as int? ?? 0;
                 final total = correct + incorrect;
                 final acc = total > 0 ? (correct / total * 100).round() : 0;
-                return Text('Overall accuracy: $acc%');
+                return Text(AppLocalizations.of(context)!.overallAccuracy(acc));
               }),
             ]),
           ),

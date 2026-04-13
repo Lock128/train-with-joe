@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/training_provider.dart';
 import '../providers/vocabulary_provider.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Screen for viewing and managing a single training
 class TrainingDetailScreen extends StatefulWidget {
@@ -47,10 +48,10 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     if (!mounted) return;
     if (updated != null) {
       setState(() => _training = updated);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Word removed')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.wordRemoved)));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to remove word'), backgroundColor: Colors.red),
+        SnackBar(content: Text(AppLocalizations.of(context)!.failedToRemoveWord), backgroundColor: Colors.red),
       );
     }
   }
@@ -114,31 +115,31 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
           ? const Color(0xFF6B46C1)
           : const Color(0xFF2B6CB0);
   String _modeLabel(String? m) => m == 'MULTIPLE_CHOICE'
-      ? 'Multiple Choice'
+      ? AppLocalizations.of(context)!.multipleChoice
       : m == 'AI_TRAINING'
-          ? 'AI Training'
-          : 'Text Input';
+          ? AppLocalizations.of(context)!.aiTraining
+          : AppLocalizations.of(context)!.textInput;
 
   Future<void> _showRenameDialog(String currentName) async {
     final controller = TextEditingController(text: currentName);
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rename Training'),
+        title: Text(AppLocalizations.of(context)!.renameTraining),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Training Name',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.trainingName,
+            border: const OutlineInputBorder(),
           ),
           onSubmitted: (value) => Navigator.of(ctx).pop(value.trim()),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(AppLocalizations.of(context)!.cancel)),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: const Text('Rename'),
+            child: Text(AppLocalizations.of(context)!.rename),
           ),
         ],
       ),
@@ -156,14 +157,14 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Training'),
-        content: const Text('Are you sure you want to delete this training? This cannot be undone.'),
+        title: Text(AppLocalizations.of(context)!.deleteTraining),
+        content: Text(AppLocalizations.of(context)!.deleteTrainingConfirm),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(AppLocalizations.of(context)!.cancel)),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -175,30 +176,31 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
       context.go('/trainings');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to delete training'), backgroundColor: Colors.red),
+        SnackBar(content: Text(AppLocalizations.of(context)!.failedToDeleteTraining), backgroundColor: Colors.red),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return Scaffold(appBar: AppBar(
         leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to trainings', onPressed: () => context.go('/trainings')),
-        title: const Text('Training')),
+        title: Text(l10n.training)),
         body: const Center(child: CircularProgressIndicator()));
     }
     if (_error != null || _training == null) {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to trainings', onPressed: () => context.go('/trainings')),
-          title: const Text('Training')),
+          title: Text(l10n.training)),
         body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
           const SizedBox(height: 16),
-          Text(_error ?? 'Training not found', style: Theme.of(context).textTheme.titleLarge),
+          Text(_error ?? l10n.trainingNotFound, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 24),
-          ElevatedButton.icon(onPressed: _loadTraining, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+          ElevatedButton.icon(onPressed: _loadTraining, icon: const Icon(Icons.refresh), label: Text(l10n.retry)),
         ])),
       );
     }
@@ -242,7 +244,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
                 color: direction == 'TRANSLATION_TO_WORD' ? const Color(0xFF805AD5) : const Color(0xFF38A169),
               ),
               label: Text(
-                direction == 'TRANSLATION_TO_WORD' ? 'Translation → Word' : 'Word → Translation',
+                direction == 'TRANSLATION_TO_WORD' ? l10n.translationToWord : l10n.wordToTranslation,
                 style: TextStyle(
                   color: direction == 'TRANSLATION_TO_WORD' ? const Color(0xFF805AD5) : const Color(0xFF38A169),
                 ),
@@ -264,7 +266,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
             style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
             child: _isStarting
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Text('Start Training'),
+                : Text(l10n.startTraining),
           ),
           if (isMcTooFew)
             const Padding(padding: EdgeInsets.only(top: 8), child: Text(
@@ -321,7 +323,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
               ),
             const SizedBox(height: 16),
             ElevatedButton.icon(onPressed: _showAddWordsSheet, icon: const Icon(Icons.add),
-              label: const Text('Add Words'), style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(12))),
+              label: Text(l10n.addWords), style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(12))),
           ],
         ]),
       ),
@@ -392,10 +394,10 @@ class _AddWordsSheetState extends State<_AddWordsSheet> {
         Padding(padding: const EdgeInsets.all(16), child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Add Words', style: Theme.of(context).textTheme.titleMedium),
+            Text(l10n.addWords, style: Theme.of(context).textTheme.titleMedium),
             ElevatedButton(
               onPressed: _totalSelected == 0 ? null : _submitAll,
-              child: Text('Add $_totalSelected'),
+              child: Text(AppLocalizations.of(context)!.addCount(_totalSelected)),
             ),
           ],
         )),

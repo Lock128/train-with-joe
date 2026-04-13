@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/subscription_provider.dart';
 import '../services/payment_service.dart';
 
@@ -69,9 +70,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           if (!mounted) return;
           
           // Show error message
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Purchase failed: $error'),
+              content: Text(l10n.purchaseFailed(error)),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 5),
             ),
@@ -143,9 +145,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       navigator.pop();
 
       if (success) {
+        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Subscription created successfully!'),
+          SnackBar(
+            content: Text(l10n.subscriptionCreated),
             backgroundColor: Colors.green,
           ),
         );
@@ -165,23 +168,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     final messenger = ScaffoldMessenger.of(context);
 
     // Show confirmation dialog
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Subscription'),
-        content: const Text(
-          'Are you sure you want to cancel your subscription? '
-          'You will lose access to premium features.',
-        ),
+        title: Text(l10n.cancelSubscription),
+        content: Text(l10n.cancelSubscriptionConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep Subscription'),
+            child: Text(l10n.keepSubscription),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Cancel Subscription'),
+            child: Text(l10n.cancelSubscription),
           ),
         ],
       ),
@@ -217,16 +218,19 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => const AlertDialog(
+          builder: (context) {
+          final l10n = AppLocalizations.of(context)!;
+          return AlertDialog(
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Restoring purchases...'),
+                const CircularProgressIndicator(),
+                const SizedBox(height: 16),
+                Text(l10n.restoringPurchases),
               ],
             ),
-          ),
+          );
+        },
         );
       }
 
@@ -241,9 +245,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       if (mounted) {
         await subscriptionProvider.loadSubscription();
         
+        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Purchases restored successfully!'),
+          SnackBar(
+            content: Text(l10n.purchasesRestored),
             backgroundColor: Colors.green,
           ),
         );
@@ -253,9 +258,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       if (mounted) {
         navigator.pop();
         
+        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Failed to restore purchases: $e'),
+            content: Text(l10n.failedToRestorePurchases(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -278,9 +284,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Subscription'),
+        title: Text(l10n.subscription),
         automaticallyImplyLeading: false,
       ),
       body: Consumer<SubscriptionProvider>(
@@ -380,7 +387,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                 child: OutlinedButton.icon(
                                   onPressed: _handleCancel,
                                   icon: const Icon(Icons.cancel),
-                                  label: const Text('Cancel Subscription'),
+                                  label: Text(l10n.cancelSubscription),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: Colors.red,
                                     padding: const EdgeInsets.all(16),
@@ -409,7 +416,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           child: OutlinedButton.icon(
                             onPressed: _handleRestorePurchases,
                             icon: const Icon(Icons.restore),
-                            label: const Text('Restore Purchases'),
+                            label: Text(l10n.restorePurchases),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.all(16),
                             ),
@@ -484,6 +491,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     required String planId,
     required bool isPopular,
   }) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: isPopular ? 4 : 1,
       child: Container(
@@ -552,7 +560,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     padding: const EdgeInsets.all(16),
                     backgroundColor: isPopular ? const Color(0xFF2B6CB0) : null,
                   ),
-                  child: const Text('Subscribe'),
+                  child: Text(l10n.subscribe),
                 ),
               ),
             ],

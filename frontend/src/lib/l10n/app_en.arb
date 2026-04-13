@@ -56,5 +56,187 @@
   "spanish": "Spanish",
   "japanese": "Japanese",
   "french": "French",
-  "portuguese": "Portuguese"
+  "portuguese": "Portuguese",
+
+  "createTraining": "Create Training",
+  "startTraining": "Start Training",
+  "trainingHistory": "Training History",
+  "results": "Results",
+  "analyzeImagesForVocabulary": "Analyze Images for Vocabulary",
+  "analyzeAnImage": "Analyze an Image",
+  "vocabularyList": "Vocabulary List",
+  "listNotFound": "List not found",
+  "trainingNotFound": "Training not found",
+  "executionNotFound": "Execution not found",
+  "noVocabularyListsAvailable": "No vocabulary lists available",
+  "createVocabularyListsFirst": "Create vocabulary lists first to build a training.",
+  "noVocabularyListsYet": "No vocabulary lists yet",
+  "analyzeImageToCreate": "Analyze an image to create your first vocabulary list!",
+  "errorLoadingVocabularyLists": "Error loading vocabulary lists",
+  "noTrainingsYet": "No trainings yet",
+  "createFirstTraining": "Create a training to start practicing!",
+  "errorLoadingTrainings": "Error loading trainings",
+
+  "trainingName": "Training Name (optional)",
+  "enterTrainingName": "Enter a name for your training",
+  "trainingMode": "Training Mode",
+  "textInput": "Text Input",
+  "multipleChoice": "Multiple Choice",
+  "aiTraining": "AI Training",
+  "trainingDirection": "Training Direction",
+  "wordToTranslation": "Word → Translation",
+  "translationToWord": "Translation → Word",
+  "yourVocabularyLists": "Your Vocabulary Lists",
+  "publicVocabularyLists": "Public Vocabulary Lists",
+  "searchLists": "Search lists",
+  "searchListsHint": "Title, publisher, school, grade, ISBN, language…",
+  "noListsYet": "You have no vocabulary lists yet.",
+  "noListsMatchSearch": "No lists match your search.",
+  "noTrainingsMatchFilters": "No trainings match your filters",
+  "clearFilters": "Clear filters",
+  "numberOfWords": "Number of Words: {count}",
+  "@numberOfWords": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "wordsAvailable": "{count} words available across selected lists",
+  "@wordsAvailable": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "maxWordsPicked": "{count} words available across selected lists (max 100 will be randomly picked)",
+  "@maxWordsPicked": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "randomizedMode": "Randomized Mode",
+  "randomizedModeDescription": "Pick different words each time you start this training",
+
+  "wordRemoved": "Word removed",
+  "failedToRemoveWord": "Failed to remove word",
+  "renameTraining": "Rename Training",
+  "cancel": "Cancel",
+  "rename": "Rename",
+  "deleteTraining": "Delete Training",
+  "deleteTrainingConfirm": "Are you sure you want to delete this training? This cannot be undone.",
+  "delete": "Delete",
+  "failedToDeleteTraining": "Failed to delete training",
+  "addWords": "Add Words",
+  "addCount": "Add {count}",
+  "@addCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "renameList": "Rename List",
+  "save": "Save",
+  "languages": "Languages",
+  "none": "None",
+  "bookDetails": "Book Details",
+  "deleteList": "Delete List",
+  "deleteListConfirm": "Delete \"{title}\"? This cannot be undone.",
+  "@deleteListConfirm": {
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+  "editWord": "Edit Word",
+  "addWord": "Add Word",
+  "add": "Add",
+  "deleteWord": "Delete Word",
+  "deleteWordConfirm": "Remove \"{word}\" from this list?",
+  "@deleteWordConfirm": {
+    "placeholders": {
+      "word": { "type": "String" }
+    }
+  },
+  "exportAsText": "Export as text",
+
+  "pickFromGallery": "Pick from Gallery",
+  "takePhoto": "Take Photo",
+  "addMore": "Add More",
+  "autoDetect": "Auto-detect",
+  "goToVocabularyLists": "Go to Vocabulary Lists",
+  "nWords": "{count} words",
+  "@nWords": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "failedToPickImages": "Failed to pick images: {error}",
+  "@failedToPickImages": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "failedToTakePhoto": "Failed to take photo: {error}",
+  "@failedToTakePhoto": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "cancelSubscription": "Cancel Subscription",
+  "cancelSubscriptionConfirm": "Are you sure you want to cancel your subscription? You will still have access until the end of your billing period.",
+  "keepSubscription": "Keep Subscription",
+  "subscriptionCreated": "Subscription created successfully!",
+  "purchaseFailed": "Purchase failed: {error}",
+  "@purchaseFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "restoringPurchases": "Restoring purchases...",
+  "purchasesRestored": "Purchases restored successfully!",
+  "failedToRestorePurchases": "Failed to restore purchases: {error}",
+  "@failedToRestorePurchases": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "restorePurchases": "Restore Purchases",
+  "subscribe": "Subscribe",
+
+  "tryAgain": "Try Again",
+  "backToTraining": "Back to Training",
+  "overallAccuracy": "Overall accuracy: {percent}%",
+  "@overallAccuracy": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+
+  "wordFlaggedForReview": "Word flagged for review",
+
+  "allModes": "All modes",
+  "allLists": "All lists",
+  "forceRemoveTraining": "Force Remove Training",
+  "forceRemoveConfirm": "Remove \"{name}\" from the list? This will also attempt to delete it from the server.",
+  "@forceRemoveConfirm": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "removedTraining": "Removed \"{name}\"",
+  "@removedTraining": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "admin": "Admin",
+  "accessDenied": "Access denied",
+  "load": "Load",
+  "noDataAvailable": "No data available",
+  "confirmMigration": "Confirm Migration",
+  "sourceAndTargetMustDiffer": "Source and target user must be different.",
+  "migrate": "Migrate",
+
+  "alreadyHaveAccount": "Already have an account? Sign In",
+  "haveVerificationCode": "Have a verification code?",
+  "backToSignIn": "Back to Sign In"
 }

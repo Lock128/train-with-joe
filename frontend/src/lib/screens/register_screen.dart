@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 /// Registration screen for new users
@@ -239,7 +240,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: authProvider.isLoading
                             ? null
                             : () => context.go('/signin'),
-                        child: const Text('Already have an account? Sign In'),
+                        child: Text(AppLocalizations.of(context)!.alreadyHaveAccount),
                       ),
                     ],
                   ),

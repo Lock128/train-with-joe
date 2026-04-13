@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 import '../providers/user_provider.dart';
 
@@ -28,17 +29,18 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isAdmin = context.watch<UserProvider>().isAdmin;
     if (!isAdmin) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Admin')),
-        body: const Center(child: Text('Access denied')),
+        appBar: AppBar(title: Text(l10n.admin)),
+        body: Center(child: Text(l10n.accessDenied)),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin'),
+        title: Text(l10n.admin),
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,
@@ -115,25 +117,31 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
       '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
 
   Future<void> _loadData([String? overrideUserId]) async {
-    final userId = overrideUserId ?? _userIdController.text.trim();
+    final userId = overrideUserId ?? _activeUserId ?? _userIdController.text.trim();
     if (userId.isEmpty) return;
 
+    // Resolve display label and actual user ID from the users list
+    String? resolvedId;
     String label = userId;
     for (final u in _allUsers) {
-      if (u['id'] == userId) {
-        final email = u['email'] as String? ?? '';
-        final name = u['name'] as String?;
+      final uid = u['id'] as String? ?? '';
+      final email = u['email'] as String? ?? '';
+      final name = u['name'] as String?;
+      // Match by id OR by email (in case the text field contains an email)
+      if (uid == userId || email == userId) {
+        resolvedId = uid;
         label = name != null && name.isNotEmpty ? '$name ($email)' : email;
         break;
       }
     }
+    final effectiveUserId = resolvedId ?? userId;
 
-    setState(() { _isLoading = true; _error = null; _activeUserId = userId; _activeUserLabel = label; _expandedDate = null; _dayStatistics = null; });
+    setState(() { _isLoading = true; _error = null; _activeUserId = effectiveUserId; _activeUserLabel = label; _expandedDate = null; _dayStatistics = null; });
     final provider = context.read<TrainingProvider>();
     final result = await provider.getTrainingOverviewStatisticsForUser(
       _formatDateParam(_fromDate),
       _formatDateParam(_toDate),
-      userId,
+      effectiveUserId,
     );
     if (!mounted) return;
     setState(() {
@@ -188,6 +196,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Padding(
@@ -240,7 +249,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
               FilledButton.icon(
                 onPressed: _loadData,
                 icon: const Icon(Icons.search),
-                label: const Text('Load'),
+                label: Text(l10n.load),
               ),
             ],
           ),
@@ -251,6 +260,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
   }
 
   Widget _buildBody() {
+    final l10n = AppLocalizations.of(context)!;
     if (_activeUserId == null) {
       return const Center(
         child: Text('Search for a user above to view their statistics.', style: TextStyle(color: Colors.grey)),
@@ -264,9 +274,9 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
           children: [
             const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
-            Text(_error ?? 'No data available', style: Theme.of(context).textTheme.titleLarge),
+            Text(_error ?? l10n.noDataAvailable, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 24),
-            ElevatedButton.icon(onPressed: _loadData, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+            ElevatedButton.icon(onPressed: _loadData, icon: const Icon(Icons.refresh), label: Text(l10n.retry)),
           ],
         ),
       );
@@ -461,24 +471,26 @@ class _MigrateDataTabState extends State<_MigrateDataTab> with AutomaticKeepAliv
   Future<void> _migrate() async {
     if (_sourceUserId == null || _targetUserId == null) return;
     if (_sourceUserId == _targetUserId) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Source and target user must be different.')),
+        SnackBar(content: Text(l10n.sourceAndTargetMustDiffer)),
       );
       return;
     }
 
     // Confirmation dialog
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Migration'),
+        title: Text(l10n.confirmMigration),
         content: Text(
           'This will move all vocabulary lists, trainings, and training executions '
           'from the source user to the target user.\n\nThis cannot be easily undone. Continue?',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Migrate')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.migrate)),
         ],
       ),
     );

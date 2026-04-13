@@ -381,6 +381,612 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Portuguese'**
   String get portuguese;
+
+  /// No description provided for @createTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Training'**
+  String get createTraining;
+
+  /// No description provided for @startTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Training'**
+  String get startTraining;
+
+  /// No description provided for @trainingHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Training History'**
+  String get trainingHistory;
+
+  /// No description provided for @results.
+  ///
+  /// In en, this message translates to:
+  /// **'Results'**
+  String get results;
+
+  /// No description provided for @analyzeImagesForVocabulary.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze Images for Vocabulary'**
+  String get analyzeImagesForVocabulary;
+
+  /// No description provided for @analyzeAnImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze an Image'**
+  String get analyzeAnImage;
+
+  /// No description provided for @vocabularyList.
+  ///
+  /// In en, this message translates to:
+  /// **'Vocabulary List'**
+  String get vocabularyList;
+
+  /// No description provided for @listNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'List not found'**
+  String get listNotFound;
+
+  /// No description provided for @trainingNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Training not found'**
+  String get trainingNotFound;
+
+  /// No description provided for @executionNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Execution not found'**
+  String get executionNotFound;
+
+  /// No description provided for @noVocabularyListsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No vocabulary lists available'**
+  String get noVocabularyListsAvailable;
+
+  /// No description provided for @createVocabularyListsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Create vocabulary lists first to build a training.'**
+  String get createVocabularyListsFirst;
+
+  /// No description provided for @noVocabularyListsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No vocabulary lists yet'**
+  String get noVocabularyListsYet;
+
+  /// No description provided for @analyzeImageToCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze an image to create your first vocabulary list!'**
+  String get analyzeImageToCreate;
+
+  /// No description provided for @errorLoadingVocabularyLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading vocabulary lists'**
+  String get errorLoadingVocabularyLists;
+
+  /// No description provided for @noTrainingsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No trainings yet'**
+  String get noTrainingsYet;
+
+  /// No description provided for @createFirstTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a training to start practicing!'**
+  String get createFirstTraining;
+
+  /// No description provided for @errorLoadingTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading trainings'**
+  String get errorLoadingTrainings;
+
+  /// No description provided for @trainingName.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Name (optional)'**
+  String get trainingName;
+
+  /// No description provided for @enterTrainingName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for your training'**
+  String get enterTrainingName;
+
+  /// No description provided for @trainingMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Mode'**
+  String get trainingMode;
+
+  /// No description provided for @textInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Input'**
+  String get textInput;
+
+  /// No description provided for @multipleChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Choice'**
+  String get multipleChoice;
+
+  /// No description provided for @aiTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Training'**
+  String get aiTraining;
+
+  /// No description provided for @trainingDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Training Direction'**
+  String get trainingDirection;
+
+  /// No description provided for @wordToTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Word → Translation'**
+  String get wordToTranslation;
+
+  /// No description provided for @translationToWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation → Word'**
+  String get translationToWord;
+
+  /// No description provided for @yourVocabularyLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Vocabulary Lists'**
+  String get yourVocabularyLists;
+
+  /// No description provided for @publicVocabularyLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Vocabulary Lists'**
+  String get publicVocabularyLists;
+
+  /// No description provided for @searchLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Search lists'**
+  String get searchLists;
+
+  /// No description provided for @searchListsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Title, publisher, school, grade, ISBN, language…'**
+  String get searchListsHint;
+
+  /// No description provided for @noListsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no vocabulary lists yet.'**
+  String get noListsYet;
+
+  /// No description provided for @noListsMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No lists match your search.'**
+  String get noListsMatchSearch;
+
+  /// No description provided for @noTrainingsMatchFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No trainings match your filters'**
+  String get noTrainingsMatchFilters;
+
+  /// No description provided for @clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get clearFilters;
+
+  /// No description provided for @numberOfWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Words: {count}'**
+  String numberOfWords(int count);
+
+  /// No description provided for @wordsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words available across selected lists'**
+  String wordsAvailable(int count);
+
+  /// No description provided for @maxWordsPicked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words available across selected lists (max 100 will be randomly picked)'**
+  String maxWordsPicked(int count);
+
+  /// No description provided for @randomizedMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Randomized Mode'**
+  String get randomizedMode;
+
+  /// No description provided for @randomizedModeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick different words each time you start this training'**
+  String get randomizedModeDescription;
+
+  /// No description provided for @wordRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Word removed'**
+  String get wordRemoved;
+
+  /// No description provided for @failedToRemoveWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove word'**
+  String get failedToRemoveWord;
+
+  /// No description provided for @renameTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename Training'**
+  String get renameTraining;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rename;
+
+  /// No description provided for @deleteTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Training'**
+  String get deleteTraining;
+
+  /// No description provided for @deleteTrainingConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this training? This cannot be undone.'**
+  String get deleteTrainingConfirm;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @failedToDeleteTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete training'**
+  String get failedToDeleteTraining;
+
+  /// No description provided for @addWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Words'**
+  String get addWords;
+
+  /// No description provided for @addCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count}'**
+  String addCount(int count);
+
+  /// No description provided for @renameList.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename List'**
+  String get renameList;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @languages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get languages;
+
+  /// No description provided for @none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get none;
+
+  /// No description provided for @bookDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Details'**
+  String get bookDetails;
+
+  /// No description provided for @deleteList.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete List'**
+  String get deleteList;
+
+  /// No description provided for @deleteListConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{title}\"? This cannot be undone.'**
+  String deleteListConfirm(String title);
+
+  /// No description provided for @editWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Word'**
+  String get editWord;
+
+  /// No description provided for @addWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Word'**
+  String get addWord;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @deleteWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Word'**
+  String get deleteWord;
+
+  /// No description provided for @deleteWordConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{word}\" from this list?'**
+  String deleteWordConfirm(String word);
+
+  /// No description provided for @exportAsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as text'**
+  String get exportAsText;
+
+  /// No description provided for @pickFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick from Gallery'**
+  String get pickFromGallery;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get takePhoto;
+
+  /// No description provided for @addMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add More'**
+  String get addMore;
+
+  /// No description provided for @autoDetect.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-detect'**
+  String get autoDetect;
+
+  /// No description provided for @goToVocabularyLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Vocabulary Lists'**
+  String get goToVocabularyLists;
+
+  /// No description provided for @nWords.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words'**
+  String nWords(int count);
+
+  /// No description provided for @failedToPickImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to pick images: {error}'**
+  String failedToPickImages(String error);
+
+  /// No description provided for @failedToTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to take photo: {error}'**
+  String failedToTakePhoto(String error);
+
+  /// No description provided for @cancelSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Subscription'**
+  String get cancelSubscription;
+
+  /// No description provided for @cancelSubscriptionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel your subscription? You will still have access until the end of your billing period.'**
+  String get cancelSubscriptionConfirm;
+
+  /// No description provided for @keepSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Subscription'**
+  String get keepSubscription;
+
+  /// No description provided for @subscriptionCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription created successfully!'**
+  String get subscriptionCreated;
+
+  /// No description provided for @purchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase failed: {error}'**
+  String purchaseFailed(String error);
+
+  /// No description provided for @restoringPurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring purchases...'**
+  String get restoringPurchases;
+
+  /// No description provided for @purchasesRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored successfully!'**
+  String get purchasesRestored;
+
+  /// No description provided for @failedToRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore purchases: {error}'**
+  String failedToRestorePurchases(String error);
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchases'**
+  String get restorePurchases;
+
+  /// No description provided for @subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get subscribe;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @backToTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Training'**
+  String get backToTraining;
+
+  /// No description provided for @overallAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall accuracy: {percent}%'**
+  String overallAccuracy(int percent);
+
+  /// No description provided for @wordFlaggedForReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Word flagged for review'**
+  String get wordFlaggedForReview;
+
+  /// No description provided for @allModes.
+  ///
+  /// In en, this message translates to:
+  /// **'All modes'**
+  String get allModes;
+
+  /// No description provided for @allLists.
+  ///
+  /// In en, this message translates to:
+  /// **'All lists'**
+  String get allLists;
+
+  /// No description provided for @forceRemoveTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Force Remove Training'**
+  String get forceRemoveTraining;
+
+  /// No description provided for @forceRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove \"{name}\" from the list? This will also attempt to delete it from the server.'**
+  String forceRemoveConfirm(String name);
+
+  /// No description provided for @removedTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed \"{name}\"'**
+  String removedTraining(String name);
+
+  /// No description provided for @admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get admin;
+
+  /// No description provided for @accessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get accessDenied;
+
+  /// No description provided for @load.
+  ///
+  /// In en, this message translates to:
+  /// **'Load'**
+  String get load;
+
+  /// No description provided for @noDataAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No data available'**
+  String get noDataAvailable;
+
+  /// No description provided for @confirmMigration.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Migration'**
+  String get confirmMigration;
+
+  /// No description provided for @sourceAndTargetMustDiffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Source and target user must be different.'**
+  String get sourceAndTargetMustDiffer;
+
+  /// No description provided for @migrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Migrate'**
+  String get migrate;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign In'**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @haveVerificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Have a verification code?'**
+  String get haveVerificationCode;
+
+  /// No description provided for @backToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Sign In'**
+  String get backToSignIn;
 }
 
 class _AppLocalizationsDelegate

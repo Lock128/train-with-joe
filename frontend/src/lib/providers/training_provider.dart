@@ -42,7 +42,7 @@ class TrainingProvider extends ChangeNotifier {
         query GetTrainings {
           getTrainings {
             id userId name mode direction vocabularyListIds createdAt updatedAt
-            isRandomized randomizedWordCount
+            isRandomized randomizedWordCount multipleChoiceOptionCount
             words { word vocabularyListId unit }
             executions { id }
           }
@@ -72,7 +72,7 @@ class TrainingProvider extends ChangeNotifier {
             success
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
-              isRandomized randomizedWordCount
+              isRandomized randomizedWordCount multipleChoiceOptionCount
               words { word translation vocabularyListId unit }
               executions {
                 id trainingId userId startedAt completedAt correctCount incorrectCount
@@ -117,6 +117,7 @@ class TrainingProvider extends ChangeNotifier {
     String? direction,
     bool? isRandomized,
     int? randomizedWordCount,
+    int? multipleChoiceOptionCount,
   }) async {
     _isLoading = true;
     _error = null;
@@ -129,7 +130,7 @@ class TrainingProvider extends ChangeNotifier {
             success
             training {
               id userId name mode direction vocabularyListIds createdAt updatedAt
-              isRandomized randomizedWordCount
+              isRandomized randomizedWordCount multipleChoiceOptionCount
               words { word translation vocabularyListId unit }
             }
             error
@@ -148,6 +149,7 @@ class TrainingProvider extends ChangeNotifier {
             if (direction != null) 'direction': direction,
             if (isRandomized != null && isRandomized) 'isRandomized': isRandomized,
             if (isRandomized != null && isRandomized && randomizedWordCount != null) 'randomizedWordCount': randomizedWordCount,
+            if (multipleChoiceOptionCount != null) 'multipleChoiceOptionCount': multipleChoiceOptionCount,
           },
         },
       );

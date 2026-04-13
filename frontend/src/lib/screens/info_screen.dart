@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../models/app_version.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
@@ -69,9 +70,10 @@ class _InfoScreenState extends State<InfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('App Info'),
+        title: Text(l10n.appInfo),
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
@@ -179,7 +181,7 @@ class _InfoScreenState extends State<InfoScreen> {
                 FilledButton.tonalIcon(
                   onPressed: () => _handleSignOut(context),
                   icon: const Icon(Icons.logout),
-                  label: const Text('Sign Out'),
+                  label: Text(l10n.signOut),
                 ),
               ],
             ),
