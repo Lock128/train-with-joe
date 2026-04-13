@@ -417,6 +417,60 @@ Provide an improved version that maintains the original meaning but is more poli
   }
 
   /**
+   * Attempt to repair truncated/malformed JSON from LLM output.
+   * Common issues: last array entry is incomplete, missing closing brackets.
+   */
+  private repairTruncatedJson(text: string): Record<string, unknown> {
+    // Find the words array and try to salvage valid entries
+    const wordsStart = text.indexOf('"words"');
+    if (wordsStart === -1) {
+      throw new Error('No words array found');
+    }
+
+    const arrayStart = text.indexOf('[', wordsStart);
+    if (arrayStart === -1) {
+      throw new Error('No array start found');
+    }
+
+    // Walk through the array collecting complete objects
+    let depth = 0;
+    let lastGoodEnd = arrayStart;
+    for (let i = arrayStart; i < text.length; i++) {
+      const ch = text[i];
+      if (ch === '{') depth++;
+      if (ch === '}') {
+        depth--;
+        if (depth === 0) {
+          // We just closed a top-level object inside the array
+          // Check if this object is valid JSON
+          const candidate = text.substring(arrayStart, i + 1) + ']}';
+          const prefix = text.substring(0, arrayStart);
+          try {
+            JSON.parse(prefix + candidate);
+            lastGoodEnd = i + 1;
+          } catch {
+            // This object itself is broken — stop here
+            break;
+          }
+        }
+      }
+    }
+
+    if (lastGoodEnd <= arrayStart) {
+      throw new Error('No valid array entries found');
+    }
+
+    // Reconstruct: everything before the array + valid entries + close array + close object
+    const prefix = text.substring(0, arrayStart);
+    const validEntries = text.substring(arrayStart, lastGoodEnd);
+    const repaired = prefix + validEntries + ']}';
+
+    const parsed = JSON.parse(repaired);
+    console.log(`[analyzeImageForVocabulary] Repaired JSON: salvaged ${parsed.words?.length ?? 0} words`);
+    return parsed;
+  }
+
+  /**
    * Build multimodal request body for image analysis (Claude/Nova only)
    */
   private buildMultimodalRequestBody(
@@ -517,28 +571,40 @@ Provide an improved version that maintains the original meaning but is more poli
         sourceLanguage && targetLanguage
           ? `The image contains vocabulary translating from ${sourceLanguage} to ${targetLanguage}. Use these as the source and target languages.`
           : 'Detect the languages used in the image. If the image contains translations between two languages, identify both.';
-      const prompt = `Analyze this image and extract all vocabulary words suitable for language learners. Capture the words in the same way as they are noted in the image. ${languageInstruction}
+      const prompt = `You are a JSON-only API. You must respond with a single valid JSON object and absolutely nothing else — no markdown, no code fences, no commentary, no trailing text.
 
-Return a JSON object with ONLY these fields:
-- "title": a brief description of the image (max 10 words)
-- "sourceLanguage": the language words are translated FROM (e.g. "English")
-- "targetLanguage": the language words are translated TO (e.g. "German"). If the image is monolingual, set this to the same value as sourceLanguage.
-- "words": an array of up to 10 objects, each with:
-  - "word": the vocabulary word in the source language
-  - "translation": the translation in the target language (if available)
-  - "definition": a learner-friendly definition (max 20 words)
-  - "partOfSpeech": noun, verb, adjective, adverb, or other
-  - "exampleSentence": a simple example sentence (max 15 words)
-  - "difficulty": easy, medium, or hard
-  - "unit": the unit, chapter, or section label the word belongs to if visible in the image (e.g. "Unit 3", "Chapter 5", "Lesson 2"). If no unit information is visible, omit this field.
+Analyze this image and extract all vocabulary words suitable for language learners. Capture the words in the same way as they are noted in the image. ${languageInstruction}
 
-Return ONLY valid JSON, no markdown, no code blocks, no extra text.`;
+Respond with a JSON object containing exactly these fields:
+{
+  "title": "brief description of the image (max 10 words)",
+  "sourceLanguage": "language words are translated FROM (e.g. English)",
+  "targetLanguage": "language words are translated TO (e.g. German, or same as sourceLanguage if monolingual)",
+  "words": [
+    {
+      "word": "vocabulary word in source language",
+      "translation": "translation in target language (if available)",
+      "definition": "learner-friendly definition (max 20 words)",
+      "partOfSpeech": "noun | verb | adjective | adverb | other",
+      "exampleSentence": "simple example sentence (max 15 words)",
+      "difficulty": "easy | medium | hard",
+      "unit": "unit/chapter/section label if visible in image, otherwise omit"
+    }
+  ]
+}
+
+CRITICAL RULES:
+- Every "word" object MUST include the "word" field.
+- Maximum 50 words in the array.
+- Output MUST be parseable by JSON.parse() — no trailing commas, no truncated objects.
+- If you cannot fit all words, stop at the last COMPLETE word object and close the array and object properly.
+- Do NOT output anything before or after the JSON object.`;
 
       console.log(
         `[analyzeImageForVocabulary] Starting analysis for user=${userId}, model=${this.modelId}, imageSize=${imageBase64.length} chars`,
       );
 
-      const requestBody = this.buildMultimodalRequestBody(imageBase64, prompt, 4000);
+      const requestBody = this.buildMultimodalRequestBody(imageBase64, prompt, 8000);
 
       console.log('[analyzeImageForVocabulary] Sending request to Bedrock...');
       const startTime = Date.now();
@@ -569,35 +635,29 @@ Return ONLY valid JSON, no markdown, no code blocks, no extra text.`;
 
       // Parse JSON from response (handle markdown fences and embedded JSON)
       let parsed;
+      const stripped = responseText
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/\s*```\s*$/, '')
+        .trim();
+
       try {
-        // Strip markdown code fences if present
-        const stripped = responseText
-          .replace(/^```(?:json)?\s*/i, '')
-          .replace(/\s*```\s*$/, '')
-          .trim();
         parsed = JSON.parse(stripped);
         console.log('[analyzeImageForVocabulary] JSON parsed successfully (direct)');
       } catch (parseError) {
         console.warn(
           `[analyzeImageForVocabulary] Direct JSON parse failed: ${parseError instanceof Error ? parseError.message : parseError}`,
         );
-        console.warn(`[analyzeImageForVocabulary] Response text (first 500 chars): ${responseText.substring(0, 500)}`);
+        console.warn(`[analyzeImageForVocabulary] Response text (first 500 chars): ${stripped.substring(0, 500)}`);
         console.warn(
-          `[analyzeImageForVocabulary] Response text (last 500 chars): ${responseText.substring(Math.max(0, responseText.length - 500))}`,
+          `[analyzeImageForVocabulary] Response text (last 500 chars): ${stripped.substring(Math.max(0, stripped.length - 500))}`,
         );
 
-        // Try to extract the first complete JSON object
-        const jsonMatch = responseText.match(/\{[^]*?\}(?=\s*$|\s*```)/);
-        if (jsonMatch) {
-          try {
-            parsed = JSON.parse(jsonMatch[0]);
-            console.log('[analyzeImageForVocabulary] JSON parsed successfully (regex extraction)');
-          } catch {
-            console.error('[analyzeImageForVocabulary] Regex-extracted JSON also failed to parse');
-            throw new Error('Failed to parse vocabulary response as JSON');
-          }
-        } else {
-          console.error('[analyzeImageForVocabulary] No JSON object found in response');
+        // Attempt repair: truncate the last malformed array entry and close the JSON
+        try {
+          parsed = this.repairTruncatedJson(stripped);
+          console.log('[analyzeImageForVocabulary] JSON parsed successfully (repaired)');
+        } catch {
+          console.error('[analyzeImageForVocabulary] JSON repair also failed');
           throw new Error('Failed to parse vocabulary response as JSON');
         }
       }

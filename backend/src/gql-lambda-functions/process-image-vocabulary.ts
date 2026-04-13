@@ -30,6 +30,17 @@ export const handler = async (event: ProcessEvent) => {
   const { vocabularyListId, userId, imageS3Keys, sourceLanguage, targetLanguage } = event;
   const repository = VocabularyListRepository.getInstance();
 
+  console.log(
+    '[process-image-vocabulary] Invoked',
+    JSON.stringify({
+      vocabularyListId,
+      userId,
+      imageCount: imageS3Keys.length,
+      sourceLanguage,
+      targetLanguage,
+    }),
+  );
+
   try {
     const aiService = getAIService();
     const allWords: VocabularyList['words'] = [];
@@ -37,11 +48,27 @@ export const handler = async (event: ProcessEvent) => {
     let detectedSourceLang = sourceLanguage || '';
     let detectedTargetLang = targetLanguage || '';
 
-    for (const s3Key of imageS3Keys) {
+    for (let i = 0; i < imageS3Keys.length; i++) {
+      const s3Key = imageS3Keys[i];
+      console.log(`[process-image-vocabulary] Processing image ${i + 1}/${imageS3Keys.length}: ${s3Key}`);
+
       const imageBase64 = await getImageBase64(s3Key);
+      console.log(`[process-image-vocabulary] Image loaded from S3, base64 size: ${imageBase64.length} chars`);
+
       const result = await aiService.analyzeImageForVocabulary(imageBase64, userId, sourceLanguage, targetLanguage, {
         skipRateLimit: true,
       });
+
+      console.log(
+        `[process-image-vocabulary] Image ${i + 1} analysis complete`,
+        JSON.stringify({
+          title: result.title,
+          wordCount: result.words.length,
+          sourceLanguage: result.sourceLanguage,
+          targetLanguage: result.targetLanguage,
+        }),
+      );
+
       if (!title) title = result.title;
       if (!detectedSourceLang) detectedSourceLang = result.sourceLanguage;
       if (!detectedTargetLang) detectedTargetLang = result.targetLanguage;
@@ -58,9 +85,16 @@ export const handler = async (event: ProcessEvent) => {
       status: 'COMPLETED',
     });
 
-    console.log(`Successfully processed vocabulary list ${vocabularyListId}`);
+    console.log(
+      `[process-image-vocabulary] Successfully completed`,
+      JSON.stringify({
+        vocabularyListId,
+        totalWords: allWords.length,
+        title: finalTitle,
+      }),
+    );
   } catch (error) {
-    console.error(`Error processing vocabulary list ${vocabularyListId}:`, error);
+    console.error(`[process-image-vocabulary] Failed for ${vocabularyListId}:`, error);
 
     const errorMessage = error instanceof Error ? error.message : 'Failed to analyze image for vocabulary';
 
@@ -68,5 +102,13 @@ export const handler = async (event: ProcessEvent) => {
       status: 'FAILED',
       errorMessage,
     });
+
+    console.error(
+      `[process-image-vocabulary] Marked as FAILED`,
+      JSON.stringify({
+        vocabularyListId,
+        errorMessage,
+      }),
+    );
   }
 };

@@ -19,6 +19,15 @@ class _VocabularyListDetailScreenState
     extends State<VocabularyListDetailScreen> {
   Map<String, dynamic>? _list;
   bool _isLoading = true;
+  bool _isSearching = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -580,6 +589,42 @@ class _VocabularyListDetailScreenState
     }
   }
 
+  // ── Search ──
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        _searchQuery = '';
+      }
+    });
+  }
+
+  bool _wordMatchesQuery(Map<String, dynamic> word) {
+    if (_searchQuery.isEmpty) return true;
+    final q = _searchQuery.toLowerCase();
+    final fields = [
+      word['word'] as String?,
+      word['translation'] as String?,
+      word['definition'] as String?,
+      word['unit'] as String?,
+      word['partOfSpeech'] as String?,
+    ];
+    return fields.any((f) => f != null && f.toLowerCase().contains(q));
+  }
+
+  /// Returns (filteredWord, originalIndex) pairs so edit/delete target the
+  /// correct index in the full list.
+  List<(Map<String, dynamic>, int)> _getFilteredWords(List<dynamic> allWords) {
+    final result = <(Map<String, dynamic>, int)>[];
+    for (var i = 0; i < allWords.length; i++) {
+      final w = allWords[i] as Map<String, dynamic>;
+      if (_wordMatchesQuery(w)) result.add((w, i));
+    }
+    return result;
+  }
+
   // ── Build ──
 
   @override
@@ -604,6 +649,7 @@ class _VocabularyListDetailScreenState
     final targetLang = _list!['targetLanguage'] as String?;
     final isPublic = _list!['isPublic'] == true;
     final words = (_list!['words'] as List<dynamic>?) ?? [];
+    final filteredWords = _getFilteredWords(words);
     final publisher = _list!['publisher'] as String?;
     final schoolForm = _list!['schoolForm'] as String?;
     final grade = _list!['grade'] as String?;
@@ -613,12 +659,31 @@ class _VocabularyListDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: l10n.searchLists,
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) => setState(() => _searchQuery = value),
+              )
+            : Text(title),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/vocabulary'),
+          onPressed: _isSearching
+              ? _toggleSearch
+              : () => context.go('/vocabulary'),
         ),
         actions: [
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            tooltip: _isSearching ? l10n.cancel : l10n.searchLists,
+            onPressed: _toggleSearch,
+          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               switch (value) {
@@ -672,8 +737,12 @@ class _VocabularyListDetailScreenState
                     Text(sourceLang,
                         style: const TextStyle(color: Colors.grey)),
                   const Spacer(),
-                  Text(l10n.nWords(words.length),
-                      style: const TextStyle(color: Colors.grey)),
+                  if (_searchQuery.isNotEmpty)
+                    Text('${filteredWords.length} / ${words.length}',
+                        style: const TextStyle(color: Colors.grey))
+                  else
+                    Text(l10n.nWords(words.length),
+                        style: const TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
@@ -725,16 +794,29 @@ class _VocabularyListDetailScreenState
                       ],
                     ),
                   )
-                : ListView.separated(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: words.length,
-                    separatorBuilder: (context, index) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final word =
-                          words[index] as Map<String, dynamic>;
-                      return _buildWordTile(word, index);
-                    },
-                  ),
+                : filteredWords.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.search_off,
+                                size: 48, color: Colors.grey),
+                            const SizedBox(height: 8),
+                            Text('No words matching "$_searchQuery"',
+                                style: const TextStyle(color: Colors.grey)),
+                          ],
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.only(bottom: 80),
+                        itemCount: filteredWords.length,
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final (word, originalIndex) = filteredWords[index];
+                          return _buildWordTile(word, originalIndex);
+                        },
+                      ),
           ),
         ],
       ),

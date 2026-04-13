@@ -26,19 +26,32 @@ const lambdaClient = new LambdaClient({ region: process.env.AWS_REGION || 'us-ea
 const PROCESSOR_FUNCTION_NAME = process.env.PROCESS_IMAGE_VOCABULARY_FUNCTION_NAME!;
 
 export const handler = async (event: Event) => {
+  console.log(
+    '[analyzeImageVocabulary] Invoked',
+    JSON.stringify({
+      userId: event.identity?.sub,
+      imageCount: event.arguments?.input?.imageS3Keys?.length,
+      sourceLanguage: event.arguments?.input?.sourceLanguage,
+      targetLanguage: event.arguments?.input?.targetLanguage,
+    }),
+  );
+
   const userId = event.identity?.sub;
   const { input } = event.arguments;
 
   if (!userId) {
+    console.warn('[analyzeImageVocabulary] No userId — returning auth error');
     return { success: false, vocabularyList: null, error: 'Authentication required' };
   }
 
   if (!input?.imageS3Keys?.length) {
+    console.warn('[analyzeImageVocabulary] No image keys provided');
     return { success: false, vocabularyList: null, error: 'At least one image S3 key is required' };
   }
 
   for (const key of input.imageS3Keys) {
     if (!key.startsWith(`uploads/${userId}/`)) {
+      console.warn('[analyzeImageVocabulary] Invalid image key rejected', { key, userId });
       return { success: false, vocabularyList: null, error: 'Invalid image key' };
     }
   }
@@ -63,6 +76,8 @@ export const handler = async (event: Event) => {
       updatedAt: now,
     });
 
+    console.log('[analyzeImageVocabulary] Created PENDING vocabulary list', { vocabularyListId, userId });
+
     // Fire-and-forget: invoke the processing Lambda asynchronously
     await lambdaClient.send(
       new InvokeCommand({
@@ -77,6 +92,11 @@ export const handler = async (event: Event) => {
         }),
       }),
     );
+
+    console.log('[analyzeImageVocabulary] Async processor invoked', {
+      vocabularyListId,
+      processorFunction: PROCESSOR_FUNCTION_NAME,
+    });
 
     return {
       success: true,
