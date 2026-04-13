@@ -5,7 +5,7 @@ import {
   type AttributeType,
 } from '@aws-sdk/client-cognito-identity-provider';
 
-const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
+const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info', 'lockhead@lockhead.info'];
 
 /**
  * Lambda resolver for Query.getUsers

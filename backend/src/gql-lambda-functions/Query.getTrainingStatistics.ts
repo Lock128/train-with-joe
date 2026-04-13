@@ -2,7 +2,7 @@ import { TrainingService } from '../services/training-service';
 import { UserRepository } from '../repositories/user-repository';
 import { resolveUserIdFromEmail } from '../services/user-lookup-service';
 
-const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
+const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info', 'lockhead@lockhead.info'];
 
 /**
  * Lambda resolver for Query.getTrainingStatistics

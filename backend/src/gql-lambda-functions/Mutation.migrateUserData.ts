@@ -2,7 +2,7 @@ import { VocabularyListRepository } from '../repositories/vocabulary-list-reposi
 import { TrainingRepository } from '../repositories/training-repository';
 import { UserRepository } from '../repositories/user-repository';
 
-const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
+const ADMIN_EMAILS = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info', 'lockhead@lockhead.info'];
 
 /**
  * Lambda resolver for Mutation.migrateUserData

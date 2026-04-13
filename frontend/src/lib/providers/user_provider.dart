@@ -11,7 +11,7 @@ class UserProvider extends ChangeNotifier {
   String? _error;
   AuthProvider? _authProvider;
 
-  static const _adminEmails = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info'];
+  static const _adminEmails = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info', 'lockhead@lockhead.info'];
 
   Map<String, dynamic>? get user => _user;
   bool get isLoading => _isLoading;
