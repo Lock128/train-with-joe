@@ -241,7 +241,7 @@ export class AIService {
 
       const prompt = `You are generating vocabulary exercises for a language learner. The learner is studying ${targetLanguage}.
 
-CRITICAL RULE: Every exercise prompt, sentence, and answer option MUST be written ONLY in ${targetLanguage}. The ONLY exception is "sentence_translation" exercises where the prompt contains a ${sourceLanguage} sentence to translate. NEVER mix ${sourceLanguage} and ${targetLanguage} within the same sentence. If you are unsure, write everything in ${targetLanguage}.
+CRITICAL RULE: Every exercise prompt, sentence, and answer option MUST be written ONLY in ${targetLanguage}. NEVER use any ${sourceLanguage} words anywhere. NEVER mix languages. If you are unsure, write everything in ${targetLanguage}.
 
 Here are the vocabulary words (provided in ${sourceLanguage} with ${targetLanguage} translations):
 ${wordDescriptions}
@@ -254,7 +254,7 @@ Use the ${targetLanguage} translations of these words to create exercises. Gener
 
 3. "verb_conjugation" — A ${targetLanguage} sentence with a verb blank. All options are different ${targetLanguage} verb forms. Use ${targetLanguage} pronouns.
 
-4. "sentence_translation" — Show a sentence in ${sourceLanguage} and ask the learner to pick the correct ${targetLanguage} translation. The prompt says "Translate to ${targetLanguage}: [${sourceLanguage} sentence]". All options are ${targetLanguage} sentences.
+4. "sentence_translation" — Show a ${targetLanguage} sentence and ask the learner to pick the best ${targetLanguage} paraphrase or restatement. The prompt and ALL options must be entirely in ${targetLanguage}. Example: "Which sentence means the same as: 'She wore a pretty dress to the party.'?" with options like "She put on a beautiful dress for the party.", "She bought a pretty dress at the party.", etc.
 
 5. "preposition" — A ${targetLanguage} sentence with a missing preposition. All options are ${targetLanguage} prepositions.
 
@@ -267,8 +267,9 @@ Use the ${targetLanguage} translations of these words to create exercises. Gener
 9. "context_word" — A ${targetLanguage} sentence with a blank. Pick the ${targetLanguage} word that fits the context/meaning.
 
 RULES:
-- ALL sentences and options in ${targetLanguage} (except the source sentence in sentence_translation).
-- NEVER write a sentence that mixes words from ${sourceLanguage} and ${targetLanguage}.
+- EVERY sentence, question, and answer option must be 100% in ${targetLanguage}. No exceptions.
+- NEVER use any ${sourceLanguage} words anywhere in prompts or options.
+- Wrong options should be plausible mistakes learners make.
 - Wrong options should be plausible mistakes learners make.
 - Vary exercise types — do not repeat the same type for every exercise.
 
