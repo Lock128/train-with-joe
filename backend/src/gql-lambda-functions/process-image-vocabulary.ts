@@ -7,7 +7,12 @@ import type { VocabularyList } from '../model/domain/VocabularyList';
  * Async Lambda for processing image vocabulary analysis.
  * Invoked asynchronously by the analyzeImageVocabulary mutation Lambda.
  * Reads images from S3, calls Bedrock, and updates the DynamoDB record.
+ *
+ * Images are processed in parallel with a concurrency limit to balance
+ * speed against Bedrock throttling limits.
  */
+
+const CONCURRENCY = parseInt(process.env.IMAGE_PROCESSING_CONCURRENCY || '5', 10);
 
 interface ProcessEvent {
   vocabularyListId: string;
@@ -17,6 +22,20 @@ interface ProcessEvent {
   targetLanguage?: string;
 }
 
+interface ImageResult {
+  index: number;
+  title: string;
+  words: VocabularyList['words'];
+  sourceLanguage: string;
+  targetLanguage: string;
+}
+
+interface ImageFailure {
+  index: number;
+  s3Key: string;
+  error: string;
+}
+
 const s3 = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
 const BUCKET = process.env.ASSETS_BUCKET_NAME!;
 
@@ -24,6 +43,30 @@ async function getImageBase64(s3Key: string): Promise<string> {
   const response = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: s3Key }));
   const bytes = await response.Body!.transformToByteArray();
   return Buffer.from(bytes).toString('base64');
+}
+
+/**
+ * Process items with a concurrency limit.
+ * Runs up to `limit` tasks in parallel, starting the next one as soon as a slot frees up.
+ */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const i = nextIndex++;
+      results[i] = await fn(items[i], i);
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
 }
 
 export const handler = async (event: ProcessEvent) => {
@@ -36,21 +79,16 @@ export const handler = async (event: ProcessEvent) => {
       vocabularyListId,
       userId,
       imageCount: imageS3Keys.length,
-      sourceLanguage,
-      targetLanguage,
+      concurrency: CONCURRENCY,
     }),
   );
 
   try {
     const aiService = getAIService();
-    const allWords: VocabularyList['words'] = [];
-    let title = '';
-    let detectedSourceLang = sourceLanguage || '';
-    let detectedTargetLang = targetLanguage || '';
-    const failedImages: { index: number; s3Key: string; error: string }[] = [];
+    const successes: ImageResult[] = [];
+    const failures: ImageFailure[] = [];
 
-    for (let i = 0; i < imageS3Keys.length; i++) {
-      const s3Key = imageS3Keys[i];
+    await mapWithConcurrency(imageS3Keys, CONCURRENCY, async (s3Key, i) => {
       console.log(`[process-image-vocabulary] Processing image ${i + 1}/${imageS3Keys.length}: ${s3Key}`);
 
       try {
@@ -71,27 +109,29 @@ export const handler = async (event: ProcessEvent) => {
           }),
         );
 
-        if (!title) title = result.title;
-        if (!detectedSourceLang) detectedSourceLang = result.sourceLanguage;
-        if (!detectedTargetLang) detectedTargetLang = result.targetLanguage;
-        allWords.push(...result.words);
+        successes.push({
+          index: i,
+          title: result.title,
+          words: result.words,
+          sourceLanguage: result.sourceLanguage,
+          targetLanguage: result.targetLanguage,
+        });
       } catch (imageError) {
         const errorMsg = imageError instanceof Error ? imageError.message : 'Unknown error';
-        console.warn(
-          `[process-image-vocabulary] Image ${i + 1}/${imageS3Keys.length} failed, continuing with remaining images: ${errorMsg}`,
-        );
-        failedImages.push({ index: i + 1, s3Key, error: errorMsg });
+        console.warn(`[process-image-vocabulary] Image ${i + 1}/${imageS3Keys.length} failed, continuing: ${errorMsg}`);
+        failures.push({ index: i + 1, s3Key, error: errorMsg });
       }
-    }
+    });
 
-    // Determine final status based on results
+    // Sort successes by original index so word order matches image order
+    successes.sort((a, b) => a.index - b.index);
+
     const totalImages = imageS3Keys.length;
-    const failedCount = failedImages.length;
-    const succeededCount = totalImages - failedCount;
+    const failedCount = failures.length;
+    const succeededCount = successes.length;
 
     if (succeededCount === 0) {
-      // Every image failed — mark as FAILED
-      const errorMessage = `All ${totalImages} images failed to process. First error: ${failedImages[0]?.error}`;
+      const errorMessage = `All ${totalImages} images failed to process. First error: ${failures[0]?.error}`;
       console.error(`[process-image-vocabulary] ${errorMessage}`);
 
       await repository.update(vocabularyListId, {
@@ -102,6 +142,13 @@ export const handler = async (event: ProcessEvent) => {
       console.error(`[process-image-vocabulary] Marked as FAILED`, JSON.stringify({ vocabularyListId, errorMessage }));
       return;
     }
+
+    // Use the first successful image (by original order) for title/language detection
+    const first = successes[0];
+    const title = first.title;
+    const detectedSourceLang = sourceLanguage || first.sourceLanguage;
+    const detectedTargetLang = targetLanguage || first.targetLanguage;
+    const allWords = successes.flatMap((s) => s.words);
 
     const finalTitle = totalImages > 1 ? `${title} (+${totalImages - 1} more)` : title;
     const isPartial = failedCount > 0;
