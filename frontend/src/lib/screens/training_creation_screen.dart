@@ -286,83 +286,6 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Target language selector (AI Training only)
-                if (_selectedMode == 'AI_TRAINING' && _selectedListIds.isNotEmpty) ...[
-                  Text(
-                    'Target Language',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'The language you want to practice and learn',
-                    style: const TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                  Builder(builder: (context) {
-                    // Collect languages from selected vocabulary lists
-                    final languages = <String>{};
-                    for (final list in allLists) {
-                      if (!_selectedListIds.contains(list['id'] as String)) continue;
-                      final src = list['sourceLanguage'] as String?;
-                      final tgt = list['targetLanguage'] as String?;
-                      if (src != null && src.isNotEmpty) languages.add(src);
-                      if (tgt != null && tgt.isNotEmpty) languages.add(tgt);
-                    }
-                    final langList = languages.toList()..sort();
-
-                    // Auto-select target language if not set
-                    if (_selectedTargetLanguage == null && langList.isNotEmpty) {
-                      // Default to targetLanguage of first selected list
-                      final firstSelected = allLists.firstWhere(
-                        (l) => _selectedListIds.contains(l['id'] as String),
-                        orElse: () => <String, dynamic>{},
-                      );
-                      final defaultTarget = firstSelected['targetLanguage'] as String?;
-                      final defaultSource = firstSelected['sourceLanguage'] as String?;
-                      _selectedTargetLanguage = (defaultTarget != null && langList.contains(defaultTarget))
-                          ? defaultTarget
-                          : langList.first;
-                      _selectedSourceLanguage = (defaultSource != null && langList.contains(defaultSource))
-                          ? defaultSource
-                          : langList.where((l) => l != _selectedTargetLanguage).firstOrNull ?? langList.first;
-                    }
-
-                    if (langList.isEmpty) {
-                      return const Text(
-                        'No languages detected from selected lists',
-                        style: TextStyle(color: Colors.grey),
-                      );
-                    }
-
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: langList.map((lang) {
-                        return ChoiceChip(
-                          label: Text(lang),
-                          selected: _selectedTargetLanguage == lang,
-                          selectedColor: const Color(0xFF6B46C1).withValues(alpha: 0.2),
-                          onSelected: (_) {
-                            setState(() {
-                              _selectedTargetLanguage = lang;
-                              // Auto-set source to the other language
-                              final otherLangs = langList.where((l) => l != lang).toList();
-                              if (otherLangs.isNotEmpty && !otherLangs.contains(_selectedSourceLanguage)) {
-                                _selectedSourceLanguage = otherLangs.first;
-                              } else if (otherLangs.isNotEmpty) {
-                                // keep current source
-                              } else {
-                                _selectedSourceLanguage = lang;
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                    );
-                  }),
-                  const SizedBox(height: 24),
-                ],
-
                 // Multiple choice option count selector
                 if (_selectedMode == 'MULTIPLE_CHOICE') ...[
                   const Text(
@@ -385,34 +308,36 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const SizedBox(height: 24),
                 ],
 
-                // Direction selector
-                Text(
-                  l10n.trainingDirection,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Flexible(
-                      child: ChoiceChip(
-                        label: Text(l10n.wordToTranslation),
-                        selected: _selectedDirection == 'WORD_TO_TRANSLATION',
-                        selectedColor: const Color(0xFF38A169).withValues(alpha: 0.2),
-                        onSelected: (_) => setState(() => _selectedDirection = 'WORD_TO_TRANSLATION'),
+                // Direction selector (not applicable for AI Training)
+                if (_selectedMode != 'AI_TRAINING') ...[
+                  Text(
+                    l10n.trainingDirection,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: ChoiceChip(
+                          label: Text(l10n.wordToTranslation),
+                          selected: _selectedDirection == 'WORD_TO_TRANSLATION',
+                          selectedColor: const Color(0xFF38A169).withValues(alpha: 0.2),
+                          onSelected: (_) => setState(() => _selectedDirection = 'WORD_TO_TRANSLATION'),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: ChoiceChip(
-                        label: Text(l10n.translationToWord),
-                        selected: _selectedDirection == 'TRANSLATION_TO_WORD',
-                        selectedColor: const Color(0xFF805AD5).withValues(alpha: 0.2),
-                        onSelected: (_) => setState(() => _selectedDirection = 'TRANSLATION_TO_WORD'),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: ChoiceChip(
+                          label: Text(l10n.translationToWord),
+                          selected: _selectedDirection == 'TRANSLATION_TO_WORD',
+                          selectedColor: const Color(0xFF805AD5).withValues(alpha: 0.2),
+                          onSelected: (_) => setState(() => _selectedDirection = 'TRANSLATION_TO_WORD'),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
 
                 // Vocabulary lists
                 Text(
@@ -472,6 +397,81 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   ...filteredPublicLists.map((list) => _buildListTile(list, isPublic: true)),
                 ],
                 const SizedBox(height: 16),
+
+                // Target language selector (AI Training only — shown after list selection)
+                if (_selectedMode == 'AI_TRAINING' && _selectedListIds.isNotEmpty) ...[
+                  Text(
+                    'Target Language',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'The language you want to practice and learn',
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  const SizedBox(height: 8),
+                  Builder(builder: (context) {
+                    // Collect languages from selected vocabulary lists
+                    final languages = <String>{};
+                    for (final list in allLists) {
+                      if (!_selectedListIds.contains(list['id'] as String)) continue;
+                      final src = list['sourceLanguage'] as String?;
+                      final tgt = list['targetLanguage'] as String?;
+                      if (src != null && src.isNotEmpty) languages.add(src);
+                      if (tgt != null && tgt.isNotEmpty) languages.add(tgt);
+                    }
+                    final langList = languages.toList()..sort();
+
+                    // Auto-select target language if not set
+                    if (_selectedTargetLanguage == null && langList.isNotEmpty) {
+                      final firstSelected = allLists.firstWhere(
+                        (l) => _selectedListIds.contains(l['id'] as String),
+                        orElse: () => <String, dynamic>{},
+                      );
+                      final defaultTarget = firstSelected['targetLanguage'] as String?;
+                      final defaultSource = firstSelected['sourceLanguage'] as String?;
+                      _selectedTargetLanguage = (defaultTarget != null && langList.contains(defaultTarget))
+                          ? defaultTarget
+                          : langList.first;
+                      _selectedSourceLanguage = (defaultSource != null && langList.contains(defaultSource))
+                          ? defaultSource
+                          : langList.where((l) => l != _selectedTargetLanguage).firstOrNull ?? langList.first;
+                    }
+
+                    if (langList.isEmpty) {
+                      return const Text(
+                        'No languages detected from selected lists',
+                        style: TextStyle(color: Colors.grey),
+                      );
+                    }
+
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: langList.map((lang) {
+                        return ChoiceChip(
+                          label: Text(lang),
+                          selected: _selectedTargetLanguage == lang,
+                          selectedColor: const Color(0xFF6B46C1).withValues(alpha: 0.2),
+                          onSelected: (_) {
+                            setState(() {
+                              _selectedTargetLanguage = lang;
+                              final otherLangs = langList.where((l) => l != lang).toList();
+                              if (otherLangs.isNotEmpty && !otherLangs.contains(_selectedSourceLanguage)) {
+                                _selectedSourceLanguage = otherLangs.first;
+                              } else if (otherLangs.isNotEmpty) {
+                                // keep current source
+                              } else {
+                                _selectedSourceLanguage = lang;
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    );
+                  }),
+                  const SizedBox(height: 24),
+                ],
 
                 // Word count selector
                 if (_selectedListIds.isNotEmpty) ...[

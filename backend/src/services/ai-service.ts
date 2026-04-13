@@ -239,47 +239,47 @@ export class AIService {
         })
         .join('\n');
 
-      const prompt = `Generate vocabulary exercises for language learners studying ${sourceLanguage} to ${targetLanguage}.
+      const prompt = `You are generating vocabulary exercises for a language learner. The learner is studying ${targetLanguage}.
 
-Here are the words to create exercises for:
+CRITICAL RULE: Every exercise prompt, sentence, and answer option MUST be written ONLY in ${targetLanguage}. The ONLY exception is "sentence_translation" exercises where the prompt contains a ${sourceLanguage} sentence to translate. NEVER mix ${sourceLanguage} and ${targetLanguage} within the same sentence. If you are unsure, write everything in ${targetLanguage}.
+
+Here are the vocabulary words (provided in ${sourceLanguage} with ${targetLanguage} translations):
 ${wordDescriptions}
 
-Create a JSON array of exercises with a good mix of the following types. Vary the types across exercises — do not use the same type for every exercise.
+Use the ${targetLanguage} translations of these words to create exercises. Generate a JSON array with a varied mix of these exercise types:
 
-EXERCISE TYPES:
+1. "fill_in_the_blank" — A ${targetLanguage} sentence with one word as a blank. All options in ${targetLanguage}. Test grammar and usage (e.g. "He ____ the bus every morning." → "catches", "catch", "catching", "caught").
 
-1. "fill_in_the_blank" — A sentence in ${targetLanguage} with one word replaced by a blank. Options are ${targetLanguage} words. Focus on correct grammar and usage (e.g. "He ____ the bus" → "stops", "stop", "stopping", "stopped").
+2. "sentence_completion" — An incomplete ${targetLanguage} sentence. All options in ${targetLanguage}.
 
-2. "sentence_completion" — An incomplete sentence in ${targetLanguage}. Options are ${targetLanguage} phrases or words that complete it correctly.
+3. "verb_conjugation" — A ${targetLanguage} sentence with a verb blank. All options are different ${targetLanguage} verb forms. Use ${targetLanguage} pronouns.
 
-3. "verb_conjugation" — Test correct verb forms in ${targetLanguage}. Show a sentence or instruction in ${targetLanguage} with a blank where a verb should go, and provide different ${targetLanguage} conjugations as options. Use ${targetLanguage} pronouns and grammar.
+4. "sentence_translation" — Show a sentence in ${sourceLanguage} and ask the learner to pick the correct ${targetLanguage} translation. The prompt says "Translate to ${targetLanguage}: [${sourceLanguage} sentence]". All options are ${targetLanguage} sentences.
 
-4. "sentence_translation" — Show a complete sentence in one language and ask the learner to pick the correct translation. Mix directions: some from ${sourceLanguage} to ${targetLanguage}, some from ${targetLanguage} to ${sourceLanguage}. The prompt should contain the sentence and clearly state the task (e.g. "Translate to ${targetLanguage}: ..."). Options are full sentences in the other language.
+5. "preposition" — A ${targetLanguage} sentence with a missing preposition. All options are ${targetLanguage} prepositions.
 
-5. "preposition" — A sentence in ${targetLanguage} with a missing preposition. Options are different ${targetLanguage} prepositions (e.g. "She arrived ____ the airport" → "at", "in", "on", "to").
+6. "word_order" — Ask which ${targetLanguage} sentence has correct word order. All options are ${targetLanguage} sentences.
 
-6. "word_order" — Show a scrambled sentence and ask the learner to pick the correctly ordered version. All options are in ${targetLanguage}. One option has correct word order, the others have plausible but wrong arrangements.
+7. "synonym_antonym" — "Which ${targetLanguage} word means the same as / opposite of X?" All options in ${targetLanguage}.
 
-7. "synonym_antonym" — Ask which word means the same as (or the opposite of) a given ${targetLanguage} word. All options are in ${targetLanguage} (e.g. "Which word means the same as 'happy'?" → "joyful", "sad", "angry", "tired").
+8. "error_correction" — A ${targetLanguage} sentence with a grammar error. Options are corrected ${targetLanguage} sentences.
 
-8. "error_correction" — Show a sentence in ${targetLanguage} that contains a grammatical error. Options are different versions of the sentence — one is correct, the others still contain errors (e.g. "He don't like coffee" → "He doesn't like coffee", "He not like coffee", "He do like coffee").
+9. "context_word" — A ${targetLanguage} sentence with a blank. Pick the ${targetLanguage} word that fits the context/meaning.
 
-9. "context_word" — A sentence in ${targetLanguage} with a blank. The learner must pick the word that fits the meaning/context, not just grammar (e.g. "The weather is very ____ today, I need a jacket." → "cold", "tall", "fast", "loud").
+RULES:
+- ALL sentences and options in ${targetLanguage} (except the source sentence in sentence_translation).
+- NEVER write a sentence that mixes words from ${sourceLanguage} and ${targetLanguage}.
+- Wrong options should be plausible mistakes learners make.
+- Vary exercise types — do not repeat the same type for every exercise.
 
-IMPORTANT RULES:
-- Unless the exercise type explicitly involves translation between languages (sentence_translation), BOTH the prompt AND the options MUST be entirely in ${targetLanguage}.
-- Prioritize testing correct grammar and natural usage of words in ${targetLanguage}.
-- Make wrong options plausible — common mistakes learners actually make.
-- Use a good variety of exercise types across the generated exercises.
-
-Each exercise must have:
-- "prompt": the question or instruction for the learner
-- "options": an array of 3 to 5 answer choices
-- "correctOptionIndex": the zero-based index of the correct answer in the options array
+JSON format per exercise:
+- "prompt": string (the question, in ${targetLanguage} unless sentence_translation)
+- "options": array of 3-5 strings (answer choices)
+- "correctOptionIndex": number (0-based index of correct answer)
 - "exerciseType": one of fill_in_the_blank, sentence_completion, verb_conjugation, sentence_translation, preposition, word_order, synonym_antonym, error_correction, context_word
-- "sourceWord": the vocabulary word this exercise is based on
+- "sourceWord": string (the vocabulary word this exercise tests)
 
-Return ONLY a valid JSON array, no markdown, no code blocks, no extra text.`;
+Return ONLY a valid JSON array. No markdown, no code blocks, no extra text.`;
 
       const requestBody = this.buildRequestBody(prompt, 2000);
 
