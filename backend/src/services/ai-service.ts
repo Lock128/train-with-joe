@@ -481,6 +481,11 @@ Provide an improved version that maintains the original meaning but is more poli
     if (this.modelId.includes('nova')) {
       // Amazon Nova multimodal format
       return {
+        system: [
+          {
+            text: 'You are a structured-data extraction API. You MUST respond with a single valid JSON object and absolutely nothing else. No markdown, no code fences, no wrapper tags, no commentary. Start with "{" and end with "}".',
+          },
+        ],
         messages: [
           {
             role: 'user',
@@ -571,34 +576,43 @@ Provide an improved version that maintains the original meaning but is more poli
         sourceLanguage && targetLanguage
           ? `The image contains vocabulary translating from ${sourceLanguage} to ${targetLanguage}. Use these as the source and target languages.`
           : 'Detect the languages used in the image. If the image contains translations between two languages, identify both.';
-      const prompt = `You are a JSON-only API. You must respond with a single valid JSON object and absolutely nothing else — no markdown, no code fences, no commentary, no trailing text.
+      const prompt = `Analyze this image and extract all vocabulary words suitable for language learners. Capture the words in the same way as they are noted in the image. ${languageInstruction}
 
-Analyze this image and extract all vocabulary words suitable for language learners. Capture the words in the same way as they are noted in the image. ${languageInstruction}
+Your response MUST be a single valid JSON object matching this exact JSON Schema — no other output:
 
-Respond with a JSON object containing exactly these fields:
 {
-  "title": "brief description of the image (max 10 words)",
-  "sourceLanguage": "language words are translated FROM (e.g. English)",
-  "targetLanguage": "language words are translated TO (e.g. German, or same as sourceLanguage if monolingual)",
-  "words": [
-    {
-      "word": "vocabulary word in source language",
-      "translation": "translation in target language (if available)",
-      "definition": "learner-friendly definition (max 20 words)",
-      "partOfSpeech": "noun | verb | adjective | adverb | other",
-      "exampleSentence": "simple example sentence (max 15 words)",
-      "difficulty": "easy | medium | hard",
-      "unit": "unit/chapter/section label if visible in image, otherwise omit"
+  "type": "object",
+  "required": ["title", "sourceLanguage", "targetLanguage", "words"],
+  "additionalProperties": false,
+  "properties": {
+    "title":          { "type": "string", "description": "Brief description of the image, max 10 words" },
+    "sourceLanguage": { "type": "string", "description": "Language words are translated FROM, e.g. English" },
+    "targetLanguage": { "type": "string", "description": "Language words are translated TO, e.g. German" },
+    "words": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": ["word", "definition"],
+        "properties": {
+          "word":            { "type": "string", "description": "Vocabulary word in source language" },
+          "translation":     { "type": "string", "description": "Translation in target language" },
+          "definition":      { "type": "string", "description": "Learner-friendly definition, max 20 words" },
+          "partOfSpeech":    { "type": "string", "enum": ["noun", "verb", "adjective", "adverb", "other"] },
+          "exampleSentence": { "type": "string", "description": "Simple example sentence, max 15 words" },
+          "difficulty":      { "type": "string", "enum": ["easy", "medium", "hard"] },
+          "unit":            { "type": "string", "description": "Unit/chapter/section label if visible in image" }
+        }
+      }
     }
-  ]
+  }
 }
 
-CRITICAL RULES:
-- Every "word" object MUST include the "word" field.
-- Maximum 50 words in the array.
-- Output MUST be parseable by JSON.parse() — no trailing commas, no truncated objects.
-- If you cannot fit all words, stop at the last COMPLETE word object and close the array and object properly.
-- Do NOT output anything before or after the JSON object.`;
+RULES:
+- Respond with ONLY the JSON object. No markdown, no code fences, no tags, no commentary before or after.
+- The output MUST be parseable by JSON.parse() — no trailing commas, no truncated objects.
+- If you cannot fit all words within the token limit, stop at the last COMPLETE word object and close the array and object properly.
+- Start your response with the "{" character and end it with the "}" character.`;
 
       console.log(
         `[analyzeImageForVocabulary] Starting analysis for user=${userId}, model=${this.modelId}, imageSize=${imageBase64.length} chars`,
@@ -633,11 +647,12 @@ CRITICAL RULES:
         throw new Error('No content returned from Bedrock');
       }
 
-      // Parse JSON from response (handle markdown fences and embedded JSON)
+      // Parse JSON from response (handle markdown fences, model tags, and embedded JSON)
       let parsed;
       const stripped = responseText
         .replace(/^```(?:json)?\s*/i, '')
         .replace(/\s*```\s*$/, '')
+        .replace(/\{@json_object\}/gi, '')
         .trim();
 
       try {
