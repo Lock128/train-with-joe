@@ -434,6 +434,15 @@ class AppLocalizationsJa extends AppLocalizations {
   String get wordFlaggedForReview => '単語を復習用にマークしました';
 
   @override
+  String get statusAnalyzing => '画像を分析中…';
+
+  @override
+  String get statusFailed => '分析に失敗しました';
+
+  @override
+  String get statusPartiallyCompleted => '一部の画像を分析できませんでした';
+
+  @override
   String get allModes => 'すべてのモード';
 
   @override

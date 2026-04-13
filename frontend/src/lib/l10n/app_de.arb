@@ -141,6 +141,10 @@
 
   "wordFlaggedForReview": "Wort zur Überprüfung markiert",
 
+  "statusAnalyzing": "Bilder werden analysiert…",
+  "statusFailed": "Analyse fehlgeschlagen",
+  "statusPartiallyCompleted": "Einige Bilder konnten nicht analysiert werden",
+
   "allModes": "Alle Modi",
   "allLists": "Alle Listen",
   "forceRemoveTraining": "Training erzwungen entfernen",

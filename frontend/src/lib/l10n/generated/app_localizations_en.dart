@@ -440,6 +440,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wordFlaggedForReview => 'Word flagged for review';
 
   @override
+  String get statusAnalyzing => 'Analyzing images…';
+
+  @override
+  String get statusFailed => 'Analysis failed';
+
+  @override
+  String get statusPartiallyCompleted => 'Some images could not be analyzed';
+
+  @override
   String get allModes => 'All modes';
 
   @override

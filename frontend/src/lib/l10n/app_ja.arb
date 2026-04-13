@@ -141,6 +141,10 @@
 
   "wordFlaggedForReview": "単語を復習用にマークしました",
 
+  "statusAnalyzing": "画像を分析中…",
+  "statusFailed": "分析に失敗しました",
+  "statusPartiallyCompleted": "一部の画像を分析できませんでした",
+
   "allModes": "すべてのモード",
   "allLists": "すべてのリスト",
   "forceRemoveTraining": "トレーニングを強制削除",

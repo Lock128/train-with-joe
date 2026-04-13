@@ -47,50 +47,84 @@ export const handler = async (event: ProcessEvent) => {
     let title = '';
     let detectedSourceLang = sourceLanguage || '';
     let detectedTargetLang = targetLanguage || '';
+    const failedImages: { index: number; s3Key: string; error: string }[] = [];
 
     for (let i = 0; i < imageS3Keys.length; i++) {
       const s3Key = imageS3Keys[i];
       console.log(`[process-image-vocabulary] Processing image ${i + 1}/${imageS3Keys.length}: ${s3Key}`);
 
-      const imageBase64 = await getImageBase64(s3Key);
-      console.log(`[process-image-vocabulary] Image loaded from S3, base64 size: ${imageBase64.length} chars`);
+      try {
+        const imageBase64 = await getImageBase64(s3Key);
+        console.log(`[process-image-vocabulary] Image loaded from S3, base64 size: ${imageBase64.length} chars`);
 
-      const result = await aiService.analyzeImageForVocabulary(imageBase64, userId, sourceLanguage, targetLanguage, {
-        skipRateLimit: true,
-      });
+        const result = await aiService.analyzeImageForVocabulary(imageBase64, userId, sourceLanguage, targetLanguage, {
+          skipRateLimit: true,
+        });
 
-      console.log(
-        `[process-image-vocabulary] Image ${i + 1} analysis complete`,
-        JSON.stringify({
-          title: result.title,
-          wordCount: result.words.length,
-          sourceLanguage: result.sourceLanguage,
-          targetLanguage: result.targetLanguage,
-        }),
-      );
+        console.log(
+          `[process-image-vocabulary] Image ${i + 1} analysis complete`,
+          JSON.stringify({
+            title: result.title,
+            wordCount: result.words.length,
+            sourceLanguage: result.sourceLanguage,
+            targetLanguage: result.targetLanguage,
+          }),
+        );
 
-      if (!title) title = result.title;
-      if (!detectedSourceLang) detectedSourceLang = result.sourceLanguage;
-      if (!detectedTargetLang) detectedTargetLang = result.targetLanguage;
-      allWords.push(...result.words);
+        if (!title) title = result.title;
+        if (!detectedSourceLang) detectedSourceLang = result.sourceLanguage;
+        if (!detectedTargetLang) detectedTargetLang = result.targetLanguage;
+        allWords.push(...result.words);
+      } catch (imageError) {
+        const errorMsg = imageError instanceof Error ? imageError.message : 'Unknown error';
+        console.warn(
+          `[process-image-vocabulary] Image ${i + 1}/${imageS3Keys.length} failed, continuing with remaining images: ${errorMsg}`,
+        );
+        failedImages.push({ index: i + 1, s3Key, error: errorMsg });
+      }
     }
 
-    const finalTitle = imageS3Keys.length > 1 ? `${title} (+${imageS3Keys.length - 1} more)` : title;
+    // Determine final status based on results
+    const totalImages = imageS3Keys.length;
+    const failedCount = failedImages.length;
+    const succeededCount = totalImages - failedCount;
+
+    if (succeededCount === 0) {
+      // Every image failed — mark as FAILED
+      const errorMessage = `All ${totalImages} images failed to process. First error: ${failedImages[0]?.error}`;
+      console.error(`[process-image-vocabulary] ${errorMessage}`);
+
+      await repository.update(vocabularyListId, {
+        status: 'FAILED',
+        errorMessage,
+      });
+
+      console.error(`[process-image-vocabulary] Marked as FAILED`, JSON.stringify({ vocabularyListId, errorMessage }));
+      return;
+    }
+
+    const finalTitle = totalImages > 1 ? `${title} (+${totalImages - 1} more)` : title;
+    const isPartial = failedCount > 0;
+    const status = isPartial ? 'PARTIALLY_COMPLETED' : 'COMPLETED';
+    const errorMessage = isPartial ? `${failedCount}/${totalImages} images failed to process` : undefined;
 
     await repository.update(vocabularyListId, {
       title: finalTitle,
       words: allWords,
       sourceLanguage: detectedSourceLang || undefined,
       targetLanguage: detectedTargetLang || undefined,
-      status: 'COMPLETED',
+      status,
+      errorMessage,
     });
 
     console.log(
-      `[process-image-vocabulary] Successfully completed`,
+      `[process-image-vocabulary] ${status}`,
       JSON.stringify({
         vocabularyListId,
         totalWords: allWords.length,
         title: finalTitle,
+        succeededImages: succeededCount,
+        failedImages: failedCount,
       }),
     );
   } catch (error) {

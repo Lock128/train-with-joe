@@ -447,6 +447,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get wordFlaggedForReview => 'Mot signalé pour révision';
 
   @override
+  String get statusAnalyzing => 'Analyse des images en cours…';
+
+  @override
+  String get statusFailed => 'L\'analyse a échoué';
+
+  @override
+  String get statusPartiallyCompleted =>
+      'Certaines images n\'ont pas pu être analysées';
+
+  @override
   String get allModes => 'Tous les modes';
 
   @override

@@ -681,6 +681,8 @@ class _VocabularyListDetailScreenState
     final schoolForm = _list!['schoolForm'] as String?;
     final grade = _list!['grade'] as String?;
     final isbn = _list!['isbn'] as String?;
+    final status = _list!['status'] as String?;
+    final errorMessage = _list!['errorMessage'] as String?;
     final hasBookDetails = [publisher, schoolForm, grade, isbn]
         .any((v) => v != null && v.isNotEmpty);
 
@@ -770,6 +772,62 @@ class _VocabularyListDetailScreenState
                   else
                     Text(l10n.nWords(words.length),
                         style: const TextStyle(color: Colors.grey)),
+                ],
+              ),
+            ),
+          // Status banner
+          if (status == 'PENDING')
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+              color: Colors.orange.shade50,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16, height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange.shade700),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(l10n.statusAnalyzing,
+                        style: TextStyle(color: Colors.orange.shade800, fontSize: 13)),
+                  ),
+                ],
+              ),
+            ),
+          if (status == 'FAILED')
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+              color: Colors.red.shade50,
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, size: 18, color: Colors.red.shade700),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      errorMessage ?? l10n.statusFailed,
+                      style: TextStyle(color: Colors.red.shade800, fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (status == 'PARTIALLY_COMPLETED')
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+              color: Colors.amber.shade50,
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade800),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      errorMessage ?? l10n.statusPartiallyCompleted,
+                      style: TextStyle(color: Colors.amber.shade900, fontSize: 13),
+                    ),
+                  ),
                 ],
               ),
             ),

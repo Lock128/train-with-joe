@@ -141,6 +141,10 @@
 
   "wordFlaggedForReview": "Palavra marcada para revisão",
 
+  "statusAnalyzing": "Analisando imagens…",
+  "statusFailed": "A análise falhou",
+  "statusPartiallyCompleted": "Algumas imagens não puderam ser analisadas",
+
   "allModes": "Todos os modos",
   "allLists": "Todas as listas",
   "forceRemoveTraining": "Forçar remoção do treino",

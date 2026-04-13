@@ -443,6 +443,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get wordFlaggedForReview => 'Wort zur Überprüfung markiert';
 
   @override
+  String get statusAnalyzing => 'Bilder werden analysiert…';
+
+  @override
+  String get statusFailed => 'Analyse fehlgeschlagen';
+
+  @override
+  String get statusPartiallyCompleted =>
+      'Einige Bilder konnten nicht analysiert werden';
+
+  @override
   String get allModes => 'Alle Modi';
 
   @override

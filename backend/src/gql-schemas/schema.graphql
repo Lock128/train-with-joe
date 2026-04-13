@@ -15,6 +15,7 @@ enum SubscriptionStatus @aws_cognito_user_pools {
 enum VocabularyListStatus @aws_cognito_user_pools {
   PENDING
   COMPLETED
+  PARTIALLY_COMPLETED
   FAILED
 }
 

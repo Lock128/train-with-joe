@@ -126,6 +126,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
     final createdAt = list['createdAt'] as String?;
     final words = (list['words'] as List<dynamic>?) ?? [];
     final isPublic = list['isPublic'] == true;
+    final status = list['status'] as String?;
 
     final langPair = formatLanguagePair(sourceLang, targetLang);
 
@@ -137,8 +138,20 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: const Icon(Icons.list_alt),
+          backgroundColor: status == 'FAILED'
+              ? Colors.red.shade100
+              : status == 'PENDING'
+                  ? Colors.orange.shade100
+                  : status == 'PARTIALLY_COMPLETED'
+                      ? Colors.amber.shade100
+                      : Theme.of(context).colorScheme.primaryContainer,
+          child: status == 'FAILED'
+              ? Icon(Icons.error_outline, color: Colors.red.shade700)
+              : status == 'PENDING'
+                  ? Icon(Icons.hourglass_top, color: Colors.orange.shade700)
+                  : status == 'PARTIALLY_COMPLETED'
+                      ? Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800)
+                      : const Icon(Icons.list_alt),
         ),
         title: Row(
           children: [
@@ -153,8 +166,22 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
             ],
           ],
         ),
-        subtitle: Text(subtitleParts.join(' · '),
-            style: const TextStyle(color: Colors.grey)),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(subtitleParts.join(' · '),
+                style: const TextStyle(color: Colors.grey)),
+            if (status == 'PENDING')
+              Text(l10n.statusAnalyzing,
+                  style: TextStyle(color: Colors.orange.shade700, fontSize: 12)),
+            if (status == 'FAILED')
+              Text(l10n.statusFailed,
+                  style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
+            if (status == 'PARTIALLY_COMPLETED')
+              Text(l10n.statusPartiallyCompleted,
+                  style: TextStyle(color: Colors.amber.shade800, fontSize: 12)),
+          ],
+        ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () => context.go('/vocabulary/${list['id']}'),
       ),

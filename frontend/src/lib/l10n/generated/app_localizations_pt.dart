@@ -441,6 +441,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get wordFlaggedForReview => 'Palavra marcada para revisão';
 
   @override
+  String get statusAnalyzing => 'Analisando imagens…';
+
+  @override
+  String get statusFailed => 'A análise falhou';
+
+  @override
+  String get statusPartiallyCompleted =>
+      'Algumas imagens não puderam ser analisadas';
+
+  @override
   String get allModes => 'Todos os modos';
 
   @override

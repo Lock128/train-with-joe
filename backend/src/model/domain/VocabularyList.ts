@@ -2,7 +2,7 @@
  * Domain models for VocabularyList entity
  */
 
-export type VocabularyListStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
+export type VocabularyListStatus = 'PENDING' | 'COMPLETED' | 'PARTIALLY_COMPLETED' | 'FAILED';
 
 export interface VocabularyWord {
   word: string;

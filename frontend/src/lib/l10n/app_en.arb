@@ -212,6 +212,10 @@
 
   "wordFlaggedForReview": "Word flagged for review",
 
+  "statusAnalyzing": "Analyzing images…",
+  "statusFailed": "Analysis failed",
+  "statusPartiallyCompleted": "Some images could not be analyzed",
+
   "allModes": "All modes",
   "allLists": "All lists",
   "forceRemoveTraining": "Force Remove Training",

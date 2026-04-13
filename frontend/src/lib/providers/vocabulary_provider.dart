@@ -274,7 +274,7 @@ class VocabularyProvider extends ChangeNotifier {
         final wordsCount = (list['words'] as List<dynamic>?)?.length ?? 0;
         debugPrint('[VocabularyProvider] Poll result: status=$status, words=$wordsCount, title=${list['title']}');
 
-        if (status == 'COMPLETED') return list;
+        if (status == 'COMPLETED' || status == 'PARTIALLY_COMPLETED') return list;
         if (status == 'FAILED') {
           _error = list['errorMessage'] as String? ?? 'Analysis failed';
           return null;

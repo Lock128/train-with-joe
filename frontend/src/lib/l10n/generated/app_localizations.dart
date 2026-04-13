@@ -898,6 +898,24 @@ abstract class AppLocalizations {
   /// **'Word flagged for review'**
   String get wordFlaggedForReview;
 
+  /// No description provided for @statusAnalyzing.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing images…'**
+  String get statusAnalyzing;
+
+  /// No description provided for @statusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis failed'**
+  String get statusFailed;
+
+  /// No description provided for @statusPartiallyCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Some images could not be analyzed'**
+  String get statusPartiallyCompleted;
+
   /// No description provided for @allModes.
   ///
   /// In en, this message translates to:
