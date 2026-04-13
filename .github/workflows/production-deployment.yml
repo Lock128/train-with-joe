@@ -373,9 +373,17 @@ jobs:
         id: get-url
         run: |
           NAMESPACE=production
-          APP_URL=$(aws ssm get-parameter --name "/$NAMESPACE/config/frontend-url" --query "Parameter.Value" --output text 2>/dev/null || echo "https://production.yourdomain.com")
-          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
-          echo "🌐 Production application deployed at: $APP_URL"
+          APP_URL=$(aws ssm get-parameter --name "/$NAMESPACE/config/frontend-url" --query "Parameter.Value" --output text 2>/dev/null) || true
+          if [ -z "$APP_URL" ]; then
+            echo "⚠️ Could not retrieve frontend URL from SSM parameter /$NAMESPACE/config/frontend-url"
+            echo "⏭️ Skipping deployment verification"
+            echo "app_url=" >> $GITHUB_OUTPUT
+            echo "url_available=false" >> $GITHUB_OUTPUT
+          else
+            echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+            echo "url_available=true" >> $GITHUB_OUTPUT
+            echo "🌐 Production application deployed at: $APP_URL"
+          fi
 
       - name: Create deployment state file
         run: |
@@ -412,6 +420,7 @@ jobs:
           retention-days: 365
 
       - name: Verify production deployment
+        if: steps.get-url.outputs.url_available == 'true'
         run: |
           APP_URL="${{ steps.get-url.outputs.app_url }}"
           echo "🔍 Verifying production deployment..."

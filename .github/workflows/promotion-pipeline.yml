@@ -239,9 +239,17 @@ jobs:
       - name: Get application URL
         id: get-url
         run: |
-          APP_URL="https://beta.yourdomain.com"
-          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
-          echo "🌐 Application deployed at: $APP_URL"
+          NAMESPACE=beta
+          APP_URL=$(aws ssm get-parameter --name "/$NAMESPACE/config/frontend-url" --query "Parameter.Value" --output text 2>/dev/null) || true
+          if [ -z "$APP_URL" ]; then
+            echo "⚠️ Could not retrieve frontend URL from SSM parameter /$NAMESPACE/config/frontend-url"
+            echo "app_url=" >> $GITHUB_OUTPUT
+            echo "url_available=false" >> $GITHUB_OUTPUT
+          else
+            echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+            echo "url_available=true" >> $GITHUB_OUTPUT
+            echo "🌐 Application deployed at: $APP_URL"
+          fi
 
       - name: Create deployment state file
         run: |
