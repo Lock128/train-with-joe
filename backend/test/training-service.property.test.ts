@@ -376,18 +376,19 @@ describe('Training Service Property Tests', () => {
 
         for (let i = 0; i < options.length; i++) {
           const opt = options[i];
-          // Each option has exactly 3 choices
-          expect(opt.options).toHaveLength(3);
+          // Each option has at most min(defaultOptionCount, words.length) choices
+          const expectedOptionCount = Math.min(5, words.length);
+          expect(opt.options).toHaveLength(expectedOptionCount);
 
           // The correct answer is at correctOptionIndex
           expect(opt.options[opt.correctOptionIndex]).toBe(words[i].translation);
 
-          // The other 2 options are translations from other words in the training
+          // All options are translations from words in the training
           for (const o of opt.options) {
             expect(allTranslations.has(o)).toBe(true);
           }
 
-          // The 2 distractors should not equal the correct answer (they come from other words)
+          // The distractors should not equal the correct answer (they come from other words)
           const distractors = opt.options.filter((_, idx) => idx !== opt.correctOptionIndex);
           for (const d of distractors) {
             // Distractors are from other words in the training
@@ -1136,8 +1137,9 @@ describe('Randomized Training Property Tests', () => {
             for (let i = 0; i < options.length; i++) {
               const opt = options[i];
 
-              // Each option set has exactly 3 options
-              expect(opt.options).toHaveLength(3);
+              // Each option set has at most min(defaultOptionCount, selectedWords.length) options
+              const expectedOptionCount = Math.min(5, selectedWords.length);
+              expect(opt.options).toHaveLength(expectedOptionCount);
 
               // The correct answer is at correctOptionIndex
               const correctAnswer = reversed ? selectedWords[i].word : selectedWords[i].translation;

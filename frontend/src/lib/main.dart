@@ -28,6 +28,7 @@ import 'screens/training_execution_screen.dart';
 import 'screens/training_results_screen.dart';
 import 'screens/training_history_screen.dart';
 import 'screens/training_statistics_screen.dart';
+import 'screens/impressum_screen.dart';
 import 'screens/admin_screen.dart';
 import 'screens/settings_screen.dart';
 import 'widgets/app_shell.dart';
@@ -373,6 +374,10 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
             GoRoute(
               path: '/settings',
               builder: (context, state) => const SettingsScreen(),
+            ),
+            GoRoute(
+              path: '/impressum',
+              builder: (context, state) => const ImpressumScreen(),
             ),
             GoRoute(
               path: '/trainings',

@@ -117,9 +117,17 @@ describe('AI Service Property Tests', () => {
           expect(capturedBody).toBeDefined();
 
           // The body contains the prompt within the request body structure
-          // For Titan format: { inputText: prompt, ... }
+          // Extract prompt based on model format (Nova, Claude, or Titan)
           const parsedBody = JSON.parse(capturedBody!);
-          const prompt: string = parsedBody.inputText;
+          let prompt: string;
+          if (parsedBody.messages) {
+            // Nova or Claude format: messages[0].content[0].text
+            const content = parsedBody.messages[0].content;
+            prompt = typeof content === 'string' ? content : content[0].text;
+          } else {
+            // Titan format: inputText
+            prompt = parsedBody.inputText;
+          }
 
           // Verify prompt contains both language names
           expect(prompt).toContain(sourceLanguage);

@@ -210,6 +210,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   Future<void> _handleRestorePurchases() async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final subscriptionProvider = context.read<SubscriptionProvider>();
 
     try {
@@ -245,7 +246,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       if (mounted) {
         await subscriptionProvider.loadSubscription();
         
-        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
           SnackBar(
             content: Text(l10n.purchasesRestored),
@@ -258,7 +258,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       if (mounted) {
         navigator.pop();
         
-        final l10n = AppLocalizations.of(context)!;
         messenger.showSnackBar(
           SnackBar(
             content: Text(l10n.failedToRestorePurchases(e.toString())),

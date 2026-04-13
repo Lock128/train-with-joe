@@ -394,7 +394,7 @@ class _AddWordsSheetState extends State<_AddWordsSheet> {
         Padding(padding: const EdgeInsets.all(16), child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(l10n.addWords, style: Theme.of(context).textTheme.titleMedium),
+            Text(AppLocalizations.of(context)!.addWords, style: Theme.of(context).textTheme.titleMedium),
             ElevatedButton(
               onPressed: _totalSelected == 0 ? null : _submitAll,
               child: Text(AppLocalizations.of(context)!.addCount(_totalSelected)),

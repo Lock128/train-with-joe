@@ -134,6 +134,8 @@ import { RouterLink } from '@angular/router';
           <a routerLink="/">← Back to Home</a>
           <span class="separator">•</span>
           <a routerLink="/privacy">Privacy Policy</a>
+          <span class="separator">•</span>
+          <a routerLink="/impressum">Impressum</a>
         </footer>
       </div>
     </div>

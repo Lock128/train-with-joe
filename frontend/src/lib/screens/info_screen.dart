@@ -172,6 +172,7 @@ class _InfoScreenState extends State<InfoScreen> {
                         const Divider(),
                         _linkRow(Icons.privacy_tip_outlined, 'Privacy Policy', 'https://trainwithjoe.app/privacy'),
                         _linkRow(Icons.description_outlined, 'Terms of Service', 'https://trainwithjoe.app/terms'),
+                        _linkRow(Icons.account_balance_outlined, 'Impressum', '/impressum'),
                         _linkRow(Icons.mail_outline, 'Contact Us', 'mailto:hello@trainwithjoe.app'),
                       ],
                     ),
@@ -211,8 +212,15 @@ class _InfoScreenState extends State<InfoScreen> {
   }
 
   Widget _linkRow(IconData icon, String label, String url) {
+    final isInternalRoute = url.startsWith('/');
     return InkWell(
-      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      onTap: () {
+        if (isInternalRoute) {
+          context.push(url);
+        } else {
+          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        }
+      },
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -221,7 +229,7 @@ class _InfoScreenState extends State<InfoScreen> {
             Icon(icon, size: 20, color: Colors.grey),
             const SizedBox(width: 12),
             Expanded(child: Text(label)),
-            const Icon(Icons.open_in_new, size: 16, color: Colors.grey),
+            Icon(isInternalRoute ? Icons.chevron_right : Icons.open_in_new, size: 16, color: Colors.grey),
           ],
         ),
       ),

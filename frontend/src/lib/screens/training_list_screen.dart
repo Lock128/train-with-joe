@@ -22,6 +22,9 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
   String? _selectedMode;
   String? _selectedListId;
 
+  // Key to force-rebuild dropdowns when filters are cleared
+  int _filterResetKey = 0;
+
   @override
   void initState() {
     super.initState();
@@ -101,6 +104,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
       _searchController.clear();
       _selectedMode = null;
       _selectedListId = null;
+      _filterResetKey++;
     });
   }
 
@@ -251,7 +255,8 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _selectedMode,
+                  key: ValueKey('mode_$_filterResetKey'),
+                  initialValue: _selectedMode,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Mode',
@@ -259,11 +264,11 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  items: [
-                    DropdownMenuItem(value: null, child: Text(l10n.allModes)),
-                    DropdownMenuItem(value: 'TEXT_INPUT', child: Text(l10n.textInput)),
-                    DropdownMenuItem(value: 'MULTIPLE_CHOICE', child: Text(l10n.multipleChoice)),
-                    DropdownMenuItem(value: 'AI_TRAINING', child: Text(l10n.aiTraining)),
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('All modes')),
+                    DropdownMenuItem(value: 'TEXT_INPUT', child: Text('Text Input')),
+                    DropdownMenuItem(value: 'MULTIPLE_CHOICE', child: Text('Multiple Choice')),
+                    DropdownMenuItem(value: 'AI_TRAINING', child: Text('AI Training')),
                   ],
                   onChanged: (v) => setState(() => _selectedMode = v),
                 ),
@@ -271,7 +276,8 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _selectedListId,
+                  key: ValueKey('list_$_filterResetKey'),
+                  initialValue: _selectedListId,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'List',
@@ -280,7 +286,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   items: [
-                    DropdownMenuItem<String>(value: null, child: Text(l10n.allLists)),
+                    DropdownMenuItem<String>(value: null, child: Text('All lists')),
                     ...vocabLists.map((l) => DropdownMenuItem<String>(
                           value: l['id'] as String,
                           child: Text(
@@ -301,7 +307,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
               child: TextButton.icon(
                 onPressed: _clearFilters,
                 icon: const Icon(Icons.clear_all, size: 16),
-                label: Text(l10n.clearFilters, style: const TextStyle(fontSize: 12)),
+                label: const Text('Clear filters', style: TextStyle(fontSize: 12)),
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
