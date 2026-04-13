@@ -376,10 +376,10 @@ export class BaseStack extends Stack {
   }
 
   createAssetsBucket(namespace: string): Bucket {
-    const domainName = namespace === 'prod' ? 'trainwithjoe.com' : `${namespace}.trainwithjoe.com`;
-    const appDomainName = namespace === 'prod' ? 'app.trainwithjoe.app' : `${namespace}.trainwithjoe.app`;
+    const domainName = namespace === 'production' ? 'trainwithjoe.com' : `${namespace}.trainwithjoe.com`;
+    const appDomainName = namespace === 'production' ? 'app.trainwithjoe.app' : `${namespace}.trainwithjoe.app`;
     const allowedOrigins = [`https://${domainName}`, `https://${appDomainName}`, 'https://*.cloudfront.net'];
-    if (namespace !== 'prod') {
+    if (namespace !== 'production') {
       allowedOrigins.push('http://localhost:*');
     }
 
