@@ -6,6 +6,7 @@ import {
   UpdateCommand,
   DeleteCommand,
   ScanCommand,
+  QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { User } from '../model/domain/User';
 
@@ -61,6 +62,36 @@ export class UserRepository {
       }
       console.error('Error creating user:', error);
       throw new Error(`Failed to create user: ${err.message}`);
+    }
+  }
+
+  /**
+   * Get user by email (uses email-index GSI)
+   * @param email User email
+   * @returns User if found, null otherwise
+   * @throws Error if retrieval fails
+   */
+  async getByEmail(email: string): Promise<User | null> {
+    try {
+      const response = await this.dynamoClient.send(
+        new QueryCommand({
+          TableName: this.tableName,
+          IndexName: 'email-index',
+          KeyConditionExpression: 'email = :email',
+          ExpressionAttributeValues: { ':email': email },
+          Limit: 1,
+        }),
+      );
+
+      if (!response.Items || response.Items.length === 0) {
+        return null;
+      }
+
+      return response.Items[0] as User;
+    } catch (error) {
+      const err = error as Error;
+      console.error('Error getting user by email:', error);
+      throw new Error(`Failed to get user by email: ${err.message}`);
     }
   }
 

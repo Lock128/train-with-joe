@@ -489,12 +489,26 @@ export class APIStack extends cdk.Stack {
     // Create startTraining Lambda function
     const startTrainingFunction = new NodejsFunction(this, 'StartTrainingFunction', {
       ...trainingLambdaProps,
+      timeout: cdk.Duration.minutes(5),
       entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.startTraining.ts'),
       handler: 'handler',
+      environment: {
+        ...trainingLambdaProps.environment,
+        BEDROCK_MODEL_ID: process.env.BEDROCK_MODEL_ID || 'eu.amazon.nova-lite-v1:0',
+      },
     });
 
     trainingsTable.grantReadWriteData(startTrainingFunction);
     vocabularyListsTable.grantReadData(startTrainingFunction);
+
+    // Grant Bedrock access for AI training mode
+    startTrainingFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['bedrock:InvokeModel'],
+        resources: ['*'],
+      }),
+    );
 
     const startTrainingDataSource = api.addLambdaDataSource('StartTrainingDataSource', startTrainingFunction);
 
