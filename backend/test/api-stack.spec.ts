@@ -252,14 +252,14 @@ describe('APIStack CDK Integration Tests', () => {
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
     );
 
-    expect(dataSources.length).toBe(28);
+    expect(dataSources.length).toBe(29);
 
     // Count data source types
     const dynamoDbSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AMAZON_DYNAMODB');
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(26); // 26 Lambda data sources (see api-stack.ts for full list)
+    expect(lambdaSources.length).toBe(27); // 27 Lambda data sources (see api-stack.ts for full list)
   });
 
   test('should export API endpoint URL and ID', { timeout: 60000 }, () => {
