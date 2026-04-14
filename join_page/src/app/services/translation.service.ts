@@ -12,6 +12,7 @@ export class TranslationService {
     // Nav
     'nav.features': { en: 'Features', de: 'Funktionen' },
     'nav.getStarted': { en: 'Get Started', de: 'Loslegen' },
+    'nav.login': { en: 'Login', de: 'Anmelden' },
 
     // Hero
     'hero.badge': { en: 'FUN LEARNING PLATFORM', de: 'SPASSIGE LERNPLATTFORM' },

@@ -24,6 +24,7 @@ export class HomeComponent {
   isSuccess = false;
   currentYear = new Date().getFullYear();
   step: FormStep = 'register';
+  readonly loginUrl = environment.appUrl;
 
   constructor(
     private authService: AuthService,
