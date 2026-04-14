@@ -35,6 +35,8 @@ export function request(ctx: Context): DynamoDBPutItemRequest {
     name: input.name || null,
     subscriptionStatus: 'INACTIVE',
     subscriptionProvider: null,
+    tier: 'FREE',
+    tierSource: 'SUBSCRIPTION',
     createdAt: now,
     updatedAt: now,
   };

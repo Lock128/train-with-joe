@@ -103,10 +103,10 @@ void main() {
 
       // Assert
       expect(find.text('Choose a Plan'), findsOneWidget);
-      expect(find.text('Basic Plan'), findsOneWidget);
-      expect(find.text('Pro Plan'), findsOneWidget);
-      expect(find.text('\$9.99/month'), findsOneWidget);
-      expect(find.text('\$19.99/month'), findsOneWidget);
+      expect(find.text('Basic'), findsOneWidget);
+      expect(find.text('Pro'), findsOneWidget);
+      expect(find.text('\$2.99'), findsWidgets);
+      expect(find.text('\$9.99'), findsWidgets);
     });
 
     testWidgets('should display active subscription details', (tester) async {
@@ -130,7 +130,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert
-      expect(find.text('POPULAR'), findsOneWidget);
+      expect(find.text('RECOMMENDED'), findsOneWidget);
     });
 
     testWidgets('should display plan features', (tester) async {
@@ -138,11 +138,10 @@ void main() {
       await tester.pumpWidget(createTestWidget(const SubscriptionScreen()));
       await tester.pumpAndSettle();
 
-      // Assert - check for feature checkmarks
+      // Assert - check for feature checkmarks and actual feature text
       expect(find.byIcon(Icons.check), findsWidgets);
-      expect(find.text('Access to all features'), findsOneWidget);
-      expect(find.text('Email support'), findsOneWidget);
-      expect(find.text('Priority support'), findsOneWidget);
+      expect(find.text('Unlimited vocabulary lists'), findsWidgets);
+      expect(find.text('AI training'), findsWidgets);
     });
 
     testWidgets('should have subscribe buttons for each plan', (tester) async {
@@ -321,9 +320,10 @@ void main() {
       await tester.pumpWidget(createTestWidget(const SubscriptionScreen()));
       await tester.pumpAndSettle();
 
-      // Assert
-      expect(find.text('\$9.99/month'), findsOneWidget);
-      expect(find.text('\$19.99/month'), findsOneWidget);
+      // Assert - prices are rendered as separate Text widgets (price + subtitle)
+      expect(find.text('\$2.99'), findsWidgets);
+      expect(find.text('\$9.99'), findsWidgets);
+      expect(find.text('/month'), findsWidgets);
     });
 
     testWidgets('should highlight popular plan with border', (tester) async {
@@ -331,8 +331,8 @@ void main() {
       await tester.pumpWidget(createTestWidget(const SubscriptionScreen()));
       await tester.pumpAndSettle();
 
-      // Assert - popular badge should exist
-      expect(find.text('POPULAR'), findsOneWidget);
+      // Assert - recommended badge should exist
+      expect(find.text('RECOMMENDED'), findsOneWidget);
     });
   });
 }

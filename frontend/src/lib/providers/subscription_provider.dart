@@ -9,6 +9,7 @@ class SubscriptionProvider extends ChangeNotifier {
   late final PaymentService _paymentService;
   
   Map<String, dynamic>? _subscription;
+  Map<String, dynamic>? _usageLimits;
   bool _isLoading = false;
   String? _error;
   AuthProvider? _authProvider;
@@ -22,14 +23,37 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   Map<String, dynamic>? get subscription => _subscription;
+  Map<String, dynamic>? get usageLimits => _usageLimits;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  /// Current tier from usage limits (defaults to FREE)
+  String get currentTier => _usageLimits?['tier'] as String? ?? 'FREE';
+
+  /// Current tier source
+  String? get tierSource => _usageLimits?['tierSource'] as String?;
+
+  /// Image scans used in current period
+  int get imageScansUsed => _usageLimits?['imageScansUsed'] as int? ?? 0;
+
+  /// Image scans limit (null means unlimited)
+  int? get imageScansLimit => _usageLimits?['imageScansLimit'] as int?;
+
+  /// Vocabulary lists used
+  int get vocabularyListsUsed => _usageLimits?['vocabularyListsUsed'] as int? ?? 0;
+
+  /// Vocabulary lists limit (null means unlimited)
+  int? get vocabularyListsLimit => _usageLimits?['vocabularyListsLimit'] as int?;
+
+  /// Whether AI training is enabled for the current tier
+  bool get aiTrainingEnabled => _usageLimits?['aiTrainingEnabled'] as bool? ?? false;
 
   /// Update auth provider reference
   void updateAuth(AuthProvider authProvider) {
     _authProvider = authProvider;
     if (authProvider.isAuthenticated && _subscription == null) {
       loadSubscription();
+      loadUsageLimits();
     }
   }
 
@@ -70,6 +94,42 @@ class SubscriptionProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Load usage limits from API (tier, usage counts, limits)
+  Future<void> loadUsageLimits() async {
+    if (_authProvider == null || !_authProvider!.isAuthenticated) {
+      return;
+    }
+
+    try {
+      const query = '''
+        query GetUsageLimits {
+          getUsageLimits {
+            success
+            usageLimits {
+              tier
+              tierSource
+              imageScansUsed
+              imageScansLimit
+              vocabularyListsUsed
+              vocabularyListsLimit
+              aiTrainingEnabled
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.query(query);
+      final result = response['getUsageLimits'] as Map<String, dynamic>?;
+      if (result != null && result['success'] == true) {
+        _usageLimits = result['usageLimits'] as Map<String, dynamic>?;
+      }
+    } catch (e) {
+      debugPrint('Error loading usage limits: $e');
+    }
+    notifyListeners();
   }
 
   /// Create a new subscription
@@ -148,6 +208,7 @@ class SubscriptionProvider extends ChangeNotifier {
   /// Clear subscription data (on sign out)
   void clear() {
     _subscription = null;
+    _usageLimits = null;
     _error = null;
     _isLoading = false;
     notifyListeners();

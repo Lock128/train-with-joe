@@ -135,4 +135,8 @@ export class HomeComponent {
   scrollToFeatures() {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
   }
+
+  scrollToPricing() {
+    document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+  }
 }

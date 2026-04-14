@@ -17,6 +17,7 @@ interface APIStackProps extends cdk.StackProps {
   subscriptionsTable: Table;
   vocabularyListsTable: Table;
   trainingsTable: Table;
+  usageCountersTable: Table;
   assetsBucket: Bucket;
 }
 
@@ -26,8 +27,16 @@ export class APIStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: APIStackProps) {
     super(scope, id, props);
 
-    const { namespace, userPool, usersTable, subscriptionsTable, vocabularyListsTable, trainingsTable, assetsBucket } =
-      props;
+    const {
+      namespace,
+      userPool,
+      usersTable,
+      subscriptionsTable,
+      vocabularyListsTable,
+      trainingsTable,
+      usageCountersTable,
+      assetsBucket,
+    } = props;
 
     // Create CloudWatch Logs role for AppSync
     const cwRole = new Role(this, 'APICWRole', {
@@ -75,44 +84,6 @@ export class APIStack extends cdk.Stack {
     // Grant permissions to data sources
     usersTable.grantReadWriteData(usersDataSource);
     subscriptionsTable.grantReadWriteData(subscriptionsDataSource);
-
-    // Create createUser Lambda function (with admin signup notification via SES)
-    const createUserFunction = new NodejsFunction(this, 'CreateUserFunction', {
-      runtime: Runtime.NODEJS_20_X,
-      memorySize: 256,
-      timeout: cdk.Duration.seconds(30),
-      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.createUser.ts'),
-      handler: 'handler',
-      bundling: {
-        minify: true,
-        sourceMap: true,
-        externalModules: ['aws-sdk'],
-      },
-      environment: {
-        NAMESPACE: namespace,
-        USERS_TABLE_NAME: usersTable.tableName,
-        ADMIN_NOTIFICATION_EMAIL: 'lockhead+joeadmin@trainwithjoe.app',
-        SES_FROM_EMAIL: 'noreply@trainwithjoe.app',
-      },
-    });
-
-    usersTable.grantReadWriteData(createUserFunction);
-
-    // Grant SES send permissions for admin signup notifications
-    createUserFunction.addToRolePolicy(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        actions: ['ses:SendEmail', 'ses:SendRawEmail'],
-        resources: [`arn:aws:ses:eu-central-1:${cdk.Stack.of(this).account}:identity/*`],
-      }),
-    );
-
-    const createUserDataSource = api.addLambdaDataSource('CreateUserDataSource', createUserFunction);
-
-    createUserDataSource.createResolver('CreateUserResolver', {
-      typeName: 'Mutation',
-      fieldName: 'createUser',
-    });
 
     // Create Lambda functions for resolvers
     const lambdaProps = {
@@ -208,11 +179,15 @@ export class APIStack extends cdk.Stack {
       environment: {
         ...vocabularyLambdaProps.environment,
         PROCESS_IMAGE_VOCABULARY_FUNCTION_NAME: processImageVocabularyFunction.functionName,
+        USAGE_COUNTERS_TABLE_NAME: usageCountersTable.tableName,
+        USERS_TABLE_NAME: usersTable.tableName,
       },
     });
 
     vocabularyListsTable.grantReadWriteData(analyzeImageVocabularyFunction);
     processImageVocabularyFunction.grantInvoke(analyzeImageVocabularyFunction);
+    usageCountersTable.grantReadWriteData(analyzeImageVocabularyFunction);
+    usersTable.grantReadData(analyzeImageVocabularyFunction);
 
     // Add Lambda data source and resolver for analyzeImageVocabulary
     const analyzeImageVocabularyDataSource = api.addLambdaDataSource(
@@ -308,9 +283,16 @@ export class APIStack extends cdk.Stack {
       ...vocabularyLambdaProps,
       entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.deleteVocabularyList.ts'),
       handler: 'handler',
+      environment: {
+        ...vocabularyLambdaProps.environment,
+        USAGE_COUNTERS_TABLE_NAME: usageCountersTable.tableName,
+        USERS_TABLE_NAME: usersTable.tableName,
+      },
     });
 
     vocabularyListsTable.grantReadWriteData(deleteVocabularyListFunction);
+    usageCountersTable.grantReadWriteData(deleteVocabularyListFunction);
+    usersTable.grantReadData(deleteVocabularyListFunction);
 
     const deleteVocabularyListDataSource = api.addLambdaDataSource(
       'DeleteVocabularyListDataSource',
@@ -463,10 +445,16 @@ export class APIStack extends cdk.Stack {
       ...trainingLambdaProps,
       entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.createTraining.ts'),
       handler: 'handler',
+      environment: {
+        ...trainingLambdaProps.environment,
+        USAGE_COUNTERS_TABLE_NAME: usageCountersTable.tableName,
+      },
     });
 
     trainingsTable.grantReadWriteData(createTrainingFunction);
     vocabularyListsTable.grantReadData(createTrainingFunction);
+    usageCountersTable.grantReadWriteData(createTrainingFunction);
+    usersTable.grantReadData(createTrainingFunction);
 
     const createTrainingDataSource = api.addLambdaDataSource('CreateTrainingDataSource', createTrainingFunction);
 
@@ -722,6 +710,95 @@ export class APIStack extends cdk.Stack {
     getUsersDataSource.createResolver('GetUsersResolver', {
       typeName: 'Query',
       fieldName: 'getUsers',
+    });
+
+    // Create pricing Lambda functions
+    const pricingLambdaProps = {
+      runtime: Runtime.NODEJS_20_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(30),
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        NAMESPACE: namespace,
+        USERS_TABLE_NAME: usersTable.tableName,
+        USAGE_COUNTERS_TABLE_NAME: usageCountersTable.tableName,
+        SUBSCRIPTIONS_TABLE_NAME: subscriptionsTable.tableName,
+        USER_POOL_ID: userPool.userPoolId,
+      },
+    };
+
+    // Create getUsageLimits Lambda function
+    const getUsageLimitsFunction = new NodejsFunction(this, 'GetUsageLimitsFunction', {
+      ...pricingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getUsageLimits.ts'),
+      handler: 'handler',
+    });
+
+    usersTable.grantReadData(getUsageLimitsFunction);
+    usageCountersTable.grantReadWriteData(getUsageLimitsFunction);
+    subscriptionsTable.grantReadData(getUsageLimitsFunction);
+
+    const getUsageLimitsDataSource = api.addLambdaDataSource('GetUsageLimitsDataSource', getUsageLimitsFunction);
+
+    getUsageLimitsDataSource.createResolver('GetUsageLimitsResolver', {
+      typeName: 'Query',
+      fieldName: 'getUsageLimits',
+    });
+
+    // Create adminSetUserTier Lambda function (admin only)
+    const adminSetUserTierFunction = new NodejsFunction(this, 'AdminSetUserTierFunction', {
+      ...pricingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.adminSetUserTier.ts'),
+      handler: 'handler',
+    });
+
+    usersTable.grantReadWriteData(adminSetUserTierFunction);
+    usageCountersTable.grantReadWriteData(adminSetUserTierFunction);
+    subscriptionsTable.grantReadData(adminSetUserTierFunction);
+    adminSetUserTierFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['cognito-idp:ListUsers'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
+
+    const adminSetUserTierDataSource = api.addLambdaDataSource('AdminSetUserTierDataSource', adminSetUserTierFunction);
+
+    adminSetUserTierDataSource.createResolver('AdminSetUserTierResolver', {
+      typeName: 'Mutation',
+      fieldName: 'adminSetUserTier',
+    });
+
+    // Create getTierStatistics Lambda function (admin only)
+    const getTierStatisticsFunction = new NodejsFunction(this, 'GetTierStatisticsFunction', {
+      ...pricingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getTierStatistics.ts'),
+      handler: 'handler',
+    });
+
+    usersTable.grantReadData(getTierStatisticsFunction);
+    usageCountersTable.grantReadData(getTierStatisticsFunction);
+    getTierStatisticsFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['cognito-idp:ListUsers'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
+
+    const getTierStatisticsDataSource = api.addLambdaDataSource(
+      'GetTierStatisticsDataSource',
+      getTierStatisticsFunction,
+    );
+
+    getTierStatisticsDataSource.createResolver('GetTierStatisticsResolver', {
+      typeName: 'Query',
+      fieldName: 'getTierStatistics',
     });
 
     // Export API endpoint URL and API ID

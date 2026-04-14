@@ -8,6 +8,7 @@
           {{ i18n.currentLang() === 'en' ? '🇩🇪 DE' : '🇬🇧 EN' }}
         </button>
         <button class="btn btn-outline" (click)="scrollToFeatures()">{{ i18n.t('nav.features') }}</button>
+        <button class="btn btn-outline" (click)="scrollToPricing()">Pricing</button>
         <button class="btn btn-primary" (click)="scrollToRegister()">{{ i18n.t('nav.getStarted') }}</button>
       </div>
     </nav>
@@ -161,6 +162,97 @@
           <li>{{ i18n.t('why.parents.5') }}</li>
           <li>{{ i18n.t('why.parents.6') }}</li>
         </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="section pricing-section" id="pricing">
+  <div class="container">
+    <h2 class="section-title">Choose Your Plan</h2>
+    <p class="section-subtitle">Start free and upgrade as you grow</p>
+
+    <div class="pricing-grid">
+      <!-- Free Plan -->
+      <div class="pricing-card">
+        <div class="pricing-card-header">
+          <h3 class="pricing-plan-name">Free</h3>
+          <div class="pricing-price">
+            <span class="pricing-amount">$0</span>
+          </div>
+          <p class="pricing-period">Forever free</p>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon">✓</span>
+            5 image scans total
+          </li>
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon">✓</span>
+            5 vocabulary lists
+          </li>
+          <li class="pricing-feature pricing-feature-disabled">
+            <span class="pricing-feature-icon">✗</span>
+            AI Training
+          </li>
+        </ul>
+        <button class="btn btn-outline pricing-btn" (click)="scrollToRegister()">Get Started</button>
+      </div>
+
+      <!-- Basic Plan -->
+      <div class="pricing-card">
+        <div class="pricing-card-header">
+          <h3 class="pricing-plan-name">Basic</h3>
+          <div class="pricing-price">
+            <span class="pricing-amount">$2.99</span>
+            <span class="pricing-per">/mo</span>
+          </div>
+          <p class="pricing-period">Billed monthly</p>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon">✓</span>
+            25 image scans/mo
+          </li>
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon">✓</span>
+            Unlimited vocabulary lists
+          </li>
+          <li class="pricing-feature pricing-feature-disabled">
+            <span class="pricing-feature-icon">✗</span>
+            AI Training
+          </li>
+        </ul>
+        <button class="btn btn-outline pricing-btn" (click)="scrollToRegister()">Get Started</button>
+      </div>
+
+      <!-- Pro Plan (Recommended) -->
+      <div class="pricing-card pricing-card-recommended">
+        <div class="pricing-badge">Recommended</div>
+        <div class="pricing-card-header">
+          <h3 class="pricing-plan-name">Pro</h3>
+          <div class="pricing-price">
+            <span class="pricing-amount">$9.99</span>
+            <span class="pricing-per">/mo</span>
+          </div>
+          <p class="pricing-period">Billed monthly</p>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon">✓</span>
+            Unlimited image scans
+          </li>
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon">✓</span>
+            Unlimited vocabulary lists
+          </li>
+          <li class="pricing-feature">
+            <span class="pricing-feature-icon">✓</span>
+            AI Training <span class="pricing-coming-soon">Coming Soon</span>
+          </li>
+        </ul>
+        <button class="btn btn-primary pricing-btn" (click)="scrollToRegister()">Get Started</button>
       </div>
     </div>
   </div>

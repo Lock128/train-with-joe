@@ -151,7 +151,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  /// Fetch all users (admin only). Returns a list of {id, email, name}.
+  /// Fetch all users (admin only). Returns a list of {id, email, name, tier, tierSource, subscriptionProvider}.
   Future<List<Map<String, dynamic>>> getUsers() async {
     try {
       const query = '''
@@ -160,6 +160,9 @@ class UserProvider extends ChangeNotifier {
             id
             email
             name
+            tier
+            tierSource
+            subscriptionProvider
           }
         }
       ''';
@@ -169,6 +172,82 @@ class UserProvider extends ChangeNotifier {
       return list.cast<Map<String, dynamic>>();
     } catch (e) {
       debugPrint('Error fetching users: $e');
+      return [];
+    }
+  }
+
+  /// Admin set user tier (admin only). Returns the updated user or null on failure.
+  Future<Map<String, dynamic>?> adminSetUserTier(String userId, String tier) async {
+    try {
+      const mutation = '''
+        mutation AdminSetUserTier(\$input: AdminSetUserTierInput!) {
+          adminSetUserTier(input: \$input) {
+            success
+            user {
+              id
+              email
+              name
+              tier
+              tierSource
+              subscriptionProvider
+              createdAt
+              updatedAt
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {
+          'input': {
+            'userId': userId,
+            'tier': tier,
+          },
+        },
+      );
+
+      final result = response['adminSetUserTier'] as Map<String, dynamic>?;
+      if (result != null && result['success'] == true) {
+        return result['user'] as Map<String, dynamic>?;
+      }
+      debugPrint('adminSetUserTier failed: ${result?['error']}');
+      return null;
+    } catch (e) {
+      debugPrint('Error setting user tier: $e');
+      return null;
+    }
+  }
+
+  /// Fetch tier statistics (admin only). Returns list of {tier, subscriptionCount, manualCount, totalCount}.
+  Future<List<Map<String, dynamic>>> getTierStatistics() async {
+    try {
+      const query = '''
+        query GetTierStatistics {
+          getTierStatistics {
+            success
+            statistics {
+              tier
+              subscriptionCount
+              manualCount
+              totalCount
+            }
+            error
+          }
+        }
+      ''';
+      final response = await _apiService.query(query);
+      final result = response['getTierStatistics'] as Map<String, dynamic>?;
+      if (result != null && result['success'] == true) {
+        final list = result['statistics'] as List<dynamic>?;
+        if (list == null) return [];
+        return list.cast<Map<String, dynamic>>();
+      }
+      debugPrint('getTierStatistics failed: ${result?['error']}');
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching tier statistics: $e');
       return [];
     }
   }

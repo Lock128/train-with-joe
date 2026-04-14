@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { SubscriptionRepository } from '../repositories/subscription-repository';
 import type { Subscription } from '../model/domain/Subscription';
 import { SubscriptionStatus, PaymentProvider } from '../model/domain/User';
+import { PricingService } from './pricing-service';
 
 /**
  * Payment service for handling multi-provider payment processing
@@ -373,18 +374,27 @@ export class PaymentService {
 
       await this.subscriptionRepository.create(subscription);
     }
+
+    // Sync user tier after subscription status change
+    await PricingService.getInstance().resolveAndUpdateTier(userId);
   }
 
   /**
    * Handle subscription deleted event
    */
   private async handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription): Promise<void> {
+    const userId = stripeSubscription.metadata?.userId;
     const subscriptionId = `stripe_${stripeSubscription.id}`;
 
     await this.subscriptionRepository.update(subscriptionId, {
       status: SubscriptionStatus.CANCELLED,
       updatedAt: new Date().toISOString(),
     });
+
+    // Sync user tier after subscription cancellation
+    if (userId) {
+      await PricingService.getInstance().resolveAndUpdateTier(userId);
+    }
   }
 
   /**
@@ -413,6 +423,12 @@ export class PaymentService {
       status: SubscriptionStatus.PAST_DUE,
       updatedAt: new Date().toISOString(),
     });
+
+    // Sync user tier after payment failure (triggers grace period logic)
+    const subscription = await this.subscriptionRepository.getById(subscriptionId);
+    if (subscription?.userId) {
+      await PricingService.getInstance().resolveAndUpdateTier(subscription.userId);
+    }
   }
 
   /**

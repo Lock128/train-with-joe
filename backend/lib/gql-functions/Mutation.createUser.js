@@ -18,6 +18,8 @@ function request(ctx) {
     name: input.name || null,
     subscriptionStatus: "INACTIVE",
     subscriptionProvider: null,
+    tier: "FREE",
+    tierSource: "SUBSCRIPTION",
     createdAt: now,
     updatedAt: now
   };

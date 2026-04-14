@@ -15,10 +15,13 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  // Callback to refresh tier stats from the Users tab after a tier override
+  VoidCallback? _refreshTierStats;
+
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -46,19 +49,26 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
+          isScrollable: true,
           tabs: const [
             Tab(icon: Icon(Icons.people), text: 'Users'),
             Tab(icon: Icon(Icons.bar_chart), text: 'Statistics'),
+            Tab(icon: Icon(Icons.pie_chart), text: 'Tier Stats'),
             Tab(icon: Icon(Icons.swap_horiz), text: 'Migrate Data'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          _UsersTab(),
-          _StatisticsTab(),
-          _MigrateDataTab(),
+        children: [
+          _UsersTab(onTierOverride: () => _refreshTierStats?.call()),
+          const _StatisticsTab(),
+          _TierStatsTab(
+            tabController: _tabController,
+            tabIndex: 2,
+            onRegisterRefresh: (cb) => _refreshTierStats = cb,
+          ),
+          const _MigrateDataTab(),
         ],
       ),
     );
@@ -69,7 +79,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 // ─── Users Tab ───
 
 class _UsersTab extends StatefulWidget {
-  const _UsersTab();
+  final VoidCallback? onTierOverride;
+
+  const _UsersTab({this.onTierOverride});
 
   @override
   State<_UsersTab> createState() => _UsersTabState();
@@ -80,6 +92,12 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
   bool _isLoading = true;
   String _searchQuery = '';
   final _searchController = TextEditingController();
+
+  // Track per-user selected tier for override dropdown
+  final Map<String, String> _selectedTiers = {};
+  final Set<String> _applyingTier = {};
+
+  static const _tierOptions = ['FREE', 'BASIC', 'PRO'];
 
   @override
   bool get wantKeepAlive => true;
@@ -119,6 +137,63 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
     final email = user['email'] as String? ?? '';
     final name = user['name'] as String?;
     return name != null && name.isNotEmpty ? '$name ($email)' : email;
+  }
+
+  String _tierSourceLabel(Map<String, dynamic> user) {
+    final tierSource = user['tierSource'] as String?;
+    if (tierSource == 'MANUAL') return 'Manual';
+    final provider = user['subscriptionProvider'] as String?;
+    if (provider != null && provider.isNotEmpty) {
+      switch (provider) {
+        case 'STRIPE':
+          return 'Stripe';
+        case 'APPLE_APP_STORE':
+          return 'App Store';
+        case 'GOOGLE_PLAY_STORE':
+          return 'Play Store';
+        default:
+          return provider;
+      }
+    }
+    return tierSource ?? 'Subscription';
+  }
+
+  Color _tierColor(String? tier) {
+    switch (tier) {
+      case 'PRO':
+        return Colors.deepPurple;
+      case 'BASIC':
+        return Colors.blue;
+      case 'FREE':
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Future<void> _applyTierOverride(String userId, String tier) async {
+    setState(() => _applyingTier.add(userId));
+    final updatedUser = await context.read<UserProvider>().adminSetUserTier(userId, tier);
+    if (!mounted) return;
+    if (updatedUser != null) {
+      // Update the user in the local list
+      setState(() {
+        final idx = _allUsers.indexWhere((u) => u['id'] == userId);
+        if (idx >= 0) {
+          _allUsers[idx] = {..._allUsers[idx], ...updatedUser};
+        }
+        _selectedTiers.remove(userId);
+        _applyingTier.remove(userId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tier updated to $tier'), duration: const Duration(seconds: 2)),
+      );
+      widget.onTierOverride?.call();
+    } else {
+      setState(() => _applyingTier.remove(userId));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to update tier'), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
@@ -181,6 +256,11 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                       final user = users[index];
                       final label = _userLabel(user);
                       final id = user['id'] as String? ?? '';
+                      final tier = user['tier'] as String? ?? 'FREE';
+                      final tierSourceLabel = _tierSourceLabel(user);
+                      final isApplying = _applyingTier.contains(id);
+                      final selectedTier = _selectedTiers[id];
+
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -193,8 +273,61 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                           ),
                         ),
                         title: Text(label, overflow: TextOverflow.ellipsis),
-                        subtitle: Text(id, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                        trailing: const Icon(Icons.chevron_right),
+                        subtitle: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: _tierColor(tier).withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                tier,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: _tierColor(tier),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              tierSourceLabel,
+                              style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            DropdownButton<String>(
+                              value: selectedTier,
+                              hint: const Text('Tier', style: TextStyle(fontSize: 12)),
+                              isDense: true,
+                              underline: const SizedBox.shrink(),
+                              items: _tierOptions.map((t) => DropdownMenuItem(
+                                value: t,
+                                child: Text(t, style: const TextStyle(fontSize: 12)),
+                              )).toList(),
+                              onChanged: (v) {
+                                if (v != null) setState(() => _selectedTiers[id] = v);
+                              },
+                            ),
+                            const SizedBox(width: 4),
+                            isApplying
+                                ? const SizedBox(
+                                    width: 20, height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : IconButton(
+                                    icon: const Icon(Icons.check_circle_outline, size: 20),
+                                    tooltip: 'Apply tier override',
+                                    onPressed: selectedTier != null
+                                        ? () => _applyTierOverride(id, selectedTier)
+                                        : null,
+                                  ),
+                          ],
+                        ),
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -843,6 +976,206 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
         const SizedBox(height: 8),
         Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+      ],
+    );
+  }
+}
+
+
+// ─── Tier Stats Tab ───
+
+class _TierStatsTab extends StatefulWidget {
+  final TabController tabController;
+  final int tabIndex;
+  final void Function(VoidCallback) onRegisterRefresh;
+
+  const _TierStatsTab({
+    required this.tabController,
+    required this.tabIndex,
+    required this.onRegisterRefresh,
+  });
+
+  @override
+  State<_TierStatsTab> createState() => _TierStatsTabState();
+}
+
+class _TierStatsTabState extends State<_TierStatsTab> with AutomaticKeepAliveClientMixin {
+  List<Map<String, dynamic>> _statistics = [];
+  bool _isLoading = true;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.onRegisterRefresh(_loadStatistics);
+    widget.tabController.addListener(_onTabChanged);
+    _loadStatistics();
+  }
+
+  @override
+  void dispose() {
+    widget.tabController.removeListener(_onTabChanged);
+    super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (widget.tabController.index == widget.tabIndex) {
+      _loadStatistics();
+    }
+  }
+
+  Future<void> _loadStatistics() async {
+    setState(() => _isLoading = true);
+    final stats = await context.read<UserProvider>().getTierStatistics();
+    if (mounted) {
+      setState(() { _statistics = stats; _isLoading = false; });
+    }
+  }
+
+  Color _tierColor(String? tier) {
+    switch (tier) {
+      case 'PRO':
+        return Colors.deepPurple;
+      case 'BASIC':
+        return Colors.blue;
+      case 'FREE':
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_statistics.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.pie_chart_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text('No tier statistics available.', style: TextStyle(color: Colors.grey)),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _loadStatistics,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final totalUsers = _statistics.fold<int>(0, (sum, s) => sum + (s['totalCount'] as int? ?? 0));
+
+    return RefreshIndicator(
+      onRefresh: _loadStatistics,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Text(
+                      'Tier Distribution',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$totalUsers total users',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ..._statistics.map((stat) {
+              final tier = stat['tier'] as String? ?? 'FREE';
+              final subscriptionCount = stat['subscriptionCount'] as int? ?? 0;
+              final manualCount = stat['manualCount'] as int? ?? 0;
+              final totalCount = stat['totalCount'] as int? ?? 0;
+              final pct = totalUsers > 0 ? (totalCount / totalUsers * 100).toStringAsFixed(1) : '0.0';
+
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _tierColor(tier).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              tier,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: _tierColor(tier),
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '$totalCount users ($pct%)',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (totalUsers > 0)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: totalCount / totalUsers,
+                            backgroundColor: Colors.grey.shade200,
+                            color: _tierColor(tier),
+                            minHeight: 6,
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _statItem('Subscription', subscriptionCount),
+                          ),
+                          Expanded(
+                            child: _statItem('Manual', manualCount),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _statItem(String label, int count) {
+    return Column(
+      children: [
+        Text('$count', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 2),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
       ],
     );

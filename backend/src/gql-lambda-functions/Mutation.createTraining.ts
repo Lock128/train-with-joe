@@ -1,5 +1,6 @@
 import { TrainingService } from '../services/training-service';
 import type { TrainingMode, TrainingDirection } from '../model/domain/Training';
+import { PricingService, UpgradeRequiredError } from '../services/pricing-service';
 
 /**
  * Lambda resolver for Mutation.createTraining
@@ -52,6 +53,12 @@ export const handler = async (event: Event) => {
   }
 
   try {
+    // Check AI training access when mode is AI_TRAINING
+    if (mode === 'AI_TRAINING') {
+      const pricingService = PricingService.getInstance();
+      await pricingService.checkAiTrainingAccess(userId);
+    }
+
     const service = TrainingService.getInstance();
     return await service.createTraining(
       userId,
@@ -68,6 +75,14 @@ export const handler = async (event: Event) => {
       targetLanguage,
     );
   } catch (error) {
+    if (error instanceof UpgradeRequiredError) {
+      return {
+        success: false,
+        training: null,
+        error: error.message,
+        errorCode: 'UPGRADE_REQUIRED',
+      };
+    }
     console.error('Error creating training:', error);
     return {
       success: false,

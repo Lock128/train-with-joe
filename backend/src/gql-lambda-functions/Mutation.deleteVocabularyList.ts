@@ -1,4 +1,5 @@
 import { VocabularyListRepository } from '../repositories/vocabulary-list-repository';
+import { PricingService } from '../services/pricing-service';
 
 /**
  * Lambda resolver for Mutation.deleteVocabularyList
@@ -56,6 +57,15 @@ export const handler = async (event: Event) => {
     }
 
     await repository.delete(id);
+
+    // Decrement vocabulary list usage counter after successful deletion
+    try {
+      const pricingService = PricingService.getInstance();
+      await pricingService.decrementVocabularyListCount(userId);
+    } catch (counterError) {
+      console.warn('Failed to decrement vocabulary list counter:', counterError);
+      // Don't fail the deletion if counter decrement fails
+    }
 
     return {
       success: true,

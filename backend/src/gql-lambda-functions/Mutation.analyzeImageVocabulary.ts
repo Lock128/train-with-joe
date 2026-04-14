@@ -1,5 +1,6 @@
 import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
 import { VocabularyListRepository } from '../repositories/vocabulary-list-repository';
+import { PricingService, UpgradeRequiredError } from '../services/pricing-service';
 
 /**
  * Lambda resolver for Mutation.analyzeImageVocabulary
@@ -57,6 +58,11 @@ export const handler = async (event: Event) => {
   }
 
   try {
+    // Check image scan and vocabulary list limits before proceeding
+    const pricingService = PricingService.getInstance();
+    await pricingService.checkImageScanLimit(userId);
+    await pricingService.checkVocabularyListLimit(userId);
+
     const repository = VocabularyListRepository.getInstance();
 
     // Create a PENDING record immediately — returned to the client right away
@@ -99,12 +105,24 @@ export const handler = async (event: Event) => {
       processorFunction: PROCESSOR_FUNCTION_NAME,
     });
 
+    // Increment usage counters after successful creation
+    await pricingService.incrementImageScanCount(userId, input.imageS3Keys.length);
+    await pricingService.incrementVocabularyListCount(userId);
+
     return {
       success: true,
       vocabularyList: { ...pendingList, isPublic: pendingList.isPublic === 'true' },
       error: null,
     };
   } catch (error) {
+    if (error instanceof UpgradeRequiredError) {
+      return {
+        success: false,
+        vocabularyList: null,
+        error: error.message,
+        errorCode: 'UPGRADE_REQUIRED',
+      };
+    }
     console.error('Error initiating image vocabulary analysis:', error);
     return {
       success: false,

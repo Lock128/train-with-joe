@@ -32,6 +32,7 @@ describe('APIStack CDK Integration Tests', () => {
       subscriptionsTable: baseStack.subscriptionsTable,
       vocabularyListsTable: baseStack.vocabularyListsTable,
       trainingsTable: baseStack.trainingsTable,
+      usageCountersTable: baseStack.usageCountersTable,
       assetsBucket: baseStack.assetsBucket,
     });
 
@@ -105,20 +106,20 @@ describe('APIStack CDK Integration Tests', () => {
   });
 
   test('should create DynamoDB data sources', () => {
-    // Verify data sources exist (2 DynamoDB + 27 Lambda)
-    template.resourceCountIs('AWS::AppSync::DataSource', 29);
+    // Verify data sources exist (2 DynamoDB + 29 Lambda)
+    template.resourceCountIs('AWS::AppSync::DataSource', 31);
 
     const dataSources = Object.values(templateJson.Resources).filter(
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
     );
 
-    expect(dataSources.length).toBe(29);
+    expect(dataSources.length).toBe(31);
 
     const dynamoDbSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AMAZON_DYNAMODB');
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(27); // 27 Lambda data sources
+    expect(lambdaSources.length).toBe(29); // 29 Lambda data sources
   });
 
   test('should export API endpoint URL and ID', () => {
@@ -137,7 +138,7 @@ describe('APIStack CDK Integration Tests', () => {
 
   test('should have correct resource counts', () => {
     template.resourceCountIs('AWS::AppSync::GraphQLApi', 1);
-    template.resourceCountIs('AWS::AppSync::DataSource', 29);
+    template.resourceCountIs('AWS::AppSync::DataSource', 31);
 
     // Verify at least 3 IAM roles exist (CloudWatch role + 2 data source roles, CDK may create additional service roles)
     const roles = Object.values(templateJson.Resources).filter((resource: any) => resource.Type === 'AWS::IAM::Role');
@@ -171,5 +172,31 @@ describe('APIStack CDK Integration Tests', () => {
     template.hasResourceProperties('AWS::AppSync::GraphQLApi', {
       XrayEnabled: true,
     });
+  });
+
+  test('should pass USAGE_COUNTERS_TABLE_NAME env var to pricing Lambda functions', () => {
+    const lambdas = Object.values(templateJson.Resources).filter(
+      (resource: any) => resource.Type === 'AWS::Lambda::Function',
+    );
+
+    const lambdasWithUsageCounters = lambdas.filter((lambda: any) => {
+      const envVars = lambda.Properties?.Environment?.Variables ?? {};
+      return envVars.USAGE_COUNTERS_TABLE_NAME !== undefined;
+    });
+
+    // At minimum: analyzeImageVocabulary, createTraining, deleteVocabularyList, getUsageLimits, adminSetUserTier, getTierStatistics
+    expect(lambdasWithUsageCounters.length).toBeGreaterThanOrEqual(6);
+  });
+
+  test('should create Lambda functions for getUsageLimits, adminSetUserTier, and getTierStatistics', () => {
+    const resolvers = Object.values(templateJson.Resources).filter(
+      (resource: any) => resource.Type === 'AWS::AppSync::Resolver',
+    );
+
+    const resolverFieldNames = resolvers.map((r: any) => r.Properties.FieldName);
+
+    expect(resolverFieldNames).toContain('getUsageLimits');
+    expect(resolverFieldNames).toContain('adminSetUserTier');
+    expect(resolverFieldNames).toContain('getTierStatistics');
   });
 });

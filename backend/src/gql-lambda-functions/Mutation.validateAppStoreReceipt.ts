@@ -1,5 +1,6 @@
 import { SubscriptionRepository } from '../repositories/subscription-repository';
 import { getPaymentService } from '../services/payment-service';
+import { PricingService } from '../services/pricing-service';
 import type { Subscription } from '../model/domain/Subscription';
 
 /**
@@ -74,6 +75,9 @@ export const handler = async (event: Event) => {
     } else {
       subscription = await subscriptionRepository.create(subscriptionData);
     }
+
+    // Sync user tier after receipt validation
+    await PricingService.getInstance().resolveAndUpdateTier(userId);
 
     return {
       success: true,

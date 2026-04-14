@@ -6,13 +6,17 @@ import {
   CfnIdentityPoolRoleAttachment,
   UserPool,
   UserPoolEmail,
+  UserPoolOperation,
   type UserPoolClient,
   type CfnUserPool,
 } from 'aws-cdk-lib/aws-cognito';
-import { FederatedPrincipal, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
+import { FederatedPrincipal, PolicyStatement, Effect, Role } from 'aws-cdk-lib/aws-iam';
 import { AttributeType, BillingMode, StreamViewType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { BlockPublicAccess, Bucket, HttpMethods } from 'aws-cdk-lib/aws-s3';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import * as path from 'path';
 import type { Construct } from 'constructs';
 import type { StackProps } from 'aws-cdk-lib';
 
@@ -30,6 +34,7 @@ export class BaseStack extends Stack {
   public readonly subscriptionsTable: Table;
   public readonly vocabularyListsTable: Table;
   public readonly trainingsTable: Table;
+  public readonly usageCountersTable: Table;
   public readonly assetsBucket: Bucket;
   public readonly assetsBucketNameParameterName: string;
   public readonly identityPoolId: string;
@@ -45,6 +50,7 @@ export class BaseStack extends Stack {
     this.subscriptionsTable = this.createSubscriptionsTable(namespace);
     this.vocabularyListsTable = this.createVocabularyListsTable(namespace);
     this.trainingsTable = this.createTrainingsTable(namespace);
+    this.usageCountersTable = this.createUsageCountersTable(namespace);
 
     // Create S3 bucket for application assets
     this.assetsBucket = this.createAssetsBucket(namespace);
@@ -80,6 +86,12 @@ export class BaseStack extends Stack {
       simpleName: false,
     });
 
+    new StringParameter(this, 'UsageCountersTableNameParameter', {
+      stringValue: this.usageCountersTable.tableName,
+      parameterName: `/${namespace}/config/usage-counters-table-name`,
+      simpleName: false,
+    });
+
     // SES email identity for Cognito verification emails must be created and
     // verified manually before deploying this stack, since email verification
     // requires human interaction (clicking a link) that CloudFormation can't wait for.
@@ -89,6 +101,37 @@ export class BaseStack extends Stack {
     this.userPool = userPoolSetup.userPool;
     this.userPoolFrontendClientIdParameterName = `/${namespace}/config/cognito-frontend-client-id`;
     this.userPoolFrontendClientId = userPoolSetup.frontendClient.userPoolClientId;
+
+    // Post Confirmation Lambda — creates DynamoDB user record + sends admin notification
+    const postConfirmationFunction = new NodejsFunction(this, 'PostConfirmationFunction', {
+      runtime: Runtime.NODEJS_20_X,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(30),
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.createUser.ts'),
+      handler: 'handler',
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        NAMESPACE: namespace,
+        USERS_TABLE_NAME: this.usersTable.tableName,
+        ADMIN_NOTIFICATION_EMAIL: 'lockhead+joeadmin@trainwithjoe.app',
+        SES_FROM_EMAIL: 'noreply@trainwithjoe.app',
+      },
+    });
+
+    this.usersTable.grantReadWriteData(postConfirmationFunction);
+    postConfirmationFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+        resources: [`arn:aws:ses:eu-central-1:${cdk.Stack.of(this).account}:identity/*`],
+      }),
+    );
+
+    this.userPool.addTrigger(UserPoolOperation.POST_CONFIRMATION, postConfirmationFunction);
 
     // Export user pool client ID parameter
     new StringParameter(this, 'UserPoolFrontendClientIdParameter', {
@@ -373,6 +416,18 @@ export class BaseStack extends Stack {
     });
 
     return table;
+  }
+
+  createUsageCountersTable(namespace: string): Table {
+    return new Table(this, `UsageCountersTable-${namespace}`, {
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: 'userId',
+        type: AttributeType.STRING,
+      },
+      removalPolicy: RemovalPolicy.DESTROY,
+      tableName: `train-with-joe-usage-counters-${namespace}`,
+    });
   }
 
   createAssetsBucket(namespace: string): Bucket {

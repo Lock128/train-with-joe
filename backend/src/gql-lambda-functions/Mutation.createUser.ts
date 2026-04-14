@@ -1,6 +1,8 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import type { PostConfirmationConfirmSignUpTriggerEvent } from 'aws-lambda';
+import { Tier, TierSource } from '../model/domain/User';
 
 const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const sesClient = new SESClient({ region: 'eu-central-1' });
@@ -9,40 +11,29 @@ const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME || '';
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || '';
 const SES_FROM_EMAIL = process.env.SES_FROM_EMAIL || 'noreply@trainwithjoe.app';
 
-interface CreateUserEvent {
-  arguments: {
-    input: {
-      email: string;
-      name?: string;
-    };
-  };
-  identity: {
-    sub: string;
-    claims: Record<string, string>;
-  };
-}
-
-export const handler = async (event: CreateUserEvent) => {
-  const { input } = event.arguments;
-  const identity = event.identity;
-
-  if (!identity?.sub) {
-    return { success: false, user: null, error: 'Authentication required' };
+/**
+ * Cognito Post Confirmation trigger — creates a DynamoDB user record
+ * and sends an admin notification email after a user confirms their email.
+ */
+export const handler = async (event: PostConfirmationConfirmSignUpTriggerEvent) => {
+  // Only act on sign-up confirmation, not forgot-password confirmation
+  if (event.triggerSource !== 'PostConfirmation_ConfirmSignUp') {
+    return event;
   }
 
-  if (!input?.email) {
-    return { success: false, user: null, error: 'Email is required' };
-  }
-
+  const userId = event.request.userAttributes.sub;
+  const email = event.request.userAttributes.email;
+  const name = event.request.userAttributes.name || null;
   const now = new Date().toISOString();
-  const userId = identity.sub;
 
   const user = {
     id: userId,
-    email: input.email,
-    name: input.name || null,
+    email,
+    name,
     subscriptionStatus: 'INACTIVE',
     subscriptionProvider: null,
+    tier: Tier.FREE,
+    tierSource: TierSource.SUBSCRIPTION,
     createdAt: now,
     updatedAt: now,
   };
@@ -58,10 +49,11 @@ export const handler = async (event: CreateUserEvent) => {
   } catch (error) {
     const err = error as Error & { name?: string };
     if (err.name === 'ConditionalCheckFailedException') {
-      return { success: false, user: null, error: 'User already exists' };
+      console.log('User already exists in DynamoDB, skipping creation:', userId);
+    } else {
+      console.error('Error creating user:', error);
+      throw error; // Let Cognito know the trigger failed
     }
-    console.error('Error creating user:', error);
-    return { success: false, user: null, error: `Failed to create user: ${err.message}` };
   }
 
   // Send admin notification email (fire-and-forget — don't fail the signup)
@@ -72,21 +64,21 @@ export const handler = async (event: CreateUserEvent) => {
           Source: SES_FROM_EMAIL,
           Destination: { ToAddresses: [ADMIN_EMAIL] },
           Message: {
-            Subject: { Data: `New User Signup: ${input.email}` },
+            Subject: { Data: `New User Signup: ${email}` },
             Body: {
               Html: {
                 Data: `
                   <h2>New User Signup — Train with Joe</h2>
                   <table style="border-collapse:collapse;font-family:Arial,sans-serif;">
                     <tr><td style="padding:8px;font-weight:bold;">User ID</td><td style="padding:8px;">${userId}</td></tr>
-                    <tr><td style="padding:8px;font-weight:bold;">Email</td><td style="padding:8px;">${input.email}</td></tr>
-                    <tr><td style="padding:8px;font-weight:bold;">Name</td><td style="padding:8px;">${input.name || '—'}</td></tr>
+                    <tr><td style="padding:8px;font-weight:bold;">Email</td><td style="padding:8px;">${email}</td></tr>
+                    <tr><td style="padding:8px;font-weight:bold;">Name</td><td style="padding:8px;">${name || '—'}</td></tr>
                     <tr><td style="padding:8px;font-weight:bold;">Signed up at</td><td style="padding:8px;">${now}</td></tr>
                   </table>
                 `,
               },
               Text: {
-                Data: `New user signup on Train with Joe:\n\nUser ID: ${userId}\nEmail: ${input.email}\nName: ${input.name || '—'}\nSigned up at: ${now}`,
+                Data: `New user signup on Train with Joe:\n\nUser ID: ${userId}\nEmail: ${email}\nName: ${name || '—'}\nSigned up at: ${now}`,
               },
             },
           },
@@ -97,5 +89,6 @@ export const handler = async (event: CreateUserEvent) => {
     }
   }
 
-  return { success: true, user, error: null };
+  // Cognito requires the event to be returned
+  return event;
 };

@@ -375,8 +375,8 @@ void main() {
       testableProvider.updateAuth(mockAuthProvider);
       await Future.delayed(Duration(milliseconds: 50)); // Wait for async load
 
-      // Assert
-      verify(mockApiService.query(any, variables: anyNamed('variables'))).called(1);
+      // Assert - updateAuth triggers both loadSubscription and loadUsageLimits
+      verify(mockApiService.query(any, variables: anyNamed('variables'))).called(2);
     });
 
     test('updateAuth should not load subscription if not authenticated', () async {

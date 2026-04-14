@@ -21,6 +21,24 @@ vi.mock('../src/repositories/vocabulary-list-repository', () => ({
   },
 }));
 
+vi.mock('../src/services/pricing-service', () => ({
+  PricingService: {
+    getInstance: vi.fn(() => ({
+      checkImageScanLimit: vi.fn().mockResolvedValue(undefined),
+      checkVocabularyListLimit: vi.fn().mockResolvedValue(undefined),
+      incrementImageScanCount: vi.fn().mockResolvedValue(undefined),
+      incrementVocabularyListCount: vi.fn().mockResolvedValue(undefined),
+    })),
+  },
+  UpgradeRequiredError: class UpgradeRequiredError extends Error {
+    code = 'UPGRADE_REQUIRED';
+    constructor(params: any) {
+      super(params?.message ?? 'Upgrade required');
+      this.name = 'UpgradeRequiredError';
+    }
+  },
+}));
+
 import { handler } from '../src/gql-lambda-functions/Mutation.analyzeImageVocabulary';
 import { VocabularyListRepository } from '../src/repositories/vocabulary-list-repository';
 

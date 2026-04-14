@@ -15,12 +15,26 @@ export enum PaymentProvider {
   GOOGLE_PLAY_STORE = 'GOOGLE_PLAY_STORE',
 }
 
+export enum Tier {
+  FREE = 'FREE',
+  BASIC = 'BASIC',
+  PRO = 'PRO',
+}
+
+export enum TierSource {
+  SUBSCRIPTION = 'SUBSCRIPTION',
+  MANUAL = 'MANUAL',
+}
+
 export interface User {
   id: string;
   email: string;
   name?: string;
   subscriptionStatus?: SubscriptionStatus;
   subscriptionProvider?: PaymentProvider;
+  tier?: Tier;
+  tierSource?: TierSource;
+  gracePeriodEnd?: string;
   createdAt: string;
   updatedAt: string;
 }
