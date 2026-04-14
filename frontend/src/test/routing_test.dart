@@ -183,7 +183,11 @@ void main() {
         expect(find.text('Home'), findsOneWidget);
 
         // Scroll down to make the Manage Subscription button visible
-        await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -200));
+        await tester.scrollUntilVisible(
+          find.widgetWithText(OutlinedButton, 'Manage Subscription'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
 
         // Act - tap manage subscription button (now an OutlinedButton)
@@ -214,7 +218,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // Scroll down to make the Manage Subscription button visible
-        await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -200));
+        await tester.scrollUntilVisible(
+          find.widgetWithText(OutlinedButton, 'Manage Subscription'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
 
         // Navigate to subscription (now an OutlinedButton)

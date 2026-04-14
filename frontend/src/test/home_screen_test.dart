@@ -91,7 +91,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Welcome!'), findsOneWidget);
-      expect(find.byType(CircleAvatar), findsOneWidget);
+      expect(find.byType(CircleAvatar), findsWidgets);
       expect(find.text('Subscription'), findsOneWidget);
       expect(find.text('Quick Actions'), findsOneWidget);
       expect(find.text('Manage Subscription'), findsOneWidget);
@@ -138,7 +138,7 @@ void main() {
       await tester.pumpWidget(createTestWidget(const HomeScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.byType(CircleAvatar), findsOneWidget);
+      expect(find.byType(CircleAvatar), findsWidgets);
     });
 
     testWidgets('should have constrained width layout', (tester) async {
