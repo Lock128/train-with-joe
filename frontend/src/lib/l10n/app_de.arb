@@ -18,6 +18,15 @@
   "manageSubscription": "Abonnement verwalten",
   "noActiveSubscription": "Kein aktives Abonnement",
   "subscriptionStatus": "Status: {status}",
+  "tierLabel": "Stufe: {tier}",
+  "@tierLabel": {
+    "placeholders": {
+      "tier": { "type": "String" }
+    }
+  },
+  "tierFree": "Kostenlos",
+  "tierBasic": "Basis",
+  "tierPro": "Pro",
   "errorLoadingUserData": "Fehler beim Laden der Benutzerdaten",
   "retry": "Erneut versuchen",
   "language": "Sprache",

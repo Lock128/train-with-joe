@@ -65,6 +65,20 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String tierLabel(String tier) {
+    return 'Plano: $tier';
+  }
+
+  @override
+  String get tierFree => 'Grátis';
+
+  @override
+  String get tierBasic => 'Básico';
+
+  @override
+  String get tierPro => 'Pro';
+
+  @override
   String get errorLoadingUserData => 'Erro ao carregar dados do usuário';
 
   @override

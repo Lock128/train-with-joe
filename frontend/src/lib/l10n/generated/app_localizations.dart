@@ -214,6 +214,30 @@ abstract class AppLocalizations {
   /// **'Status: {status}'**
   String subscriptionStatus(String status);
 
+  /// No description provided for @tierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tier: {tier}'**
+  String tierLabel(String tier);
+
+  /// No description provided for @tierFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get tierFree;
+
+  /// No description provided for @tierBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get tierBasic;
+
+  /// No description provided for @tierPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get tierPro;
+
   /// No description provided for @errorLoadingUserData.
   ///
   /// In en, this message translates to:

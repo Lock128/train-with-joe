@@ -58,6 +58,8 @@ class UserProvider extends ChangeNotifier {
             name
             subscriptionStatus
             subscriptionProvider
+            tier
+            tierSource
             createdAt
             updatedAt
           }
@@ -101,6 +103,8 @@ class UserProvider extends ChangeNotifier {
               name
               subscriptionStatus
               subscriptionProvider
+              tier
+              tierSource
               createdAt
               updatedAt
             }

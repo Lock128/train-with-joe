@@ -18,6 +18,15 @@
   "manageSubscription": "Gérer l'abonnement",
   "noActiveSubscription": "Aucun abonnement actif",
   "subscriptionStatus": "Statut : {status}",
+  "tierLabel": "Niveau : {tier}",
+  "@tierLabel": {
+    "placeholders": {
+      "tier": { "type": "String" }
+    }
+  },
+  "tierFree": "Gratuit",
+  "tierBasic": "Basique",
+  "tierPro": "Pro",
   "errorLoadingUserData": "Erreur lors du chargement des données",
   "retry": "Réessayer",
   "language": "Langue",

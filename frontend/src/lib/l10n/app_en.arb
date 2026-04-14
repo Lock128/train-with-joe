@@ -23,6 +23,15 @@
       "status": { "type": "String" }
     }
   },
+  "tierLabel": "Tier: {tier}",
+  "@tierLabel": {
+    "placeholders": {
+      "tier": { "type": "String" }
+    }
+  },
+  "tierFree": "Free",
+  "tierBasic": "Basic",
+  "tierPro": "Pro",
   "errorLoadingUserData": "Error loading user data",
   "retry": "Retry",
   "language": "Language",

@@ -65,6 +65,20 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String tierLabel(String tier) {
+    return 'プラン: $tier';
+  }
+
+  @override
+  String get tierFree => '無料';
+
+  @override
+  String get tierBasic => 'ベーシック';
+
+  @override
+  String get tierPro => 'プロ';
+
+  @override
   String get errorLoadingUserData => 'ユーザーデータの読み込みエラー';
 
   @override

@@ -23,6 +23,23 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  /// Returns a localized tier display string based on user data.
+  String _getTierDisplay(AppLocalizations l10n, Map<String, dynamic>? user) {
+    if (user == null || user['tier'] == null) {
+      return l10n.tierLabel(l10n.tierFree);
+    }
+    final tier = user['tier'] as String;
+    switch (tier) {
+      case 'BASIC':
+        return l10n.tierLabel(l10n.tierBasic);
+      case 'PRO':
+        return l10n.tierLabel(l10n.tierPro);
+      case 'FREE':
+      default:
+        return l10n.tierLabel(l10n.tierFree);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -133,9 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         leading: const Icon(Icons.card_membership),
                         title: Text(l10n.subscription),
                         subtitle: Text(
-                          user != null && user['subscriptionStatus'] != null
-                              ? l10n.subscriptionStatus(user['subscriptionStatus'] as String)
-                              : l10n.noActiveSubscription,
+                          _getTierDisplay(l10n, user),
                         ),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () => context.go('/subscription'),

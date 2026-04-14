@@ -18,6 +18,15 @@
   "manageSubscription": "サブスクリプション管理",
   "noActiveSubscription": "有効なサブスクリプションなし",
   "subscriptionStatus": "ステータス: {status}",
+  "tierLabel": "プラン: {tier}",
+  "@tierLabel": {
+    "placeholders": {
+      "tier": { "type": "String" }
+    }
+  },
+  "tierFree": "無料",
+  "tierBasic": "ベーシック",
+  "tierPro": "プロ",
   "errorLoadingUserData": "ユーザーデータの読み込みエラー",
   "retry": "再試行",
   "language": "言語",

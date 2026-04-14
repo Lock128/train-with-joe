@@ -65,6 +65,20 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String tierLabel(String tier) {
+    return 'Nivel: $tier';
+  }
+
+  @override
+  String get tierFree => 'Gratis';
+
+  @override
+  String get tierBasic => 'Básico';
+
+  @override
+  String get tierPro => 'Pro';
+
+  @override
   String get errorLoadingUserData => 'Error al cargar datos del usuario';
 
   @override
