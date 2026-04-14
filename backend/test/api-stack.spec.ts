@@ -106,8 +106,8 @@ describe('APIStack CDK Integration Tests', () => {
   });
 
   test('should create DynamoDB data sources', () => {
-    // Verify data sources exist (2 DynamoDB + 30 Lambda)
-    template.resourceCountIs('AWS::AppSync::DataSource', 32);
+    // Verify data sources exist (2 DynamoDB + 31 Lambda)
+    template.resourceCountIs('AWS::AppSync::DataSource', 33);
 
     const dataSources = Object.values(templateJson.Resources).filter(
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
@@ -138,7 +138,7 @@ describe('APIStack CDK Integration Tests', () => {
 
   test('should have correct resource counts', () => {
     template.resourceCountIs('AWS::AppSync::GraphQLApi', 1);
-    template.resourceCountIs('AWS::AppSync::DataSource', 32);
+    template.resourceCountIs('AWS::AppSync::DataSource', 33);
 
     // Verify at least 3 IAM roles exist (CloudWatch role + 2 data source roles, CDK may create additional service roles)
     const roles = Object.values(templateJson.Resources).filter((resource: any) => resource.Type === 'AWS::IAM::Role');
