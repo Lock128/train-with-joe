@@ -242,3 +242,103 @@ getPlanIds(platform: STRIPE) {
 
 No schema change needed. The `planId` field on `Subscription` already exists as `string?`. The change is that App Store subscriptions will now store the actual product ID (e.g., `com.app.basic.monthly`) instead of the hardcoded `'appstore-subscription'`.
 
+
+
+## Correctness Properties
+
+*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+
+### Property 1: Config structure validation round-trip
+
+*For any* JSON object, if `validateConfig` accepts it (returns non-null), then the result must have all three platform keys (`stripe`, `appStore`, `playStore`) each containing both `basic` and `pro` string entries. Conversely, *for any* JSON object missing any of these required keys, `validateConfig` must return null.
+
+**Validates: Requirements 1.1, 1.2, 1.4**
+
+### Property 2: Config load and tier resolution round-trip
+
+*For any* valid `PlanIdConfig` with unique product IDs across all platforms, building the reverse-lookup map and then resolving the tier for each configured product ID shall return the expected tier (`BASIC` for basic entries, `PRO` for pro entries).
+
+**Validates: Requirements 2.2, 3.1, 3.2, 3.3, 3.4, 3.6**
+
+### Property 3: Malformed config rejection
+
+*For any* string that is not valid JSON, or any JSON object that is missing required platform/tier keys, or any config where a plan ID value is not a non-empty string, `validateConfig` shall return null.
+
+**Validates: Requirements 2.4**
+
+### Property 4: Unknown plan ID fallback to FREE
+
+*For any* valid `PlanIdConfig` and *for any* product ID string that does not appear in any platform entry of that config, resolving the tier using the reverse-lookup map shall return `FREE`.
+
+**Validates: Requirements 3.5**
+
+### Property 5: getPlanIds returns correct platform-specific IDs
+
+*For any* valid `PlanIdConfig` and *for any* payment platform (Stripe, App Store, Play Store), calling `getPlanIds(platform)` shall return the `basicPlanId` and `proPlanId` that match the corresponding entries in the config for that platform.
+
+**Validates: Requirements 2.5, 6.1**
+
+## Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| SSM parameter missing | `PricingService.initialize()` logs error, sets `planTierMap` to empty `{}`. All plan IDs resolve to FREE. |
+| SSM parameter contains invalid JSON | `validateConfig` returns null. Same fallback as missing parameter. |
+| SSM parameter has partial config (e.g., missing `playStore`) | `validateConfig` returns null. Same fallback. |
+| Plan ID value is empty string or non-string | `validateConfig` returns null. Same fallback. |
+| `getPlanIds` called before `initialize()` | Returns error response: `{ success: false, error: "Plan ID configuration not loaded" }`. |
+| `getPlanIds` called with invalid platform | Returns error response: `{ success: false, error: "Invalid platform" }`. |
+| Flutter `getPlanIds` query fails (network error, backend error) | `SubscriptionScreen` shows error message, disables purchase buttons. |
+| Duplicate product IDs across platforms in config | `validateConfig` should reject configs where the same product ID maps to different tiers. If same ID maps to same tier, it's allowed (e.g., same product ID on App Store and Play Store). |
+
+## Testing Strategy
+
+### Property-Based Tests (Vitest + fast-check)
+
+The feature's core logic — config validation, reverse-map building, tier resolution, and plan ID retrieval — consists of pure functions with clear input/output behavior and a large input space (arbitrary strings as product IDs, arbitrary config structures). Property-based testing is well-suited here.
+
+Library: `fast-check` (already used in the project)
+Framework: `vitest` (already used in the project)
+File: `backend/test/plan-id-config.property.test.ts`
+
+Each property test must:
+- Run a minimum of 100 iterations
+- Reference its design document property in a comment tag
+- Tag format: **Feature: plan-id-configuration, Property {number}: {property_text}**
+
+Properties to implement:
+1. **Property 1** — Generate random valid/invalid config objects, verify `validateConfig` accepts/rejects correctly
+2. **Property 2** — Generate random valid configs with unique product IDs, build reverse map, resolve each ID, verify correct tier
+3. **Property 3** — Generate random malformed inputs (bad JSON, missing keys, non-string values), verify `validateConfig` returns null
+4. **Property 4** — Generate random valid configs and random strings not in the config, verify resolution returns FREE
+5. **Property 5** — Generate random valid configs, call `getPlanIds` for each platform, verify correct IDs returned
+
+### Unit Tests (Example-Based)
+
+File: `backend/test/plan-id-config.test.ts`
+
+- App Store receipt validation extracts product ID from `latest_receipt_info` (Requirement 4.1)
+- Play Store validation stores `productId` from request (Requirement 5.1)
+- Stripe checkout passes `planId` through to session creation (Requirement 7.1)
+- Stripe webhook stores price ID from subscription line items (Requirement 7.2)
+- `getPlanIds` returns error when config not loaded
+- `getPlanIds` returns error for invalid platform
+
+### CDK Snapshot/Assertion Tests
+
+File: `backend/test/base-stack.spec.ts` (existing)
+
+- SSM parameter created at `/<namespace>/config/plan-ids` (Requirement 8.1)
+- Lambda environment variables include `PLAN_IDS_SSM_PATH` (Requirement 8.2)
+- Default parameter value contains `CONFIGURE_ME` placeholders (Requirement 8.3)
+
+File: `backend/test/api-stack.spec.ts` (existing)
+
+- `getPlanIds` Lambda function created with correct environment variables
+- SSM read permissions granted to pricing Lambda functions
+
+### Integration Tests
+
+- Flutter widget test: `SubscriptionScreen` calls `getPlanIds` on load (Requirement 6.2)
+- Flutter widget test: fetched plan IDs passed to payment flow (Requirement 6.3)
+- Flutter widget test: error state disables purchase buttons (Requirement 6.4)
