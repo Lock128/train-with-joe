@@ -30,7 +30,7 @@ dependencies:
   image_picker: ^1.1.2
 
   # Sharing / export
-  share_plus: ^10.1.4
+  share_plus: ">=10.1.4 <13.0.0"
 
   # Audio feedback
   audioplayers: ^6.1.0
