@@ -475,7 +475,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update release with production deployment info
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const tag = '${{ needs.validate-production-deployment.outputs.ref }}';
@@ -514,7 +514,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create urgent deployment tracking issue
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { data: issue } = await github.rest.issues.create({
@@ -614,7 +614,7 @@ jobs:
 
       - name: Create production deployment issue
         if: steps.status.outputs.status == 'success' && needs.validate-production-deployment.outputs.is_urgent != 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const { data: issue } = await github.rest.issues.create({
