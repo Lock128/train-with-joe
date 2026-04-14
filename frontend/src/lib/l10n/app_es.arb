@@ -161,5 +161,16 @@
 
   "alreadyHaveAccount": "¿Ya tienes una cuenta? Iniciar sesión",
   "haveVerificationCode": "¿Tienes un código de verificación?",
-  "backToSignIn": "Volver a iniciar sesión"
+  "backToSignIn": "Volver a iniciar sesión",
+
+  "gettingStarted": "Primeros pasos",
+  "gettingStartedSubtitle": "¿No sabes por dónde empezar? Aquí tienes algunas ideas:",
+  "gettingStartedTryPublicLists": "Prueba con listas existentes",
+  "gettingStartedTryPublicListsDesc": "Explora listas de vocabulario públicas y empieza un entrenamiento de inmediato",
+  "gettingStartedScanVocabulary": "Escanea tu propio vocabulario",
+  "gettingStartedScanVocabularyDesc": "Toma una foto de tu libro de texto o apuntes para crear una lista de vocabulario",
+  "gettingStartedChangeLanguage": "Cambia tu idioma",
+  "gettingStartedChangeLanguageDesc": "Cambia el idioma de la app en los ajustes según tu preferencia",
+  "gettingStartedExploreTraining": "Explora los modos de entrenamiento",
+  "gettingStartedExploreTrainingDesc": "Elige entre entrada de texto, opción múltiple o entrenamiento con IA"
 }

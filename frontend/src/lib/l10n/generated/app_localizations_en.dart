@@ -497,4 +497,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backToSignIn => 'Back to Sign In';
+
+  @override
+  String get gettingStarted => 'Getting Started';
+
+  @override
+  String get gettingStartedSubtitle =>
+      'Not sure where to begin? Here are a few ideas:';
+
+  @override
+  String get gettingStartedTryPublicLists => 'Try a test with existing lists';
+
+  @override
+  String get gettingStartedTryPublicListsDesc =>
+      'Browse public vocabulary lists and start a training right away';
+
+  @override
+  String get gettingStartedScanVocabulary => 'Scan your own vocabularies';
+
+  @override
+  String get gettingStartedScanVocabularyDesc =>
+      'Take a photo of your textbook or notes to create a vocabulary list';
+
+  @override
+  String get gettingStartedChangeLanguage => 'Change your language';
+
+  @override
+  String get gettingStartedChangeLanguageDesc =>
+      'Switch the app language in settings to match your preference';
+
+  @override
+  String get gettingStartedExploreTraining => 'Explore training modes';
+
+  @override
+  String get gettingStartedExploreTrainingDesc =>
+      'Choose between text input, multiple choice, or AI-powered training';
 }

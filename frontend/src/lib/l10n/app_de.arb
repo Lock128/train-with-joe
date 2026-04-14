@@ -161,5 +161,16 @@
 
   "alreadyHaveAccount": "Bereits ein Konto? Anmelden",
   "haveVerificationCode": "Bestätigungscode vorhanden?",
-  "backToSignIn": "Zurück zur Anmeldung"
+  "backToSignIn": "Zurück zur Anmeldung",
+
+  "gettingStarted": "Erste Schritte",
+  "gettingStartedSubtitle": "Nicht sicher, wo du anfangen sollst? Hier ein paar Ideen:",
+  "gettingStartedTryPublicLists": "Teste mit vorhandenen Listen",
+  "gettingStartedTryPublicListsDesc": "Durchstöbere öffentliche Vokabellisten und starte sofort ein Training",
+  "gettingStartedScanVocabulary": "Scanne deine eigenen Vokabeln",
+  "gettingStartedScanVocabularyDesc": "Fotografiere dein Lehrbuch oder deine Notizen, um eine Vokabelliste zu erstellen",
+  "gettingStartedChangeLanguage": "Sprache ändern",
+  "gettingStartedChangeLanguageDesc": "Wechsle die App-Sprache in den Einstellungen nach deinen Wünschen",
+  "gettingStartedExploreTraining": "Trainingsmodi entdecken",
+  "gettingStartedExploreTrainingDesc": "Wähle zwischen Texteingabe, Multiple Choice oder KI-gestütztem Training"
 }

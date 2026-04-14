@@ -143,6 +143,60 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 16),
 
+                    // Getting started section
+                    Text(
+                      l10n.gettingStarted,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.gettingStartedSubtitle,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    _GettingStartedCard(
+                      icon: Icons.play_circle_outline,
+                      color: const Color(0xFF2B6CB0),
+                      title: l10n.gettingStartedTryPublicLists,
+                      description: l10n.gettingStartedTryPublicListsDesc,
+                      onTap: () => context.go('/trainings/create'),
+                    ),
+                    const SizedBox(height: 10),
+
+                    _GettingStartedCard(
+                      icon: Icons.camera_alt,
+                      color: const Color(0xFFF0932B),
+                      title: l10n.gettingStartedScanVocabulary,
+                      description: l10n.gettingStartedScanVocabularyDesc,
+                      onTap: () => context.go('/vocabulary/analyze'),
+                    ),
+                    const SizedBox(height: 10),
+
+                    _GettingStartedCard(
+                      icon: Icons.quiz,
+                      color: const Color(0xFF27AE60),
+                      title: l10n.gettingStartedExploreTraining,
+                      description: l10n.gettingStartedExploreTrainingDesc,
+                      onTap: () => context.go('/trainings'),
+                    ),
+                    const SizedBox(height: 10),
+
+                    _GettingStartedCard(
+                      icon: Icons.language,
+                      color: const Color(0xFF5BC0DE),
+                      title: l10n.gettingStartedChangeLanguage,
+                      description: l10n.gettingStartedChangeLanguageDesc,
+                      onTap: () => context.go('/settings'),
+                    ),
+                    const SizedBox(height: 24),
+
                     // Quick actions
                     Text(
                       l10n.quickActions,
@@ -152,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     ElevatedButton.icon(
                       onPressed: () => context.go('/vocabulary/analyze'),
                       icon: const Icon(Icons.camera_alt),
@@ -199,6 +253,64 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _GettingStartedCard extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String description;
+  final VoidCallback onTap;
+
+  const _GettingStartedCard({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.description,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: color.withValues(alpha: 0.12),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[400]),
+            ],
+          ),
+        ),
       ),
     );
   }

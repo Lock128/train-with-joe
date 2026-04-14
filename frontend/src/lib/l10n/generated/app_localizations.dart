@@ -1005,6 +1005,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to Sign In'**
   String get backToSignIn;
+
+  /// No description provided for @gettingStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting Started'**
+  String get gettingStarted;
+
+  /// No description provided for @gettingStartedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure where to begin? Here are a few ideas:'**
+  String get gettingStartedSubtitle;
+
+  /// No description provided for @gettingStartedTryPublicLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a test with existing lists'**
+  String get gettingStartedTryPublicLists;
+
+  /// No description provided for @gettingStartedTryPublicListsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse public vocabulary lists and start a training right away'**
+  String get gettingStartedTryPublicListsDesc;
+
+  /// No description provided for @gettingStartedScanVocabulary.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan your own vocabularies'**
+  String get gettingStartedScanVocabulary;
+
+  /// No description provided for @gettingStartedScanVocabularyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo of your textbook or notes to create a vocabulary list'**
+  String get gettingStartedScanVocabularyDesc;
+
+  /// No description provided for @gettingStartedChangeLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Change your language'**
+  String get gettingStartedChangeLanguage;
+
+  /// No description provided for @gettingStartedChangeLanguageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch the app language in settings to match your preference'**
+  String get gettingStartedChangeLanguageDesc;
+
+  /// No description provided for @gettingStartedExploreTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore training modes'**
+  String get gettingStartedExploreTraining;
+
+  /// No description provided for @gettingStartedExploreTrainingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose between text input, multiple choice, or AI-powered training'**
+  String get gettingStartedExploreTrainingDesc;
 }
 
 class _AppLocalizationsDelegate

@@ -490,4 +490,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get backToSignIn => 'サインインに戻る';
+
+  @override
+  String get gettingStarted => 'はじめに';
+
+  @override
+  String get gettingStartedSubtitle => '何から始めればいいかわからない？いくつかのアイデアをご紹介します：';
+
+  @override
+  String get gettingStartedTryPublicLists => '既存のリストでテストしてみる';
+
+  @override
+  String get gettingStartedTryPublicListsDesc =>
+      '公開単語リストを閲覧して、すぐにトレーニングを始めましょう';
+
+  @override
+  String get gettingStartedScanVocabulary => '自分の単語をスキャンする';
+
+  @override
+  String get gettingStartedScanVocabularyDesc => '教科書やノートを撮影して単語リストを作成しましょう';
+
+  @override
+  String get gettingStartedChangeLanguage => '言語を変更する';
+
+  @override
+  String get gettingStartedChangeLanguageDesc => '設定でアプリの言語をお好みに合わせて切り替えましょう';
+
+  @override
+  String get gettingStartedExploreTraining => 'トレーニングモードを探索する';
+
+  @override
+  String get gettingStartedExploreTrainingDesc =>
+      'テキスト入力、選択式、またはAIトレーニングから選べます';
 }

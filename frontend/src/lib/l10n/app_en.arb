@@ -242,5 +242,16 @@
 
   "alreadyHaveAccount": "Already have an account? Sign In",
   "haveVerificationCode": "Have a verification code?",
-  "backToSignIn": "Back to Sign In"
+  "backToSignIn": "Back to Sign In",
+
+  "gettingStarted": "Getting Started",
+  "gettingStartedSubtitle": "Not sure where to begin? Here are a few ideas:",
+  "gettingStartedTryPublicLists": "Try a test with existing lists",
+  "gettingStartedTryPublicListsDesc": "Browse public vocabulary lists and start a training right away",
+  "gettingStartedScanVocabulary": "Scan your own vocabularies",
+  "gettingStartedScanVocabularyDesc": "Take a photo of your textbook or notes to create a vocabulary list",
+  "gettingStartedChangeLanguage": "Change your language",
+  "gettingStartedChangeLanguageDesc": "Switch the app language in settings to match your preference",
+  "gettingStartedExploreTraining": "Explore training modes",
+  "gettingStartedExploreTrainingDesc": "Choose between text input, multiple choice, or AI-powered training"
 }
