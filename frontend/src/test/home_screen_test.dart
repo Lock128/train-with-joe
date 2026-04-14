@@ -117,7 +117,7 @@ void main() {
       await tester.pumpWidget(createTestWidget(const HomeScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.text('No active subscription'), findsOneWidget);
+      expect(find.text('Tier: Free'), findsOneWidget);
     });
 
     testWidgets('should display quick actions section', (tester) async {
