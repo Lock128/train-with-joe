@@ -34,6 +34,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       final provider = context.read<SubscriptionProvider>();
       provider.loadSubscription();
       provider.loadUsageLimits();
+
+      // Fetch platform-specific plan IDs
+      final platformString = _platformToGraphQL(_detectedPlatform);
+      if (platformString != null) {
+        provider.loadPlanIds(platformString);
+      }
     });
   }
 
@@ -279,6 +285,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     }
   }
 
+  /// Map Flutter PaymentProvider to GraphQL PaymentProvider enum string
+  String? _platformToGraphQL(PaymentProvider? platform) {
+    switch (platform) {
+      case PaymentProvider.stripe:
+        return 'STRIPE';
+      case PaymentProvider.appleAppStore:
+        return 'APPLE_APP_STORE';
+      case PaymentProvider.googlePlayStore:
+        return 'GOOGLE_PLAY_STORE';
+      default:
+        return null;
+    }
+  }
+
   String _getPlatformName() {
     switch (_detectedPlatform) {
       case PaymentProvider.stripe:
@@ -416,6 +436,30 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       const SizedBox(height: 24),
                     ],
 
+                    // Plan IDs error banner
+                    if (subscriptionProvider.planIdsError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Card(
+                          color: const Color(0xFFFFF3CD),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.warning_amber, color: Color(0xFF856404)),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Unable to load plan information. Purchases are temporarily unavailable.',
+                                    style: TextStyle(color: Colors.orange[900]),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
                     // Tier cards heading
                     const Text(
                       'Choose a Plan',
@@ -479,7 +523,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                     'Unlimited vocabulary lists',
                                     'No AI training',
                                   ],
-                                  planId: 'basic-monthly',
+                                  planId: subscriptionProvider.basicPlanId,
                                   isCurrentTier: currentTier == 'BASIC',
                                   isRecommended: false,
                                   hasActiveSubscription: hasActiveSubscription,
@@ -498,7 +542,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                     'Unlimited vocabulary lists',
                                     'AI training',
                                   ],
-                                  planId: 'pro-monthly',
+                                  planId: subscriptionProvider.proPlanId,
                                   isCurrentTier: currentTier == 'PRO',
                                   isRecommended: true,
                                   hasActiveSubscription: hasActiveSubscription,
@@ -538,7 +582,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                 'Unlimited vocabulary lists',
                                 'No AI training',
                               ],
-                              planId: 'basic-monthly',
+                              planId: subscriptionProvider.basicPlanId,
                               isCurrentTier: currentTier == 'BASIC',
                               isRecommended: false,
                               hasActiveSubscription: hasActiveSubscription,
@@ -555,7 +599,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                 'Unlimited vocabulary lists',
                                 'AI training',
                               ],
-                              planId: 'pro-monthly',
+                              planId: subscriptionProvider.proPlanId,
                               isCurrentTier: currentTier == 'PRO',
                               isRecommended: true,
                               hasActiveSubscription: hasActiveSubscription,

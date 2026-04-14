@@ -32,6 +32,12 @@ const tierSourceArb = fc.constantFrom(TierSource.SUBSCRIPTION, TierSource.MANUAL
 
 const nonNegativeIntArb = fc.nat({ max: 1000 });
 
+/** Plan tier map used for property tests (replaces the old hardcoded PLAN_TIER_MAP) */
+const TEST_PLAN_TIER_MAP: Record<string, Tier> = {
+  'basic-monthly': Tier.BASIC,
+  'pro-monthly': Tier.PRO,
+};
+
 describe('PricingService Property Tests', () => {
   /**
    * Feature: pricing-structure, Property 1: Tier resolution correctness
@@ -49,7 +55,7 @@ describe('PricingService Property Tests', () => {
         fc.option(tierArb, { nil: undefined }),
         tierSourceArb,
         (status, planId, manualTier, tierSource) => {
-          const result = resolveTierFromSubscription(status, planId, manualTier, tierSource);
+          const result = resolveTierFromSubscription(status, planId, manualTier, tierSource, TEST_PLAN_TIER_MAP);
 
           // Rule: Active subscription always takes precedence
           if (status === SubscriptionStatus.ACTIVE) {

@@ -63,6 +63,7 @@ export const handler = async (event: Event) => {
       userId,
       provider: 'GOOGLE_PLAY_STORE',
       status: 'ACTIVE',
+      // Play Store product ID from the purchase request, used for tier resolution via PlanIdConfig
       planId: input.productId,
       externalId: validation.subscriptionId,
       currentPeriodEnd: validation.expiresAt,

@@ -239,6 +239,7 @@ export class PaymentService {
   async validateAppStoreReceipt(receiptData: string): Promise<{
     valid: boolean;
     subscriptionId?: string;
+    productId?: string;
     expiresAt?: string;
     error?: string;
   }> {
@@ -292,6 +293,7 @@ export class PaymentService {
       return {
         valid: isActive,
         subscriptionId: latestReceipt.original_transaction_id,
+        productId: latestReceipt.product_id,
         expiresAt: expiresDate.toISOString(),
       };
     } catch (error) {

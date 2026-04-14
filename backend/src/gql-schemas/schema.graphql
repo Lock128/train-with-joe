@@ -499,6 +499,17 @@ type TierStatisticsResponse @aws_cognito_user_pools {
   error: String
 }
 
+type PlanIds @aws_cognito_user_pools {
+  basicPlanId: String!
+  proPlanId: String!
+}
+
+type PlanIdsResponse @aws_cognito_user_pools {
+  success: Boolean!
+  planIds: PlanIds
+  error: String
+}
+
 # ============================================================================
 # APP INFO
 # ============================================================================
@@ -529,6 +540,7 @@ type Query {
   getUsers: [User] @aws_cognito_user_pools
   getUsageLimits: UsageLimitsResponse @aws_cognito_user_pools
   getTierStatistics: TierStatisticsResponse @aws_cognito_user_pools
+  getPlanIds(platform: PaymentProvider!): PlanIdsResponse @aws_cognito_user_pools
 }
 
 # ============================================================================

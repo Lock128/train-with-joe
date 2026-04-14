@@ -14,6 +14,12 @@ class SubscriptionProvider extends ChangeNotifier {
   String? _error;
   AuthProvider? _authProvider;
 
+  // Plan ID state
+  String? _basicPlanId;
+  String? _proPlanId;
+  bool _planIdsLoaded = false;
+  String? _planIdsError;
+
   SubscriptionProvider({
     ApiService? apiService,
     PaymentService? paymentService,
@@ -26,6 +32,12 @@ class SubscriptionProvider extends ChangeNotifier {
   Map<String, dynamic>? get usageLimits => _usageLimits;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  // Plan ID getters
+  String? get basicPlanId => _basicPlanId;
+  String? get proPlanId => _proPlanId;
+  bool get planIdsLoaded => _planIdsLoaded;
+  String? get planIdsError => _planIdsError;
 
   /// Current tier from usage limits (defaults to FREE)
   String get currentTier => _usageLimits?['tier'] as String? ?? 'FREE';
@@ -132,6 +144,50 @@ class SubscriptionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Load plan IDs for the given platform from the backend
+  Future<void> loadPlanIds(String platform) async {
+    _planIdsLoaded = false;
+    _planIdsError = null;
+    notifyListeners();
+
+    try {
+      const query = '''
+        query GetPlanIds(\$platform: PaymentProvider!) {
+          getPlanIds(platform: \$platform) {
+            success
+            planIds {
+              basicPlanId
+              proPlanId
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.query(query, variables: {'platform': platform});
+      final result = response['getPlanIds'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        final planIds = result['planIds'] as Map<String, dynamic>?;
+        _basicPlanId = planIds?['basicPlanId'] as String?;
+        _proPlanId = planIds?['proPlanId'] as String?;
+        _planIdsError = null;
+      } else {
+        _planIdsError = result?['error'] as String? ?? 'Failed to load plan IDs';
+        _basicPlanId = null;
+        _proPlanId = null;
+      }
+    } catch (e) {
+      debugPrint('Error loading plan IDs: $e');
+      _planIdsError = e.toString();
+      _basicPlanId = null;
+      _proPlanId = null;
+    } finally {
+      _planIdsLoaded = true;
+      notifyListeners();
+    }
+  }
+
   /// Create a new subscription
   Future<bool> createSubscription(String planId) async {
     _isLoading = true;
@@ -211,6 +267,10 @@ class SubscriptionProvider extends ChangeNotifier {
     _usageLimits = null;
     _error = null;
     _isLoading = false;
+    _basicPlanId = null;
+    _proPlanId = null;
+    _planIdsLoaded = false;
+    _planIdsError = null;
     notifyListeners();
   }
 }

@@ -1,8 +1,11 @@
 import { Tier, TierSource, SubscriptionStatus } from '../model/domain/User';
+import type { PaymentProvider } from '../model/domain/User';
 import type { User } from '../model/domain/User';
 import { UserRepository } from '../repositories/user-repository';
 import { SubscriptionRepository } from '../repositories/subscription-repository';
 import { UsageCounterRepository } from '../repositories/usage-counter-repository';
+import { loadConfig, buildReverseLookupMap, getPlanIds as getConfigPlanIds } from './plan-id-config-loader';
+import type { PlanIdConfig } from './plan-id-config-loader';
 
 // ─── Tier Limits Configuration ───────────────────────────────────────────────
 
@@ -52,11 +55,6 @@ const TIER_LIMITS: Record<Tier, TierLimits> = {
     aiTrainingEnabled: true,
     imageScanPeriod: 'lifetime',
   },
-};
-
-const PLAN_TIER_MAP: Record<string, Tier> = {
-  'basic-monthly': Tier.BASIC,
-  'pro-monthly': Tier.PRO,
 };
 
 const GRACE_PERIOD_DAYS = 7;
@@ -114,10 +112,14 @@ export function resolveTierFromSubscription(
   planId: string | undefined,
   manualTier?: Tier,
   tierSource?: TierSource,
+  planTierMap: Record<string, Tier> = {},
 ): { tier: Tier; tierSource: TierSource } {
   // Rule 2/7: Active subscription always takes precedence (even over manual override)
   if (subscriptionStatus === SubscriptionStatus.ACTIVE) {
-    const mappedTier = planId ? PLAN_TIER_MAP[planId] : undefined;
+    const mappedTier = planId ? planTierMap[planId] : undefined;
+    if (planId && mappedTier === undefined) {
+      console.warn(`Unknown plan ID "${planId}" not found in planTierMap, resolving to FREE`);
+    }
     return {
       tier: mappedTier ?? Tier.FREE,
       tierSource: TierSource.SUBSCRIPTION,
@@ -192,6 +194,8 @@ export class PricingService {
   private userRepository: UserRepository;
   private subscriptionRepository: SubscriptionRepository;
   private usageCounterRepository: UsageCounterRepository;
+  private planTierMap: Record<string, Tier> = {};
+  private planIdConfig: PlanIdConfig | null = null;
 
   private constructor() {
     this.userRepository = UserRepository.getInstance();
@@ -204,6 +208,41 @@ export class PricingService {
       PricingService.instance = new PricingService();
     }
     return PricingService.instance;
+  }
+
+  /**
+   * Load plan ID configuration from SSM Parameter Store and build the reverse lookup map.
+   * On failure, logs an error and sets planTierMap to empty {} so all unknown plan IDs resolve to FREE.
+   */
+  async initialize(): Promise<void> {
+    const ssmPath = process.env.PLAN_IDS_SSM_PATH;
+    if (!ssmPath) {
+      console.error('PLAN_IDS_SSM_PATH environment variable is not set, falling back to empty plan tier map');
+      this.planTierMap = {};
+      this.planIdConfig = null;
+      return;
+    }
+
+    try {
+      const config = await loadConfig(ssmPath);
+      this.planIdConfig = config;
+      this.planTierMap = buildReverseLookupMap(config);
+    } catch (error) {
+      console.error('Failed to load plan ID config from SSM:', error);
+      this.planTierMap = {};
+      this.planIdConfig = null;
+    }
+  }
+
+  /**
+   * Returns plan IDs for a given payment platform from the cached config.
+   * Throws if initialize() has not been called or config is null.
+   */
+  getPlanIds(platform: PaymentProvider): { basicPlanId: string; proPlanId: string } {
+    if (!this.planIdConfig) {
+      throw new Error('Plan ID configuration not loaded. Call initialize() first.');
+    }
+    return getConfigPlanIds(this.planIdConfig, platform);
   }
 
   /**
@@ -413,6 +452,7 @@ export class PricingService {
       subscription?.planId,
       user.tier,
       user.tierSource,
+      this.planTierMap,
     );
 
     updates.tier = resolved.tier;

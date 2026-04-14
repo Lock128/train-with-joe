@@ -546,7 +546,7 @@ class VocabularyProvider extends ChangeNotifier {
 
     final content = lines.join('\n');
 
-    await Share.share(content, subject: title);
+    await SharePlus.instance.share(ShareParams(text: content, title: title));
   }
 
   /// Flag a word in a vocabulary list for review by the list owner

@@ -38,6 +38,7 @@ export class BaseStack extends Stack {
   public readonly assetsBucket: Bucket;
   public readonly assetsBucketNameParameterName: string;
   public readonly identityPoolId: string;
+  public readonly planIdsSsmPath: string;
   private readonly namespace: string;
 
   constructor(scope: Construct, id: string, props: BaseStackProps) {
@@ -195,6 +196,18 @@ export class BaseStack extends Stack {
     new StringParameter(this, 'IdentityPoolIdParameter', {
       stringValue: identityPool.ref,
       parameterName: `/${namespace}/config/cognito-identity-pool-id`,
+      simpleName: false,
+    });
+
+    // Create plan IDs SSM parameter with placeholder values
+    this.planIdsSsmPath = `/${namespace}/config/plan-ids`;
+    new StringParameter(this, 'PlanIdsParameter', {
+      stringValue: JSON.stringify({
+        stripe: { basic: 'CONFIGURE_ME_stripe_basic', pro: 'CONFIGURE_ME_stripe_pro' },
+        appStore: { basic: 'CONFIGURE_ME_appstore_basic', pro: 'CONFIGURE_ME_appstore_pro' },
+        playStore: { basic: 'CONFIGURE_ME_playstore_basic', pro: 'CONFIGURE_ME_playstore_pro' },
+      }),
+      parameterName: this.planIdsSsmPath,
       simpleName: false,
     });
   }

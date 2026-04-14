@@ -243,6 +243,40 @@ describe('BaseStack CDK Integration Tests', () => {
     template.hasResourceProperties('AWS::SSM::Parameter', {
       Name: '/test/config/cognito-identity-pool-id',
     });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/test/config/plan-ids',
+    });
+  });
+
+  test('should create plan-ids SSM parameter with CONFIGURE_ME placeholders', { timeout: 60000 }, () => {
+    const app = new App();
+
+    const baseStack = new BaseStack(app, 'TestBaseStack', {
+      env: {
+        account: '123456789012',
+        region: 'us-east-1',
+      },
+      namespace: 'test',
+    });
+
+    const template = Template.fromStack(baseStack);
+    const templateJson = template.toJSON();
+
+    const planIdsParams = Object.values(templateJson.Resources).filter(
+      (resource: any) =>
+        resource.Type === 'AWS::SSM::Parameter' && resource.Properties.Name === '/test/config/plan-ids',
+    );
+
+    expect(planIdsParams.length).toBe(1);
+    const paramValue = (planIdsParams[0] as any).Properties.Value;
+    expect(paramValue).toContain('CONFIGURE_ME');
+    expect(paramValue).toContain('CONFIGURE_ME_stripe_basic');
+    expect(paramValue).toContain('CONFIGURE_ME_stripe_pro');
+    expect(paramValue).toContain('CONFIGURE_ME_appstore_basic');
+    expect(paramValue).toContain('CONFIGURE_ME_appstore_pro');
+    expect(paramValue).toContain('CONFIGURE_ME_playstore_basic');
+    expect(paramValue).toContain('CONFIGURE_ME_playstore_pro');
   });
 
   test('should have correct resource counts', { timeout: 60000 }, () => {

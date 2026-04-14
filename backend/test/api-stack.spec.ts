@@ -106,20 +106,20 @@ describe('APIStack CDK Integration Tests', () => {
   });
 
   test('should create DynamoDB data sources', () => {
-    // Verify data sources exist (2 DynamoDB + 29 Lambda)
-    template.resourceCountIs('AWS::AppSync::DataSource', 31);
+    // Verify data sources exist (2 DynamoDB + 30 Lambda)
+    template.resourceCountIs('AWS::AppSync::DataSource', 32);
 
     const dataSources = Object.values(templateJson.Resources).filter(
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
     );
 
-    expect(dataSources.length).toBe(31);
+    expect(dataSources.length).toBe(32);
 
     const dynamoDbSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AMAZON_DYNAMODB');
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(29); // 29 Lambda data sources
+    expect(lambdaSources.length).toBe(30); // 30 Lambda data sources
   });
 
   test('should export API endpoint URL and ID', () => {
@@ -138,7 +138,7 @@ describe('APIStack CDK Integration Tests', () => {
 
   test('should have correct resource counts', () => {
     template.resourceCountIs('AWS::AppSync::GraphQLApi', 1);
-    template.resourceCountIs('AWS::AppSync::DataSource', 31);
+    template.resourceCountIs('AWS::AppSync::DataSource', 32);
 
     // Verify at least 3 IAM roles exist (CloudWatch role + 2 data source roles, CDK may create additional service roles)
     const roles = Object.values(templateJson.Resources).filter((resource: any) => resource.Type === 'AWS::IAM::Role');
@@ -198,5 +198,34 @@ describe('APIStack CDK Integration Tests', () => {
     expect(resolverFieldNames).toContain('getUsageLimits');
     expect(resolverFieldNames).toContain('adminSetUserTier');
     expect(resolverFieldNames).toContain('getTierStatistics');
+  });
+
+  test('should create getPlanIds resolver', () => {
+    const resolvers = Object.values(templateJson.Resources).filter(
+      (resource: any) => resource.Type === 'AWS::AppSync::Resolver',
+    );
+
+    const resolverFieldNames = resolvers.map((r: any) => r.Properties.FieldName);
+
+    expect(resolverFieldNames).toContain('getPlanIds');
+  });
+
+  test('should pass PLAN_IDS_SSM_PATH env var to Lambda functions', () => {
+    const lambdas = Object.values(templateJson.Resources).filter(
+      (resource: any) => resource.Type === 'AWS::Lambda::Function',
+    );
+
+    const lambdasWithPlanIdsSsmPath = lambdas.filter((lambda: any) => {
+      const envVars = lambda.Properties?.Environment?.Variables ?? {};
+      return envVars.PLAN_IDS_SSM_PATH !== undefined;
+    });
+
+    // pricing lambdas (getUsageLimits, adminSetUserTier, getTierStatistics, getPlanIds) + createStripeCheckout
+    expect(lambdasWithPlanIdsSsmPath.length).toBeGreaterThanOrEqual(5);
+
+    // Verify the value is correct
+    for (const lambda of lambdasWithPlanIdsSsmPath) {
+      expect(lambda.Properties.Environment.Variables.PLAN_IDS_SSM_PATH).toBe('/test/config/plan-ids');
+    }
   });
 });

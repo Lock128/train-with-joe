@@ -29,6 +29,19 @@ void main() {
     // Default mock for platform detection
     when(mockPaymentService.detectPlatform())
         .thenReturn(PaymentProvider.stripe);
+
+    // Default mock for plan IDs query (called by SubscriptionScreen on init)
+    when(mockApiService.query(any, variables: anyNamed('variables')))
+        .thenAnswer((_) async => {
+      'getPlanIds': {
+        'success': true,
+        'planIds': {
+          'basicPlanId': 'basic-monthly',
+          'proPlanId': 'pro-monthly',
+        },
+        'error': null,
+      },
+    });
   });
 
   /// Helper to create widget with providers

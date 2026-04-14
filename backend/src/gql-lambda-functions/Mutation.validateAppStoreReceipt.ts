@@ -62,7 +62,7 @@ export const handler = async (event: Event) => {
       userId,
       provider: 'APPLE_APP_STORE',
       status: 'ACTIVE',
-      planId: 'appstore-subscription',
+      planId: validation.productId || 'appstore-subscription',
       externalId: validation.subscriptionId,
       currentPeriodEnd: validation.expiresAt,
       createdAt: existingSubscription?.createdAt || new Date().toISOString(),

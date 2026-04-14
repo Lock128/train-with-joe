@@ -98,6 +98,7 @@ export class APIStack extends cdk.Stack {
       environment: {
         NAMESPACE: namespace,
         SUBSCRIPTIONS_TABLE_NAME: subscriptionsTable.tableName,
+        PLAN_IDS_SSM_PATH: `/${namespace}/config/plan-ids`,
       },
     };
 
@@ -118,6 +119,17 @@ export class APIStack extends cdk.Stack {
         actions: ['ssm:GetParameter', 'ssm:GetParameters'],
         resources: [
           `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter/${namespace}/stripe/*`,
+        ],
+      }),
+    );
+
+    // Grant SSM permissions for plan IDs parameter
+    createStripeCheckoutFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['ssm:GetParameter'],
+        resources: [
+          `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter/${namespace}/config/plan-ids`,
         ],
       }),
     );
@@ -728,6 +740,7 @@ export class APIStack extends cdk.Stack {
         USAGE_COUNTERS_TABLE_NAME: usageCountersTable.tableName,
         SUBSCRIPTIONS_TABLE_NAME: subscriptionsTable.tableName,
         USER_POOL_ID: userPool.userPoolId,
+        PLAN_IDS_SSM_PATH: `/${namespace}/config/plan-ids`,
       },
     };
 
@@ -799,6 +812,44 @@ export class APIStack extends cdk.Stack {
     getTierStatisticsDataSource.createResolver('GetTierStatisticsResolver', {
       typeName: 'Query',
       fieldName: 'getTierStatistics',
+    });
+
+    // Grant SSM permissions for plan IDs parameter to pricing Lambda functions
+    const planIdsSsmArn = `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter/${namespace}/config/plan-ids`;
+    const pricingFunctionsNeedingSsm = [getUsageLimitsFunction, adminSetUserTierFunction, getTierStatisticsFunction];
+    for (const fn of pricingFunctionsNeedingSsm) {
+      fn.addToRolePolicy(
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          actions: ['ssm:GetParameter'],
+          resources: [planIdsSsmArn],
+        }),
+      );
+    }
+
+    // Create getPlanIds Lambda function
+    const getPlanIdsFunction = new NodejsFunction(this, 'GetPlanIdsFunction', {
+      ...pricingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getPlanIds.ts'),
+      handler: 'handler',
+    });
+
+    usersTable.grantReadData(getPlanIdsFunction);
+    usageCountersTable.grantReadData(getPlanIdsFunction);
+    subscriptionsTable.grantReadData(getPlanIdsFunction);
+    getPlanIdsFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['ssm:GetParameter'],
+        resources: [planIdsSsmArn],
+      }),
+    );
+
+    const getPlanIdsDataSource = api.addLambdaDataSource('GetPlanIdsDataSource', getPlanIdsFunction);
+
+    getPlanIdsDataSource.createResolver('GetPlanIdsResolver', {
+      typeName: 'Query',
+      fieldName: 'getPlanIds',
     });
 
     // Export API endpoint URL and API ID
