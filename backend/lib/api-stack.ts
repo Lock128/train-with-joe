@@ -787,6 +787,30 @@ export class APIStack extends cdk.Stack {
       fieldName: 'adminSetUserTier',
     });
 
+    // Create syncMissingUsers Lambda function (admin only)
+    const syncMissingUsersFunction = new NodejsFunction(this, 'SyncMissingUsersFunction', {
+      ...pricingLambdaProps,
+      timeout: cdk.Duration.minutes(2),
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.syncMissingUsers.ts'),
+      handler: 'handler',
+    });
+
+    usersTable.grantReadWriteData(syncMissingUsersFunction);
+    syncMissingUsersFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['cognito-idp:ListUsers'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
+
+    const syncMissingUsersDataSource = api.addLambdaDataSource('SyncMissingUsersDataSource', syncMissingUsersFunction);
+
+    syncMissingUsersDataSource.createResolver('SyncMissingUsersResolver', {
+      typeName: 'Mutation',
+      fieldName: 'syncMissingUsers',
+    });
+
     // Create getTierStatistics Lambda function (admin only)
     const getTierStatisticsFunction = new NodejsFunction(this, 'GetTierStatisticsFunction', {
       ...pricingLambdaProps,

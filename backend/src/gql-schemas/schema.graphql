@@ -452,6 +452,12 @@ type MigrateUserDataResponse @aws_cognito_user_pools {
   error: String
 }
 
+type SyncMissingUsersResponse @aws_cognito_user_pools {
+  success: Boolean!
+  createdCount: Int!
+  error: String
+}
+
 type TrainingStatisticsResponse @aws_cognito_user_pools {
   success: Boolean!
   statistics: TrainingStatistics
@@ -576,6 +582,7 @@ type Mutation {
   # Admin operations
   migrateUserData(input: MigrateUserDataInput!): MigrateUserDataResponse @aws_cognito_user_pools
   adminSetUserTier(input: AdminSetUserTierInput!): UserResponse @aws_cognito_user_pools
+  syncMissingUsers: SyncMissingUsersResponse @aws_cognito_user_pools
 
   # Training operations
   createTraining(input: CreateTrainingInput!): TrainingResponse @aws_cognito_user_pools

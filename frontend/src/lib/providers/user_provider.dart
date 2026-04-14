@@ -285,6 +285,28 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  /// Sync Cognito users missing from DynamoDB (admin only).
+  /// Returns {success, createdCount, error}.
+  Future<Map<String, dynamic>?> syncMissingUsers() async {
+    try {
+      const mutation = '''
+        mutation SyncMissingUsers {
+          syncMissingUsers {
+            success
+            createdCount
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(mutation);
+      return response['syncMissingUsers'] as Map<String, dynamic>?;
+    } catch (e) {
+      debugPrint('Error syncing missing users: $e');
+      return {'success': false, 'createdCount': 0, 'error': e.toString()};
+    }
+  }
+
   /// Clear user data (on sign out)
   void clear() {
     _user = null;

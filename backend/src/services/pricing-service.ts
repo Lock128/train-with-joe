@@ -251,11 +251,7 @@ export class PricingService {
    */
   async checkImageScanLimit(userId: string): Promise<void> {
     const user = await this.userRepository.getById(userId);
-    if (!user) {
-      throw new Error(`User with id ${userId} not found`);
-    }
-
-    const tier = user.tier ?? Tier.FREE;
+    const tier = user?.tier ?? Tier.FREE;
     const limits = getTierLimits(tier);
 
     // Unlimited scans — no check needed
@@ -296,11 +292,7 @@ export class PricingService {
    */
   async checkVocabularyListLimit(userId: string): Promise<void> {
     const user = await this.userRepository.getById(userId);
-    if (!user) {
-      throw new Error(`User with id ${userId} not found`);
-    }
-
-    const tier = user.tier ?? Tier.FREE;
+    const tier = user?.tier ?? Tier.FREE;
     const limits = getTierLimits(tier);
 
     // Unlimited lists — no check needed
@@ -328,11 +320,7 @@ export class PricingService {
    */
   async checkAiTrainingAccess(userId: string): Promise<void> {
     const user = await this.userRepository.getById(userId);
-    if (!user) {
-      throw new Error(`User with id ${userId} not found`);
-    }
-
-    const tier = user.tier ?? Tier.FREE;
+    const tier = user?.tier ?? Tier.FREE;
 
     if (!canAccessAiTraining(tier)) {
       throw new UpgradeRequiredError({
@@ -370,11 +358,7 @@ export class PricingService {
    */
   async getUsageStatus(userId: string): Promise<UsageStatus> {
     const user = await this.userRepository.getById(userId);
-    if (!user) {
-      throw new Error(`User with id ${userId} not found`);
-    }
-
-    const tier = user.tier ?? Tier.FREE;
+    const tier = user?.tier ?? Tier.FREE;
     const limits = getTierLimits(tier);
     const counter = await this.usageCounterRepository.getByUserId(userId);
 

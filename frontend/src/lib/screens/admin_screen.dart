@@ -96,6 +96,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
   // Track per-user selected tier for override dropdown
   final Map<String, String> _selectedTiers = {};
   final Set<String> _applyingTier = {};
+  bool _isSyncing = false;
 
   static const _tierOptions = ['FREE', 'BASIC', 'PRO'];
 
@@ -170,6 +171,36 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
     }
   }
 
+  Future<void> _syncMissingUsers() async {
+    setState(() => _isSyncing = true);
+    final result = await context.read<UserProvider>().syncMissingUsers();
+    if (!mounted) return;
+    setState(() => _isSyncing = false);
+
+    final success = result?['success'] == true;
+    final createdCount = result?['createdCount'] as int? ?? 0;
+    final error = result?['error'] as String?;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(createdCount > 0
+              ? 'Synced $createdCount missing user${createdCount == 1 ? '' : 's'} from Cognito'
+              : 'All users are already synced'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      if (createdCount > 0) _fetchUsers();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error ?? 'Failed to sync users'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Future<void> _applyTierOverride(String userId, String tier) async {
     setState(() => _applyingTier.add(userId));
     final updatedUser = await context.read<UserProvider>().adminSetUserTier(userId, tier);
@@ -230,12 +261,24 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '${users.length} user${users.length == 1 ? '' : 's'}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
-            ),
+          child: Row(
+            children: [
+              Text(
+                '${users.length} user${users.length == 1 ? '' : 's'}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+              ),
+              const Spacer(),
+              _isSyncing
+                  ? const SizedBox(
+                      width: 16, height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : TextButton.icon(
+                      onPressed: _syncMissingUsers,
+                      icon: const Icon(Icons.sync, size: 16),
+                      label: const Text('Sync from Cognito', style: TextStyle(fontSize: 12)),
+                    ),
+            ],
           ),
         ),
         const SizedBox(height: 4),
