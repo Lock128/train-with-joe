@@ -119,7 +119,7 @@ describe('APIStack CDK Integration Tests', () => {
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(30); // 30 Lambda data sources
+    expect(lambdaSources.length).toBe(31); // 31 Lambda data sources
   });
 
   test('should export API endpoint URL and ID', () => {
