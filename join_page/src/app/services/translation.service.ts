@@ -13,6 +13,7 @@ export class TranslationService {
     'nav.features': { en: 'Features', de: 'Funktionen' },
     'nav.getStarted': { en: 'Get Started', de: 'Loslegen' },
     'nav.login': { en: 'Login', de: 'Anmelden' },
+    'nav.pricing': { en: 'Pricing', de: 'Preise' },
 
     // Hero
     'hero.badge': { en: 'FUN LEARNING PLATFORM', de: 'SPASSIGE LERNPLATTFORM' },
@@ -181,6 +182,35 @@ export class TranslationService {
       en: 'Account created but auto-login failed. Redirecting to login...',
       de: 'Konto erstellt, aber automatische Anmeldung fehlgeschlagen. Weiterleitung...',
     },
+
+    // Pricing section
+    'pricing.title': { en: 'Choose Your Plan', de: 'Wähle deinen Plan' },
+    'pricing.subtitle': { en: 'Start free and upgrade as you grow', de: 'Starte kostenlos und upgrade bei Bedarf' },
+    'pricing.free.name': { en: 'Free', de: 'Kostenlos' },
+    'pricing.free.price': { en: '$0', de: '0 €' },
+    'pricing.free.period': { en: 'Forever free', de: 'Für immer kostenlos' },
+    'pricing.free.scans': { en: '5 image scans total', de: '5 Bild-Scans insgesamt' },
+    'pricing.free.lists': { en: '5 vocabulary lists', de: '5 Vokabellisten' },
+    'pricing.free.ai': { en: 'AI Training', de: 'KI-Training' },
+    'pricing.free.btn': { en: 'Get Started', de: 'Loslegen' },
+    'pricing.basic.name': { en: 'Basic', de: 'Basis' },
+    'pricing.basic.price': { en: '$2.99', de: '2,99 €' },
+    'pricing.basic.per': { en: '/mo', de: '/Monat' },
+    'pricing.basic.period': { en: 'Billed monthly', de: 'Monatliche Abrechnung' },
+    'pricing.basic.scans': { en: '25 image scans/mo', de: '25 Bild-Scans/Monat' },
+    'pricing.basic.lists': { en: 'Unlimited vocabulary lists', de: 'Unbegrenzte Vokabellisten' },
+    'pricing.basic.ai': { en: 'AI Training', de: 'KI-Training' },
+    'pricing.basic.btn': { en: 'Get Started', de: 'Loslegen' },
+    'pricing.pro.name': { en: 'Pro', de: 'Pro' },
+    'pricing.pro.badge': { en: 'Recommended', de: 'Empfohlen' },
+    'pricing.pro.price': { en: '$9.99', de: '9,99 €' },
+    'pricing.pro.per': { en: '/mo', de: '/Monat' },
+    'pricing.pro.period': { en: 'Billed monthly', de: 'Monatliche Abrechnung' },
+    'pricing.pro.scans': { en: 'Unlimited image scans', de: 'Unbegrenzte Bild-Scans' },
+    'pricing.pro.lists': { en: 'Unlimited vocabulary lists', de: 'Unbegrenzte Vokabellisten' },
+    'pricing.pro.ai': { en: 'AI Training', de: 'KI-Training' },
+    'pricing.pro.comingSoon': { en: 'Coming Soon', de: 'Demnächst' },
+    'pricing.pro.btn': { en: 'Get Started', de: 'Loslegen' },
 
     // Footer
     'footer.rights': { en: 'All rights reserved.', de: 'Alle Rechte vorbehalten.' },

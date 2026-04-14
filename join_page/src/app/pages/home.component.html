@@ -8,7 +8,7 @@
           {{ i18n.currentLang() === 'en' ? '🇩🇪 DE' : '🇬🇧 EN' }}
         </button>
         <button class="btn btn-outline" (click)="scrollToFeatures()">{{ i18n.t('nav.features') }}</button>
-        <button class="btn btn-outline" (click)="scrollToPricing()">Pricing</button>
+        <button class="btn btn-outline" (click)="scrollToPricing()">{{ i18n.t('nav.pricing') }}</button>
         <a class="btn btn-outline" [href]="loginUrl">{{ i18n.t('nav.login') }}</a>
         <button class="btn btn-primary" (click)="scrollToRegister()">{{ i18n.t('nav.getStarted') }}</button>
       </div>
@@ -171,89 +171,89 @@
 <!-- Pricing Section -->
 <section class="section pricing-section" id="pricing">
   <div class="container">
-    <h2 class="section-title">Choose Your Plan</h2>
-    <p class="section-subtitle">Start free and upgrade as you grow</p>
+    <h2 class="section-title">{{ i18n.t('pricing.title') }}</h2>
+    <p class="section-subtitle">{{ i18n.t('pricing.subtitle') }}</p>
 
     <div class="pricing-grid">
       <!-- Free Plan -->
       <div class="pricing-card">
         <div class="pricing-card-header">
-          <h3 class="pricing-plan-name">Free</h3>
+          <h3 class="pricing-plan-name">{{ i18n.t('pricing.free.name') }}</h3>
           <div class="pricing-price">
-            <span class="pricing-amount">$0</span>
+            <span class="pricing-amount">{{ i18n.t('pricing.free.price') }}</span>
           </div>
-          <p class="pricing-period">Forever free</p>
+          <p class="pricing-period">{{ i18n.t('pricing.free.period') }}</p>
         </div>
         <ul class="pricing-features">
           <li class="pricing-feature">
             <span class="pricing-feature-icon">✓</span>
-            5 image scans total
+            {{ i18n.t('pricing.free.scans') }}
           </li>
           <li class="pricing-feature">
             <span class="pricing-feature-icon">✓</span>
-            5 vocabulary lists
+            {{ i18n.t('pricing.free.lists') }}
           </li>
           <li class="pricing-feature pricing-feature-disabled">
             <span class="pricing-feature-icon">✗</span>
-            AI Training
+            {{ i18n.t('pricing.free.ai') }}
           </li>
         </ul>
-        <button class="btn btn-outline pricing-btn" (click)="scrollToRegister()">Get Started</button>
+        <button class="btn btn-outline pricing-btn" (click)="scrollToRegister()">{{ i18n.t('pricing.free.btn') }}</button>
       </div>
 
       <!-- Basic Plan -->
       <div class="pricing-card">
         <div class="pricing-card-header">
-          <h3 class="pricing-plan-name">Basic</h3>
+          <h3 class="pricing-plan-name">{{ i18n.t('pricing.basic.name') }}</h3>
           <div class="pricing-price">
-            <span class="pricing-amount">$2.99</span>
-            <span class="pricing-per">/mo</span>
+            <span class="pricing-amount">{{ i18n.t('pricing.basic.price') }}</span>
+            <span class="pricing-per">{{ i18n.t('pricing.basic.per') }}</span>
           </div>
-          <p class="pricing-period">Billed monthly</p>
+          <p class="pricing-period">{{ i18n.t('pricing.basic.period') }}</p>
         </div>
         <ul class="pricing-features">
           <li class="pricing-feature">
             <span class="pricing-feature-icon">✓</span>
-            25 image scans/mo
+            {{ i18n.t('pricing.basic.scans') }}
           </li>
           <li class="pricing-feature">
             <span class="pricing-feature-icon">✓</span>
-            Unlimited vocabulary lists
+            {{ i18n.t('pricing.basic.lists') }}
           </li>
           <li class="pricing-feature pricing-feature-disabled">
             <span class="pricing-feature-icon">✗</span>
-            AI Training
+            {{ i18n.t('pricing.basic.ai') }}
           </li>
         </ul>
-        <button class="btn btn-outline pricing-btn" (click)="scrollToRegister()">Get Started</button>
+        <button class="btn btn-outline pricing-btn" (click)="scrollToRegister()">{{ i18n.t('pricing.basic.btn') }}</button>
       </div>
 
       <!-- Pro Plan (Recommended) -->
       <div class="pricing-card pricing-card-recommended">
-        <div class="pricing-badge">Recommended</div>
+        <div class="pricing-badge">{{ i18n.t('pricing.pro.badge') }}</div>
         <div class="pricing-card-header">
-          <h3 class="pricing-plan-name">Pro</h3>
+          <h3 class="pricing-plan-name">{{ i18n.t('pricing.pro.name') }}</h3>
           <div class="pricing-price">
-            <span class="pricing-amount">$9.99</span>
-            <span class="pricing-per">/mo</span>
+            <span class="pricing-amount">{{ i18n.t('pricing.pro.price') }}</span>
+            <span class="pricing-per">{{ i18n.t('pricing.pro.per') }}</span>
           </div>
-          <p class="pricing-period">Billed monthly</p>
+          <p class="pricing-period">{{ i18n.t('pricing.pro.period') }}</p>
         </div>
         <ul class="pricing-features">
           <li class="pricing-feature">
             <span class="pricing-feature-icon">✓</span>
-            Unlimited image scans
+            {{ i18n.t('pricing.pro.scans') }}
           </li>
           <li class="pricing-feature">
             <span class="pricing-feature-icon">✓</span>
-            Unlimited vocabulary lists
+            {{ i18n.t('pricing.pro.lists') }}
           </li>
           <li class="pricing-feature">
             <span class="pricing-feature-icon">✓</span>
-            AI Training <span class="pricing-coming-soon">Coming Soon</span>
+            {{ i18n.t('pricing.pro.ai') }} <span class="pricing-coming-soon">{{ i18n.t('pricing.pro.comingSoon') }}</span>
           </li>
         </ul>
-        <button class="btn btn-primary pricing-btn" (click)="scrollToRegister()">Get Started</button>
+        <button class="btn btn-primary pricing-btn" (click)="scrollToRegister()">{{ i18n.t('pricing.pro.btn') }}</button>
       </div>
     </div>
   </div>
