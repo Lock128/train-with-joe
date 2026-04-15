@@ -24,7 +24,7 @@ export class AIService {
   private constructor() {
     const region = process.env.AWS_REGION || 'eu-central-1';
     this.bedrockClient = new BedrockRuntimeClient({ region });
-    this.modelId = process.env.BEDROCK_MODEL_ID || 'amazon.nova-2-lite-v1:0';
+    this.modelId = process.env.BEDROCK_MODEL_ID || 'eu.amazon.nova-2-lite-v1:0';
     this.rateLimitMap = new Map();
   }
 

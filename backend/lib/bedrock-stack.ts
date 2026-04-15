@@ -23,14 +23,14 @@ export class BedrockStack extends Stack {
 
     // Create SSM parameter for Bedrock model ID
     const modelIdParameter = new StringParameter(this, 'BedrockModelIdParam', {
-      stringValue: 'amazon.nova-2-lite-v1:0',
+      stringValue: 'eu.amazon.nova-2-lite-v1:0',
       parameterName: `/${namespace}/bedrock/model-id`,
       description: 'Bedrock model ID for AI content generation (multimodal, supports image analysis)',
       simpleName: false,
     });
 
     // Store model ARN (for reference, though we use model ID in practice)
-    this.bedrockModelArn = `arn:aws:bedrock:${this.region}::foundation-model/amazon.nova-2-lite-v1:0`;
+    this.bedrockModelArn = `arn:aws:bedrock:${this.region}:${this.account}:inference-profile/eu.amazon.nova-2-lite-v1:0`;
 
     // Create IAM policy statement for Bedrock access
     // This will be attached to Lambda functions that need Bedrock access
