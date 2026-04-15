@@ -1,6 +1,15 @@
 import * as cdk from 'aws-cdk-lib';
 import { type Construct } from 'constructs';
-import { GraphqlApi, SchemaFile, FieldLogLevel, AuthorizationType } from 'aws-cdk-lib/aws-appsync';
+import {
+  GraphqlApi,
+  SchemaFile,
+  FieldLogLevel,
+  AuthorizationType,
+  Code,
+  FunctionRuntime,
+  AppsyncFunction,
+  Resolver,
+} from 'aws-cdk-lib/aws-appsync';
 import { type UserPool } from 'aws-cdk-lib/aws-cognito';
 import { PolicyStatement, Role, ServicePrincipal, Effect } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
@@ -84,6 +93,67 @@ export class APIStack extends cdk.Stack {
     // Grant permissions to data sources
     usersTable.grantReadWriteData(usersDataSource);
     subscriptionsTable.grantReadWriteData(subscriptionsDataSource);
+
+    // Register DynamoDB JS resolvers for User operations
+    const getUserFunction = new AppsyncFunction(this, 'GetUserFunction', {
+      name: 'getUserFunction',
+      api,
+      dataSource: usersDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'gql-functions/Query.getUser.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    new Resolver(this, 'GetUserResolver', {
+      api,
+      typeName: 'Query',
+      fieldName: 'getUser',
+      code: Code.fromInline(`
+        export function request(ctx) { return {}; }
+        export function response(ctx) { return ctx.prev.result; }
+      `),
+      runtime: FunctionRuntime.JS_1_0_0,
+      pipelineConfig: [getUserFunction],
+    });
+
+    const createUserFunction = new AppsyncFunction(this, 'CreateUserAppSyncFunction', {
+      name: 'createUserFunction',
+      api,
+      dataSource: usersDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'gql-functions/Mutation.createUser.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    new Resolver(this, 'CreateUserResolver', {
+      api,
+      typeName: 'Mutation',
+      fieldName: 'createUser',
+      code: Code.fromInline(`
+        export function request(ctx) { return {}; }
+        export function response(ctx) { return ctx.prev.result; }
+      `),
+      runtime: FunctionRuntime.JS_1_0_0,
+      pipelineConfig: [createUserFunction],
+    });
+
+    const updateUserFunction = new AppsyncFunction(this, 'UpdateUserAppSyncFunction', {
+      name: 'updateUserFunction',
+      api,
+      dataSource: usersDataSource,
+      code: Code.fromAsset(path.join(__dirname, 'gql-functions/Mutation.updateUser.js')),
+      runtime: FunctionRuntime.JS_1_0_0,
+    });
+
+    new Resolver(this, 'UpdateUserResolver', {
+      api,
+      typeName: 'Mutation',
+      fieldName: 'updateUser',
+      code: Code.fromInline(`
+        export function request(ctx) { return {}; }
+        export function response(ctx) { return ctx.prev.result; }
+      `),
+      runtime: FunctionRuntime.JS_1_0_0,
+      pipelineConfig: [updateUserFunction],
+    });
 
     // Create Lambda functions for resolvers
     const lambdaProps = {
