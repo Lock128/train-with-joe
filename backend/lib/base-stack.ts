@@ -203,7 +203,7 @@ export class BaseStack extends Stack {
     this.planIdsSsmPath = `/${namespace}/config/plan-ids`;
     new StringParameter(this, 'PlanIdsParameter', {
       stringValue: JSON.stringify({
-        stripe: { basic: 'CONFIGURE_ME_stripe_basic', pro: 'CONFIGURE_ME_stripe_pro' },
+        stripe: { basic: 'price_1TMjma6XJ81FrS4ZxPpE6yr4', pro: 'price_1TMjmb6XJ81FrS4ZKdv5Site' },
         appStore: { basic: 'CONFIGURE_ME_appstore_basic', pro: 'CONFIGURE_ME_appstore_pro' },
         playStore: { basic: 'CONFIGURE_ME_playstore_basic', pro: 'CONFIGURE_ME_playstore_pro' },
       }),

@@ -271,8 +271,8 @@ describe('BaseStack CDK Integration Tests', () => {
     expect(planIdsParams.length).toBe(1);
     const paramValue = (planIdsParams[0] as any).Properties.Value;
     expect(paramValue).toContain('CONFIGURE_ME');
-    expect(paramValue).toContain('CONFIGURE_ME_stripe_basic');
-    expect(paramValue).toContain('CONFIGURE_ME_stripe_pro');
+    expect(paramValue).toContain('price_1TMjma6XJ81FrS4ZxPpE6yr4');
+    expect(paramValue).toContain('price_1TMjmb6XJ81FrS4ZKdv5Site');
     expect(paramValue).toContain('CONFIGURE_ME_appstore_basic');
     expect(paramValue).toContain('CONFIGURE_ME_appstore_pro');
     expect(paramValue).toContain('CONFIGURE_ME_playstore_basic');
