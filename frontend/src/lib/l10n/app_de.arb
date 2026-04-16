@@ -144,6 +144,12 @@
   "restorePurchases": "Käufe wiederherstellen",
   "subscribe": "Abonnieren",
 
+  "pricingLegalPrefix": "Mit dem Abonnement stimmst du unseren ",
+  "pricingTermsLink": "Nutzungsbedingungen",
+  "pricingLegalAnd": "und der",
+  "pricingPrivacyLink": "Datenschutzerklärung",
+  "pricingLegalSuffix": " zu.",
+
   "tryAgain": "Erneut versuchen",
   "backToTraining": "Zurück zum Training",
   "overallAccuracy": "Gesamtgenauigkeit: {percent}%",

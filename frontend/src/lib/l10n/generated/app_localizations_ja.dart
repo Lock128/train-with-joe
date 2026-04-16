@@ -434,6 +434,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get subscribe => '登録する';
 
   @override
+  String get pricingLegalPrefix => 'By subscribing, you agree to our ';
+
+  @override
+  String get pricingTermsLink => 'Terms of Service';
+
+  @override
+  String get pricingLegalAnd => 'and';
+
+  @override
+  String get pricingPrivacyLink => 'Privacy Policy';
+
+  @override
+  String get pricingLegalSuffix => '.';
+
+  @override
   String get tryAgain => 'もう一度試す';
 
   @override

@@ -443,6 +443,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get subscribe => 'Abonnieren';
 
   @override
+  String get pricingLegalPrefix => 'Mit dem Abonnement stimmst du unseren ';
+
+  @override
+  String get pricingTermsLink => 'Nutzungsbedingungen';
+
+  @override
+  String get pricingLegalAnd => 'und der';
+
+  @override
+  String get pricingPrivacyLink => 'Datenschutzerklärung';
+
+  @override
+  String get pricingLegalSuffix => ' zu.';
+
+  @override
   String get tryAgain => 'Erneut versuchen';
 
   @override

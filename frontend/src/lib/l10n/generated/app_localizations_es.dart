@@ -443,6 +443,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get subscribe => 'Suscribirse';
 
   @override
+  String get pricingLegalPrefix => 'By subscribing, you agree to our ';
+
+  @override
+  String get pricingTermsLink => 'Terms of Service';
+
+  @override
+  String get pricingLegalAnd => 'and';
+
+  @override
+  String get pricingPrivacyLink => 'Privacy Policy';
+
+  @override
+  String get pricingLegalSuffix => '.';
+
+  @override
   String get tryAgain => 'Intentar de nuevo';
 
   @override

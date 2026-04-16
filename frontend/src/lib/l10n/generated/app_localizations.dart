@@ -898,6 +898,36 @@ abstract class AppLocalizations {
   /// **'Subscribe'**
   String get subscribe;
 
+  /// No description provided for @pricingLegalPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'By subscribing, you agree to our '**
+  String get pricingLegalPrefix;
+
+  /// No description provided for @pricingTermsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get pricingTermsLink;
+
+  /// No description provided for @pricingLegalAnd.
+  ///
+  /// In en, this message translates to:
+  /// **'and'**
+  String get pricingLegalAnd;
+
+  /// No description provided for @pricingPrivacyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get pricingPrivacyLink;
+
+  /// No description provided for @pricingLegalSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'.'**
+  String get pricingLegalSuffix;
+
   /// No description provided for @tryAgain.
   ///
   /// In en, this message translates to:

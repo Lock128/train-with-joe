@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/subscription_provider.dart';
 import '../services/payment_service.dart';
@@ -608,6 +610,51 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         );
                       },
                     ),
+
+                    // Terms and Privacy links
+                    Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Center(
+                        child: Text.rich(
+                          TextSpan(
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 13,
+                            ),
+                            children: [
+                              TextSpan(text: l10n.pricingLegalPrefix),
+                              TextSpan(
+                                text: l10n.pricingTermsLink,
+                                style: const TextStyle(
+                                  color: Color(0xFF2B6CB0),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () => launchUrl(
+                                        Uri.parse('https://trainwithjoe.app/terms'),
+                                        mode: LaunchMode.externalApplication,
+                                      ),
+                              ),
+                              TextSpan(text: ' ${l10n.pricingLegalAnd} '),
+                              TextSpan(
+                                text: l10n.pricingPrivacyLink,
+                                style: const TextStyle(
+                                  color: Color(0xFF2B6CB0),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () => launchUrl(
+                                        Uri.parse('https://trainwithjoe.app/privacy'),
+                                        mode: LaunchMode.externalApplication,
+                                      ),
+                              ),
+                              TextSpan(text: l10n.pricingLegalSuffix),
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -617,8 +664,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       ),
     );
   }
-
-  /// Build usage indicators section showing current usage vs limits
   Widget _buildUsageSection(SubscriptionProvider provider) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24.0),

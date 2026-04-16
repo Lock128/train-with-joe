@@ -475,6 +475,23 @@
   border-radius: 14px;
 }
 
+.pricing-legal {
+  text-align: center;
+  color: #757575;
+  font-size: 14px;
+  margin-top: 32px;
+}
+
+.pricing-legal a {
+  color: #2B6CB0;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.pricing-legal a:hover {
+  text-decoration: underline;
+}
+
 .form-container {
   max-width: 500px;
   margin: 0 auto;

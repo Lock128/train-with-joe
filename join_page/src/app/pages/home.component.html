@@ -256,6 +256,10 @@
         <button class="btn btn-primary pricing-btn" (click)="scrollToRegister()">{{ i18n.t('pricing.pro.btn') }}</button>
       </div>
     </div>
+
+    <p class="pricing-legal">
+      {{ i18n.t('pricing.legalPrefix') }} <a href="/terms">{{ i18n.t('pricing.termsLink') }}</a> {{ i18n.t('pricing.legalAnd') }} <a href="/privacy">{{ i18n.t('pricing.privacyLink') }}</a>{{ i18n.t('pricing.legalSuffix') }}
+    </p>
   </div>
 </section>
 

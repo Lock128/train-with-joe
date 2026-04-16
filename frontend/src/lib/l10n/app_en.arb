@@ -210,6 +210,12 @@
   "restorePurchases": "Restore Purchases",
   "subscribe": "Subscribe",
 
+  "pricingLegalPrefix": "By subscribing, you agree to our ",
+  "pricingTermsLink": "Terms of Service",
+  "pricingLegalAnd": "and",
+  "pricingPrivacyLink": "Privacy Policy",
+  "pricingLegalSuffix": ".",
+
   "tryAgain": "Try Again",
   "backToTraining": "Back to Training",
   "overallAccuracy": "Overall accuracy: {percent}%",

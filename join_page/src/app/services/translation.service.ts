@@ -211,6 +211,11 @@ export class TranslationService {
     'pricing.pro.ai': { en: 'AI Training', de: 'KI-Training' },
     'pricing.pro.comingSoon': { en: 'Coming Soon', de: 'Demnächst' },
     'pricing.pro.btn': { en: 'Get Started', de: 'Loslegen' },
+    'pricing.legalPrefix': { en: 'By subscribing, you agree to our', de: 'Mit dem Abonnement stimmst du unseren' },
+    'pricing.termsLink': { en: 'Terms of Service', de: 'Nutzungsbedingungen' },
+    'pricing.legalAnd': { en: 'and', de: 'und der' },
+    'pricing.privacyLink': { en: 'Privacy Policy', de: 'Datenschutzerklärung' },
+    'pricing.legalSuffix': { en: '.', de: ' zu.' },
 
     // Footer
     'footer.rights': { en: 'All rights reserved.', de: 'Alle Rechte vorbehalten.' },
