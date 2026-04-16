@@ -19,12 +19,12 @@ STRIPE_BASIC="price_1TMjma6XJ81FrS4ZxPpE6yr4"
 STRIPE_PRO="price_1TMjmb6XJ81FrS4ZKdv5Site"
 
 # ── App Store product IDs ────────────────────────────────────────────
-APPSTORE_BASIC="${APPSTORE_BASIC:-CONFIGURE_ME_appstore_basic}"
-APPSTORE_PRO="${APPSTORE_PRO:-CONFIGURE_ME_appstore_pro}"
+APPSTORE_BASIC="${APPSTORE_BASIC:-appstore_sub_joe_basic}"
+APPSTORE_PRO="${APPSTORE_PRO:-appstore_sub_joe_pro}"
 
 # ── Play Store product IDs ───────────────────────────────────────────
-PLAYSTORE_BASIC="${PLAYSTORE_BASIC:-CONFIGURE_ME_playstore_basic}"
-PLAYSTORE_PRO="${PLAYSTORE_PRO:-CONFIGURE_ME_playstore_pro}"
+PLAYSTORE_BASIC="${PLAYSTORE_BASIC:-playstore_sub_joe_basic}"
+PLAYSTORE_PRO="${PLAYSTORE_PRO:-playstore_sub_joe_pro}"
 
 # Build the JSON value
 PLAN_IDS_JSON=$(cat <<EOF

@@ -136,11 +136,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Future<void> _handleSubscribe(String planId) async {
     final subscriptionProvider = context.read<SubscriptionProvider>();
-    final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
 
-    // Show loading dialog
-    if (mounted) {
+    // On iOS/Android the native payment sheet handles its own UI,
+    // so we only show a loading dialog for Stripe (web).
+    final isNativePurchase = _detectedPlatform == PaymentProvider.appleAppStore ||
+        _detectedPlatform == PaymentProvider.googlePlayStore;
+
+    if (!isNativePurchase && mounted) {
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -152,18 +155,24 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     final success = await subscriptionProvider.createSubscription(planId);
 
-    // Close loading dialog
-    if (mounted) {
-      navigator.pop();
+    // Close loading dialog (only shown for web/Stripe)
+    if (!isNativePurchase && mounted) {
+      Navigator.of(context).pop();
+    }
 
+    if (mounted) {
       if (success) {
         final l10n = AppLocalizations.of(context)!;
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(l10n.subscriptionCreated),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // On native platforms the result is 'pending' — the purchase stream
+        // callback will show the final success message, so skip the snackbar.
+        if (!isNativePurchase) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(l10n.subscriptionCreated),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
         // Reload usage limits after subscription change
         subscriptionProvider.loadUsageLimits();
       } else if (subscriptionProvider.error != null) {
@@ -226,39 +235,24 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   /// Handle restore purchases (iOS only)
   Future<void> _handleRestorePurchases() async {
-    final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context)!;
     final subscriptionProvider = context.read<SubscriptionProvider>();
 
+    // restorePurchases() returns immediately — results arrive via the
+    // purchase stream.  Showing a non-dismissible dialog here caused a
+    // black screen because there was no guaranteed code path to pop it
+    // (the stream callback lives in a different scope).  Instead, show a
+    // brief snackbar so the user knows something is happening.
     try {
-      // Show loading dialog
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            final l10n = AppLocalizations.of(context)!;
-            return AlertDialog(
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text(l10n.restoringPurchases),
-                ],
-              ),
-            );
-          },
-        );
-      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.restoringPurchases),
+          duration: const Duration(seconds: 3),
+        ),
+      );
 
       await _paymentService.restorePurchases();
-
-      // Close loading dialog
-      if (mounted) {
-        navigator.pop();
-      }
 
       // Reload subscription and usage data
       if (mounted) {
@@ -273,10 +267,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         );
       }
     } catch (e) {
-      // Close loading dialog
       if (mounted) {
-        navigator.pop();
-
         messenger.showSnackBar(
           SnackBar(
             content: Text(l10n.failedToRestorePurchases(e.toString())),
