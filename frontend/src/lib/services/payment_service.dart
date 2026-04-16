@@ -211,9 +211,14 @@ class PaymentService {
       ''';
 
       // Get current URL for success/cancel redirects
-      final currentUrl = Uri.base.toString();
-      final successUrl = '${currentUrl}subscription?success=true';
-      final cancelUrl = '${currentUrl}subscription?canceled=true';
+      // With hash-based routing, query params must go BEFORE the hash
+      // fragment, otherwise the browser treats them as part of the fragment
+      // and Uri.base.queryParameters won't find them.
+      // Correct: https://app.example.com/?success=true#/subscription
+      // Wrong:   https://app.example.com/#/subscription?success=true
+      final origin = Uri.base.origin;
+      final successUrl = '$origin/?success=true#/subscription';
+      final cancelUrl = '$origin/?canceled=true#/subscription';
 
       final response = await _apiService.mutate(
         mutation,
@@ -485,6 +490,7 @@ class PaymentService {
   }
 
   /// Open Stripe Checkout (web only)
+  /// Redirects the current page to Stripe Checkout instead of opening a new tab
   Future<void> openStripeCheckout(String checkoutUrl) async {
     if (!kIsWeb) {
       throw Exception('Stripe Checkout is only available on web');
@@ -492,7 +498,8 @@ class PaymentService {
 
     final uri = Uri.parse(checkoutUrl);
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      // Use _self to redirect the current tab instead of opening a new one
+      await launchUrl(uri, webOnlyWindowName: '_self');
     } else {
       throw Exception('Could not launch Stripe Checkout');
     }
