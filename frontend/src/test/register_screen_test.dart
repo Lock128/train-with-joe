@@ -24,6 +24,12 @@ class MockAuthUser extends AuthUser {
       : super(signInDetails: const _MockSignInDetails());
 }
 
+/// Helper to create a successful SignInResult for mocking.
+SignInResult mockSignInResultDone() => const SignInResult(
+      isSignedIn: true,
+      nextStep: AuthNextSignInStep(signInStep: AuthSignInStep.done),
+    );
+
 @GenerateMocks([AuthService])
 void main() {
   late MockAuthService mockAuthService;
@@ -252,12 +258,7 @@ void main() {
       // Arrange
       when(mockAuthService.register(any, any, name: anyNamed('name')))
           .thenAnswer((_) async => {});
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'token',
-            refreshToken: 'refresh',
-            idToken: 'id',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
       );
@@ -299,12 +300,7 @@ void main() {
       // Arrange
       when(mockAuthService.register(any, any, name: anyNamed('name')))
           .thenAnswer((_) async => {});
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'token',
-            refreshToken: 'refresh',
-            idToken: 'id',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
       );
@@ -378,12 +374,7 @@ void main() {
           .thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 100));
       });
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'token',
-            refreshToken: 'refresh',
-            idToken: 'id',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
       );
@@ -425,12 +416,7 @@ void main() {
           .thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 100));
       });
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'token',
-            refreshToken: 'refresh',
-            idToken: 'id',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
       );
@@ -473,12 +459,7 @@ void main() {
       // Arrange
       when(mockAuthService.register(any, any, name: anyNamed('name')))
           .thenAnswer((_) async => {});
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'token',
-            refreshToken: 'refresh',
-            idToken: 'id',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
       );

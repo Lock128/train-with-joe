@@ -19,6 +19,12 @@ class MockAuthUser extends AuthUser {
       : super(signInDetails: const MockSignInDetails());
 }
 
+/// Helper to create a successful SignInResult for mocking.
+SignInResult mockSignInResultDone() => const SignInResult(
+      isSignedIn: true,
+      nextStep: AuthNextSignInStep(signInStep: AuthSignInStep.done),
+    );
+
 @GenerateMocks([AuthService])
 void main() {
   late app.AuthProvider authProvider;
@@ -47,12 +53,7 @@ void main() {
     test('signIn success should update state to authenticated', () async {
       // Arrange
       final mockUser = createMockUser('test-user-id', 'test@example.com');
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
-            idToken: 'id-token',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       // Act
@@ -87,12 +88,7 @@ void main() {
       final mockUser = createMockUser('test-user-id', 'test@example.com');
       when(mockAuthService.signIn(any, any)).thenAnswer((_) async {
         await Future.delayed(Duration(milliseconds: 100));
-        return AuthTokens(
-          accessToken: 'access-token',
-          refreshToken: 'refresh-token',
-          idToken: 'id-token',
-          expiresIn: 3600,
-        );
+        return mockSignInResultDone();
       });
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
@@ -110,12 +106,7 @@ void main() {
     test('signOut should clear user and set state to unauthenticated', () async {
       // Arrange - first sign in
       final mockUser = createMockUser('test-user-id', 'test@example.com');
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
-            idToken: 'id-token',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
       await authProvider.signIn('test@example.com', 'password123');
       
@@ -171,12 +162,7 @@ void main() {
       final mockUser = createMockUser('new-user-id', 'newuser@example.com');
       when(mockAuthService.confirmSignUp(any, any))
           .thenAnswer((_) async => true);
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
-            idToken: 'id-token',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       // Act
@@ -304,12 +290,7 @@ void main() {
       
       // Second attempt succeeds
       when(mockAuthService.signIn('test@example.com', 'correctpassword'))
-          .thenAnswer((_) async => AuthTokens(
-                accessToken: 'access-token',
-                refreshToken: 'refresh-token',
-                idToken: 'id-token',
-                expiresIn: 3600,
-              ));
+          .thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       // Act - first attempt
@@ -334,12 +315,7 @@ void main() {
       });
 
       final mockUser = createMockUser('test-user-id', 'test@example.com');
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'access-token',
-            refreshToken: 'refresh-token',
-            idToken: 'id-token',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       // Act

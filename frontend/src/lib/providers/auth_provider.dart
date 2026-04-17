@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import '../services/auth_service.dart';
 
 /// Provider for managing authentication state
@@ -222,7 +221,10 @@ class AuthProvider extends ChangeNotifier {
       }
 
       // Auto sign-in after successful verification
-      await _authService.signIn(email, password);
+      final signInResult = await _authService.signIn(email, password);
+      if (!signInResult.isSignedIn) {
+        throw Exception('Sign in failed after verification');
+      }
       _currentUser = await _authService.getCurrentUser();
       _isAuthenticated = true;
       _error = null;

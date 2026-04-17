@@ -29,6 +29,12 @@ class MockAuthUser extends AuthUser {
       : super(signInDetails: const _MockSignInDetails());
 }
 
+/// Helper to create a successful SignInResult for mocking.
+SignInResult mockSignInResultDone() => const SignInResult(
+      isSignedIn: true,
+      nextStep: AuthNextSignInStep(signInStep: AuthSignInStep.done),
+    );
+
 // Mock UserProvider that doesn't call API
 class MockUserProvider extends UserProvider {
   @override
@@ -163,12 +169,7 @@ void main() {
 
       testWidgets('should navigate from home to subscription', (tester) async {
         // Arrange - create authenticated user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -201,12 +202,7 @@ void main() {
 
       testWidgets('should navigate back from subscription to home', (tester) async {
         // Arrange - create authenticated user and navigate to subscription
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -272,12 +268,7 @@ void main() {
 
       testWidgets('should allow authenticated user to access home', (tester) async {
         // Arrange - authenticate user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -294,12 +285,7 @@ void main() {
 
       testWidgets('should allow authenticated user to access subscription', (tester) async {
         // Arrange - authenticate user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -320,12 +306,7 @@ void main() {
 
       testWidgets('should redirect authenticated user from signin to home', (tester) async {
         // Arrange - authenticate user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -346,12 +327,7 @@ void main() {
 
       testWidgets('should redirect authenticated user from register to home', (tester) async {
         // Arrange - authenticate user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -372,12 +348,7 @@ void main() {
 
       testWidgets('should redirect to signin after signout', (tester) async {
         // Arrange - authenticate user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -437,12 +408,7 @@ void main() {
 
       testWidgets('should handle deep link to home route when authenticated', (tester) async {
         // Arrange - authenticate user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -463,12 +429,7 @@ void main() {
 
       testWidgets('should handle deep link to subscription route when authenticated', (tester) async {
         // Arrange - authenticate user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -517,12 +478,7 @@ void main() {
 
       testWidgets('should redirect deep link to signin when authenticated', (tester) async {
         // Arrange - authenticate user
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );
@@ -554,12 +510,7 @@ void main() {
         expect(find.text('Welcome Back'), findsOneWidget);
 
         // Act - authenticate
-        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-              accessToken: 'token',
-              refreshToken: 'refresh',
-              idToken: 'id',
-              expiresIn: 3600,
-            ));
+        when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
         when(mockAuthService.getCurrentUser()).thenAnswer(
           (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
         );

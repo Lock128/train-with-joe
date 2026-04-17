@@ -24,6 +24,12 @@ class MockAuthUser extends AuthUser {
       : super(signInDetails: const _MockSignInDetails());
 }
 
+/// Helper to create a successful SignInResult for mocking.
+SignInResult mockSignInResultDone() => const SignInResult(
+      isSignedIn: true,
+      nextStep: AuthNextSignInStep(signInStep: AuthSignInStep.done),
+    );
+
 @GenerateMocks([AuthService, GoRouter])
 void main() {
   late MockAuthService mockAuthService;
@@ -157,12 +163,7 @@ void main() {
 
     testWidgets('should call signIn on valid form submission', (tester) async {
       // Arrange
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'token',
-            refreshToken: 'refresh',
-            idToken: 'id',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
       );
@@ -215,12 +216,7 @@ void main() {
       // Arrange
       when(mockAuthService.signIn(any, any)).thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 100));
-        return AuthTokens(
-          accessToken: 'token',
-          refreshToken: 'refresh',
-          idToken: 'id',
-          expiresIn: 3600,
-        );
+        return mockSignInResultDone();
       });
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
@@ -252,12 +248,7 @@ void main() {
       // Arrange
       when(mockAuthService.signIn(any, any)).thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 100));
-        return AuthTokens(
-          accessToken: 'token',
-          refreshToken: 'refresh',
-          idToken: 'id',
-          expiresIn: 3600,
-        );
+        return mockSignInResultDone();
       });
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
@@ -294,12 +285,7 @@ void main() {
 
     testWidgets('should trim email input', (tester) async {
       // Arrange
-      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => AuthTokens(
-            accessToken: 'token',
-            refreshToken: 'refresh',
-            idToken: 'id',
-            expiresIn: 3600,
-          ));
+      when(mockAuthService.signIn(any, any)).thenAnswer((_) async => mockSignInResultDone());
       when(mockAuthService.getCurrentUser()).thenAnswer(
         (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
       );
