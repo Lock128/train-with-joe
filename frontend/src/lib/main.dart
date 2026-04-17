@@ -22,6 +22,8 @@ import 'screens/vocabulary_lists_screen.dart';
 import 'screens/vocabulary_list_detail_screen.dart';
 import 'screens/info_screen.dart';
 import 'screens/training_list_screen.dart';
+import 'screens/reset_password_screen.dart';
+import 'screens/new_password_screen.dart';
 import 'screens/training_creation_screen.dart';
 import 'screens/training_detail_screen.dart';
 import 'screens/training_execution_screen.dart';
@@ -313,6 +315,8 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
         final isAuthRoute = state.matchedLocation == '/signin' || 
                            state.matchedLocation == '/register' ||
                            state.matchedLocation == '/verify-email' ||
+                           state.matchedLocation == '/reset-password' ||
+                           state.matchedLocation == '/new-password' ||
                            state.matchedLocation == '/auth/callback';
 
         // Redirect to home if authenticated and trying to access auth routes
@@ -353,6 +357,17 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
             final email = state.uri.queryParameters['email'] ?? '';
             return VerifyEmailScreen(email: email);
           },
+        ),
+        GoRoute(
+          path: '/reset-password',
+          builder: (context, state) {
+            final email = state.uri.queryParameters['email'] ?? '';
+            return ResetPasswordScreen(initialEmail: email);
+          },
+        ),
+        GoRoute(
+          path: '/new-password',
+          builder: (context, state) => const NewPasswordScreen(),
         ),
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),

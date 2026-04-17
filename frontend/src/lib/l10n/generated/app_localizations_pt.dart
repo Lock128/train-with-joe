@@ -598,4 +598,67 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get parentalGateAnswerLabel => 'Resposta';
+
+  @override
+  String get forgotPassword => 'Esqueceu a senha?';
+
+  @override
+  String get resetPassword => 'Redefinir senha';
+
+  @override
+  String get resetPasswordDescription =>
+      'Digite seu e-mail e enviaremos um código para redefinir sua senha.';
+
+  @override
+  String get sendResetCode => 'Enviar código';
+
+  @override
+  String get enterResetCode => 'Digite o código';
+
+  @override
+  String get enterResetCodeDescription =>
+      'Digite o código de 6 dígitos enviado para seu e-mail junto com sua nova senha.';
+
+  @override
+  String get verificationCode => 'Código de verificação';
+
+  @override
+  String get enterVerificationCode => 'Digite o código de verificação';
+
+  @override
+  String get codeMustBeSixDigits => 'O código deve ter 6 dígitos';
+
+  @override
+  String get newPassword => 'Nova senha';
+
+  @override
+  String get enterNewPassword => 'Digite uma nova senha';
+
+  @override
+  String get confirmNewPassword => 'Confirmar nova senha';
+
+  @override
+  String get passwordMinLength => 'A senha deve ter pelo menos 8 caracteres';
+
+  @override
+  String get passwordsDoNotMatch => 'As senhas não coincidem';
+
+  @override
+  String get resetPasswordButton => 'Redefinir senha e entrar';
+
+  @override
+  String get resendCode => 'Não recebeu o código? Reenviar';
+
+  @override
+  String get codeSentAgain => 'Um novo código foi enviado para seu e-mail';
+
+  @override
+  String get setNewPassword => 'Definir nova senha';
+
+  @override
+  String get setNewPasswordDescription =>
+      'Sua conta requer uma nova senha. Escolha uma para continuar.';
+
+  @override
+  String get setNewPasswordButton => 'Definir senha e continuar';
 }

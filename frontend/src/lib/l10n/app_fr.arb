@@ -193,5 +193,26 @@
   "parentalGateDescription": "Demandez à un parent ou tuteur de résoudre ceci pour continuer :",
   "parentalGateWrongAnswer": "Ce n'est pas correct. Réessayez.",
   "parentalGateCooldown": "Trop de tentatives. Veuillez patienter…",
-  "parentalGateAnswerLabel": "Réponse"
+  "parentalGateAnswerLabel": "Réponse",
+
+  "forgotPassword": "Mot de passe oublié ?",
+  "resetPassword": "Réinitialiser le mot de passe",
+  "resetPasswordDescription": "Entrez votre adresse e-mail et nous vous enverrons un code pour réinitialiser votre mot de passe.",
+  "sendResetCode": "Envoyer le code",
+  "enterResetCode": "Entrez le code",
+  "enterResetCodeDescription": "Entrez le code à 6 chiffres envoyé à votre e-mail ainsi que votre nouveau mot de passe.",
+  "verificationCode": "Code de vérification",
+  "enterVerificationCode": "Veuillez entrer le code de vérification",
+  "codeMustBeSixDigits": "Le code doit comporter 6 chiffres",
+  "newPassword": "Nouveau mot de passe",
+  "enterNewPassword": "Veuillez entrer un nouveau mot de passe",
+  "confirmNewPassword": "Confirmer le nouveau mot de passe",
+  "passwordMinLength": "Le mot de passe doit comporter au moins 8 caractères",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+  "resetPasswordButton": "Réinitialiser et se connecter",
+  "resendCode": "Pas reçu de code ? Renvoyer",
+  "codeSentAgain": "Un nouveau code a été envoyé à votre e-mail",
+  "setNewPassword": "Définir un nouveau mot de passe",
+  "setNewPasswordDescription": "Votre compte nécessite un nouveau mot de passe. Veuillez en choisir un pour continuer.",
+  "setNewPasswordButton": "Définir le mot de passe et continuer"
 }

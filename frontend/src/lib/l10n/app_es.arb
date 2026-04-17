@@ -193,5 +193,26 @@
   "parentalGateDescription": "Pide a un padre o tutor que resuelva esto para continuar:",
   "parentalGateWrongAnswer": "Eso no es correcto. Inténtalo de nuevo.",
   "parentalGateCooldown": "Demasiados intentos. Por favor espera…",
-  "parentalGateAnswerLabel": "Respuesta"
+  "parentalGateAnswerLabel": "Respuesta",
+
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "resetPassword": "Restablecer contraseña",
+  "resetPasswordDescription": "Ingresa tu correo electrónico y te enviaremos un código para restablecer tu contraseña.",
+  "sendResetCode": "Enviar código",
+  "enterResetCode": "Ingresa el código",
+  "enterResetCodeDescription": "Ingresa el código de 6 dígitos enviado a tu correo junto con tu nueva contraseña.",
+  "verificationCode": "Código de verificación",
+  "enterVerificationCode": "Ingresa el código de verificación",
+  "codeMustBeSixDigits": "El código debe tener 6 dígitos",
+  "newPassword": "Nueva contraseña",
+  "enterNewPassword": "Ingresa una nueva contraseña",
+  "confirmNewPassword": "Confirmar nueva contraseña",
+  "passwordMinLength": "La contraseña debe tener al menos 8 caracteres",
+  "passwordsDoNotMatch": "Las contraseñas no coinciden",
+  "resetPasswordButton": "Restablecer contraseña e iniciar sesión",
+  "resendCode": "¿No recibiste el código? Reenviar",
+  "codeSentAgain": "Se ha enviado un nuevo código a tu correo",
+  "setNewPassword": "Establecer nueva contraseña",
+  "setNewPasswordDescription": "Tu cuenta requiere una nueva contraseña. Elige una para continuar.",
+  "setNewPasswordButton": "Establecer contraseña y continuar"
 }

@@ -53,8 +53,12 @@ class _SignInScreenState extends State<SignInScreen> {
       _passwordController.text,
     );
 
-    if (success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
       context.go('/home');
+    } else if (authProvider.needsNewPassword) {
+      context.go('/new-password');
     }
   }
 
@@ -154,6 +158,17 @@ class _SignInScreenState extends State<SignInScreen> {
                         enabled: !authProvider.isLoading,
                       ),
                       const SizedBox(height: 24),
+
+                      // Forgot password link
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: authProvider.isLoading
+                              ? null
+                              : () => context.go('/reset-password?email=${Uri.encodeComponent(_emailController.text.trim())}'),
+                          child: Text(AppLocalizations.of(context)!.forgotPassword),
+                        ),
+                      ),
 
                       // Registration success banner
                       if (_showRegisteredBanner)

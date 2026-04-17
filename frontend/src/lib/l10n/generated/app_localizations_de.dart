@@ -600,4 +600,68 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get parentalGateAnswerLabel => 'Antwort';
+
+  @override
+  String get forgotPassword => 'Passwort vergessen?';
+
+  @override
+  String get resetPassword => 'Passwort zurücksetzen';
+
+  @override
+  String get resetPasswordDescription =>
+      'Gib deine E-Mail-Adresse ein und wir senden dir einen Code zum Zurücksetzen deines Passworts.';
+
+  @override
+  String get sendResetCode => 'Code senden';
+
+  @override
+  String get enterResetCode => 'Code eingeben';
+
+  @override
+  String get enterResetCodeDescription =>
+      'Gib den 6-stelligen Code aus deiner E-Mail zusammen mit deinem neuen Passwort ein.';
+
+  @override
+  String get verificationCode => 'Bestätigungscode';
+
+  @override
+  String get enterVerificationCode => 'Bitte gib den Bestätigungscode ein';
+
+  @override
+  String get codeMustBeSixDigits => 'Der Code muss 6 Ziffern haben';
+
+  @override
+  String get newPassword => 'Neues Passwort';
+
+  @override
+  String get enterNewPassword => 'Bitte gib ein neues Passwort ein';
+
+  @override
+  String get confirmNewPassword => 'Neues Passwort bestätigen';
+
+  @override
+  String get passwordMinLength =>
+      'Das Passwort muss mindestens 8 Zeichen lang sein';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwörter stimmen nicht überein';
+
+  @override
+  String get resetPasswordButton => 'Passwort zurücksetzen & anmelden';
+
+  @override
+  String get resendCode => 'Keinen Code erhalten? Erneut senden';
+
+  @override
+  String get codeSentAgain => 'Ein neuer Code wurde an deine E-Mail gesendet';
+
+  @override
+  String get setNewPassword => 'Neues Passwort festlegen';
+
+  @override
+  String get setNewPasswordDescription =>
+      'Dein Konto erfordert ein neues Passwort. Bitte wähle eines, um fortzufahren.';
+
+  @override
+  String get setNewPasswordButton => 'Passwort festlegen & weiter';
 }

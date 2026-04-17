@@ -4,36 +4,69 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 
 /// Authentication service using AWS Amplify Cognito
 class AuthService {
-  /// Sign in with email and password
-  Future<AuthTokens> signIn(String email, String password) async {
+  /// Sign in with email and password.
+  /// Returns [SignInResult] so the caller can inspect the next step
+  /// (e.g. confirmSignInWithNewPassword).
+  Future<SignInResult> signIn(String email, String password) async {
     try {
       final result = await Amplify.Auth.signIn(
         username: email,
         password: password,
       );
+      return result;
+    } on AuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
 
-      if (!result.isSignedIn) {
-        throw Exception('Sign in failed');
-      }
+  /// Fetch auth tokens from the current session.
+  Future<AuthTokens> fetchTokens() async {
+    final session = await Amplify.Auth.fetchAuthSession();
+    if (session is CognitoAuthSession) {
+      final tokens = session.userPoolTokensResult.value;
+      return AuthTokens(
+        accessToken: tokens.accessToken.toString(),
+        refreshToken: tokens.refreshToken.toString(),
+        idToken: tokens.idToken.toString(),
+        expiresIn: 3600,
+      );
+    }
+    throw Exception('Failed to retrieve auth tokens');
+  }
 
-      // Fetch the session to get tokens
-      final session = await Amplify.Auth.fetchAuthSession();
-      if (session is CognitoAuthSession) {
-        final tokens = session.userPoolTokensResult.value;
-        // In Amplify 2.x, tokens are already strings
-        final accessTokenStr = tokens.accessToken.toString();
-        final refreshTokenStr = tokens.refreshToken.toString();
-        final idTokenStr = tokens.idToken.toString();
-        
-        return AuthTokens(
-          accessToken: accessTokenStr,
-          refreshToken: refreshTokenStr,
-          idToken: idTokenStr,
-          expiresIn: 3600, // Default 1 hour
-        );
-      }
+  /// Complete the NEW_PASSWORD_REQUIRED challenge.
+  Future<SignInResult> confirmSignInWithNewPassword(String newPassword) async {
+    try {
+      final result = await Amplify.Auth.confirmSignIn(
+        confirmationValue: newPassword,
+      );
+      return result;
+    } on AuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
 
-      throw Exception('Failed to retrieve auth tokens');
+  /// Initiate a password reset — Cognito sends a verification code.
+  Future<ResetPasswordResult> resetPassword(String email) async {
+    try {
+      return await Amplify.Auth.resetPassword(username: email);
+    } on AuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  /// Confirm the password reset with the code and new password.
+  Future<void> confirmResetPassword(
+    String email,
+    String code,
+    String newPassword,
+  ) async {
+    try {
+      await Amplify.Auth.confirmResetPassword(
+        username: email,
+        newPassword: newPassword,
+        confirmationCode: code,
+      );
     } on AuthException catch (e) {
       throw _handleAuthException(e);
     }

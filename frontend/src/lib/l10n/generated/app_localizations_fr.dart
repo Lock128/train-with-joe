@@ -605,4 +605,68 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get parentalGateAnswerLabel => 'Réponse';
+
+  @override
+  String get forgotPassword => 'Mot de passe oublié ?';
+
+  @override
+  String get resetPassword => 'Réinitialiser le mot de passe';
+
+  @override
+  String get resetPasswordDescription =>
+      'Entrez votre adresse e-mail et nous vous enverrons un code pour réinitialiser votre mot de passe.';
+
+  @override
+  String get sendResetCode => 'Envoyer le code';
+
+  @override
+  String get enterResetCode => 'Entrez le code';
+
+  @override
+  String get enterResetCodeDescription =>
+      'Entrez le code à 6 chiffres envoyé à votre e-mail ainsi que votre nouveau mot de passe.';
+
+  @override
+  String get verificationCode => 'Code de vérification';
+
+  @override
+  String get enterVerificationCode => 'Veuillez entrer le code de vérification';
+
+  @override
+  String get codeMustBeSixDigits => 'Le code doit comporter 6 chiffres';
+
+  @override
+  String get newPassword => 'Nouveau mot de passe';
+
+  @override
+  String get enterNewPassword => 'Veuillez entrer un nouveau mot de passe';
+
+  @override
+  String get confirmNewPassword => 'Confirmer le nouveau mot de passe';
+
+  @override
+  String get passwordMinLength =>
+      'Le mot de passe doit comporter au moins 8 caractères';
+
+  @override
+  String get passwordsDoNotMatch => 'Les mots de passe ne correspondent pas';
+
+  @override
+  String get resetPasswordButton => 'Réinitialiser et se connecter';
+
+  @override
+  String get resendCode => 'Pas reçu de code ? Renvoyer';
+
+  @override
+  String get codeSentAgain => 'Un nouveau code a été envoyé à votre e-mail';
+
+  @override
+  String get setNewPassword => 'Définir un nouveau mot de passe';
+
+  @override
+  String get setNewPasswordDescription =>
+      'Votre compte nécessite un nouveau mot de passe. Veuillez en choisir un pour continuer.';
+
+  @override
+  String get setNewPasswordButton => 'Définir le mot de passe et continuer';
 }

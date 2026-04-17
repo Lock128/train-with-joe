@@ -595,4 +595,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get parentalGateAnswerLabel => 'Answer';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get resetPasswordDescription =>
+      'Enter your email and we\'ll send you a code to reset your password.';
+
+  @override
+  String get sendResetCode => 'Send Reset Code';
+
+  @override
+  String get enterResetCode => 'Enter Reset Code';
+
+  @override
+  String get enterResetCodeDescription =>
+      'Enter the 6-digit code sent to your email along with your new password.';
+
+  @override
+  String get verificationCode => 'Verification Code';
+
+  @override
+  String get enterVerificationCode => 'Please enter the verification code';
+
+  @override
+  String get codeMustBeSixDigits => 'Code must be 6 digits';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get enterNewPassword => 'Please enter a new password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get passwordMinLength => 'Password must be at least 8 characters';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get resetPasswordButton => 'Reset Password & Sign In';
+
+  @override
+  String get resendCode => 'Didn\'t receive a code? Resend';
+
+  @override
+  String get codeSentAgain => 'A new code has been sent to your email';
+
+  @override
+  String get setNewPassword => 'Set New Password';
+
+  @override
+  String get setNewPasswordDescription =>
+      'Your account requires a new password. Please choose one to continue.';
+
+  @override
+  String get setNewPasswordButton => 'Set Password & Continue';
 }

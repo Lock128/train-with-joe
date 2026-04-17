@@ -193,5 +193,26 @@
   "parentalGateDescription": "Peça a um pai ou responsável para resolver isto para continuar:",
   "parentalGateWrongAnswer": "Resposta incorreta. Tente novamente.",
   "parentalGateCooldown": "Muitas tentativas. Aguarde um momento…",
-  "parentalGateAnswerLabel": "Resposta"
+  "parentalGateAnswerLabel": "Resposta",
+
+  "forgotPassword": "Esqueceu a senha?",
+  "resetPassword": "Redefinir senha",
+  "resetPasswordDescription": "Digite seu e-mail e enviaremos um código para redefinir sua senha.",
+  "sendResetCode": "Enviar código",
+  "enterResetCode": "Digite o código",
+  "enterResetCodeDescription": "Digite o código de 6 dígitos enviado para seu e-mail junto com sua nova senha.",
+  "verificationCode": "Código de verificação",
+  "enterVerificationCode": "Digite o código de verificação",
+  "codeMustBeSixDigits": "O código deve ter 6 dígitos",
+  "newPassword": "Nova senha",
+  "enterNewPassword": "Digite uma nova senha",
+  "confirmNewPassword": "Confirmar nova senha",
+  "passwordMinLength": "A senha deve ter pelo menos 8 caracteres",
+  "passwordsDoNotMatch": "As senhas não coincidem",
+  "resetPasswordButton": "Redefinir senha e entrar",
+  "resendCode": "Não recebeu o código? Reenviar",
+  "codeSentAgain": "Um novo código foi enviado para seu e-mail",
+  "setNewPassword": "Definir nova senha",
+  "setNewPasswordDescription": "Sua conta requer uma nova senha. Escolha uma para continuar.",
+  "setNewPasswordButton": "Definir senha e continuar"
 }

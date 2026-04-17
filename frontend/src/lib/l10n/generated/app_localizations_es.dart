@@ -601,4 +601,68 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get parentalGateAnswerLabel => 'Respuesta';
+
+  @override
+  String get forgotPassword => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get resetPassword => 'Restablecer contraseña';
+
+  @override
+  String get resetPasswordDescription =>
+      'Ingresa tu correo electrónico y te enviaremos un código para restablecer tu contraseña.';
+
+  @override
+  String get sendResetCode => 'Enviar código';
+
+  @override
+  String get enterResetCode => 'Ingresa el código';
+
+  @override
+  String get enterResetCodeDescription =>
+      'Ingresa el código de 6 dígitos enviado a tu correo junto con tu nueva contraseña.';
+
+  @override
+  String get verificationCode => 'Código de verificación';
+
+  @override
+  String get enterVerificationCode => 'Ingresa el código de verificación';
+
+  @override
+  String get codeMustBeSixDigits => 'El código debe tener 6 dígitos';
+
+  @override
+  String get newPassword => 'Nueva contraseña';
+
+  @override
+  String get enterNewPassword => 'Ingresa una nueva contraseña';
+
+  @override
+  String get confirmNewPassword => 'Confirmar nueva contraseña';
+
+  @override
+  String get passwordMinLength =>
+      'La contraseña debe tener al menos 8 caracteres';
+
+  @override
+  String get passwordsDoNotMatch => 'Las contraseñas no coinciden';
+
+  @override
+  String get resetPasswordButton => 'Restablecer contraseña e iniciar sesión';
+
+  @override
+  String get resendCode => '¿No recibiste el código? Reenviar';
+
+  @override
+  String get codeSentAgain => 'Se ha enviado un nuevo código a tu correo';
+
+  @override
+  String get setNewPassword => 'Establecer nueva contraseña';
+
+  @override
+  String get setNewPasswordDescription =>
+      'Tu cuenta requiere una nueva contraseña. Elige una para continuar.';
+
+  @override
+  String get setNewPasswordButton => 'Establecer contraseña y continuar';
 }

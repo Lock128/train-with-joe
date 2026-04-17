@@ -280,5 +280,26 @@
   "parentalGateDescription": "Ask a parent or guardian to solve this to continue:",
   "parentalGateWrongAnswer": "That's not right. Try again.",
   "parentalGateCooldown": "Too many attempts. Please wait…",
-  "parentalGateAnswerLabel": "Answer"
+  "parentalGateAnswerLabel": "Answer",
+
+  "forgotPassword": "Forgot password?",
+  "resetPassword": "Reset Password",
+  "resetPasswordDescription": "Enter your email and we'll send you a code to reset your password.",
+  "sendResetCode": "Send Reset Code",
+  "enterResetCode": "Enter Reset Code",
+  "enterResetCodeDescription": "Enter the 6-digit code sent to your email along with your new password.",
+  "verificationCode": "Verification Code",
+  "enterVerificationCode": "Please enter the verification code",
+  "codeMustBeSixDigits": "Code must be 6 digits",
+  "newPassword": "New Password",
+  "enterNewPassword": "Please enter a new password",
+  "confirmNewPassword": "Confirm New Password",
+  "passwordMinLength": "Password must be at least 8 characters",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "resetPasswordButton": "Reset Password & Sign In",
+  "resendCode": "Didn't receive a code? Resend",
+  "codeSentAgain": "A new code has been sent to your email",
+  "setNewPassword": "Set New Password",
+  "setNewPasswordDescription": "Your account requires a new password. Please choose one to continue.",
+  "setNewPasswordButton": "Set Password & Continue"
 }

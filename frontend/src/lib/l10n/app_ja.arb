@@ -193,5 +193,26 @@
   "parentalGateDescription": "続けるには、保護者にこの問題を解いてもらってください：",
   "parentalGateWrongAnswer": "不正解です。もう一度お試しください。",
   "parentalGateCooldown": "試行回数が多すぎます。しばらくお待ちください…",
-  "parentalGateAnswerLabel": "答え"
+  "parentalGateAnswerLabel": "答え",
+
+  "forgotPassword": "パスワードをお忘れですか？",
+  "resetPassword": "パスワードをリセット",
+  "resetPasswordDescription": "メールアドレスを入力してください。パスワードリセット用のコードをお送りします。",
+  "sendResetCode": "リセットコードを送信",
+  "enterResetCode": "コードを入力",
+  "enterResetCodeDescription": "メールに送信された6桁のコードと新しいパスワードを入力してください。",
+  "verificationCode": "確認コード",
+  "enterVerificationCode": "確認コードを入力してください",
+  "codeMustBeSixDigits": "コードは6桁である必要があります",
+  "newPassword": "新しいパスワード",
+  "enterNewPassword": "新しいパスワードを入力してください",
+  "confirmNewPassword": "新しいパスワードの確認",
+  "passwordMinLength": "パスワードは8文字以上である必要があります",
+  "passwordsDoNotMatch": "パスワードが一致しません",
+  "resetPasswordButton": "パスワードをリセットしてサインイン",
+  "resendCode": "コードが届きませんか？再送信",
+  "codeSentAgain": "新しいコードがメールに送信されました",
+  "setNewPassword": "新しいパスワードを設定",
+  "setNewPasswordDescription": "アカウントに新しいパスワードが必要です。続行するにはパスワードを設定してください。",
+  "setNewPasswordButton": "パスワードを設定して続行"
 }

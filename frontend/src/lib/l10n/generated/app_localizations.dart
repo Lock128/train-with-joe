@@ -1179,6 +1179,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Answer'**
   String get parentalGateAnswerLabel;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// No description provided for @resetPasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we\'ll send you a code to reset your password.'**
+  String get resetPasswordDescription;
+
+  /// No description provided for @sendResetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Reset Code'**
+  String get sendResetCode;
+
+  /// No description provided for @enterResetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Reset Code'**
+  String get enterResetCode;
+
+  /// No description provided for @enterResetCodeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code sent to your email along with your new password.'**
+  String get enterResetCodeDescription;
+
+  /// No description provided for @verificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Code'**
+  String get verificationCode;
+
+  /// No description provided for @enterVerificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the verification code'**
+  String get enterVerificationCode;
+
+  /// No description provided for @codeMustBeSixDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'Code must be 6 digits'**
+  String get codeMustBeSixDigits;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @enterNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a new password'**
+  String get enterNewPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @passwordMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get passwordMinLength;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @resetPasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password & Sign In'**
+  String get resetPasswordButton;
+
+  /// No description provided for @resendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive a code? Resend'**
+  String get resendCode;
+
+  /// No description provided for @codeSentAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'A new code has been sent to your email'**
+  String get codeSentAgain;
+
+  /// No description provided for @setNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set New Password'**
+  String get setNewPassword;
+
+  /// No description provided for @setNewPasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account requires a new password. Please choose one to continue.'**
+  String get setNewPasswordDescription;
+
+  /// No description provided for @setNewPasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Password & Continue'**
+  String get setNewPasswordButton;
 }
 
 class _AppLocalizationsDelegate

@@ -582,4 +582,66 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get parentalGateAnswerLabel => '答え';
+
+  @override
+  String get forgotPassword => 'パスワードをお忘れですか？';
+
+  @override
+  String get resetPassword => 'パスワードをリセット';
+
+  @override
+  String get resetPasswordDescription =>
+      'メールアドレスを入力してください。パスワードリセット用のコードをお送りします。';
+
+  @override
+  String get sendResetCode => 'リセットコードを送信';
+
+  @override
+  String get enterResetCode => 'コードを入力';
+
+  @override
+  String get enterResetCodeDescription => 'メールに送信された6桁のコードと新しいパスワードを入力してください。';
+
+  @override
+  String get verificationCode => '確認コード';
+
+  @override
+  String get enterVerificationCode => '確認コードを入力してください';
+
+  @override
+  String get codeMustBeSixDigits => 'コードは6桁である必要があります';
+
+  @override
+  String get newPassword => '新しいパスワード';
+
+  @override
+  String get enterNewPassword => '新しいパスワードを入力してください';
+
+  @override
+  String get confirmNewPassword => '新しいパスワードの確認';
+
+  @override
+  String get passwordMinLength => 'パスワードは8文字以上である必要があります';
+
+  @override
+  String get passwordsDoNotMatch => 'パスワードが一致しません';
+
+  @override
+  String get resetPasswordButton => 'パスワードをリセットしてサインイン';
+
+  @override
+  String get resendCode => 'コードが届きませんか？再送信';
+
+  @override
+  String get codeSentAgain => '新しいコードがメールに送信されました';
+
+  @override
+  String get setNewPassword => '新しいパスワードを設定';
+
+  @override
+  String get setNewPasswordDescription =>
+      'アカウントに新しいパスワードが必要です。続行するにはパスワードを設定してください。';
+
+  @override
+  String get setNewPasswordButton => 'パスワードを設定して続行';
 }

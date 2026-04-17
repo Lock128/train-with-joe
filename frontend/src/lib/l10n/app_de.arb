@@ -199,5 +199,26 @@
   "parentalGateDescription": "Bitte einen Elternteil oder Erziehungsberechtigten, diese Aufgabe zu lösen:",
   "parentalGateWrongAnswer": "Das ist leider falsch. Versuch es nochmal.",
   "parentalGateCooldown": "Zu viele Versuche. Bitte warte kurz…",
-  "parentalGateAnswerLabel": "Antwort"
+  "parentalGateAnswerLabel": "Antwort",
+
+  "forgotPassword": "Passwort vergessen?",
+  "resetPassword": "Passwort zurücksetzen",
+  "resetPasswordDescription": "Gib deine E-Mail-Adresse ein und wir senden dir einen Code zum Zurücksetzen deines Passworts.",
+  "sendResetCode": "Code senden",
+  "enterResetCode": "Code eingeben",
+  "enterResetCodeDescription": "Gib den 6-stelligen Code aus deiner E-Mail zusammen mit deinem neuen Passwort ein.",
+  "verificationCode": "Bestätigungscode",
+  "enterVerificationCode": "Bitte gib den Bestätigungscode ein",
+  "codeMustBeSixDigits": "Der Code muss 6 Ziffern haben",
+  "newPassword": "Neues Passwort",
+  "enterNewPassword": "Bitte gib ein neues Passwort ein",
+  "confirmNewPassword": "Neues Passwort bestätigen",
+  "passwordMinLength": "Das Passwort muss mindestens 8 Zeichen lang sein",
+  "passwordsDoNotMatch": "Passwörter stimmen nicht überein",
+  "resetPasswordButton": "Passwort zurücksetzen & anmelden",
+  "resendCode": "Keinen Code erhalten? Erneut senden",
+  "codeSentAgain": "Ein neuer Code wurde an deine E-Mail gesendet",
+  "setNewPassword": "Neues Passwort festlegen",
+  "setNewPasswordDescription": "Dein Konto erfordert ein neues Passwort. Bitte wähle eines, um fortzufahren.",
+  "setNewPasswordButton": "Passwort festlegen & weiter"
 }
