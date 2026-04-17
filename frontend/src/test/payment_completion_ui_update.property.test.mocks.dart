@@ -5,11 +5,11 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
 
-import 'package:amplify_flutter/amplify_flutter.dart' as _i3;
+import 'package:amplify_flutter/amplify_flutter.dart' as _i2;
 import 'package:in_app_purchase/in_app_purchase.dart' as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:train_with_joe/services/api_service.dart' as _i4;
-import 'package:train_with_joe/services/auth_service.dart' as _i2;
+import 'package:train_with_joe/services/auth_service.dart' as _i3;
 import 'package:train_with_joe/services/payment_service.dart' as _i6;
 
 // ignore_for_file: type=lint
@@ -27,13 +27,24 @@ import 'package:train_with_joe/services/payment_service.dart' as _i6;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeAuthTokens_0 extends _i1.SmartFake implements _i2.AuthTokens {
-  _FakeAuthTokens_0(Object parent, Invocation parentInvocation)
+class _FakeSignInResult_0 extends _i1.SmartFake implements _i2.SignInResult {
+  _FakeSignInResult_0(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeAuthUser_1 extends _i1.SmartFake implements _i3.AuthUser {
-  _FakeAuthUser_1(Object parent, Invocation parentInvocation)
+class _FakeAuthTokens_1 extends _i1.SmartFake implements _i3.AuthTokens {
+  _FakeAuthTokens_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeResetPasswordResult_2 extends _i1.SmartFake
+    implements _i2.ResetPasswordResult {
+  _FakeResetPasswordResult_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeAuthUser_3 extends _i1.SmartFake implements _i2.AuthUser {
+  _FakeAuthUser_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -217,23 +228,78 @@ class MockPaymentService extends _i1.Mock implements _i6.PaymentService {
 /// A class which mocks [AuthService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockAuthService extends _i1.Mock implements _i2.AuthService {
+class MockAuthService extends _i1.Mock implements _i3.AuthService {
   MockAuthService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i5.Future<_i2.AuthTokens> signIn(String? email, String? password) =>
+  _i5.Future<_i2.SignInResult> signIn(String? email, String? password) =>
       (super.noSuchMethod(
             Invocation.method(#signIn, [email, password]),
-            returnValue: _i5.Future<_i2.AuthTokens>.value(
-              _FakeAuthTokens_0(
+            returnValue: _i5.Future<_i2.SignInResult>.value(
+              _FakeSignInResult_0(
                 this,
                 Invocation.method(#signIn, [email, password]),
               ),
             ),
           )
-          as _i5.Future<_i2.AuthTokens>);
+          as _i5.Future<_i2.SignInResult>);
+
+  @override
+  _i5.Future<_i3.AuthTokens> fetchTokens() =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchTokens, []),
+            returnValue: _i5.Future<_i3.AuthTokens>.value(
+              _FakeAuthTokens_1(this, Invocation.method(#fetchTokens, [])),
+            ),
+          )
+          as _i5.Future<_i3.AuthTokens>);
+
+  @override
+  _i5.Future<_i2.SignInResult> confirmSignInWithNewPassword(
+    String? newPassword,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#confirmSignInWithNewPassword, [newPassword]),
+            returnValue: _i5.Future<_i2.SignInResult>.value(
+              _FakeSignInResult_0(
+                this,
+                Invocation.method(#confirmSignInWithNewPassword, [newPassword]),
+              ),
+            ),
+          )
+          as _i5.Future<_i2.SignInResult>);
+
+  @override
+  _i5.Future<_i2.ResetPasswordResult> resetPassword(String? email) =>
+      (super.noSuchMethod(
+            Invocation.method(#resetPassword, [email]),
+            returnValue: _i5.Future<_i2.ResetPasswordResult>.value(
+              _FakeResetPasswordResult_2(
+                this,
+                Invocation.method(#resetPassword, [email]),
+              ),
+            ),
+          )
+          as _i5.Future<_i2.ResetPasswordResult>);
+
+  @override
+  _i5.Future<void> confirmResetPassword(
+    String? email,
+    String? code,
+    String? newPassword,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#confirmResetPassword, [
+              email,
+              code,
+              newPassword,
+            ]),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
 
   @override
   _i5.Future<void> signOut() =>
@@ -271,14 +337,14 @@ class MockAuthService extends _i1.Mock implements _i2.AuthService {
           as _i5.Future<void>);
 
   @override
-  _i5.Future<_i3.AuthUser> getCurrentUser() =>
+  _i5.Future<_i2.AuthUser> getCurrentUser() =>
       (super.noSuchMethod(
             Invocation.method(#getCurrentUser, []),
-            returnValue: _i5.Future<_i3.AuthUser>.value(
-              _FakeAuthUser_1(this, Invocation.method(#getCurrentUser, [])),
+            returnValue: _i5.Future<_i2.AuthUser>.value(
+              _FakeAuthUser_3(this, Invocation.method(#getCurrentUser, [])),
             ),
           )
-          as _i5.Future<_i3.AuthUser>);
+          as _i5.Future<_i2.AuthUser>);
 
   @override
   _i5.Future<bool> isUserSignedIn() =>
@@ -289,15 +355,15 @@ class MockAuthService extends _i1.Mock implements _i2.AuthService {
           as _i5.Future<bool>);
 
   @override
-  _i5.Future<_i2.AuthTokens> refreshTokens(String? refreshToken) =>
+  _i5.Future<_i3.AuthTokens> refreshTokens(String? refreshToken) =>
       (super.noSuchMethod(
             Invocation.method(#refreshTokens, [refreshToken]),
-            returnValue: _i5.Future<_i2.AuthTokens>.value(
-              _FakeAuthTokens_0(
+            returnValue: _i5.Future<_i3.AuthTokens>.value(
+              _FakeAuthTokens_1(
                 this,
                 Invocation.method(#refreshTokens, [refreshToken]),
               ),
             ),
           )
-          as _i5.Future<_i2.AuthTokens>);
+          as _i5.Future<_i3.AuthTokens>);
 }

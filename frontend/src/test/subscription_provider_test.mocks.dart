@@ -226,6 +226,14 @@ class MockAuthProvider extends _i1.Mock implements _i6.AuthProvider {
           as bool);
 
   @override
+  bool get needsNewPassword =>
+      (super.noSuchMethod(
+            Invocation.getter(#needsNewPassword),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
@@ -234,6 +242,38 @@ class MockAuthProvider extends _i1.Mock implements _i6.AuthProvider {
   _i3.Future<bool> signIn(String? email, String? password) =>
       (super.noSuchMethod(
             Invocation.method(#signIn, [email, password]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> confirmNewPassword(String? newPassword) =>
+      (super.noSuchMethod(
+            Invocation.method(#confirmNewPassword, [newPassword]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> resetPassword(String? email) =>
+      (super.noSuchMethod(
+            Invocation.method(#resetPassword, [email]),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> confirmResetPassword(
+    String? email,
+    String? code,
+    String? newPassword,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#confirmResetPassword, [
+              email,
+              code,
+              newPassword,
+            ]),
             returnValue: _i3.Future<bool>.value(false),
           )
           as _i3.Future<bool>);
