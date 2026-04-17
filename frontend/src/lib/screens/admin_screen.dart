@@ -151,7 +151,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
         case 'APPLE_APP_STORE':
           return 'App Store';
         case 'GOOGLE_PLAY_STORE':
-          return 'Play Store';
+          return 'Google Play';
         default:
           return provider;
       }

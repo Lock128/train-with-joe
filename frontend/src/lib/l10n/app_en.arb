@@ -268,5 +268,17 @@
   "gettingStartedChangeLanguage": "Change your language",
   "gettingStartedChangeLanguageDesc": "Switch the app language in settings to match your preference",
   "gettingStartedExploreTraining": "Explore training modes",
-  "gettingStartedExploreTrainingDesc": "Choose between text input, multiple choice, or AI-powered training"
+  "gettingStartedExploreTrainingDesc": "Choose between text input, multiple choice, or AI-powered training",
+
+  "deleteAccount": "Delete Account",
+  "deleteAccountConfirm": "Are you sure you want to delete your account? This will permanently remove all your data including vocabulary lists, trainings, and subscription records. This action cannot be undone.",
+  "deleteAccountFinalConfirm": "Final Confirmation",
+  "deleteAccountTypeDelete": "Type DELETE to confirm permanent account deletion.",
+  "deleteAccountFailed": "Failed to delete account. Please try again.",
+
+  "parentalGateTitle": "Grown-Ups Only",
+  "parentalGateDescription": "Ask a parent or guardian to solve this to continue:",
+  "parentalGateWrongAnswer": "That's not right. Try again.",
+  "parentalGateCooldown": "Too many attempts. Please wait…",
+  "parentalGateAnswerLabel": "Answer"
 }

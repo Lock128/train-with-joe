@@ -551,4 +551,35 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get gettingStartedExploreTrainingDesc =>
       'テキスト入力、選択式、またはAIトレーニングから選べます';
+
+  @override
+  String get deleteAccount => 'アカウントを削除';
+
+  @override
+  String get deleteAccountConfirm =>
+      '本当にアカウントを削除しますか？単語リスト、トレーニング、サブスクリプションを含むすべてのデータが完全に削除されます。この操作は元に戻せません。';
+
+  @override
+  String get deleteAccountFinalConfirm => '最終確認';
+
+  @override
+  String get deleteAccountTypeDelete => 'アカウントの完全な削除を確認するには DELETE と入力してください。';
+
+  @override
+  String get deleteAccountFailed => 'アカウントの削除に失敗しました。もう一度お試しください。';
+
+  @override
+  String get parentalGateTitle => '大人専用';
+
+  @override
+  String get parentalGateDescription => '続けるには、保護者にこの問題を解いてもらってください：';
+
+  @override
+  String get parentalGateWrongAnswer => '不正解です。もう一度お試しください。';
+
+  @override
+  String get parentalGateCooldown => '試行回数が多すぎます。しばらくお待ちください…';
+
+  @override
+  String get parentalGateAnswerLabel => '答え';
 }

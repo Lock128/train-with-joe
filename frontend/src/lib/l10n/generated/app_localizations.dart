@@ -1119,6 +1119,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose between text input, multiple choice, or AI-powered training'**
   String get gettingStartedExploreTrainingDesc;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete your account? This will permanently remove all your data including vocabulary lists, trainings, and subscription records. This action cannot be undone.'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountFinalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Final Confirmation'**
+  String get deleteAccountFinalConfirm;
+
+  /// No description provided for @deleteAccountTypeDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Type DELETE to confirm permanent account deletion.'**
+  String get deleteAccountTypeDelete;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete account. Please try again.'**
+  String get deleteAccountFailed;
+
+  /// No description provided for @parentalGateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grown-Ups Only'**
+  String get parentalGateTitle;
+
+  /// No description provided for @parentalGateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask a parent or guardian to solve this to continue:'**
+  String get parentalGateDescription;
+
+  /// No description provided for @parentalGateWrongAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s not right. Try again.'**
+  String get parentalGateWrongAnswer;
+
+  /// No description provided for @parentalGateCooldown.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait…'**
+  String get parentalGateCooldown;
+
+  /// No description provided for @parentalGateAnswerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get parentalGateAnswerLabel;
 }
 
 class _AppLocalizationsDelegate

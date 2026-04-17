@@ -557,6 +557,7 @@ type Mutation {
   # User operations
   createUser(input: CreateUserInput!): UserResponse @aws_cognito_user_pools
   updateUser(input: UpdateUserInput!): UserResponse @aws_cognito_user_pools
+  deleteUser: UserResponse @aws_cognito_user_pools
   
   # Subscription operations
   createSubscription(input: CreateSubscriptionInput!): SubscriptionResponse @aws_cognito_user_pools

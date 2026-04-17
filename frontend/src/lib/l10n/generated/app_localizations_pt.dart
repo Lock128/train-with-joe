@@ -564,4 +564,38 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get gettingStartedExploreTrainingDesc =>
       'Escolha entre entrada de texto, múltipla escolha ou treino com IA';
+
+  @override
+  String get deleteAccount => 'Excluir conta';
+
+  @override
+  String get deleteAccountConfirm =>
+      'Tem certeza de que deseja excluir sua conta? Todos os seus dados serão removidos permanentemente, incluindo listas de vocabulário, treinos e assinaturas. Esta ação não pode ser desfeita.';
+
+  @override
+  String get deleteAccountFinalConfirm => 'Confirmação final';
+
+  @override
+  String get deleteAccountTypeDelete =>
+      'Digite DELETE para confirmar a exclusão permanente da conta.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Falha ao excluir a conta. Tente novamente.';
+
+  @override
+  String get parentalGateTitle => 'Apenas para adultos';
+
+  @override
+  String get parentalGateDescription =>
+      'Peça a um pai ou responsável para resolver isto para continuar:';
+
+  @override
+  String get parentalGateWrongAnswer => 'Resposta incorreta. Tente novamente.';
+
+  @override
+  String get parentalGateCooldown => 'Muitas tentativas. Aguarde um momento…';
+
+  @override
+  String get parentalGateAnswerLabel => 'Resposta';
 }

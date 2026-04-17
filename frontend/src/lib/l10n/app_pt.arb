@@ -181,5 +181,17 @@
   "gettingStartedChangeLanguage": "Mude seu idioma",
   "gettingStartedChangeLanguageDesc": "Altere o idioma do app nas configurações de acordo com sua preferência",
   "gettingStartedExploreTraining": "Explore os modos de treino",
-  "gettingStartedExploreTrainingDesc": "Escolha entre entrada de texto, múltipla escolha ou treino com IA"
+  "gettingStartedExploreTrainingDesc": "Escolha entre entrada de texto, múltipla escolha ou treino com IA",
+
+  "deleteAccount": "Excluir conta",
+  "deleteAccountConfirm": "Tem certeza de que deseja excluir sua conta? Todos os seus dados serão removidos permanentemente, incluindo listas de vocabulário, treinos e assinaturas. Esta ação não pode ser desfeita.",
+  "deleteAccountFinalConfirm": "Confirmação final",
+  "deleteAccountTypeDelete": "Digite DELETE para confirmar a exclusão permanente da conta.",
+  "deleteAccountFailed": "Falha ao excluir a conta. Tente novamente.",
+
+  "parentalGateTitle": "Apenas para adultos",
+  "parentalGateDescription": "Peça a um pai ou responsável para resolver isto para continuar:",
+  "parentalGateWrongAnswer": "Resposta incorreta. Tente novamente.",
+  "parentalGateCooldown": "Muitas tentativas. Aguarde um momento…",
+  "parentalGateAnswerLabel": "Resposta"
 }

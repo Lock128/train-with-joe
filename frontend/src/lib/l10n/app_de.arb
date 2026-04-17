@@ -187,5 +187,17 @@
   "gettingStartedChangeLanguage": "Sprache ändern",
   "gettingStartedChangeLanguageDesc": "Wechsle die App-Sprache in den Einstellungen nach deinen Wünschen",
   "gettingStartedExploreTraining": "Trainingsmodi entdecken",
-  "gettingStartedExploreTrainingDesc": "Wähle zwischen Texteingabe, Multiple Choice oder KI-gestütztem Training"
+  "gettingStartedExploreTrainingDesc": "Wähle zwischen Texteingabe, Multiple Choice oder KI-gestütztem Training",
+
+  "deleteAccount": "Konto löschen",
+  "deleteAccountConfirm": "Möchtest du dein Konto wirklich löschen? Alle deine Daten werden dauerhaft entfernt, einschließlich Vokabellisten, Trainings und Abonnements. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "deleteAccountFinalConfirm": "Letzte Bestätigung",
+  "deleteAccountTypeDelete": "Gib DELETE ein, um die dauerhafte Kontolöschung zu bestätigen.",
+  "deleteAccountFailed": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut.",
+
+  "parentalGateTitle": "Nur für Erwachsene",
+  "parentalGateDescription": "Bitte einen Elternteil oder Erziehungsberechtigten, diese Aufgabe zu lösen:",
+  "parentalGateWrongAnswer": "Das ist leider falsch. Versuch es nochmal.",
+  "parentalGateCooldown": "Zu viele Versuche. Bitte warte kurz…",
+  "parentalGateAnswerLabel": "Antwort"
 }

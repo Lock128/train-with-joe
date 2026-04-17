@@ -181,5 +181,17 @@
   "gettingStartedChangeLanguage": "言語を変更する",
   "gettingStartedChangeLanguageDesc": "設定でアプリの言語をお好みに合わせて切り替えましょう",
   "gettingStartedExploreTraining": "トレーニングモードを探索する",
-  "gettingStartedExploreTrainingDesc": "テキスト入力、選択式、またはAIトレーニングから選べます"
+  "gettingStartedExploreTrainingDesc": "テキスト入力、選択式、またはAIトレーニングから選べます",
+
+  "deleteAccount": "アカウントを削除",
+  "deleteAccountConfirm": "本当にアカウントを削除しますか？単語リスト、トレーニング、サブスクリプションを含むすべてのデータが完全に削除されます。この操作は元に戻せません。",
+  "deleteAccountFinalConfirm": "最終確認",
+  "deleteAccountTypeDelete": "アカウントの完全な削除を確認するには DELETE と入力してください。",
+  "deleteAccountFailed": "アカウントの削除に失敗しました。もう一度お試しください。",
+
+  "parentalGateTitle": "大人専用",
+  "parentalGateDescription": "続けるには、保護者にこの問題を解いてもらってください：",
+  "parentalGateWrongAnswer": "不正解です。もう一度お試しください。",
+  "parentalGateCooldown": "試行回数が多すぎます。しばらくお待ちください…",
+  "parentalGateAnswerLabel": "答え"
 }

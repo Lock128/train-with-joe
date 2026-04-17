@@ -181,5 +181,17 @@
   "gettingStartedChangeLanguage": "Changez votre langue",
   "gettingStartedChangeLanguageDesc": "Modifiez la langue de l'application dans les paramètres selon votre préférence",
   "gettingStartedExploreTraining": "Explorez les modes d'entraînement",
-  "gettingStartedExploreTrainingDesc": "Choisissez entre saisie de texte, choix multiple ou entraînement assisté par IA"
+  "gettingStartedExploreTrainingDesc": "Choisissez entre saisie de texte, choix multiple ou entraînement assisté par IA",
+
+  "deleteAccount": "Supprimer le compte",
+  "deleteAccountConfirm": "Êtes-vous sûr de vouloir supprimer votre compte ? Toutes vos données seront définitivement supprimées, y compris les listes de vocabulaire, les entraînements et les abonnements. Cette action est irréversible.",
+  "deleteAccountFinalConfirm": "Confirmation finale",
+  "deleteAccountTypeDelete": "Tapez DELETE pour confirmer la suppression définitive du compte.",
+  "deleteAccountFailed": "Impossible de supprimer le compte. Veuillez réessayer.",
+
+  "parentalGateTitle": "Réservé aux adultes",
+  "parentalGateDescription": "Demandez à un parent ou tuteur de résoudre ceci pour continuer :",
+  "parentalGateWrongAnswer": "Ce n'est pas correct. Réessayez.",
+  "parentalGateCooldown": "Trop de tentatives. Veuillez patienter…",
+  "parentalGateAnswerLabel": "Réponse"
 }

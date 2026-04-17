@@ -565,4 +565,39 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get gettingStartedExploreTrainingDesc =>
       'Wähle zwischen Texteingabe, Multiple Choice oder KI-gestütztem Training';
+
+  @override
+  String get deleteAccount => 'Konto löschen';
+
+  @override
+  String get deleteAccountConfirm =>
+      'Möchtest du dein Konto wirklich löschen? Alle deine Daten werden dauerhaft entfernt, einschließlich Vokabellisten, Trainings und Abonnements. Diese Aktion kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get deleteAccountFinalConfirm => 'Letzte Bestätigung';
+
+  @override
+  String get deleteAccountTypeDelete =>
+      'Gib DELETE ein, um die dauerhafte Kontolöschung zu bestätigen.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Konto konnte nicht gelöscht werden. Bitte versuche es erneut.';
+
+  @override
+  String get parentalGateTitle => 'Nur für Erwachsene';
+
+  @override
+  String get parentalGateDescription =>
+      'Bitte einen Elternteil oder Erziehungsberechtigten, diese Aufgabe zu lösen:';
+
+  @override
+  String get parentalGateWrongAnswer =>
+      'Das ist leider falsch. Versuch es nochmal.';
+
+  @override
+  String get parentalGateCooldown => 'Zu viele Versuche. Bitte warte kurz…';
+
+  @override
+  String get parentalGateAnswerLabel => 'Antwort';
 }

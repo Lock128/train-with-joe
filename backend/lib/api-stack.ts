@@ -155,6 +155,49 @@ export class APIStack extends cdk.Stack {
       pipelineConfig: [updateUserFunction],
     });
 
+    // Create deleteUser Lambda function (account deletion — Guideline 5.1.1(v))
+    const deleteUserFunction = new NodejsFunction(this, 'DeleteUserFunction', {
+      runtime: Runtime.NODEJS_20_X,
+      memorySize: 256,
+      timeout: cdk.Duration.minutes(2),
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.deleteUser.ts'),
+      handler: 'handler',
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        externalModules: ['aws-sdk'],
+      },
+      environment: {
+        NAMESPACE: namespace,
+        USERS_TABLE_NAME: usersTable.tableName,
+        SUBSCRIPTIONS_TABLE_NAME: subscriptionsTable.tableName,
+        VOCABULARY_LISTS_TABLE_NAME: vocabularyListsTable.tableName,
+        TRAININGS_TABLE_NAME: trainingsTable.tableName,
+        USAGE_COUNTERS_TABLE_NAME: usageCountersTable.tableName,
+        USER_POOL_ID: userPool.userPoolId,
+      },
+    });
+
+    usersTable.grantReadWriteData(deleteUserFunction);
+    subscriptionsTable.grantReadWriteData(deleteUserFunction);
+    vocabularyListsTable.grantReadWriteData(deleteUserFunction);
+    trainingsTable.grantReadWriteData(deleteUserFunction);
+    usageCountersTable.grantReadWriteData(deleteUserFunction);
+    deleteUserFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['cognito-idp:AdminDeleteUser'],
+        resources: [userPool.userPoolArn],
+      }),
+    );
+
+    const deleteUserDataSource = api.addLambdaDataSource('DeleteUserDataSource', deleteUserFunction);
+
+    deleteUserDataSource.createResolver('DeleteUserResolver', {
+      typeName: 'Mutation',
+      fieldName: 'deleteUser',
+    });
+
     // Create Lambda functions for resolvers
     const lambdaProps = {
       runtime: Runtime.NODEJS_20_X,

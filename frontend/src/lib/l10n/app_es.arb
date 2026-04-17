@@ -181,5 +181,17 @@
   "gettingStartedChangeLanguage": "Cambia tu idioma",
   "gettingStartedChangeLanguageDesc": "Cambia el idioma de la app en los ajustes según tu preferencia",
   "gettingStartedExploreTraining": "Explora los modos de entrenamiento",
-  "gettingStartedExploreTrainingDesc": "Elige entre entrada de texto, opción múltiple o entrenamiento con IA"
+  "gettingStartedExploreTrainingDesc": "Elige entre entrada de texto, opción múltiple o entrenamiento con IA",
+
+  "deleteAccount": "Eliminar cuenta",
+  "deleteAccountConfirm": "¿Estás seguro de que quieres eliminar tu cuenta? Todos tus datos se eliminarán permanentemente, incluyendo listas de vocabulario, entrenamientos y suscripciones. Esta acción no se puede deshacer.",
+  "deleteAccountFinalConfirm": "Confirmación final",
+  "deleteAccountTypeDelete": "Escribe DELETE para confirmar la eliminación permanente de la cuenta.",
+  "deleteAccountFailed": "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
+
+  "parentalGateTitle": "Solo para adultos",
+  "parentalGateDescription": "Pide a un padre o tutor que resuelva esto para continuar:",
+  "parentalGateWrongAnswer": "Eso no es correcto. Inténtalo de nuevo.",
+  "parentalGateCooldown": "Demasiados intentos. Por favor espera…",
+  "parentalGateAnswerLabel": "Respuesta"
 }

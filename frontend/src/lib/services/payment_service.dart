@@ -318,7 +318,7 @@ class PaymentService {
       final ProductDetailsResponse response = await _inAppPurchase.queryProductDetails({productId});
       
       if (response.notFoundIDs.isNotEmpty) {
-        throw Exception('Product not found: $productId. Please check the product ID in Google Play Console.');
+        throw Exception('Product not found: $productId. Please check the product ID configuration.');
       }
 
       if (response.productDetails.isEmpty) {
@@ -353,7 +353,7 @@ class PaymentService {
         'status': 'pending',
         'provider': 'GOOGLE_PLAY_STORE',
         'productId': productId,
-        'message': 'Purchase initiated. Waiting for Google Play confirmation...',
+        'message': 'Purchase initiated. Waiting for confirmation...',
       };
     } catch (e) {
       debugPrint('Play Store payment error: $e');

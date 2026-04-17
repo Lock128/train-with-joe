@@ -6,6 +6,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../models/app_version.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import '../widgets/parental_gate_dialog.dart';
 
 /// Info screen showing app and backend version details.
 class InfoScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class _InfoScreenState extends State<InfoScreen> {
   String? _backendCommitId;
   String? _backendBuildNumber;
   bool _isLoading = true;
+  bool _isDeletingAccount = false;
   String? _error;
 
   @override
@@ -65,6 +67,84 @@ class _InfoScreenState extends State<InfoScreen> {
     await authProvider.signOut();
     if (context.mounted) {
       context.go('/signin');
+    }
+  }
+
+  Future<void> _handleDeleteAccount(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+
+    // First confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteAccount),
+        content: Text(l10n.deleteAccountConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    // Second confirmation — type "DELETE"
+    final finalConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => _DeleteConfirmationDialog(),
+    );
+
+    if (finalConfirmed != true || !mounted) return;
+
+    setState(() => _isDeletingAccount = true);
+
+    try {
+      const mutation = '''
+        mutation DeleteUser {
+          deleteUser {
+            success
+            error
+          }
+        }
+      ''';
+
+      final result = await _apiService.mutate(mutation);
+      final response = result['deleteUser'] as Map<String, dynamic>?;
+
+      if (response?['success'] == true) {
+        // Sign out after successful deletion
+        if (mounted) {
+          final authProvider = context.read<AuthProvider>();
+          await authProvider.signOut();
+          if (mounted) {
+            context.go('/signin');
+          }
+        }
+      } else {
+        final error = response?['error'] as String? ?? l10n.deleteAccountFailed;
+        messenger.showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: Colors.red),
+        );
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.deleteAccountFailed),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isDeletingAccount = false);
+      }
     }
   }
 
@@ -184,6 +264,22 @@ class _InfoScreenState extends State<InfoScreen> {
                   icon: const Icon(Icons.logout),
                   label: Text(l10n.signOut),
                 ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _isDeletingAccount ? null : () => _handleDeleteAccount(context),
+                  icon: _isDeletingAccount
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.delete_forever),
+                  label: Text(l10n.deleteAccount),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    padding: const EdgeInsets.all(16),
+                  ),
+                ),
               ],
             ),
           ),
@@ -214,11 +310,15 @@ class _InfoScreenState extends State<InfoScreen> {
   Widget _linkRow(IconData icon, String label, String url) {
     final isInternalRoute = url.startsWith('/');
     return InkWell(
-      onTap: () {
+      onTap: () async {
         if (isInternalRoute) {
           context.push(url);
         } else {
-          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          // Parental gate before opening external links (Guideline 1.3)
+          final passed = await showParentalGate(context);
+          if (passed && mounted) {
+            launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          }
         }
       },
       borderRadius: BorderRadius.circular(8),
@@ -233,6 +333,67 @@ class _InfoScreenState extends State<InfoScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Dialog that requires typing "DELETE" to confirm account deletion.
+class _DeleteConfirmationDialog extends StatefulWidget {
+  @override
+  State<_DeleteConfirmationDialog> createState() => _DeleteConfirmationDialogState();
+}
+
+class _DeleteConfirmationDialogState extends State<_DeleteConfirmationDialog> {
+  final _controller = TextEditingController();
+  bool _isValid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      setState(() {
+        _isValid = _controller.text.trim().toUpperCase() == 'DELETE';
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(l10n.deleteAccountFinalConfirm),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(l10n.deleteAccountTypeDelete),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'DELETE',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(
+          onPressed: _isValid ? () => Navigator.of(context).pop(true) : null,
+          style: TextButton.styleFrom(foregroundColor: Colors.red),
+          child: Text(l10n.deleteAccount),
+        ),
+      ],
     );
   }
 }

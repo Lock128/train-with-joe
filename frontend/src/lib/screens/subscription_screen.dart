@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/subscription_provider.dart';
 import '../services/payment_service.dart';
+import '../widgets/parental_gate_dialog.dart';
 
 /// Subscription management screen
 class SubscriptionScreen extends StatefulWidget {
@@ -71,7 +72,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               content: Text(
                 result['provider'] == 'APPLE_APP_STORE'
                     ? 'App Store purchase completed successfully!'
-                    : 'Play Store purchase completed successfully!',
+                    : 'Purchase completed successfully!',
               ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 5),
@@ -135,6 +136,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   Future<void> _handleSubscribe(String planId) async {
+    // Parental gate before purchase (Guideline 1.3)
+    final passed = await showParentalGate(context);
+    if (!passed || !mounted) return;
+
     final subscriptionProvider = context.read<SubscriptionProvider>();
     final messenger = ScaffoldMessenger.of(context);
 
@@ -299,7 +304,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       case PaymentProvider.appleAppStore:
         return 'iOS (App Store)';
       case PaymentProvider.googlePlayStore:
-        return 'Android (Play Store)';
+        return 'In-App Purchase';
       default:
         return 'Unknown';
     }
@@ -346,7 +351,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   ? Icons.web
                                   : _detectedPlatform == PaymentProvider.appleAppStore
                                       ? Icons.apple
-                                      : Icons.android,
+                                      : Icons.shopping_cart,
                               color: const Color(0xFF2B6CB0),
                             ),
                             const SizedBox(width: 12),
@@ -621,10 +626,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                                 recognizer: TapGestureRecognizer()
-                                  ..onTap = () => launchUrl(
-                                        Uri.parse('https://trainwithjoe.app/terms'),
-                                        mode: LaunchMode.externalApplication,
-                                      ),
+                                  ..onTap = () async {
+                                        final passed = await showParentalGate(context);
+                                        if (passed) {
+                                          launchUrl(
+                                            Uri.parse('https://trainwithjoe.app/terms'),
+                                            mode: LaunchMode.externalApplication,
+                                          );
+                                        }
+                                      },
                               ),
                               TextSpan(text: ' ${l10n.pricingLegalAnd} '),
                               TextSpan(
@@ -634,10 +644,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                                 recognizer: TapGestureRecognizer()
-                                  ..onTap = () => launchUrl(
-                                        Uri.parse('https://trainwithjoe.app/privacy'),
-                                        mode: LaunchMode.externalApplication,
-                                      ),
+                                  ..onTap = () async {
+                                        final passed = await showParentalGate(context);
+                                        if (passed) {
+                                          launchUrl(
+                                            Uri.parse('https://trainwithjoe.app/privacy'),
+                                            mode: LaunchMode.externalApplication,
+                                          );
+                                        }
+                                      },
                               ),
                               TextSpan(text: l10n.pricingLegalSuffix),
                             ],

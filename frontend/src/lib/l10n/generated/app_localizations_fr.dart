@@ -571,4 +571,38 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get gettingStartedExploreTrainingDesc =>
       'Choisissez entre saisie de texte, choix multiple ou entraînement assisté par IA';
+
+  @override
+  String get deleteAccount => 'Supprimer le compte';
+
+  @override
+  String get deleteAccountConfirm =>
+      'Êtes-vous sûr de vouloir supprimer votre compte ? Toutes vos données seront définitivement supprimées, y compris les listes de vocabulaire, les entraînements et les abonnements. Cette action est irréversible.';
+
+  @override
+  String get deleteAccountFinalConfirm => 'Confirmation finale';
+
+  @override
+  String get deleteAccountTypeDelete =>
+      'Tapez DELETE pour confirmer la suppression définitive du compte.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Impossible de supprimer le compte. Veuillez réessayer.';
+
+  @override
+  String get parentalGateTitle => 'Réservé aux adultes';
+
+  @override
+  String get parentalGateDescription =>
+      'Demandez à un parent ou tuteur de résoudre ceci pour continuer :';
+
+  @override
+  String get parentalGateWrongAnswer => 'Ce n\'est pas correct. Réessayez.';
+
+  @override
+  String get parentalGateCooldown => 'Trop de tentatives. Veuillez patienter…';
+
+  @override
+  String get parentalGateAnswerLabel => 'Réponse';
 }
