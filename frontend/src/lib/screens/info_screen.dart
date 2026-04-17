@@ -94,7 +94,7 @@ class _InfoScreenState extends State<InfoScreen> {
       ),
     );
 
-    if (confirmed != true || !mounted) return;
+    if (confirmed != true || !context.mounted) return;
 
     // Second confirmation — type "DELETE"
     final finalConfirmed = await showDialog<bool>(
@@ -102,7 +102,7 @@ class _InfoScreenState extends State<InfoScreen> {
       builder: (context) => _DeleteConfirmationDialog(),
     );
 
-    if (finalConfirmed != true || !mounted) return;
+    if (finalConfirmed != true || !context.mounted) return;
 
     setState(() => _isDeletingAccount = true);
 
@@ -121,10 +121,10 @@ class _InfoScreenState extends State<InfoScreen> {
 
       if (response?['success'] == true) {
         // Sign out after successful deletion
-        if (mounted) {
+        if (context.mounted) {
           final authProvider = context.read<AuthProvider>();
           await authProvider.signOut();
-          if (mounted) {
+          if (context.mounted) {
             context.go('/signin');
           }
         }
