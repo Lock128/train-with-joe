@@ -165,17 +165,18 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   }
 
   Future<void> _confirmAbort() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Abort Training?'),
-        content: const Text('Your progress in this session will be lost.'),
+        title: Text(l10n.abortTraining),
+        content: Text(l10n.abortTrainingMessage),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Continue')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(l10n.continueText)),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Abort'),
+            child: Text(l10n.abort),
           ),
         ],
       ),

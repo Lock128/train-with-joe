@@ -50,9 +50,36 @@ class AppShell extends StatelessWidget {
     return bestIndex;
   }
 
-  void _onDestinationSelected(BuildContext context, int index) {
+  void _onDestinationSelected(BuildContext context, int index) async {
     final destinations = _effectiveDestinations(context);
-    context.go(destinations[index].path);
+    final targetPath = destinations[index].path;
+
+    // If the user is in an active training execution, confirm before navigating away.
+    final location = GoRouterState.of(context).matchedLocation;
+    if (RegExp(r'^/trainings/[^/]+/execute/[^/]+$').hasMatch(location)) {
+      final l10n = AppLocalizations.of(context)!;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.abortTraining),
+          content: Text(l10n.abortTrainingMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.continueText),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: Text(l10n.abort),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !context.mounted) return;
+    }
+
+    context.go(targetPath);
   }
 
   Future<void> _handleSignOut(BuildContext context) async {
