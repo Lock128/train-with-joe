@@ -145,7 +145,8 @@
   "subscribe": "Abonnieren",
 
   "pricingLegalPrefix": "Mit dem Abonnement stimmst du unseren ",
-  "pricingTermsLink": "Nutzungsbedingungen",
+  "pricingTermsLink": "Nutzungsbedingungen (EULA)",
+  "pricingTermsLinkGeneric": "Nutzungsbedingungen",
   "pricingLegalAnd": "und der",
   "pricingPrivacyLink": "Datenschutzerklärung",
   "pricingLegalSuffix": " zu.",

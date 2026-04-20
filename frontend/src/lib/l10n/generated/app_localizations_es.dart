@@ -446,7 +446,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pricingLegalPrefix => 'By subscribing, you agree to our ';
 
   @override
-  String get pricingTermsLink => 'Terms of Service';
+  String get pricingTermsLink => 'Terms of Use (EULA)';
+
+  @override
+  String get pricingTermsLinkGeneric => 'Terms of Service';
 
   @override
   String get pricingLegalAnd => 'and';

@@ -624,7 +624,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                             children: [
                               TextSpan(text: l10n.pricingLegalPrefix),
                               TextSpan(
-                                text: l10n.pricingTermsLink,
+                                text: _detectedPlatform == PaymentProvider.appleAppStore
+                                    ? l10n.pricingTermsLink
+                                    : l10n.pricingTermsLinkGeneric,
                                 style: const TextStyle(
                                   color: Color(0xFF2B6CB0),
                                   fontWeight: FontWeight.bold,
@@ -633,8 +635,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   ..onTap = () async {
                                         final passed = await showParentalGate(context);
                                         if (passed) {
+                                          final url = _detectedPlatform == PaymentProvider.appleAppStore
+                                              ? 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'
+                                              : 'https://trainwithjoe.app/terms';
                                           launchUrl(
-                                            Uri.parse('https://trainwithjoe.app/terms'),
+                                            Uri.parse(url),
                                             mode: LaunchMode.externalApplication,
                                           );
                                         }

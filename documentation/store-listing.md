@@ -53,7 +53,7 @@ Subscription Terms:
 - You can manage and cancel subscriptions in your App Store account settings
 
 Privacy Policy: https://trainwithjoe.app/privacy
-Terms of Use (EULA): https://trainwithjoe.app/terms
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
 ## Promotional Text (App Store, max 170 characters)
 

@@ -211,7 +211,8 @@
   "subscribe": "Subscribe",
 
   "pricingLegalPrefix": "By subscribing, you agree to our ",
-  "pricingTermsLink": "Terms of Service",
+  "pricingTermsLink": "Terms of Use (EULA)",
+  "pricingTermsLinkGeneric": "Terms of Service",
   "pricingLegalAnd": "and",
   "pricingPrivacyLink": "Privacy Policy",
   "pricingLegalSuffix": ".",

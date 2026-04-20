@@ -907,8 +907,14 @@ abstract class AppLocalizations {
   /// No description provided for @pricingTermsLink.
   ///
   /// In en, this message translates to:
-  /// **'Terms of Service'**
+  /// **'Terms of Use (EULA)'**
   String get pricingTermsLink;
+
+  /// No description provided for @pricingTermsLinkGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get pricingTermsLinkGeneric;
 
   /// No description provided for @pricingLegalAnd.
   ///

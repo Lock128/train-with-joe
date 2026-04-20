@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_io/io.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../models/app_version.dart';
@@ -251,7 +253,13 @@ class _InfoScreenState extends State<InfoScreen> {
                         Text('Legal & Contact', style: Theme.of(context).textTheme.titleMedium),
                         const Divider(),
                         _linkRow(Icons.privacy_tip_outlined, 'Privacy Policy', 'https://trainwithjoe.app/privacy'),
-                        _linkRow(Icons.description_outlined, 'Terms of Service', 'https://trainwithjoe.app/terms'),
+                        _linkRow(
+                          Icons.description_outlined,
+                          !kIsWeb && Platform.isIOS ? 'Terms of Use (EULA)' : 'Terms of Service',
+                          !kIsWeb && Platform.isIOS
+                              ? 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'
+                              : 'https://trainwithjoe.app/terms',
+                        ),
                         _linkRow(Icons.account_balance_outlined, 'Impressum', '/impressum'),
                         _linkRow(Icons.mail_outline, 'Contact Us', 'mailto:hello@trainwithjoe.app'),
                       ],
