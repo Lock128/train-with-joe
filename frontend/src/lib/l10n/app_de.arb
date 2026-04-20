@@ -220,5 +220,8 @@
   "codeSentAgain": "Ein neuer Code wurde an deine E-Mail gesendet",
   "setNewPassword": "Neues Passwort festlegen",
   "setNewPasswordDescription": "Dein Konto erfordert ein neues Passwort. Bitte wähle eines, um fortzufahren.",
-  "setNewPasswordButton": "Passwort festlegen & weiter"
+  "setNewPasswordButton": "Passwort festlegen & weiter",
+
+  "subscriptionMonthly": "1-Monats-Abo mit automatischer Verlängerung",
+  "subscriptionDisclosure": "Abonnements verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums gekündigt werden. Die Verlängerung wird innerhalb von 24 Stunden vor Ende des aktuellen Zeitraums berechnet. Du kannst deine Abonnements nach dem Kauf in deinen Kontoeinstellungen im App Store verwalten und kündigen."
 }

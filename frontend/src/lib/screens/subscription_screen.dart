@@ -516,6 +516,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   title: 'Basic',
                                   price: '\$2.99',
                                   priceSubtitle: '/month',
+                                  subscriptionLength: l10n.subscriptionMonthly,
                                   features: const [
                                     '25 image scans per period',
                                     'Unlimited vocabulary lists',
@@ -535,6 +536,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   title: 'Pro',
                                   price: '\$9.99',
                                   priceSubtitle: '/month',
+                                  subscriptionLength: l10n.subscriptionMonthly,
                                   features: const [
                                     'Unlimited image scans',
                                     'Unlimited vocabulary lists',
@@ -575,6 +577,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                               title: 'Basic',
                               price: '\$2.99',
                               priceSubtitle: '/month',
+                              subscriptionLength: l10n.subscriptionMonthly,
                               features: const [
                                 '25 image scans per period',
                                 'Unlimited vocabulary lists',
@@ -592,6 +595,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                               title: 'Pro',
                               price: '\$9.99',
                               priceSubtitle: '/month',
+                              subscriptionLength: l10n.subscriptionMonthly,
                               features: const [
                                 'Unlimited image scans',
                                 'Unlimited vocabulary lists',
@@ -659,6 +663,20 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           ),
                           textAlign: TextAlign.center,
                         ),
+                      ),
+                    ),
+
+                    // Auto-renewable subscription disclosure (Guideline 3.1.2(c))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12.0, bottom: 24.0),
+                      child: Text(
+                        l10n.subscriptionDisclosure,
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 11,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],
@@ -799,6 +817,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     required bool isCurrentTier,
     required bool isRecommended,
     required bool hasActiveSubscription,
+    String? subscriptionLength,
   }) {
     final l10n = AppLocalizations.of(context)!;
     final isFree = planId == null;
@@ -897,6 +916,17 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   ),
                 ],
               ),
+              if (subscriptionLength != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(
+                    subscriptionLength,
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
               const SizedBox(height: 16),
               ...features.map(
                 (feature) => Padding(

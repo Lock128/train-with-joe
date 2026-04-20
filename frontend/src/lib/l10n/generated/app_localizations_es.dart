@@ -665,4 +665,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get setNewPasswordButton => 'Establecer contraseña y continuar';
+
+  @override
+  String get subscriptionMonthly =>
+      'Suscripción mensual con renovación automática';
+
+  @override
+  String get subscriptionDisclosure =>
+      'Las suscripciones se renuevan automáticamente a menos que se cancelen al menos 24 horas antes del final del período actual. Se cobrará la renovación dentro de las 24 horas anteriores al final del período actual. Puedes gestionar y cancelar tus suscripciones en los ajustes de tu cuenta en la App Store después de la compra.';
 }

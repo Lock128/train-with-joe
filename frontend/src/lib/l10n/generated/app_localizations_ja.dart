@@ -644,4 +644,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get setNewPasswordButton => 'パスワードを設定して続行';
+
+  @override
+  String get subscriptionMonthly => '1ヶ月自動更新サブスクリプション';
+
+  @override
+  String get subscriptionDisclosure =>
+      'サブスクリプションは、現在の期間終了の24時間前までにキャンセルしない限り自動的に更新されます。更新料金は現在の期間終了の24時間以内に請求されます。購入後、App Storeのアカウント設定からサブスクリプションの管理・キャンセルができます。';
 }

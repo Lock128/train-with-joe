@@ -664,4 +664,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get setNewPasswordButton => 'Passwort festlegen & weiter';
+
+  @override
+  String get subscriptionMonthly =>
+      '1-Monats-Abo mit automatischer Verlängerung';
+
+  @override
+  String get subscriptionDisclosure =>
+      'Abonnements verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums gekündigt werden. Die Verlängerung wird innerhalb von 24 Stunden vor Ende des aktuellen Zeitraums berechnet. Du kannst deine Abonnements nach dem Kauf in deinen Kontoeinstellungen im App Store verwalten und kündigen.';
 }

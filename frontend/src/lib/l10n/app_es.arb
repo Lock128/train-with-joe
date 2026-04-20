@@ -214,5 +214,8 @@
   "codeSentAgain": "Se ha enviado un nuevo código a tu correo",
   "setNewPassword": "Establecer nueva contraseña",
   "setNewPasswordDescription": "Tu cuenta requiere una nueva contraseña. Elige una para continuar.",
-  "setNewPasswordButton": "Establecer contraseña y continuar"
+  "setNewPasswordButton": "Establecer contraseña y continuar",
+
+  "subscriptionMonthly": "Suscripción mensual con renovación automática",
+  "subscriptionDisclosure": "Las suscripciones se renuevan automáticamente a menos que se cancelen al menos 24 horas antes del final del período actual. Se cobrará la renovación dentro de las 24 horas anteriores al final del período actual. Puedes gestionar y cancelar tus suscripciones en los ajustes de tu cuenta en la App Store después de la compra."
 }

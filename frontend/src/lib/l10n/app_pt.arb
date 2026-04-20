@@ -214,5 +214,8 @@
   "codeSentAgain": "Um novo código foi enviado para seu e-mail",
   "setNewPassword": "Definir nova senha",
   "setNewPasswordDescription": "Sua conta requer uma nova senha. Escolha uma para continuar.",
-  "setNewPasswordButton": "Definir senha e continuar"
+  "setNewPasswordButton": "Definir senha e continuar",
+
+  "subscriptionMonthly": "Assinatura mensal com renovação automática",
+  "subscriptionDisclosure": "As assinaturas são renovadas automaticamente, a menos que sejam canceladas pelo menos 24 horas antes do final do período atual. A renovação será cobrada dentro de 24 horas antes do final do período atual. Você pode gerenciar e cancelar suas assinaturas nas configurações da sua conta na App Store após a compra."
 }

@@ -669,4 +669,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get setNewPasswordButton => 'Définir le mot de passe et continuer';
+
+  @override
+  String get subscriptionMonthly =>
+      'Abonnement mensuel à renouvellement automatique';
+
+  @override
+  String get subscriptionDisclosure =>
+      'Les abonnements se renouvellent automatiquement sauf annulation au moins 24 heures avant la fin de la période en cours. Le renouvellement sera facturé dans les 24 heures précédant la fin de la période en cours. Vous pouvez gérer et annuler vos abonnements dans les réglages de votre compte sur l\'App Store après l\'achat.';
 }

@@ -301,5 +301,8 @@
   "codeSentAgain": "A new code has been sent to your email",
   "setNewPassword": "Set New Password",
   "setNewPasswordDescription": "Your account requires a new password. Please choose one to continue.",
-  "setNewPasswordButton": "Set Password & Continue"
+  "setNewPasswordButton": "Set Password & Continue",
+
+  "subscriptionMonthly": "1-month auto-renewable subscription",
+  "subscriptionDisclosure": "Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions by going to your account settings on the App Store after purchase."
 }

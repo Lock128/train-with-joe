@@ -1299,6 +1299,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set Password & Continue'**
   String get setNewPasswordButton;
+
+  /// No description provided for @subscriptionMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'1-month auto-renewable subscription'**
+  String get subscriptionMonthly;
+
+  /// No description provided for @subscriptionDisclosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions by going to your account settings on the App Store after purchase.'**
+  String get subscriptionDisclosure;
 }
 
 class _AppLocalizationsDelegate

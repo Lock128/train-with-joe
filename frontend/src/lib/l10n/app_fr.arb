@@ -214,5 +214,8 @@
   "codeSentAgain": "Un nouveau code a été envoyé à votre e-mail",
   "setNewPassword": "Définir un nouveau mot de passe",
   "setNewPasswordDescription": "Votre compte nécessite un nouveau mot de passe. Veuillez en choisir un pour continuer.",
-  "setNewPasswordButton": "Définir le mot de passe et continuer"
+  "setNewPasswordButton": "Définir le mot de passe et continuer",
+
+  "subscriptionMonthly": "Abonnement mensuel à renouvellement automatique",
+  "subscriptionDisclosure": "Les abonnements se renouvellent automatiquement sauf annulation au moins 24 heures avant la fin de la période en cours. Le renouvellement sera facturé dans les 24 heures précédant la fin de la période en cours. Vous pouvez gérer et annuler vos abonnements dans les réglages de votre compte sur l'App Store après l'achat."
 }

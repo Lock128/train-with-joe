@@ -43,6 +43,18 @@ Features:
 
 A subscription unlocks full access to all features.
 
+Subscription Terms:
+- Basic: $2.99/month — 25 image scans per period, unlimited vocabulary lists
+- Pro: $9.99/month — unlimited image scans, unlimited vocabulary lists, AI training
+- Subscriptions are auto-renewable and billed monthly
+- Payment is charged to your iTunes account at confirmation of purchase
+- Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period
+- Your account will be charged for renewal within 24 hours prior to the end of the current period
+- You can manage and cancel subscriptions in your App Store account settings
+
+Privacy Policy: https://trainwithjoe.app/privacy
+Terms of Use (EULA): https://trainwithjoe.app/terms
+
 ## Promotional Text (App Store, max 170 characters)
 
 Train smarter, not harder. Build vocabulary from real-world photos, practice with personalized training sessions, and track your progress as your language skills grow.
