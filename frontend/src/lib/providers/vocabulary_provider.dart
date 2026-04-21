@@ -214,8 +214,13 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Poll getVocabularyList until status is COMPLETED or FAILED
-  Future<Map<String, dynamic>?> _pollForCompletion(String id) async {
+  /// Poll getVocabularyList until the target status is reached or FAILED.
+  ///
+  /// When [targetStatus] is null (default), stops at COMPLETED or PARTIALLY_COMPLETED
+  /// (preserving existing behavior). When set to 'RECOGNIZED', stops at RECOGNIZED.
+  /// FAILED always stops polling regardless of targetStatus.
+  /// TRANSLATING is treated as in-progress during Phase 2 polling.
+  Future<Map<String, dynamic>?> _pollForCompletion(String id, {String? targetStatus}) async {
     const maxAttempts = 60; // up to ~3 minutes with 3s intervals
     const pollInterval = Duration(seconds: 3);
 
@@ -274,10 +279,20 @@ class VocabularyProvider extends ChangeNotifier {
         final wordsCount = (list['words'] as List<dynamic>?)?.length ?? 0;
         debugPrint('[VocabularyProvider] Poll result: status=$status, words=$wordsCount, title=${list['title']}');
 
-        if (status == 'COMPLETED' || status == 'PARTIALLY_COMPLETED') return list;
+        // FAILED always stops polling regardless of targetStatus
         if (status == 'FAILED') {
           _error = list['errorMessage'] as String? ?? 'Analysis failed';
           return null;
+        }
+
+        // Check if we've reached the target status
+        if (targetStatus == 'RECOGNIZED') {
+          // Phase 1 polling: stop when RECOGNIZED is reached
+          if (status == 'RECOGNIZED') return list;
+        } else {
+          // Default / Phase 2 polling: stop at COMPLETED or PARTIALLY_COMPLETED
+          if (status == 'COMPLETED' || status == 'PARTIALLY_COMPLETED') return list;
+          // TRANSLATING is in-progress during Phase 2 — keep polling
         }
 
         // Fallback: if status field is missing (schema not deployed yet),
@@ -287,7 +302,7 @@ class VocabularyProvider extends ChangeNotifier {
           return list;
         }
 
-        // Still PENDING — keep polling
+        // Still in progress — keep polling
       } catch (e) {
         debugPrint('[VocabularyProvider] Polling error (attempt ${i + 1}): $e');
         // Don't break on transient errors, keep trying
@@ -547,6 +562,153 @@ class VocabularyProvider extends ChangeNotifier {
     final content = lines.join('\n');
 
     await SharePlus.instance.share(ShareParams(text: content, title: title));
+  }
+
+  /// Upload images and perform Phase 1 (OCR recognition) of the Scan & Translate flow.
+  ///
+  /// Uploads images to S3, calls `analyzeImageVocabulary` with `mode: 'scan_translate'`,
+  /// and polls until the vocabulary list reaches `RECOGNIZED` status.
+  /// Returns the recognized vocabulary list (words without translations) for word review.
+  Future<Map<String, dynamic>?> analyzeScanTranslate(List<Uint8List> images) async {
+    _isAnalyzing = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // 1. Get presigned upload URLs
+      final uploads = await _getUploadUrls(images.length);
+      if (uploads == null || uploads.length != images.length) {
+        throw Exception('Failed to get upload URLs');
+      }
+
+      // 2. Upload all images to S3 in parallel
+      await Future.wait(
+        List.generate(images.length, (i) =>
+          _uploadToS3(uploads[i]['uploadUrl'] as String, images[i]),
+        ),
+      );
+
+      // 3. Call the mutation with S3 keys and scan_translate mode
+      final s3Keys = uploads.map((u) => u['s3Key'] as String).toList();
+
+      const mutation = '''
+        mutation AnalyzeImageVocabulary(\$input: AnalyzeImageVocabularyInput!) {
+          analyzeImageVocabulary(input: \$input) {
+            success
+            vocabularyList {
+              id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
+              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {
+          'input': {
+            'imageS3Keys': s3Keys,
+            'mode': 'scan_translate',
+          },
+        },
+      );
+
+      final result = response['analyzeImageVocabulary'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        final vocabularyList = result['vocabularyList'] as Map<String, dynamic>?;
+        if (vocabularyList != null) {
+          // Poll until Phase 1 completes (RECOGNIZED status)
+          final completed = await _pollForCompletion(
+            vocabularyList['id'] as String,
+            targetStatus: 'RECOGNIZED',
+          );
+          if (completed != null) {
+            _currentList = completed;
+            _vocabularyLists.add(completed);
+            return completed;
+          } else if (_error == null) {
+            _error = 'Processing is running in the background. Please check your vocabulary lists in a few minutes.';
+            _vocabularyLists.add(vocabularyList);
+            notifyListeners();
+            return null;
+          } else {
+            _vocabularyLists.add(vocabularyList);
+            return null;
+          }
+        }
+        return vocabularyList;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to analyze images';
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error in scan & translate: $e');
+      _error = e.toString();
+      return null;
+    } finally {
+      _isAnalyzing = false;
+      notifyListeners();
+    }
+  }
+
+  /// Trigger Phase 2 translation of recognized words
+  Future<Map<String, dynamic>?> translateRecognizedWords(
+    String vocabularyListId,
+    String targetLanguage,
+  ) async {
+    try {
+      const mutation = '''
+        mutation TranslateRecognizedWords(\$input: TranslateRecognizedWordsInput!) {
+          translateRecognizedWords(input: \$input) {
+            success
+            vocabularyList {
+              id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
+              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
+            }
+            error
+          }
+        }
+      ''';
+
+      final response = await _apiService.mutate(
+        mutation,
+        variables: {
+          'input': {
+            'vocabularyListId': vocabularyListId,
+            'targetLanguage': targetLanguage,
+          },
+        },
+      );
+
+      final result = response['translateRecognizedWords'] as Map<String, dynamic>?;
+
+      if (result != null && result['success'] == true) {
+        final vocabularyList = result['vocabularyList'] as Map<String, dynamic>?;
+        if (vocabularyList != null) {
+          // Update local state with the returned list (now TRANSLATING)
+          final idx = _vocabularyLists.indexWhere((l) => l['id'] == vocabularyListId);
+          if (idx != -1) {
+            _vocabularyLists[idx] = vocabularyList;
+          }
+          if (_currentList?['id'] == vocabularyListId) {
+            _currentList = vocabularyList;
+          }
+          notifyListeners();
+        }
+        return vocabularyList;
+      } else {
+        _error = result?['error'] as String? ?? 'Failed to translate recognized words';
+        notifyListeners();
+        return null;
+      }
+    } catch (e) {
+      debugPrint('Error translating recognized words: $e');
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
   }
 
   /// Flag a word in a vocabulary list for review by the list owner

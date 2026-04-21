@@ -18,6 +18,7 @@ import 'screens/verify_email_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/subscription_screen.dart';
 import 'screens/image_vocabulary_screen.dart';
+import 'screens/scan_translate_screen.dart';
 import 'screens/vocabulary_lists_screen.dart';
 import 'screens/vocabulary_list_detail_screen.dart';
 import 'screens/info_screen.dart';
@@ -387,6 +388,10 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
             GoRoute(
               path: '/vocabulary/analyze',
               builder: (context, state) => const ImageVocabularyScreen(),
+            ),
+            GoRoute(
+              path: '/vocabulary/scan-translate',
+              builder: (context, state) => const ScanTranslateScreen(),
             ),
             GoRoute(
               path: '/vocabulary/:id',

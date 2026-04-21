@@ -2,7 +2,13 @@
  * Domain models for VocabularyList entity
  */
 
-export type VocabularyListStatus = 'PENDING' | 'COMPLETED' | 'PARTIALLY_COMPLETED' | 'FAILED';
+export type VocabularyListStatus =
+  | 'PENDING'
+  | 'RECOGNIZED'
+  | 'TRANSLATING'
+  | 'COMPLETED'
+  | 'PARTIALLY_COMPLETED'
+  | 'FAILED';
 
 export interface VocabularyWord {
   word: string;
@@ -31,6 +37,7 @@ export interface VocabularyList {
   schoolForm?: string;
   grade?: string;
   isbn?: string;
+  mode?: 'standard' | 'scan_translate';
   createdAt: string;
   updatedAt: string;
 }

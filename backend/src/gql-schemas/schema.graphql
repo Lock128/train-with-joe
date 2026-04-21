@@ -14,6 +14,8 @@ enum SubscriptionStatus @aws_cognito_user_pools {
 
 enum VocabularyListStatus @aws_cognito_user_pools {
   PENDING
+  RECOGNIZED
+  TRANSLATING
   COMPLETED
   PARTIALLY_COMPLETED
   FAILED
@@ -97,6 +99,7 @@ type VocabularyList @aws_cognito_user_pools {
   targetLanguage: String
   status: VocabularyListStatus
   errorMessage: String
+  mode: String
   isPublic: Boolean
   publisher: String
   schoolForm: String
@@ -276,6 +279,7 @@ input AnalyzeImageVocabularyInput @aws_cognito_user_pools {
   imageS3Keys: [String!]!
   sourceLanguage: String
   targetLanguage: String
+  mode: String
 }
 
 input RenameVocabularyListInput @aws_cognito_user_pools {
@@ -355,6 +359,11 @@ input SubmitAnswerInput @aws_cognito_user_pools {
   executionId: ID!
   wordIndex: Int!
   answer: String!
+}
+
+input TranslateRecognizedWordsInput @aws_cognito_user_pools {
+  vocabularyListId: ID!
+  targetLanguage: String!
 }
 
 input MigrateUserDataInput @aws_cognito_user_pools {
@@ -579,6 +588,7 @@ type Mutation {
   enhanceContent(input: EnhanceContentInput!): ContentResponse @aws_cognito_user_pools
   generateContent(input: GenerateContentInput!): ContentResponse @aws_cognito_user_pools
   analyzeImageVocabulary(input: AnalyzeImageVocabularyInput!): VocabularyListResponse @aws_cognito_user_pools
+  translateRecognizedWords(input: TranslateRecognizedWordsInput!): VocabularyListResponse @aws_cognito_user_pools
 
   # Admin operations
   migrateUserData(input: MigrateUserDataInput!): MigrateUserDataResponse @aws_cognito_user_pools

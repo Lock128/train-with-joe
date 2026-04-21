@@ -1,5 +1,6 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { AIExercise } from '../model/domain/Training';
+import type { VocabularyWord } from '../model/domain/VocabularyList';
 
 /**
  * Rate limiting tracker for AI service
@@ -529,6 +530,344 @@ Provide an improved version that maintains the original meaning but is more poli
       max_tokens: maxTokens,
       anthropic_version: 'bedrock-2023-05-31',
     };
+  }
+
+  /**
+   * Extract text from an image using OCR-style multimodal analysis.
+   * Returns recognized words, a short title, and the detected source language.
+   * Words are deduplicated (case-sensitive) before returning.
+   */
+  async extractTextFromImage(
+    imageBase64: string,
+    userId: string,
+    options?: { skipRateLimit?: boolean },
+  ): Promise<{
+    title: string;
+    detectedLanguage: string;
+    words: string[];
+  }> {
+    // Check rate limit (skip for internal batch processing)
+    if (!options?.skipRateLimit && !this.checkRateLimit(userId)) {
+      throw new Error('Rate limit exceeded. Please wait before making more AI requests.');
+    }
+
+    if (!imageBase64 || imageBase64.trim().length === 0) {
+      throw new Error('Image data cannot be empty');
+    }
+
+    // Titan models do not support image analysis
+    if (this.modelId.includes('titan')) {
+      throw new Error(
+        'Image analysis requires a multimodal model (Claude or Nova). Please configure BEDROCK_MODEL_ID accordingly.',
+      );
+    }
+
+    try {
+      const prompt = `Analyze this image and extract every visible text word. This includes printed text, signage, menus, book pages, labels, and handwritten text.
+
+Your response MUST be a single valid JSON object matching this exact structure — no other output:
+
+{
+  "title": "Brief description of the image, max 10 words",
+  "detectedLanguage": "Primary language of the text, e.g. French, Japanese, German. Use Unknown if unsure.",
+  "words": ["word1", "word2", "word3"]
+}
+
+RULES:
+- Extract ALL visible text words from the image.
+- Preserve the original spelling and casing of each word exactly as it appears.
+- Do NOT translate or modify any words.
+- If the image contains words in multiple languages, set detectedLanguage to the dominant language.
+- If no text is found, return an empty words array.
+- Respond with ONLY the JSON object. No markdown, no code fences, no tags, no commentary before or after.
+- The output MUST be parseable by JSON.parse() — no trailing commas, no truncated objects.
+- Start your response with the "{" character and end it with the "}" character.`;
+
+      console.log(
+        `[extractTextFromImage] Starting OCR extraction for user=${userId}, model=${this.modelId}, imageSize=${imageBase64.length} chars`,
+      );
+
+      const requestBody = this.buildMultimodalRequestBody(imageBase64, prompt, 4000);
+
+      console.log('[extractTextFromImage] Sending request to Bedrock...');
+      const startTime = Date.now();
+
+      const response = await this.bedrockClient.send(
+        new InvokeModelCommand({
+          modelId: this.modelId,
+          contentType: 'application/json',
+          accept: 'application/json',
+          body: JSON.stringify(requestBody),
+        }),
+      );
+
+      const elapsed = Date.now() - startTime;
+      console.log(`[extractTextFromImage] Bedrock responded in ${elapsed}ms`);
+
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+      const responseText = this.extractResponseText(responseBody);
+
+      console.log(`[extractTextFromImage] Response text length: ${responseText?.length || 0} chars`);
+      if (!responseText) {
+        console.error(
+          '[extractTextFromImage] Empty response from Bedrock, responseBody keys:',
+          Object.keys(responseBody),
+        );
+        throw new Error('No content returned from Bedrock');
+      }
+
+      // Parse JSON from response (handle markdown fences, model tags, and embedded JSON)
+      let parsed;
+      const stripped = responseText
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/\s*```\s*$/, '')
+        .replace(/\{@json_object\}/gi, '')
+        .trim();
+
+      try {
+        parsed = JSON.parse(stripped);
+        console.log('[extractTextFromImage] JSON parsed successfully (direct)');
+      } catch (parseError) {
+        console.warn(
+          `[extractTextFromImage] Direct JSON parse failed: ${parseError instanceof Error ? parseError.message : parseError}`,
+        );
+        console.warn(`[extractTextFromImage] Response text (first 500 chars): ${stripped.substring(0, 500)}`);
+
+        // Attempt repair for truncated JSON
+        try {
+          parsed = this.repairTruncatedJson(stripped);
+          console.log('[extractTextFromImage] JSON parsed successfully (repaired)');
+        } catch {
+          console.error('[extractTextFromImage] JSON repair also failed');
+          throw new Error('Failed to parse OCR response as JSON');
+        }
+      }
+
+      // Deduplicate words (case-sensitive)
+      const rawWords: string[] = Array.isArray(parsed.words)
+        ? parsed.words.filter((w: unknown) => typeof w === 'string' && w.length > 0)
+        : [];
+      const uniqueWords = Array.from(new Set(rawWords));
+
+      const wordCount = uniqueWords.length;
+      console.log(
+        `[extractTextFromImage] Success: title="${parsed.title}", words=${wordCount}, detectedLanguage="${parsed.detectedLanguage}"`,
+      );
+
+      // Log usage
+      const tokenCount = responseText.length / 4;
+      this.logUsage(userId, 'extractTextFromImage', tokenCount);
+
+      return {
+        title: parsed.title || 'Text from Image',
+        detectedLanguage: parsed.detectedLanguage || 'Unknown',
+        words: uniqueWords,
+      };
+    } catch (error) {
+      console.error('Error extracting text from image with Bedrock:', error);
+
+      if (error instanceof Error) {
+        if (error.message.includes('Rate limit')) {
+          throw error;
+        }
+        if (error.message.includes('Image analysis requires')) {
+          throw error;
+        }
+        if (error.message.includes('Failed to parse')) {
+          throw error;
+        }
+        if (error.message.includes('throttling')) {
+          throw new Error('Bedrock service is currently throttling requests. Please try again later.');
+        }
+        if (error.message.includes('is not authorized to perform') || error.message.includes('AccessDeniedException')) {
+          throw new Error(
+            'Bedrock model access is not enabled. Please enable model access in the AWS Bedrock console.',
+          );
+        }
+        if (
+          error.message.includes('Could not resolve the foundation model') ||
+          error.message.includes('ValidationException') ||
+          error.name === 'ValidationException'
+        ) {
+          throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
+        }
+      }
+
+      throw new Error('Failed to extract text from image');
+    }
+  }
+
+  /**
+   * Translate a list of words from a source language to a target language.
+   * Returns enriched VocabularyWord objects with translation, definition,
+   * partOfSpeech, exampleSentence, and difficulty.
+   * Untranslatable words are included with an empty translation field.
+   */
+  async translateWords(
+    words: string[],
+    sourceLanguage: string,
+    targetLanguage: string,
+    userId: string,
+    options?: { skipRateLimit?: boolean },
+  ): Promise<VocabularyWord[]> {
+    // Check rate limit (skip for internal batch processing)
+    if (!options?.skipRateLimit && !this.checkRateLimit(userId)) {
+      throw new Error('Rate limit exceeded. Please wait before making more AI requests.');
+    }
+
+    if (!words || words.length === 0) {
+      throw new Error('Words array cannot be empty');
+    }
+
+    try {
+      const wordList = words.map((w, i) => `${i + 1}. ${w}`).join('\n');
+
+      const prompt = `You are a language translation API. Translate the following words from ${sourceLanguage} to ${targetLanguage}.
+
+Words to translate:
+${wordList}
+
+Your response MUST be a single valid JSON array of objects matching this exact structure — no other output:
+
+[
+  {
+    "word": "original word in ${sourceLanguage}",
+    "translation": "translation in ${targetLanguage}",
+    "definition": "Learner-friendly definition, max 20 words",
+    "partOfSpeech": "noun | verb | adjective | adverb | other",
+    "exampleSentence": "Simple example sentence using the word, max 15 words",
+    "difficulty": "easy | medium | hard"
+  }
+]
+
+RULES:
+- Return one object per input word, in the same order as the input list.
+- If a word cannot be translated, include it with an empty string for the "translation" field and a definition indicating it could not be translated.
+- partOfSpeech MUST be one of: noun, verb, adjective, adverb, other.
+- difficulty MUST be one of: easy, medium, hard.
+- definition MUST be at most 20 words.
+- exampleSentence MUST be at most 15 words.
+- Respond with ONLY the JSON array. No markdown, no code fences, no tags, no commentary before or after.
+- The output MUST be parseable by JSON.parse() — no trailing commas, no truncated objects.
+- Start your response with the "[" character and end it with the "]" character.`;
+
+      console.log(
+        `[translateWords] Starting translation for user=${userId}, model=${this.modelId}, wordCount=${words.length}, ${sourceLanguage} → ${targetLanguage}`,
+      );
+
+      const requestBody = this.buildRequestBody(prompt, 4000);
+
+      console.log('[translateWords] Sending request to Bedrock...');
+      const startTime = Date.now();
+
+      const response = await this.bedrockClient.send(
+        new InvokeModelCommand({
+          modelId: this.modelId,
+          contentType: 'application/json',
+          accept: 'application/json',
+          body: JSON.stringify(requestBody),
+        }),
+      );
+
+      const elapsed = Date.now() - startTime;
+      console.log(`[translateWords] Bedrock responded in ${elapsed}ms`);
+
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+      const responseText = this.extractResponseText(responseBody);
+
+      console.log(`[translateWords] Response text length: ${responseText?.length || 0} chars`);
+      if (!responseText) {
+        console.error('[translateWords] Empty response from Bedrock, responseBody keys:', Object.keys(responseBody));
+        throw new Error('No content returned from Bedrock');
+      }
+
+      // Parse JSON from response (handle markdown fences and model tags)
+      let parsed: unknown;
+      const stripped = responseText
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/\s*```\s*$/, '')
+        .replace(/\{@json_object\}/gi, '')
+        .trim();
+
+      try {
+        parsed = JSON.parse(stripped);
+        console.log('[translateWords] JSON parsed successfully (direct)');
+      } catch (parseError) {
+        console.warn(
+          `[translateWords] Direct JSON parse failed: ${parseError instanceof Error ? parseError.message : parseError}`,
+        );
+        console.warn(`[translateWords] Response text (first 500 chars): ${stripped.substring(0, 500)}`);
+
+        // Attempt repair for truncated JSON — wrap in object so repairTruncatedJson can handle it
+        try {
+          const wrappedText = `{"words": ${stripped}`;
+          const repaired = this.repairTruncatedJson(wrappedText);
+          parsed = repaired.words;
+          console.log('[translateWords] JSON parsed successfully (repaired)');
+        } catch {
+          console.error('[translateWords] JSON repair also failed');
+          throw new Error('Failed to parse translation response as JSON');
+        }
+      }
+
+      if (!Array.isArray(parsed)) {
+        throw new Error('Expected JSON array of translated words');
+      }
+
+      // Map to VocabularyWord[], filtering out completely invalid entries
+      const vocabularyWords: VocabularyWord[] = parsed
+        .filter(
+          (entry: unknown): entry is Record<string, unknown> =>
+            entry !== null && typeof entry === 'object' && typeof (entry as Record<string, unknown>).word === 'string',
+        )
+        .map((entry: Record<string, unknown>) => ({
+          word: entry.word as string,
+          translation: typeof entry.translation === 'string' ? entry.translation : undefined,
+          definition: typeof entry.definition === 'string' ? entry.definition : 'No definition available',
+          partOfSpeech: typeof entry.partOfSpeech === 'string' ? entry.partOfSpeech : undefined,
+          exampleSentence: typeof entry.exampleSentence === 'string' ? entry.exampleSentence : undefined,
+          difficulty: typeof entry.difficulty === 'string' ? entry.difficulty : undefined,
+        }));
+
+      console.log(`[translateWords] Success: translated ${vocabularyWords.length} words`);
+
+      // Log usage
+      const tokenCount = responseText.length / 4;
+      this.logUsage(userId, 'translateWords', tokenCount);
+
+      return vocabularyWords;
+    } catch (error) {
+      console.error('Error translating words with Bedrock:', error);
+
+      if (error instanceof Error) {
+        if (error.message.includes('Rate limit')) {
+          throw error;
+        }
+        if (error.message.includes('Words array cannot be empty')) {
+          throw error;
+        }
+        if (error.message.includes('Failed to parse') || error.message.includes('Expected JSON array')) {
+          throw error;
+        }
+        if (error.message.includes('throttling')) {
+          throw new Error('Bedrock service is currently throttling requests. Please try again later.');
+        }
+        if (error.message.includes('is not authorized to perform') || error.message.includes('AccessDeniedException')) {
+          throw new Error(
+            'Bedrock model access is not enabled. Please enable model access in the AWS Bedrock console.',
+          );
+        }
+        if (
+          error.message.includes('Could not resolve the foundation model') ||
+          error.message.includes('ValidationException') ||
+          error.name === 'ValidationException'
+        ) {
+          throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
+        }
+      }
+
+      throw new Error('Failed to translate words');
+    }
   }
 
   /**

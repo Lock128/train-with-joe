@@ -236,6 +236,18 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                 minimumSize: const Size(double.infinity, 0),
               ),
             ),
+            const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => context.go('/vocabulary/scan-translate'),
+              icon: const Icon(Icons.document_scanner),
+              label: const Text('Scan & Translate'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(double.infinity, 0),
+              ),
+            ),
           ],
         ),
       ),
@@ -629,6 +641,13 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             icon: const Icon(Icons.add_photo_alternate),
             label: const Text('Analyze More Images'),
             style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => context.go('/vocabulary/scan-translate'),
+            icon: const Icon(Icons.document_scanner),
+            label: const Text('Scan & Translate'),
+            style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(

@@ -187,4 +187,81 @@ describe('Mutation.analyzeImageVocabulary handler', () => {
     expect(result.vocabularyList).toBeNull();
     expect(result.error).toBe('Failed to start image analysis');
   });
+
+  test('should pass phase "recognize" and mode to processor Lambda when mode is scan_translate', async () => {
+    const event = {
+      arguments: {
+        input: {
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
+          mode: 'scan_translate',
+        },
+      },
+      identity: { sub: 'user-123' },
+    };
+
+    const result = await handler(event);
+
+    expect(result.success).toBe(true);
+    expect(mockLambdaSend).toHaveBeenCalledTimes(1);
+    const invokeCommand = mockLambdaSend.mock.calls[0][0];
+    const payload = JSON.parse(invokeCommand.input.Payload);
+    expect(payload.phase).toBe('recognize');
+    expect(payload.mode).toBe('scan_translate');
+  });
+
+  test('should store mode on the PENDING record when mode is scan_translate', async () => {
+    const event = {
+      arguments: {
+        input: {
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
+          mode: 'scan_translate',
+        },
+      },
+      identity: { sub: 'user-123' },
+    };
+
+    await handler(event);
+
+    expect(mockCreate).toHaveBeenCalledTimes(1);
+    const createArg = mockCreate.mock.calls[0][0];
+    expect(createArg.mode).toBe('scan_translate');
+  });
+
+  test('should not include phase or mode in Lambda payload when mode is omitted', async () => {
+    const event = {
+      arguments: {
+        input: {
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
+          sourceLanguage: 'English',
+        },
+      },
+      identity: { sub: 'user-123' },
+    };
+
+    const result = await handler(event);
+
+    expect(result.success).toBe(true);
+    expect(mockLambdaSend).toHaveBeenCalledTimes(1);
+    const invokeCommand = mockLambdaSend.mock.calls[0][0];
+    const payload = JSON.parse(invokeCommand.input.Payload);
+    expect(payload.phase).toBeUndefined();
+    expect(payload.mode).toBeUndefined();
+  });
+
+  test('should not include mode on PENDING record when mode is omitted', async () => {
+    const event = {
+      arguments: {
+        input: {
+          imageS3Keys: ['uploads/user-123/image1.jpg'],
+        },
+      },
+      identity: { sub: 'user-123' },
+    };
+
+    await handler(event);
+
+    expect(mockCreate).toHaveBeenCalledTimes(1);
+    const createArg = mockCreate.mock.calls[0][0];
+    expect(createArg.mode).toBeUndefined();
+  });
 });

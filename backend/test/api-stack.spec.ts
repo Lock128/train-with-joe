@@ -106,20 +106,20 @@ describe('APIStack CDK Integration Tests', () => {
   });
 
   test('should create DynamoDB data sources', () => {
-    // Verify data sources exist (2 DynamoDB + 32 Lambda)
-    template.resourceCountIs('AWS::AppSync::DataSource', 34);
+    // Verify data sources exist (2 DynamoDB + 33 Lambda)
+    template.resourceCountIs('AWS::AppSync::DataSource', 35);
 
     const dataSources = Object.values(templateJson.Resources).filter(
       (resource: any) => resource.Type === 'AWS::AppSync::DataSource',
     );
 
-    expect(dataSources.length).toBe(34);
+    expect(dataSources.length).toBe(35);
 
     const dynamoDbSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AMAZON_DYNAMODB');
     const lambdaSources = dataSources.filter((ds: any) => ds.Properties.Type === 'AWS_LAMBDA');
 
     expect(dynamoDbSources.length).toBe(2); // Users and Subscriptions tables
-    expect(lambdaSources.length).toBe(32); // 32 Lambda data sources
+    expect(lambdaSources.length).toBe(33); // 33 Lambda data sources
   });
 
   test('should export API endpoint URL and ID', () => {
@@ -138,7 +138,7 @@ describe('APIStack CDK Integration Tests', () => {
 
   test('should have correct resource counts', () => {
     template.resourceCountIs('AWS::AppSync::GraphQLApi', 1);
-    template.resourceCountIs('AWS::AppSync::DataSource', 34);
+    template.resourceCountIs('AWS::AppSync::DataSource', 35);
 
     // Verify at least 3 IAM roles exist (CloudWatch role + 2 data source roles, CDK may create additional service roles)
     const roles = Object.values(templateJson.Resources).filter((resource: any) => resource.Type === 'AWS::IAM::Role');
@@ -208,6 +208,29 @@ describe('APIStack CDK Integration Tests', () => {
     const resolverFieldNames = resolvers.map((r: any) => r.Properties.FieldName);
 
     expect(resolverFieldNames).toContain('getPlanIds');
+  });
+
+  test('should create translateRecognizedWords resolver', () => {
+    const resolvers = Object.values(templateJson.Resources).filter(
+      (resource: any) => resource.Type === 'AWS::AppSync::Resolver',
+    );
+
+    const resolverFieldNames = resolvers.map((r: any) => r.Properties.FieldName);
+
+    expect(resolverFieldNames).toContain('translateRecognizedWords');
+  });
+
+  test('should pass PROCESS_IMAGE_VOCABULARY_FUNCTION_NAME env var to Lambda functions', () => {
+    const lambdas = Object.values(templateJson.Resources).filter(
+      (resource: any) => resource.Type === 'AWS::Lambda::Function',
+    );
+
+    const lambdasWithProcessImageVocabulary = lambdas.filter((lambda: any) => {
+      const envVars = lambda.Properties?.Environment?.Variables ?? {};
+      return envVars.PROCESS_IMAGE_VOCABULARY_FUNCTION_NAME !== undefined;
+    });
+
+    expect(lambdasWithProcessImageVocabulary.length).toBeGreaterThanOrEqual(1);
   });
 
   test('should pass PLAN_IDS_SSM_PATH env var to Lambda functions', () => {

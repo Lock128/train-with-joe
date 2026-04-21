@@ -12,6 +12,7 @@ interface AnalyzeImageVocabularyInput {
   imageS3Keys: string[];
   sourceLanguage?: string;
   targetLanguage?: string;
+  mode?: string;
 }
 
 interface Event {
@@ -79,6 +80,7 @@ export const handler = async (event: Event) => {
       targetLanguage: input.targetLanguage,
       status: 'PENDING',
       isPublic: 'false',
+      ...(input.mode && { mode: input.mode }),
       createdAt: now,
       updatedAt: now,
     });
@@ -86,17 +88,24 @@ export const handler = async (event: Event) => {
     console.log('[analyzeImageVocabulary] Created PENDING vocabulary list', { vocabularyListId, userId });
 
     // Fire-and-forget: invoke the processing Lambda asynchronously
+    const lambdaPayload: Record<string, unknown> = {
+      vocabularyListId,
+      userId,
+      imageS3Keys: input.imageS3Keys,
+      sourceLanguage: input.sourceLanguage,
+      targetLanguage: input.targetLanguage,
+    };
+
+    if (input.mode === 'scan_translate') {
+      lambdaPayload.phase = 'recognize';
+      lambdaPayload.mode = input.mode;
+    }
+
     await lambdaClient.send(
       new InvokeCommand({
         FunctionName: PROCESSOR_FUNCTION_NAME,
         InvocationType: 'Event', // async, no waiting for response
-        Payload: JSON.stringify({
-          vocabularyListId,
-          userId,
-          imageS3Keys: input.imageS3Keys,
-          sourceLanguage: input.sourceLanguage,
-          targetLanguage: input.targetLanguage,
-        }),
+        Payload: JSON.stringify(lambdaPayload),
       }),
     );
 

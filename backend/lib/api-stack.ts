@@ -325,6 +325,30 @@ export class APIStack extends cdk.Stack {
       fieldName: 'analyzeImageVocabulary',
     });
 
+    // Create translateRecognizedWords mutation Lambda (validates RECOGNIZED status, triggers Phase 2 translation)
+    const translateRecognizedWordsFunction = new NodejsFunction(this, 'TranslateRecognizedWordsFunction', {
+      ...vocabularyLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.translateRecognizedWords.ts'),
+      handler: 'handler',
+      environment: {
+        ...vocabularyLambdaProps.environment,
+        PROCESS_IMAGE_VOCABULARY_FUNCTION_NAME: processImageVocabularyFunction.functionName,
+      },
+    });
+
+    vocabularyListsTable.grantReadWriteData(translateRecognizedWordsFunction);
+    processImageVocabularyFunction.grantInvoke(translateRecognizedWordsFunction);
+
+    const translateRecognizedWordsDataSource = api.addLambdaDataSource(
+      'TranslateRecognizedWordsDataSource',
+      translateRecognizedWordsFunction,
+    );
+
+    translateRecognizedWordsDataSource.createResolver('TranslateRecognizedWordsResolver', {
+      typeName: 'Mutation',
+      fieldName: 'translateRecognizedWords',
+    });
+
     // Create getImageUploadUrls Lambda function
     const getImageUploadUrlsFunction = new NodejsFunction(this, 'GetImageUploadUrlsFunction', {
       ...vocabularyLambdaProps,
