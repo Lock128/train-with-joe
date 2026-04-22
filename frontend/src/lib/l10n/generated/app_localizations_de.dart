@@ -675,4 +675,151 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get subscriptionDisclosure =>
       'Abonnements verlängern sich automatisch, sofern sie nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums gekündigt werden. Die Verlängerung wird innerhalb von 24 Stunden vor Ende des aktuellen Zeitraums berechnet. Du kannst deine Abonnements nach dem Kauf in deinen Kontoeinstellungen im App Store verwalten und kündigen.';
+
+  @override
+  String get more => 'Mehr';
+
+  @override
+  String get selectImages => 'Bilder auswählen';
+
+  @override
+  String get scanAndTranslate => 'Scannen & Übersetzen';
+
+  @override
+  String get from => 'Von:';
+
+  @override
+  String get to => 'Nach:';
+
+  @override
+  String analyzeNImages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Bilder analysieren',
+      one: '$count Bild analysieren',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get analyzeMoreImages => 'Weitere Bilder analysieren';
+
+  @override
+  String get viewAllLists => 'Alle Listen anzeigen';
+
+  @override
+  String get allModesFilter => 'Alle Modi';
+
+  @override
+  String get remove => 'Entfernen';
+
+  @override
+  String get randomized => 'Zufällig';
+
+  @override
+  String fromNLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Vokabellisten',
+      one: 'Vokabelliste',
+    );
+    return 'Aus $count $_temp0';
+  }
+
+  @override
+  String get wordsRandomlySelected =>
+      'Bei jedem Start dieses Trainings werden zufällig Wörter ausgewählt.';
+
+  @override
+  String wordsCount(int count) {
+    return 'Wörter ($count)';
+  }
+
+  @override
+  String get noWordsInTraining => 'Keine Wörter in diesem Training.';
+
+  @override
+  String totalTime(String duration) {
+    return 'Gesamtzeit: $duration';
+  }
+
+  @override
+  String get wordBreakdown => 'Wortübersicht';
+
+  @override
+  String get noResultsAvailable => 'Keine Ergebnisse verfügbar.';
+
+  @override
+  String get toggleAdminMode => 'Admin-Modus umschalten';
+
+  @override
+  String get forceRemove => 'Erzwungen entfernen';
+
+  @override
+  String get backToTrainings => 'Zurück zu Trainings';
+
+  @override
+  String get addCustomWord => 'Eigenes Wort hinzufügen';
+
+  @override
+  String get analyzeImage => 'Bild analysieren';
+
+  @override
+  String get changeDateRange => 'Zeitraum ändern';
+
+  @override
+  String get backToTrainingDetail => 'Zurück zum Training';
+
+  @override
+  String tierUpdatedTo(String tier) {
+    return 'Stufe auf $tier aktualisiert';
+  }
+
+  @override
+  String get failedToUpdateTier => 'Stufe konnte nicht aktualisiert werden';
+
+  @override
+  String get syncFromCognito => 'Von Cognito synchronisieren';
+
+  @override
+  String get noUsersFound => 'Keine Benutzer gefunden.';
+
+  @override
+  String get tier => 'Stufe';
+
+  @override
+  String get overview => 'Übersicht';
+
+  @override
+  String get dailyBreakdown => 'Tagesübersicht';
+
+  @override
+  String get noTrainingActivity =>
+      'Keine Trainingsaktivität in diesem Zeitraum.';
+
+  @override
+  String get noExecutionDetails => 'Keine Ausführungsdetails verfügbar.';
+
+  @override
+  String get searchUserAbove =>
+      'Suche oben nach einem Benutzer, um seine Statistiken anzuzeigen.';
+
+  @override
+  String userLabel(String label) {
+    return 'Benutzer: $label';
+  }
+
+  @override
+  String get applyTierOverride => 'Stufe überschreiben';
+
+  @override
+  String get editWordTooltip => 'Wort bearbeiten';
+
+  @override
+  String get deleteWordTooltip => 'Wort löschen';
+
+  @override
+  String get addWordTooltip => 'Wort hinzufügen';
 }

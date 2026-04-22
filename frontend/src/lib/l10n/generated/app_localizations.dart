@@ -1317,6 +1317,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions by going to your account settings on the App Store after purchase.'**
   String get subscriptionDisclosure;
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
+
+  /// No description provided for @selectImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Images'**
+  String get selectImages;
+
+  /// No description provided for @scanAndTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan & Translate'**
+  String get scanAndTranslate;
+
+  /// No description provided for @from.
+  ///
+  /// In en, this message translates to:
+  /// **'From:'**
+  String get from;
+
+  /// No description provided for @to.
+  ///
+  /// In en, this message translates to:
+  /// **'To:'**
+  String get to;
+
+  /// No description provided for @analyzeNImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze {count} {count, plural, =1{Image} other{Images}}'**
+  String analyzeNImages(int count);
+
+  /// No description provided for @analyzeMoreImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze More Images'**
+  String get analyzeMoreImages;
+
+  /// No description provided for @viewAllLists.
+  ///
+  /// In en, this message translates to:
+  /// **'View All Lists'**
+  String get viewAllLists;
+
+  /// No description provided for @allModesFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'All modes'**
+  String get allModesFilter;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @randomized.
+  ///
+  /// In en, this message translates to:
+  /// **'Randomized'**
+  String get randomized;
+
+  /// No description provided for @fromNLists.
+  ///
+  /// In en, this message translates to:
+  /// **'From {count} vocabulary {count, plural, =1{list} other{lists}}'**
+  String fromNLists(int count);
+
+  /// No description provided for @wordsRandomlySelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Words are randomly selected each time you start this training.'**
+  String get wordsRandomlySelected;
+
+  /// No description provided for @wordsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Words ({count})'**
+  String wordsCount(int count);
+
+  /// No description provided for @noWordsInTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'No words in this training.'**
+  String get noWordsInTraining;
+
+  /// No description provided for @totalTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Total time: {duration}'**
+  String totalTime(String duration);
+
+  /// No description provided for @wordBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Word Breakdown'**
+  String get wordBreakdown;
+
+  /// No description provided for @noResultsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No results available.'**
+  String get noResultsAvailable;
+
+  /// No description provided for @toggleAdminMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle admin mode'**
+  String get toggleAdminMode;
+
+  /// No description provided for @forceRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Force remove'**
+  String get forceRemove;
+
+  /// No description provided for @backToTrainings.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to trainings'**
+  String get backToTrainings;
+
+  /// No description provided for @addCustomWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom word'**
+  String get addCustomWord;
+
+  /// No description provided for @analyzeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze Image'**
+  String get analyzeImage;
+
+  /// No description provided for @changeDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change date range'**
+  String get changeDateRange;
+
+  /// No description provided for @backToTrainingDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to training'**
+  String get backToTrainingDetail;
+
+  /// No description provided for @tierUpdatedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tier updated to {tier}'**
+  String tierUpdatedTo(String tier);
+
+  /// No description provided for @failedToUpdateTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update tier'**
+  String get failedToUpdateTier;
+
+  /// No description provided for @syncFromCognito.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync from Cognito'**
+  String get syncFromCognito;
+
+  /// No description provided for @noUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found.'**
+  String get noUsersFound;
+
+  /// No description provided for @tier.
+  ///
+  /// In en, this message translates to:
+  /// **'Tier'**
+  String get tier;
+
+  /// No description provided for @overview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// No description provided for @dailyBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Breakdown'**
+  String get dailyBreakdown;
+
+  /// No description provided for @noTrainingActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'No training activity in this period.'**
+  String get noTrainingActivity;
+
+  /// No description provided for @noExecutionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'No execution details available.'**
+  String get noExecutionDetails;
+
+  /// No description provided for @searchUserAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a user above to view their statistics.'**
+  String get searchUserAbove;
+
+  /// No description provided for @userLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User: {label}'**
+  String userLabel(String label);
+
+  /// No description provided for @applyTierOverride.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply tier override'**
+  String get applyTierOverride;
+
+  /// No description provided for @editWordTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit word'**
+  String get editWordTooltip;
+
+  /// No description provided for @deleteWordTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete word'**
+  String get deleteWordTooltip;
+
+  /// No description provided for @addWordTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add word'**
+  String get addWordTooltip;
 }
 
 class _AppLocalizationsDelegate

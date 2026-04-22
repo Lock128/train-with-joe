@@ -99,7 +99,7 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),
-            tooltip: 'Change date range',
+            tooltip: l10n.changeDateRange,
             onPressed: _pickDateRange,
           ),
         ],

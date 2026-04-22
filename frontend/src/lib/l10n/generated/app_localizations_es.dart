@@ -443,19 +443,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get subscribe => 'Suscribirse';
 
   @override
-  String get pricingLegalPrefix => 'By subscribing, you agree to our ';
+  String get pricingLegalPrefix => 'Al suscribirte, aceptas nuestros ';
 
   @override
-  String get pricingTermsLink => 'Terms of Use (EULA)';
+  String get pricingTermsLink => 'Términos de uso (EULA)';
 
   @override
-  String get pricingTermsLinkGeneric => 'Terms of Service';
+  String get pricingTermsLinkGeneric => 'Términos de servicio';
 
   @override
-  String get pricingLegalAnd => 'and';
+  String get pricingLegalAnd => 'y la';
 
   @override
-  String get pricingPrivacyLink => 'Privacy Policy';
+  String get pricingPrivacyLink => 'Política de privacidad';
 
   @override
   String get pricingLegalSuffix => '.';
@@ -676,4 +676,151 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get subscriptionDisclosure =>
       'Las suscripciones se renuevan automáticamente a menos que se cancelen al menos 24 horas antes del final del período actual. Se cobrará la renovación dentro de las 24 horas anteriores al final del período actual. Puedes gestionar y cancelar tus suscripciones en los ajustes de tu cuenta en la App Store después de la compra.';
+
+  @override
+  String get more => 'Más';
+
+  @override
+  String get selectImages => 'Seleccionar imágenes';
+
+  @override
+  String get scanAndTranslate => 'Escanear y traducir';
+
+  @override
+  String get from => 'De:';
+
+  @override
+  String get to => 'A:';
+
+  @override
+  String analyzeNImages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'imágenes',
+      one: 'imagen',
+    );
+    return 'Analizar $count $_temp0';
+  }
+
+  @override
+  String get analyzeMoreImages => 'Analizar más imágenes';
+
+  @override
+  String get viewAllLists => 'Ver todas las listas';
+
+  @override
+  String get allModesFilter => 'Todos los modos';
+
+  @override
+  String get remove => 'Eliminar';
+
+  @override
+  String get randomized => 'Aleatorio';
+
+  @override
+  String fromNLists(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'listas de vocabulario',
+      one: 'lista de vocabulario',
+    );
+    return 'De $count $_temp0';
+  }
+
+  @override
+  String get wordsRandomlySelected =>
+      'Las palabras se seleccionan aleatoriamente cada vez que inicias este entrenamiento.';
+
+  @override
+  String wordsCount(int count) {
+    return 'Palabras ($count)';
+  }
+
+  @override
+  String get noWordsInTraining => 'No hay palabras en este entrenamiento.';
+
+  @override
+  String totalTime(String duration) {
+    return 'Tiempo total: $duration';
+  }
+
+  @override
+  String get wordBreakdown => 'Desglose de palabras';
+
+  @override
+  String get noResultsAvailable => 'No hay resultados disponibles.';
+
+  @override
+  String get toggleAdminMode => 'Alternar modo admin';
+
+  @override
+  String get forceRemove => 'Forzar eliminación';
+
+  @override
+  String get backToTrainings => 'Volver a entrenamientos';
+
+  @override
+  String get addCustomWord => 'Añadir palabra personalizada';
+
+  @override
+  String get analyzeImage => 'Analizar imagen';
+
+  @override
+  String get changeDateRange => 'Cambiar rango de fechas';
+
+  @override
+  String get backToTrainingDetail => 'Volver al entrenamiento';
+
+  @override
+  String tierUpdatedTo(String tier) {
+    return 'Nivel actualizado a $tier';
+  }
+
+  @override
+  String get failedToUpdateTier => 'No se pudo actualizar el nivel';
+
+  @override
+  String get syncFromCognito => 'Sincronizar desde Cognito';
+
+  @override
+  String get noUsersFound => 'No se encontraron usuarios.';
+
+  @override
+  String get tier => 'Nivel';
+
+  @override
+  String get overview => 'Resumen';
+
+  @override
+  String get dailyBreakdown => 'Desglose diario';
+
+  @override
+  String get noTrainingActivity =>
+      'Sin actividad de entrenamiento en este período.';
+
+  @override
+  String get noExecutionDetails => 'No hay detalles de ejecución disponibles.';
+
+  @override
+  String get searchUserAbove =>
+      'Busca un usuario arriba para ver sus estadísticas.';
+
+  @override
+  String userLabel(String label) {
+    return 'Usuario: $label';
+  }
+
+  @override
+  String get applyTierOverride => 'Aplicar nivel';
+
+  @override
+  String get editWordTooltip => 'Editar palabra';
+
+  @override
+  String get deleteWordTooltip => 'Eliminar palabra';
+
+  @override
+  String get addWordTooltip => 'Añadir palabra';
 }

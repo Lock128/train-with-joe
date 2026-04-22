@@ -101,7 +101,7 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
+          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: l10n.backToTrainingDetail, onPressed: () => context.go('/trainings/${widget.trainingId}')),
           title: Text(l10n.trainingHistory)),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -110,7 +110,7 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
     if (_error != null || _training == null) {
       return Scaffold(
         appBar: AppBar(
-          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
+          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: l10n.backToTrainingDetail, onPressed: () => context.go('/trainings/${widget.trainingId}')),
           title: Text(l10n.trainingHistory)),
         body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red), const SizedBox(height: 16),
@@ -131,7 +131,7 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to training', onPressed: () => context.go('/trainings/${widget.trainingId}')),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: l10n.backToTrainingDetail, onPressed: () => context.go('/trainings/${widget.trainingId}')),
         title: Text(l10n.trainingHistory)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

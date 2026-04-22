@@ -910,7 +910,7 @@ class _VocabularyListDetailScreenState
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddWordDialog,
-        tooltip: 'Add word',
+        tooltip: l10n.addWordTooltip,
         child: const Icon(Icons.add),
       ),
     );
@@ -997,6 +997,7 @@ class _VocabularyListDetailScreenState
   }
 
   Widget _buildWordTile(Map<String, dynamic> word, int index) {
+    final l10n = AppLocalizations.of(context)!;
     final wordText = word['word'] as String? ?? '';
     final translation = word['translation'] as String?;
     final definition = word['definition'] as String? ?? '';
@@ -1069,12 +1070,12 @@ class _VocabularyListDetailScreenState
           ],
           IconButton(
             icon: const Icon(Icons.edit_outlined, size: 20),
-            tooltip: 'Edit word',
+            tooltip: l10n.editWordTooltip,
             onPressed: () => _showEditWordDialog(index),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline, size: 20),
-            tooltip: 'Delete word',
+            tooltip: l10n.deleteWordTooltip,
             onPressed: () => _confirmDeleteWord(index),
           ),
         ],

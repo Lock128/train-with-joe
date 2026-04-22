@@ -112,7 +112,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/vocabulary/analyze'),
-        tooltip: 'Analyze Image',
+        tooltip: l10n.analyzeImage,
         child: const Icon(Icons.camera_alt),
       ),
     );

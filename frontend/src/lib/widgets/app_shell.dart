@@ -6,14 +6,14 @@ import '../providers/user_provider.dart';
 import '../l10n/generated/app_localizations.dart';
 
 /// Shared shell widget that wraps authenticated screens with navigation.
-/// On narrow screens (mobile): bottom navigation bar.
-/// On wide screens (web/tablet): side navigation rail + drawer.
+/// On narrow screens (mobile): bottom navigation bar with 4 primary + "More".
+/// On wide screens (web/tablet): side navigation rail with all destinations.
 class AppShell extends StatelessWidget {
   final Widget child;
 
   const AppShell({super.key, required this.child});
 
-  /// Builds the navigation destinations using translated labels.
+  /// All navigation destinations.
   static List<_NavDestination> _buildDestinations(AppLocalizations l10n) => [
     _NavDestination('/home', Icons.home_outlined, Icons.home, l10n.home),
     _NavDestination('/vocabulary/analyze', Icons.camera_alt_outlined, Icons.camera_alt, l10n.scan),
@@ -25,23 +25,36 @@ class AppShell extends StatelessWidget {
     _NavDestination('/settings', Icons.settings_outlined, Icons.settings, l10n.settings),
   ];
 
-  List<_NavDestination> _effectiveDestinations(BuildContext context) {
+  /// Number of items shown directly in the mobile bottom bar (excluding "More").
+  static const int _primaryCount = 4;
+
+  List<_NavDestination> _allDestinations(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final destinations = _buildDestinations(l10n);
     final isAdmin = context.watch<UserProvider>().isAdmin;
     if (isAdmin) {
-      return [...destinations, _NavDestination('/admin', Icons.admin_panel_settings_outlined, Icons.admin_panel_settings, 'Admin')];
+      return [...destinations, _NavDestination('/admin', Icons.admin_panel_settings_outlined, Icons.admin_panel_settings, l10n.admin)];
     }
     return destinations;
   }
 
+  /// Primary destinations shown in the mobile bottom bar.
+  List<_NavDestination> _primaryDestinations(BuildContext context) {
+    return _allDestinations(context).take(_primaryCount).toList();
+  }
+
+  /// Overflow destinations shown in the "More" bottom sheet.
+  List<_NavDestination> _overflowDestinations(BuildContext context) {
+    return _allDestinations(context).skip(_primaryCount).toList();
+  }
+
   int _currentIndex(BuildContext context) {
-    final destinations = _effectiveDestinations(context);
+    final all = _allDestinations(context);
     final location = GoRouterState.of(context).matchedLocation;
     int bestIndex = 0;
     int bestLength = 0;
-    for (var i = 0; i < destinations.length; i++) {
-      final path = destinations[i].path;
+    for (var i = 0; i < all.length; i++) {
+      final path = all[i].path;
       if (location.startsWith(path) && path.length > bestLength) {
         bestIndex = i;
         bestLength = path.length;
@@ -50,9 +63,17 @@ class AppShell extends StatelessWidget {
     return bestIndex;
   }
 
+  /// For the mobile bottom bar: returns the selected index within the 5-item
+  /// bar (0-3 = primary, 4 = "More" when an overflow item is active).
+  int _bottomBarIndex(BuildContext context) {
+    final idx = _currentIndex(context);
+    if (idx >= _primaryCount) return _primaryCount; // "More" tab
+    return idx;
+  }
+
   void _onDestinationSelected(BuildContext context, int index) async {
-    final destinations = _effectiveDestinations(context);
-    final targetPath = destinations[index].path;
+    final all = _allDestinations(context);
+    final targetPath = all[index].path;
 
     // If the user is in an active training execution, confirm before navigating away.
     final location = GoRouterState.of(context).matchedLocation;
@@ -90,18 +111,83 @@ class AppShell extends StatelessWidget {
     }
   }
 
+  void _showMoreSheet(BuildContext context) {
+    final overflow = _overflowDestinations(context);
+    final currentIdx = _currentIndex(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Container(
+                  width: 32,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              ...overflow.map((dest) {
+                final isActive = _allDestinations(context).indexOf(dest) == currentIdx;
+                return ListTile(
+                  leading: Icon(
+                    isActive ? dest.selectedIcon : dest.icon,
+                    color: isActive ? Theme.of(context).colorScheme.primary : null,
+                  ),
+                  title: Text(
+                    dest.label,
+                    style: isActive
+                        ? TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          )
+                        : null,
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    _onDestinationSelected(context, _allDestinations(context).indexOf(dest));
+                  },
+                );
+              }),
+              // Sign out option
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: Text(l10n.signOut),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _handleSignOut(context);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = _currentIndex(context);
     final isWide = MediaQuery.of(context).size.width >= 600;
 
     if (isWide) {
-      return _buildWideLayout(context, selectedIndex);
+      return _buildWideLayout(context, _currentIndex(context));
     }
-    return _buildNarrowLayout(context, selectedIndex);
+    return _buildNarrowLayout(context);
   }
 
-  /// Wide layout: NavigationRail on the left side
+  /// Wide layout: NavigationRail on the left side (unchanged – all items fit)
   Widget _buildWideLayout(BuildContext context, int selectedIndex) {
     return Scaffold(
       body: SafeArea(
@@ -145,7 +231,7 @@ class AppShell extends StatelessWidget {
                 ),
               ),
             ),
-            destinations: _effectiveDestinations(context)
+            destinations: _allDestinations(context)
                 .map((d) => NavigationRailDestination(
                       icon: Icon(d.icon),
                       selectedIcon: Icon(d.selectedIcon),
@@ -161,20 +247,35 @@ class AppShell extends StatelessWidget {
     );
   }
 
-  /// Narrow layout: bottom NavigationBar + drawer accessible from AppBar
-  Widget _buildNarrowLayout(BuildContext context, int selectedIndex) {
+  /// Narrow layout: bottom NavigationBar with 4 primary items + "More"
+  Widget _buildNarrowLayout(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final primary = _primaryDestinations(context);
+    final selectedBottomIdx = _bottomBarIndex(context);
+
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (i) => _onDestinationSelected(context, i),
-        destinations: _effectiveDestinations(context)
-            .map((d) => NavigationDestination(
-                  icon: Icon(d.icon),
-                  selectedIcon: Icon(d.selectedIcon),
-                  label: d.label,
-                ))
-            .toList(),
+        selectedIndex: selectedBottomIdx,
+        onDestinationSelected: (i) {
+          if (i == _primaryCount) {
+            _showMoreSheet(context);
+          } else {
+            _onDestinationSelected(context, i);
+          }
+        },
+        destinations: [
+          ...primary.map((d) => NavigationDestination(
+                icon: Icon(d.icon),
+                selectedIcon: Icon(d.selectedIcon),
+                label: d.label,
+              )),
+          NavigationDestination(
+            icon: const Icon(Icons.more_horiz_outlined),
+            selectedIcon: const Icon(Icons.more_horiz),
+            label: l10n.more,
+          ),
+        ],
       ),
     );
   }

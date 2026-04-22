@@ -219,7 +219,7 @@ class _InfoScreenState extends State<InfoScreen> {
                               IconButton(
                                 icon: const Icon(Icons.refresh, size: 20),
                                 onPressed: _loadBackendVersion,
-                                tooltip: 'Retry',
+                                tooltip: l10n.retry,
                               ),
                           ],
                         ),

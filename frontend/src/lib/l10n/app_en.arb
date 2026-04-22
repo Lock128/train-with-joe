@@ -305,5 +305,76 @@
   "setNewPasswordButton": "Set Password & Continue",
 
   "subscriptionMonthly": "1-month auto-renewable subscription",
-  "subscriptionDisclosure": "Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions by going to your account settings on the App Store after purchase."
+  "subscriptionDisclosure": "Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. Your account will be charged for renewal within 24 hours prior to the end of the current period. You can manage and cancel your subscriptions by going to your account settings on the App Store after purchase.",
+
+  "more": "More",
+  "selectImages": "Select Images",
+  "scanAndTranslate": "Scan & Translate",
+  "from": "From:",
+  "to": "To:",
+  "analyzeNImages": "Analyze {count} {count, plural, =1{Image} other{Images}}",
+  "@analyzeNImages": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "analyzeMoreImages": "Analyze More Images",
+  "viewAllLists": "View All Lists",
+  "allModesFilter": "All modes",
+  "remove": "Remove",
+  "randomized": "Randomized",
+  "fromNLists": "From {count} vocabulary {count, plural, =1{list} other{lists}}",
+  "@fromNLists": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "wordsRandomlySelected": "Words are randomly selected each time you start this training.",
+  "wordsCount": "Words ({count})",
+  "@wordsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "noWordsInTraining": "No words in this training.",
+  "totalTime": "Total time: {duration}",
+  "@totalTime": {
+    "placeholders": {
+      "duration": { "type": "String" }
+    }
+  },
+  "wordBreakdown": "Word Breakdown",
+  "noResultsAvailable": "No results available.",
+  "toggleAdminMode": "Toggle admin mode",
+  "forceRemove": "Force remove",
+  "backToTrainings": "Back to trainings",
+  "addCustomWord": "Add custom word",
+  "analyzeImage": "Analyze Image",
+  "changeDateRange": "Change date range",
+  "backToTrainingDetail": "Back to training",
+  "tierUpdatedTo": "Tier updated to {tier}",
+  "@tierUpdatedTo": {
+    "placeholders": {
+      "tier": { "type": "String" }
+    }
+  },
+  "failedToUpdateTier": "Failed to update tier",
+  "syncFromCognito": "Sync from Cognito",
+  "noUsersFound": "No users found.",
+  "tier": "Tier",
+  "overview": "Overview",
+  "dailyBreakdown": "Daily Breakdown",
+  "noTrainingActivity": "No training activity in this period.",
+  "noExecutionDetails": "No execution details available.",
+  "searchUserAbove": "Search for a user above to view their statistics.",
+  "userLabel": "User: {label}",
+  "@userLabel": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
+  "applyTierOverride": "Apply tier override",
+  "editWordTooltip": "Edit word",
+  "deleteWordTooltip": "Delete word",
+  "addWordTooltip": "Add word"
 }

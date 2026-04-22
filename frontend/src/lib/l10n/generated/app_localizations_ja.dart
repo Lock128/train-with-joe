@@ -434,22 +434,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get subscribe => '登録する';
 
   @override
-  String get pricingLegalPrefix => 'By subscribing, you agree to our ';
+  String get pricingLegalPrefix => '登録することで、';
 
   @override
-  String get pricingTermsLink => 'Terms of Use (EULA)';
+  String get pricingTermsLink => '利用規約（EULA）';
 
   @override
-  String get pricingTermsLinkGeneric => 'Terms of Service';
+  String get pricingTermsLinkGeneric => '利用規約';
 
   @override
-  String get pricingLegalAnd => 'and';
+  String get pricingLegalAnd => 'および';
 
   @override
-  String get pricingPrivacyLink => 'Privacy Policy';
+  String get pricingPrivacyLink => 'プライバシーポリシー';
 
   @override
-  String get pricingLegalSuffix => '.';
+  String get pricingLegalSuffix => 'に同意したものとみなされます。';
 
   @override
   String get tryAgain => 'もう一度試す';
@@ -654,4 +654,136 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get subscriptionDisclosure =>
       'サブスクリプションは、現在の期間終了の24時間前までにキャンセルしない限り自動的に更新されます。更新料金は現在の期間終了の24時間以内に請求されます。購入後、App Storeのアカウント設定からサブスクリプションの管理・キャンセルができます。';
+
+  @override
+  String get more => 'その他';
+
+  @override
+  String get selectImages => '画像を選択';
+
+  @override
+  String get scanAndTranslate => 'スキャン＆翻訳';
+
+  @override
+  String get from => '元:';
+
+  @override
+  String get to => '先:';
+
+  @override
+  String analyzeNImages(int count) {
+    return '$count枚の画像を分析';
+  }
+
+  @override
+  String get analyzeMoreImages => 'さらに画像を分析';
+
+  @override
+  String get viewAllLists => 'すべてのリストを表示';
+
+  @override
+  String get allModesFilter => 'すべてのモード';
+
+  @override
+  String get remove => '削除';
+
+  @override
+  String get randomized => 'ランダム';
+
+  @override
+  String fromNLists(int count) {
+    return '$count個の単語リストから';
+  }
+
+  @override
+  String get wordsRandomlySelected => 'このトレーニングを開始するたびに単語がランダムに選択されます。';
+
+  @override
+  String wordsCount(int count) {
+    return '単語 ($count)';
+  }
+
+  @override
+  String get noWordsInTraining => 'このトレーニングに単語がありません。';
+
+  @override
+  String totalTime(String duration) {
+    return '合計時間: $duration';
+  }
+
+  @override
+  String get wordBreakdown => '単語の内訳';
+
+  @override
+  String get noResultsAvailable => '結果がありません。';
+
+  @override
+  String get toggleAdminMode => '管理者モードを切り替え';
+
+  @override
+  String get forceRemove => '強制削除';
+
+  @override
+  String get backToTrainings => 'トレーニング一覧に戻る';
+
+  @override
+  String get addCustomWord => 'カスタム単語を追加';
+
+  @override
+  String get analyzeImage => '画像を分析';
+
+  @override
+  String get changeDateRange => '期間を変更';
+
+  @override
+  String get backToTrainingDetail => 'トレーニングに戻る';
+
+  @override
+  String tierUpdatedTo(String tier) {
+    return 'プランを$tierに更新しました';
+  }
+
+  @override
+  String get failedToUpdateTier => 'プランの更新に失敗しました';
+
+  @override
+  String get syncFromCognito => 'Cognitoから同期';
+
+  @override
+  String get noUsersFound => 'ユーザーが見つかりません。';
+
+  @override
+  String get tier => 'プラン';
+
+  @override
+  String get overview => '概要';
+
+  @override
+  String get dailyBreakdown => '日別内訳';
+
+  @override
+  String get noTrainingActivity => 'この期間にトレーニング活動はありません。';
+
+  @override
+  String get noExecutionDetails => '実行の詳細がありません。';
+
+  @override
+  String get searchUserAbove => '上でユーザーを検索して統計を表示します。';
+
+  @override
+  String userLabel(String label) {
+    return 'ユーザー: $label';
+  }
+
+  @override
+  String get applyTierOverride => 'プランを適用';
+
+  @override
+  String get editWordTooltip => '単語を編集';
+
+  @override
+  String get deleteWordTooltip => '単語を削除';
+
+  @override
+  String get addWordTooltip => '単語を追加';
 }

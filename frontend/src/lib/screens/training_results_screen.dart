@@ -144,19 +144,19 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text('Total time: $duration', style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                Text(l10n.totalTime(duration), style: const TextStyle(color: Colors.grey, fontSize: 14)),
               ]),
             ),
           ),
           const SizedBox(height: 24),
 
           // Per-word breakdown
-          Text('Word Breakdown', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(l10n.wordBreakdown, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           if (results.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Text('No results available.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(l10n.noResultsAvailable, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
             )
           else
             ListView.builder(

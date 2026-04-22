@@ -186,14 +186,14 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return Scaffold(appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to trainings', onPressed: () => context.go('/trainings')),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: l10n.backToTrainings, onPressed: () => context.go('/trainings')),
         title: Text(l10n.training)),
         body: const Center(child: CircularProgressIndicator()));
     }
     if (_error != null || _training == null) {
       return Scaffold(
         appBar: AppBar(
-          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: 'Back to trainings', onPressed: () => context.go('/trainings')),
+          leading: IconButton(icon: const Icon(Icons.arrow_back), tooltip: l10n.backToTrainings, onPressed: () => context.go('/trainings')),
           title: Text(l10n.training)),
         body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.error_outline, size: 64, color: Colors.red),
@@ -218,16 +218,16 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Back to trainings',
+          tooltip: l10n.backToTrainings,
           onPressed: () => context.go('/trainings'),
         ),
         title: Text(name),
         actions: [
-        IconButton(icon: const Icon(Icons.edit), tooltip: 'Rename',
+        IconButton(icon: const Icon(Icons.edit), tooltip: l10n.rename,
           onPressed: () => _showRenameDialog(name)),
-        IconButton(icon: const Icon(Icons.history), tooltip: 'History',
+        IconButton(icon: const Icon(Icons.history), tooltip: l10n.trainingHistory,
           onPressed: () => context.go('/trainings/${widget.trainingId}/history')),
-        IconButton(icon: const Icon(Icons.delete), tooltip: 'Delete',
+        IconButton(icon: const Icon(Icons.delete), tooltip: l10n.delete,
           onPressed: _confirmDelete),
       ]),
       body: SingleChildScrollView(
@@ -255,7 +255,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
               const SizedBox(width: 8),
               Chip(
                 avatar: Icon(Icons.shuffle, size: 16, color: Colors.grey.shade700),
-                label: Text('Randomized', style: TextStyle(color: Colors.grey.shade700)),
+                label: Text(l10n.randomized, style: TextStyle(color: Colors.grey.shade700)),
                 backgroundColor: Colors.grey.shade200,
               ),
             ],
@@ -288,21 +288,21 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
                   Row(children: [
                     Icon(Icons.list_alt, color: Colors.grey.shade600),
                     const SizedBox(width: 8),
-                    Text('From ${vocabularyListIds.length} vocabulary ${vocabularyListIds.length == 1 ? 'list' : 'lists'}',
+                    Text(l10n.fromNLists(vocabularyListIds.length),
                       style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
                   ]),
                   const SizedBox(height: 8),
-                  Text('Words are randomly selected each time you start this training.',
+                  Text(l10n.wordsRandomlySelected,
                     style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
                 ]),
               ),
             ),
           ] else ...[
-            Text('Words (${words.length})', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(l10n.wordsCount(words.length), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             if (words.isEmpty)
-              const Padding(padding: EdgeInsets.symmetric(vertical: 24),
-                child: Text('No words in this training.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)))
+              Padding(padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Text(l10n.noWordsInTraining, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)))
             else
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 300),
@@ -440,7 +440,7 @@ class _AddWordsSheetState extends State<_AddWordsSheet> {
             const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.add_circle, color: Colors.green),
-              tooltip: 'Add custom word',
+              tooltip: l10n.addCustomWord,
               onPressed: _addCustomWord,
             ),
           ]),

@@ -216,13 +216,13 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
         _applyingTier.remove(userId);
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tier updated to $tier'), duration: const Duration(seconds: 2)),
+        SnackBar(content: Text(AppLocalizations.of(context)!.tierUpdatedTo(tier)), duration: const Duration(seconds: 2)),
       );
       widget.onTierOverride?.call();
     } else {
       setState(() => _applyingTier.remove(userId));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update tier'), backgroundColor: Colors.red),
+        SnackBar(content: Text(AppLocalizations.of(context)!.failedToUpdateTier), backgroundColor: Colors.red),
       );
     }
   }
@@ -276,7 +276,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                   : TextButton.icon(
                       onPressed: _syncMissingUsers,
                       icon: const Icon(Icons.sync, size: 16),
-                      label: const Text('Sync from Cognito', style: TextStyle(fontSize: 12)),
+                      label: Text(l10n.syncFromCognito, style: const TextStyle(fontSize: 12)),
                     ),
             ],
           ),
@@ -289,7 +289,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                 ? ListView(
                     children: const [
                       SizedBox(height: 100),
-                      Center(child: Text('No users found.', style: TextStyle(color: Colors.grey))),
+                      Center(child: Text(l10n.noUsersFound, style: const TextStyle(color: Colors.grey))),
                     ],
                   )
                 : ListView.separated(
@@ -345,7 +345,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                           children: [
                             DropdownButton<String>(
                               value: selectedTier,
-                              hint: const Text('Tier', style: TextStyle(fontSize: 12)),
+                              hint: Text(l10n.tier, style: const TextStyle(fontSize: 12)),
                               isDense: true,
                               underline: const SizedBox.shrink(),
                               items: _tierOptions.map((t) => DropdownMenuItem(
@@ -364,7 +364,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                                   )
                                 : IconButton(
                                     icon: const Icon(Icons.check_circle_outline, size: 20),
-                                    tooltip: 'Apply tier override',
+                                    tooltip: l10n.applyTierOverride,
                                     onPressed: selectedTier != null
                                         ? () => _applyTierOverride(id, selectedTier)
                                         : null,
@@ -488,7 +488,7 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),
-            tooltip: 'Change date range',
+            tooltip: l10n.changeDateRange,
             onPressed: _pickDateRange,
           ),
         ],
@@ -543,7 +543,7 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    Text('Overview', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(l10n.overview, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -558,13 +558,13 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
               ),
             ),
             const SizedBox(height: 24),
-            Text('Daily Breakdown',
+            Text(l10n.dailyBreakdown,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             if (dailySummaries.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 32),
-                child: Text('No training activity in this period.',
+                child: Text(l10n.noTrainingActivity,
                     textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
               )
             else
@@ -623,7 +623,7 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
     if (executions.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Text('No execution details available.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+        child: Text(l10n.noExecutionDetails, style: TextStyle(color: Colors.grey, fontSize: 13)),
       );
     }
     return Padding(
@@ -832,7 +832,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
                         prefixIcon: const Icon(Icons.person_search),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.date_range),
-                          tooltip: 'Change date range',
+                          tooltip: l10n.changeDateRange,
                           onPressed: _pickDateRange,
                         ),
                       ),
@@ -858,8 +858,8 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
   Widget _buildBody() {
     final l10n = AppLocalizations.of(context)!;
     if (_activeUserId == null) {
-      return const Center(
-        child: Text('Search for a user above to view their statistics.', style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text(l10n.searchUserAbove, style: const TextStyle(color: Colors.grey)),
       );
     }
     if (_isLoading) return const Center(child: CircularProgressIndicator());
@@ -922,13 +922,13 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
               ),
             ),
             const SizedBox(height: 24),
-            Text('Daily Breakdown',
+            Text(l10n.dailyBreakdown,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             if (dailySummaries.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 32),
-                child: Text('No training activity in this period.',
+                child: Text(l10n.noTrainingActivity,
                     textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
               )
             else
@@ -987,7 +987,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
     if (executions.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Text('No execution details available.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+        child: Text(l10n.noExecutionDetails, style: TextStyle(color: Colors.grey, fontSize: 13)),
       );
     }
     return Padding(

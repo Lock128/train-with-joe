@@ -209,7 +209,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           children: [
             const Icon(Icons.image_search, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
-            Text('Select Images', style: Theme.of(context).textTheme.titleLarge),
+            Text(l10n.selectImages, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             const Text(
               'Pick one or more images to analyze and extract vocabulary words',
@@ -242,7 +242,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             OutlinedButton.icon(
               onPressed: () => context.go('/vocabulary/scan-translate'),
               icon: const Icon(Icons.document_scanner),
-              label: const Text('Scan & Translate'),
+              label: Text(l10n.scanAndTranslate),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.all(16),
                 minimumSize: const Size(double.infinity, 0),
@@ -347,7 +347,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                   children: [
                     const Icon(Icons.language, size: 20),
                     const SizedBox(width: 8),
-                    const Text('From:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(l10n.from, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: DropdownButton<String?>(
@@ -372,7 +372,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
                   children: [
                     const Icon(Icons.translate, size: 20),
                     const SizedBox(width: 8),
-                    const Text('To:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(l10n.to, style: const TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: DropdownButton<String?>(
@@ -403,7 +403,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           ElevatedButton.icon(
             onPressed: () => _analyzeImages(provider),
             icon: const Icon(Icons.auto_awesome),
-            label: Text('Analyze ${_selectedImages.length} Image${_selectedImages.length == 1 ? '' : 's'}'),
+            label: Text(l10n.analyzeNImages(_selectedImages.length)),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.all(16),
               backgroundColor: const Color(0xFF2B6CB0),
@@ -631,6 +631,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   }
 
   Widget _buildBottomActions() {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(top: 24.0),
       child: Column(
@@ -639,21 +640,21 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           ElevatedButton.icon(
             onPressed: _resetState,
             icon: const Icon(Icons.add_photo_alternate),
-            label: const Text('Analyze More Images'),
+            label: Text(l10n.analyzeMoreImages),
             style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: () => context.go('/vocabulary/scan-translate'),
             icon: const Icon(Icons.document_scanner),
-            label: const Text('Scan & Translate'),
+            label: Text(l10n.scanAndTranslate),
             style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: () => context.go('/vocabulary'),
             icon: const Icon(Icons.list),
-            label: const Text('View All Lists'),
+            label: Text(l10n.viewAllLists),
             style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
           ),
         ],

@@ -118,7 +118,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         actions: [
           IconButton(
             icon: Icon(_adminMode ? Icons.admin_panel_settings : Icons.admin_panel_settings_outlined),
-            tooltip: 'Toggle admin mode',
+            tooltip: l10n.toggleAdminMode,
             onPressed: () => setState(() => _adminMode = !_adminMode),
           ),
         ],
@@ -218,13 +218,14 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/trainings/create'),
-        tooltip: 'Create Training',
+        tooltip: l10n.createTraining,
         child: const Icon(Icons.add),
       ),
     );
   }
 
   Widget _buildFilterBar() {
+    final l10n = AppLocalizations.of(context)!;
     final vocabLists = context.watch<VocabularyProvider>().vocabularyLists;
 
     return Padding(
@@ -264,11 +265,11 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: null, child: Text('All modes')),
-                    DropdownMenuItem(value: 'TEXT_INPUT', child: Text('Text Input')),
-                    DropdownMenuItem(value: 'MULTIPLE_CHOICE', child: Text('Multiple Choice')),
-                    DropdownMenuItem(value: 'AI_TRAINING', child: Text('AI Training')),
+                  items: [
+                    DropdownMenuItem(value: null, child: Text(l10n.allModesFilter)),
+                    DropdownMenuItem(value: 'TEXT_INPUT', child: Text(l10n.textInput)),
+                    DropdownMenuItem(value: 'MULTIPLE_CHOICE', child: Text(l10n.multipleChoice)),
+                    DropdownMenuItem(value: 'AI_TRAINING', child: Text(l10n.aiTraining)),
                   ],
                   onChanged: (v) => setState(() => _selectedMode = v),
                 ),
@@ -286,7 +287,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   items: [
-                    DropdownMenuItem<String>(value: null, child: Text('All lists')),
+                    DropdownMenuItem<String>(value: null, child: Text(l10n.allLists)),
                     ...vocabLists.map((l) => DropdownMenuItem<String>(
                           value: l['id'] as String,
                           child: Text(
@@ -307,7 +308,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
               child: TextButton.icon(
                 onPressed: _clearFilters,
                 icon: const Icon(Icons.clear_all, size: 16),
-                label: const Text('Clear filters', style: TextStyle(fontSize: 12)),
+                label: Text(l10n.clearFilters, style: const TextStyle(fontSize: 12)),
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity.compact,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -338,7 +339,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                 SnackBar(content: Text(AppLocalizations.of(context)!.removedTraining(name))),
               );
             },
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.remove, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -456,7 +457,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         trailing: _adminMode
             ? IconButton(
                 icon: const Icon(Icons.delete_forever, color: Colors.red),
-                tooltip: 'Force remove',
+                tooltip: l10n.forceRemove,
                 onPressed: () => _confirmForceRemove(training),
               )
             : const Icon(Icons.arrow_forward_ios, size: 16),

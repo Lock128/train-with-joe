@@ -188,6 +188,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final words = _words;
 
     final isAIMode = _currentMode == 'AI_TRAINING';
@@ -196,7 +197,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     if (_execution == null || totalWords == 0) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Training'),
+          title: Text(l10n.training),
           actions: [_buildFlagButton(), _buildSoundToggle()],
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -216,10 +217,10 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
         : (currentWord?['word'] as String? ?? '');
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Training'),
+        title: Text(l10n.training),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          tooltip: 'Abort training',
+          tooltip: l10n.abortTraining,
           onPressed: _confirmAbort,
         ),
         actions: [_buildFlagButton(), _buildSoundToggle()],
@@ -321,7 +322,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
               ? null
               : () => _submitAnswer(_answerController.text.trim()),
           style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
-          child: const Text('Submit'),
+          child: Text(l10n.submit),
         ),
       ],
     );
