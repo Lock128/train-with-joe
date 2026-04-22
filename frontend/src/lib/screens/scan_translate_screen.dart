@@ -156,12 +156,12 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
       if (proceed != true) return;
     }
 
+    final provider = Provider.of<VocabularyProvider>(context, listen: false);
+
     setState(() {
       _phase = _ScreenPhase.translating;
       _errorMessage = null;
     });
-
-    final provider = Provider.of<VocabularyProvider>(context, listen: false);
 
     // Trigger Phase 2 mutation
     final translatingList = await provider.translateRecognizedWords(
@@ -180,7 +180,7 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
     }
 
     // Poll for completion
-    final completed = await provider.getVocabularyList(listId);
+    await provider.getVocabularyList(listId);
 
     if (!mounted) return;
 
