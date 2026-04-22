@@ -148,6 +148,8 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
     final listId = _recognizedList?['id'] as String?;
     if (listId == null || _selectedTargetLanguage == null) return;
 
+    final provider = Provider.of<VocabularyProvider>(context, listen: false);
+
     // Check source == target language
     final sourceLanguage = _recognizedList?['sourceLanguage'] as String?;
     if (sourceLanguage != null &&
@@ -155,8 +157,6 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
       final proceed = await _showSourceTargetWarning(sourceLanguage);
       if (proceed != true) return;
     }
-
-    final provider = Provider.of<VocabularyProvider>(context, listen: false);
 
     setState(() {
       _phase = _ScreenPhase.translating;
