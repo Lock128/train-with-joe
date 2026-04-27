@@ -176,6 +176,76 @@
   font-weight: 600;
 }
 
+.app-store-links {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.app-store-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.app-store-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.app-store-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.app-store-btn:hover {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.app-store-icon {
+  font-size: 28px;
+}
+
+.app-store-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.app-store-small {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.app-store-name {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.footer-app-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
 .section-title {
   text-align: center;
   font-size: 42px;

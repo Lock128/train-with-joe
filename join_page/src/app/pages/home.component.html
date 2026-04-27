@@ -51,6 +51,26 @@
         <span class="trust-badge">{{ i18n.t('hero.freeTier') }}</span>
         <span class="trust-badge">{{ i18n.t('hero.cancelAnytime') }}</span>
       </div>
+
+      <div class="app-store-links">
+        <p class="app-store-title">{{ i18n.t('apps.title') }}</p>
+        <div class="app-store-buttons">
+          <a href="https://apps.apple.com/us/app/train-with-joe/id6761463604" target="_blank" rel="noopener noreferrer" class="app-store-btn" [attr.aria-label]="i18n.t('apps.ios')">
+            <span class="app-store-icon">🍎</span>
+            <span class="app-store-text">
+              <span class="app-store-small">{{ i18n.t('apps.ios') }}</span>
+              <span class="app-store-name">App Store</span>
+            </span>
+          </a>
+          <a href="https://t.co/epwzo1fZHh" target="_blank" rel="noopener noreferrer" class="app-store-btn" [attr.aria-label]="i18n.t('apps.android')">
+            <span class="app-store-icon">▶️</span>
+            <span class="app-store-text">
+              <span class="app-store-small">{{ i18n.t('apps.android') }}</span>
+              <span class="app-store-name">Google Play</span>
+            </span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -361,6 +381,10 @@
 <!-- Footer -->
 <footer class="footer">
   <div class="container">
+    <div class="footer-app-links">
+      <a href="https://apps.apple.com/us/app/train-with-joe/id6761463604" target="_blank" rel="noopener noreferrer" class="footer-link" [attr.aria-label]="i18n.t('apps.ios')">🍎 App Store</a>
+      <a href="https://t.co/epwzo1fZHh" target="_blank" rel="noopener noreferrer" class="footer-link" [attr.aria-label]="i18n.t('apps.android')">▶️ Google Play</a>
+    </div>
     <p>&copy; {{ currentYear }} Train with Joe. {{ i18n.t('footer.rights') }}</p>
     <div class="footer-links">
       <a href="/privacy" class="footer-link">{{ i18n.t('footer.privacy') }}</a>

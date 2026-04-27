@@ -577,6 +577,7 @@ RULES:
 - Extract ALL visible text words from the image.
 - Preserve the original spelling and casing of each word exactly as it appears.
 - Do NOT translate or modify any words.
+- Do NOT include phonetic transcriptions, IPA notation (e.g. /həˈloʊ/, [ˈwɜːrd]), or pronunciation guides. Only extract actual words written in a standard script/alphabet.
 - If the image contains words in multiple languages, set detectedLanguage to the dominant language.
 - If no text is found, return an empty words array.
 - Respond with ONLY the JSON object. No markdown, no code fences, no tags, no commentary before or after.
@@ -948,6 +949,7 @@ Your response MUST be a single valid JSON object matching this exact JSON Schema
 }
 
 RULES:
+- Do NOT include phonetic transcriptions, IPA notation (e.g. /həˈloʊ/, [ˈwɜːrd]), or pronunciation guides as word values or translations. Only extract actual words written in a standard script/alphabet.
 - Respond with ONLY the JSON object. No markdown, no code fences, no tags, no commentary before or after.
 - The output MUST be parseable by JSON.parse() — no trailing commas, no truncated objects.
 - If you cannot fit all words within the token limit, stop at the last COMPLETE word object and close the array and object properly.

@@ -217,6 +217,11 @@ export class TranslationService {
     'pricing.privacyLink': { en: 'Privacy Policy', de: 'Datenschutzerklärung' },
     'pricing.legalSuffix': { en: '.', de: ' zu.' },
 
+    // App Store Links
+    'apps.title': { en: 'Available on Mobile', de: 'Verfügbar auf dem Handy' },
+    'apps.ios': { en: 'Download on the App Store', de: 'Im App Store laden' },
+    'apps.android': { en: 'Get it on Google Play', de: 'Bei Google Play laden' },
+
     // Footer
     'footer.rights': { en: 'All rights reserved.', de: 'Alle Rechte vorbehalten.' },
     'footer.privacy': { en: 'Privacy Policy', de: 'Datenschutz' },

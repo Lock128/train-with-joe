@@ -244,8 +244,11 @@ export class TrainingService {
     const distractorCount = optionCount - 1;
     return words.map((word, index) => {
       const correctAnswer = reversed ? word.word : word.translation;
-      // Get distractor answers from other words
-      const otherAnswers = words.filter((_, i) => i !== index).map((w) => (reversed ? w.word : w.translation));
+      // Get unique distractor answers from other words, excluding the correct answer
+      const otherAnswers = words
+        .filter((_, i) => i !== index)
+        .map((w) => (reversed ? w.word : w.translation))
+        .filter((answer, i, arr) => answer !== correctAnswer && arr.indexOf(answer) === i);
 
       // Pick random distractors based on optionCount
       const shuffled = otherAnswers.sort(() => Math.random() - 0.5);
@@ -300,6 +303,12 @@ export class TrainingService {
           }
 
           for (const word of validWords) {
+            // Deduplicate: skip if we already collected a word with the same word+translation pair
+            const isDuplicate = collectedWords.some(
+              (cw) => cw.word === word.word && cw.translation === word.translation,
+            );
+            if (isDuplicate) continue;
+
             const trainingWord: TrainingWord = {
               word: word.word,
               translation: word.translation!,
