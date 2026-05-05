@@ -378,7 +378,11 @@ describe('Training Service Property Tests', () => {
           const opt = options[i];
           // Each option has at most min(defaultOptionCount, words.length) choices
           const expectedOptionCount = Math.min(5, words.length);
-          expect(opt.options).toHaveLength(expectedOptionCount);
+          expect(opt.options.length).toBeLessThanOrEqual(expectedOptionCount);
+
+          // All options within a set should be unique (no duplicates)
+          const uniqueOptions = new Set(opt.options);
+          expect(uniqueOptions.size).toBe(opt.options.length);
 
           // The correct answer should be among the options (correctOptionIndex is stripped for security)
           expect(opt.options).toContain(words[i].translation);

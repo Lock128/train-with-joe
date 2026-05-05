@@ -250,18 +250,27 @@ export class TrainingService {
         .map((w) => (reversed ? w.word : w.translation))
         .filter((answer, i, arr) => answer !== correctAnswer && arr.indexOf(answer) === i);
 
-      // Pick random distractors based on optionCount
-      const shuffled = otherAnswers.sort(() => Math.random() - 0.5);
-      const distractors = shuffled.slice(0, distractorCount);
+      // Fisher-Yates shuffle for distractors
+      for (let i = otherAnswers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [otherAnswers[i], otherAnswers[j]] = [otherAnswers[j], otherAnswers[i]];
+      }
+      const distractors = otherAnswers.slice(0, distractorCount);
 
-      // Build options array with correct answer + distractors, then shuffle
-      const options = [correctAnswer, ...distractors];
-      const shuffledOptions = options.sort(() => Math.random() - 0.5);
-      const correctOptionIndex = shuffledOptions.indexOf(correctAnswer);
+      // Build options array with correct answer + unique distractors
+      const uniqueDistractors = distractors.filter((d) => d !== correctAnswer);
+      const options = [correctAnswer, ...uniqueDistractors];
+
+      // Fisher-Yates shuffle for final options
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+      const correctOptionIndex = options.indexOf(correctAnswer);
 
       return {
         wordIndex: index,
-        options: shuffledOptions,
+        options,
         correctOptionIndex,
       };
     });
