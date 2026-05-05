@@ -189,13 +189,18 @@ export class AIService {
         exercise.sourceWord.length > 0;
 
       if (isValid) {
-        validExercises.push({
+        const validDifficulties = ['easy', 'medium', 'hard'];
+        const exerciseEntry: AIExercise = {
           prompt: exercise.prompt,
           options: exercise.options,
           correctOptionIndex: exercise.correctOptionIndex,
           exerciseType: exercise.exerciseType,
           sourceWord: exercise.sourceWord,
-        });
+        };
+        if (validDifficulties.includes(exercise.difficulty)) {
+          exerciseEntry.difficulty = exercise.difficulty;
+        }
+        validExercises.push(exerciseEntry);
       } else {
         console.warn('Invalid exercise filtered out:', JSON.stringify(exercise));
       }
@@ -271,7 +276,9 @@ RULES:
 - EVERY sentence, question, and answer option must be 100% in ${targetLanguage}. No exceptions.
 - NEVER use any ${sourceLanguage} words anywhere in prompts or options.
 - Wrong options should be plausible mistakes learners make.
-- Wrong options should be plausible mistakes learners make.
+- All wrong options for each exercise must be unique and distinct from each other and from the correct answer.
+- Generate at least one exercise per vocabulary word provided, ensuring every word is tested.
+- Order exercises by progressive difficulty: start with simpler types (fill_in_the_blank, context_word, synonym_antonym) and end with more challenging types (error_correction, sentence_translation, word_order).
 - Vary exercise types — do not repeat the same type for every exercise.
 
 JSON format per exercise:
@@ -280,6 +287,7 @@ JSON format per exercise:
 - "correctOptionIndex": number (0-based index of correct answer)
 - "exerciseType": one of fill_in_the_blank, sentence_completion, verb_conjugation, sentence_translation, preposition, word_order, synonym_antonym, error_correction, context_word
 - "sourceWord": string (the vocabulary word this exercise tests)
+- "difficulty": one of easy, medium, hard (reflecting how challenging this exercise is)
 
 Return ONLY a valid JSON array. No markdown, no code blocks, no extra text.`;
 

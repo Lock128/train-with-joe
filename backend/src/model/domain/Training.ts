@@ -50,6 +50,7 @@ export interface AIExercise {
   correctOptionIndex: number;
   exerciseType: string;
   sourceWord: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
 }
 
 export interface TrainingExecution {

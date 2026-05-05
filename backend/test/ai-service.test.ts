@@ -23,6 +23,7 @@ function createBedrockResponse(text: string) {
  */
 function validExercisesJson(count: number = 2): string {
   const exercises = [];
+  const difficulties = ['easy', 'medium', 'hard'];
   for (let i = 0; i < count; i++) {
     exercises.push({
       prompt: `What is the translation of word${i}?`,
@@ -30,6 +31,7 @@ function validExercisesJson(count: number = 2): string {
       correctOptionIndex: 0,
       exerciseType: 'fill_in_the_blank',
       sourceWord: `word${i}`,
+      difficulty: difficulties[i % 3],
     });
   }
   return JSON.stringify(exercises);
@@ -178,6 +180,81 @@ describe('AI Service Unit Tests', () => {
       const result = service.parseAndValidateExercises(json);
 
       expect(result).toHaveLength(0);
+    });
+
+    test('should pass through valid difficulty field', () => {
+      const service = AIService.getInstance();
+
+      const json = JSON.stringify([
+        {
+          prompt: 'Fill in the blank: Er ___ ein Buch.',
+          options: ['liest', 'lesen', 'lese'],
+          correctOptionIndex: 0,
+          exerciseType: 'fill_in_the_blank',
+          sourceWord: 'lesen',
+          difficulty: 'easy',
+        },
+        {
+          prompt: 'Choose the correct verb form',
+          options: ['gegangen', 'gehen', 'ging', 'ginge'],
+          correctOptionIndex: 2,
+          exerciseType: 'verb_conjugation',
+          sourceWord: 'gehen',
+          difficulty: 'medium',
+        },
+        {
+          prompt: 'Correct the error in this sentence',
+          options: ['Er hat das Buch gelesen', 'Er haben das Buch gelesen', 'Er hat das Buch lesen'],
+          correctOptionIndex: 0,
+          exerciseType: 'error_correction',
+          sourceWord: 'lesen',
+          difficulty: 'hard',
+        },
+      ]);
+
+      const result = service.parseAndValidateExercises(json);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].difficulty).toBe('easy');
+      expect(result[1].difficulty).toBe('medium');
+      expect(result[2].difficulty).toBe('hard');
+    });
+
+    test('should omit invalid difficulty values', () => {
+      const service = AIService.getInstance();
+
+      const json = JSON.stringify([
+        {
+          prompt: 'Fill in the blank: Er ___ ein Buch.',
+          options: ['liest', 'lesen', 'lese'],
+          correctOptionIndex: 0,
+          exerciseType: 'fill_in_the_blank',
+          sourceWord: 'lesen',
+          difficulty: 'super_hard',
+        },
+        {
+          prompt: 'Choose the correct word',
+          options: ['schnell', 'langsam', 'groß'],
+          correctOptionIndex: 0,
+          exerciseType: 'context_word',
+          sourceWord: 'schnell',
+          difficulty: 123,
+        },
+        {
+          prompt: 'Another question',
+          options: ['ja', 'nein', 'vielleicht'],
+          correctOptionIndex: 1,
+          exerciseType: 'fill_in_the_blank',
+          sourceWord: 'nein',
+        },
+      ]);
+
+      const result = service.parseAndValidateExercises(json);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].difficulty).toBeUndefined();
+      expect(result[1].difficulty).toBeUndefined();
+      expect(result[2].difficulty).toBeUndefined();
     });
   });
 
