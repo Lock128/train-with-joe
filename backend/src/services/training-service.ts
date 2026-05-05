@@ -257,9 +257,8 @@ export class TrainingService {
       }
       const distractors = otherAnswers.slice(0, distractorCount);
 
-      // Build options array with correct answer + unique distractors
-      const uniqueDistractors = distractors.filter((d) => d !== correctAnswer);
-      const options = [correctAnswer, ...uniqueDistractors];
+      // Build options array with correct answer + distractors (already deduplicated above)
+      const options = [correctAnswer, ...distractors];
 
       // Fisher-Yates shuffle for final options
       for (let i = options.length - 1; i > 0; i--) {
