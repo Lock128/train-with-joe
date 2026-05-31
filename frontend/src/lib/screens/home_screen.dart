@@ -40,19 +40,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  String _getGreeting(AppLocalizations l10n) {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return l10n.welcome;
-    if (hour < 17) return l10n.welcome;
-    return l10n.welcome;
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.home),
+        automaticallyImplyLeading: false,
+      ),
       body: Consumer2<AuthProvider, UserProvider>(
         builder: (context, authProvider, userProvider, _) {
           if (userProvider.isLoading) {
@@ -75,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.cloud_off_rounded,
+                        Icons.error_outline,
                         size: 48,
                         color: Colors.red.shade400,
                       ),
@@ -94,9 +91,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
-                    FilledButton.icon(
+                    ElevatedButton.icon(
                       onPressed: () => userProvider.loadUser(),
-                      icon: const Icon(Icons.refresh_rounded),
+                      icon: const Icon(Icons.refresh),
                       label: Text(l10n.retry),
                     ),
                   ],
@@ -107,247 +104,186 @@ class _HomeScreenState extends State<HomeScreen> {
 
           final user = userProvider.user;
           final currentUser = authProvider.currentUser;
-          final userName = user?['name'] as String? ??
-              currentUser?.username ??
-              '';
 
-          return CustomScrollView(
-            slivers: [
-              // Header section
-              SliverToBoxAdapter(
-                child: _buildHeader(context, l10n, userName, user),
-              ),
-              // Getting started section
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                  child: Text(
-                    l10n.gettingStarted,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Welcome card
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          children: [
+                            CircleAvatar(
+                              radius: 50,
+                              backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.4),
+                              child: const ClipOval(
+                                child: Image(
+                                  image: AssetImage('assets/images/app_icon.png'),
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              l10n.welcome,
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            if (user != null && user['name'] != null)
+                              Text(
+                                user['name'] as String,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            if (user != null && user['email'] != null)
+                              Text(
+                                user['email'] as String,
+                                style: TextStyle(color: colorScheme.onSurfaceVariant),
+                              )
+                            else if (currentUser != null)
+                              Text(
+                                currentUser.username,
+                                style: TextStyle(color: colorScheme.onSurfaceVariant),
+                              ),
+                          ],
                         ),
-                  ),
-                ),
-              ),
-              // Getting started cards
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Subscription status card
+                    Card(
+                      child: ListTile(
+                        leading: Icon(Icons.card_membership, color: colorScheme.primary),
+                        title: Text(l10n.subscription),
+                        subtitle: Text(
+                          _getTierDisplay(l10n, user),
+                        ),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: colorScheme.onSurfaceVariant),
+                        onTap: () => context.go('/subscription'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Getting started section
+                    Text(
+                      l10n.gettingStarted,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.gettingStartedSubtitle,
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
                     _GettingStartedCard(
-                      icon: Icons.play_circle_rounded,
+                      icon: Icons.play_circle_outline,
                       color: const Color(0xFF2B6CB0),
                       title: l10n.gettingStartedTryPublicLists,
                       description: l10n.gettingStartedTryPublicListsDesc,
                       onTap: () => context.go('/trainings/create'),
                     ),
                     const SizedBox(height: 10),
+
                     _GettingStartedCard(
-                      icon: Icons.camera_alt_rounded,
+                      icon: Icons.camera_alt,
                       color: const Color(0xFFF0932B),
                       title: l10n.gettingStartedScanVocabulary,
                       description: l10n.gettingStartedScanVocabularyDesc,
                       onTap: () => context.go('/vocabulary/analyze'),
                     ),
                     const SizedBox(height: 10),
+
                     _GettingStartedCard(
-                      icon: Icons.psychology_rounded,
+                      icon: Icons.quiz,
                       color: const Color(0xFF27AE60),
                       title: l10n.gettingStartedExploreTraining,
                       description: l10n.gettingStartedExploreTrainingDesc,
                       onTap: () => context.go('/trainings'),
                     ),
                     const SizedBox(height: 10),
+
                     _GettingStartedCard(
-                      icon: Icons.translate_rounded,
+                      icon: Icons.language,
                       color: const Color(0xFF5BC0DE),
                       title: l10n.gettingStartedChangeLanguage,
                       description: l10n.gettingStartedChangeLanguageDesc,
                       onTap: () => context.go('/settings'),
                     ),
-                  ]),
-                ),
-              ),
-              // Quick actions section
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
-                  child: Text(
-                    l10n.quickActions,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                  ),
-                ),
-              ),
-              // Quick action grid
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 1.1,
-                  ),
-                  delegate: SliverChildListDelegate([
-                    _QuickActionTile(
-                      icon: Icons.camera_alt_rounded,
-                      label: l10n.scanImageForVocabulary,
-                      color: const Color(0xFF2B6CB0),
-                      onTap: () => context.go('/vocabulary/analyze'),
-                    ),
-                    _QuickActionTile(
-                      icon: Icons.list_alt_rounded,
-                      label: l10n.myVocabularyLists,
-                      color: const Color(0xFFF0932B),
-                      onTap: () => context.go('/vocabulary'),
-                    ),
-                    _QuickActionTile(
-                      icon: Icons.quiz_rounded,
-                      label: l10n.myTrainings,
-                      color: const Color(0xFF27AE60),
-                      onTap: () => context.go('/trainings'),
-                    ),
-                    _QuickActionTile(
-                      icon: Icons.workspace_premium_rounded,
-                      label: l10n.manageSubscription,
-                      color: const Color(0xFF6B46C1),
-                      onTap: () => context.go('/subscription'),
-                    ),
-                  ]),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
+                    const SizedBox(height: 24),
 
-  Widget _buildHeader(
-    BuildContext context,
-    AppLocalizations l10n,
-    String userName,
-    Map<String, dynamic>? user,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        MediaQuery.of(context).padding.top + 24,
-        20,
-        24,
-      ),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colorScheme.primary,
-            colorScheme.primary.withValues(alpha: 0.85),
-          ],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(14)),
-                    child: Image(
-                      image: AssetImage('assets/images/app_icon.png'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getGreeting(l10n),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      if (userName.isNotEmpty)
-                        Text(
-                          userName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            // Subscription badge
-            GestureDetector(
-              onTap: () => context.go('/subscription'),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.25),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.workspace_premium_rounded,
-                      color: Colors.white.withValues(alpha: 0.9),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
+                    // Quick actions
                     Text(
-                      _getTierDisplay(AppLocalizations.of(context)!, user),
+                      l10n.quickActions,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.95),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: Colors.white.withValues(alpha: 0.6),
-                      size: 12,
+                    const SizedBox(height: 12),
+
+                    ElevatedButton.icon(
+                      onPressed: () => context.go('/vocabulary/analyze'),
+                      icon: const Icon(Icons.camera_alt),
+                      label: Text(l10n.scanImageForVocabulary),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    ElevatedButton.icon(
+                      onPressed: () => context.go('/vocabulary'),
+                      icon: const Icon(Icons.list_alt),
+                      label: Text(l10n.myVocabularyLists),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        backgroundColor: const Color(0xFFF0932B),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    ElevatedButton.icon(
+                      onPressed: () => context.go('/trainings'),
+                      icon: const Icon(Icons.quiz),
+                      label: Text(l10n.myTrainings),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                        backgroundColor: const Color(0xFF27AE60),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    OutlinedButton.icon(
+                      onPressed: () => context.go('/subscription'),
+                      icon: const Icon(Icons.upgrade),
+                      label: Text(l10n.manageSubscription),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(16),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -370,14 +306,12 @@ class _GettingStartedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(14),
+    return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
         child: Padding(
-          padding: const EdgeInsets.all(14.0),
+          padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
               Container(
@@ -389,7 +323,7 @@ class _GettingStartedCard extends StatelessWidget {
                 ),
                 child: Icon(icon, color: color, size: 22),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,81 +340,12 @@ class _GettingStartedCard extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 13,
-                        height: 1.3,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 14,
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickActionTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _QuickActionTile({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerLowest,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      color.withValues(alpha: 0.15),
-                      color.withValues(alpha: 0.05),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: color, size: 26),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
-                    ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Icon(Icons.arrow_forward_ios, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
             ],
           ),
         ),

@@ -105,7 +105,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               ],
                             ),
                             child: const Icon(
-                              Icons.auto_stories_rounded,
+                              Icons.auto_stories,
                               size: 40,
                               color: Colors.white,
                             ),
@@ -121,7 +121,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Sign in to continue learning',
+                          'Sign in to your account',
                           style: TextStyle(
                             fontSize: 15,
                             color: colorScheme.onSurfaceVariant,
@@ -170,7 +170,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.error_outline_rounded, color: Colors.red.shade600, size: 20),
+                                Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
@@ -254,9 +254,9 @@ class _SignInScreenState extends State<SignInScreen> {
                         const SizedBox(height: 8),
 
                         // Sign in button
-                        FilledButton(
+                        ElevatedButton(
                           onPressed: authProvider.isLoading ? null : _handleSignIn,
-                          style: FilledButton.styleFrom(
+                          style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: authProvider.isLoading
@@ -296,7 +296,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           onPressed: authProvider.isLoading
                               ? null
                               : () => context.go('/register'),
-                          child: const Text("Create an account"),
+                          child: const Text("Don't have an account? Register"),
                         ),
                         const SizedBox(height: 12),
 
