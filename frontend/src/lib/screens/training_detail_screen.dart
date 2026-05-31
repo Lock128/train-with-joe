@@ -113,12 +113,16 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
       ? const Color(0xFFF0932B)
       : m == 'AI_TRAINING'
           ? const Color(0xFF6B46C1)
-          : const Color(0xFF2B6CB0);
+          : m == 'VERB_CONJUGATION'
+              ? const Color(0xFF2D9CDB)
+              : const Color(0xFF2B6CB0);
   String _modeLabel(String? m) => m == 'MULTIPLE_CHOICE'
       ? AppLocalizations.of(context)!.multipleChoice
       : m == 'AI_TRAINING'
           ? AppLocalizations.of(context)!.aiTraining
-          : AppLocalizations.of(context)!.textInput;
+          : m == 'VERB_CONJUGATION'
+              ? 'Irregular Verbs'
+              : AppLocalizations.of(context)!.textInput;
 
   Future<void> _showRenameDialog(String currentName) async {
     final controller = TextEditingController(text: currentName);
@@ -387,6 +391,7 @@ class _AddWordsSheetState extends State<_AddWordsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final filtered = _filteredWords;
     return DraggableScrollableSheet(
       initialChildSize: 0.7, maxChildSize: 0.95, minChildSize: 0.3, expand: false,

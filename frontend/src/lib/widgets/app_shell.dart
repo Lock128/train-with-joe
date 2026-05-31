@@ -15,14 +15,14 @@ class AppShell extends StatelessWidget {
 
   /// All navigation destinations.
   static List<_NavDestination> _buildDestinations(AppLocalizations l10n) => [
-    _NavDestination('/home', Icons.home_outlined, Icons.home, l10n.home),
-    _NavDestination('/vocabulary/analyze', Icons.camera_alt_outlined, Icons.camera_alt, l10n.scan),
-    _NavDestination('/vocabulary', Icons.list_alt_outlined, Icons.list_alt, l10n.lists),
-    _NavDestination('/trainings', Icons.quiz_outlined, Icons.quiz, l10n.training),
-    _NavDestination('/statistics', Icons.bar_chart_outlined, Icons.bar_chart, l10n.statistics),
-    _NavDestination('/subscription', Icons.card_membership_outlined, Icons.card_membership, l10n.subscription),
-    _NavDestination('/info', Icons.info_outline, Icons.info, l10n.info),
-    _NavDestination('/settings', Icons.settings_outlined, Icons.settings, l10n.settings),
+    _NavDestination('/home', Icons.home_outlined, Icons.home_rounded, l10n.home),
+    _NavDestination('/vocabulary/analyze', Icons.camera_alt_outlined, Icons.camera_alt_rounded, l10n.scan),
+    _NavDestination('/vocabulary', Icons.list_alt_outlined, Icons.list_alt_rounded, l10n.lists),
+    _NavDestination('/trainings', Icons.quiz_outlined, Icons.quiz_rounded, l10n.training),
+    _NavDestination('/statistics', Icons.bar_chart_outlined, Icons.bar_chart_rounded, l10n.statistics),
+    _NavDestination('/subscription', Icons.workspace_premium_outlined, Icons.workspace_premium_rounded, l10n.subscription),
+    _NavDestination('/info', Icons.info_outline_rounded, Icons.info_rounded, l10n.info),
+    _NavDestination('/settings', Icons.settings_outlined, Icons.settings_rounded, l10n.settings),
   ];
 
   /// Number of items shown directly in the mobile bottom bar (excluding "More").
@@ -115,12 +115,10 @@ class AppShell extends StatelessWidget {
     final overflow = _overflowDestinations(context);
     final currentIdx = _currentIndex(context);
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
       builder: (sheetContext) {
         return SafeArea(
           child: Column(
@@ -129,29 +127,50 @@ class AppShell extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Container(
-                  width: 32,
+                  width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.more,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                 ),
               ),
               ...overflow.map((dest) {
                 final isActive = _allDestinations(context).indexOf(dest) == currentIdx;
                 return ListTile(
-                  leading: Icon(
-                    isActive ? dest.selectedIcon : dest.icon,
-                    color: isActive ? Theme.of(context).colorScheme.primary : null,
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? colorScheme.primaryContainer
+                          : colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      isActive ? dest.selectedIcon : dest.icon,
+                      color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
                   ),
                   title: Text(
                     dest.label,
-                    style: isActive
-                        ? TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          )
-                        : null,
+                    style: TextStyle(
+                      color: isActive ? colorScheme.primary : colorScheme.onSurface,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                    ),
                   ),
                   onTap: () {
                     Navigator.of(sheetContext).pop();
@@ -159,17 +178,27 @@ class AppShell extends StatelessWidget {
                   },
                 );
               }),
-              // Sign out option
-              const Divider(),
+              const Divider(indent: 16, endIndent: 16),
               ListTile(
-                leading: const Icon(Icons.logout),
-                title: Text(l10n.signOut),
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.logout_rounded, color: Colors.red.shade400, size: 20),
+                ),
+                title: Text(
+                  l10n.signOut,
+                  style: TextStyle(color: Colors.red.shade600, fontWeight: FontWeight.w500),
+                ),
                 onTap: () {
                   Navigator.of(sheetContext).pop();
                   _handleSignOut(context);
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
             ],
           ),
         );
@@ -179,7 +208,7 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.of(context).size.width >= 600;
+    final isWide = MediaQuery.sizeOf(context).width >= 600;
 
     if (isWide) {
       return _buildWideLayout(context, _currentIndex(context));
@@ -187,61 +216,79 @@ class AppShell extends StatelessWidget {
     return _buildNarrowLayout(context);
   }
 
-  /// Wide layout: NavigationRail on the left side (unchanged – all items fit)
+  /// Wide layout: NavigationRail on the left side
   Widget _buildWideLayout(BuildContext context, int selectedIndex) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: SafeArea(
         bottom: false,
         right: false,
         child: Row(
-        children: [
-          NavigationRail(
-            selectedIndex: selectedIndex,
-            onDestinationSelected: (i) => _onDestinationSelected(context, i),
-            labelType: NavigationRailLabelType.all,
-            leading: Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 8),
-                  Icon(Icons.school, color: Theme.of(context).colorScheme.primary, size: 32),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Train\nwith Joe',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
+          children: [
+            NavigationRail(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (i) => _onDestinationSelected(context, i),
+              labelType: NavigationRailLabelType.all,
+              leading: Padding(
+                padding: const EdgeInsets.only(bottom: 12.0, top: 8.0),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.school_rounded,
+                        color: colorScheme.primary,
+                        size: 24,
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 6),
+                    Text(
+                      'Train\nwith Joe',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: colorScheme.primary,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            trailing: Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: IconButton(
-                    icon: const Icon(Icons.logout),
-                    tooltip: AppLocalizations.of(context)!.signOut,
-                    onPressed: () => _handleSignOut(context),
+              trailing: Expanded(
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20.0),
+                    child: IconButton(
+                      icon: Icon(Icons.logout_rounded, color: colorScheme.onSurfaceVariant),
+                      tooltip: AppLocalizations.of(context)!.signOut,
+                      onPressed: () => _handleSignOut(context),
+                    ),
                   ),
                 ),
               ),
+              destinations: _allDestinations(context)
+                  .map((d) => NavigationRailDestination(
+                        icon: Icon(d.icon),
+                        selectedIcon: Icon(d.selectedIcon),
+                        label: Text(d.label),
+                      ))
+                  .toList(),
             ),
-            destinations: _allDestinations(context)
-                .map((d) => NavigationRailDestination(
-                      icon: Icon(d.icon),
-                      selectedIcon: Icon(d.selectedIcon),
-                      label: Text(d.label),
-                    ))
-                .toList(),
-          ),
-          const VerticalDivider(thickness: 1, width: 1),
-          Expanded(child: child),
-        ],
+            VerticalDivider(
+              thickness: 1,
+              width: 1,
+              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+            ),
+            Expanded(child: child),
+          ],
         ),
       ),
     );
@@ -249,7 +296,6 @@ class AppShell extends StatelessWidget {
 
   /// Narrow layout: bottom NavigationBar with 4 primary items + "More"
   Widget _buildNarrowLayout(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     final primary = _primaryDestinations(context);
     final selectedBottomIdx = _bottomBarIndex(context);
 
@@ -270,10 +316,10 @@ class AppShell extends StatelessWidget {
                 selectedIcon: Icon(d.selectedIcon),
                 label: d.label,
               )),
-          NavigationDestination(
-            icon: const Icon(Icons.more_horiz_outlined),
-            selectedIcon: const Icon(Icons.more_horiz),
-            label: l10n.more,
+          const NavigationDestination(
+            icon: Icon(Icons.more_horiz_outlined),
+            selectedIcon: Icon(Icons.more_horiz_rounded),
+            label: 'More',
           ),
         ],
       ),

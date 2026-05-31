@@ -53,8 +53,8 @@ export const handler = async (event: Event) => {
   }
 
   try {
-    // Check AI training access when mode is AI_TRAINING
-    if (mode === 'AI_TRAINING') {
+    // Check AI training access when mode is AI_TRAINING or VERB_CONJUGATION
+    if (mode === 'AI_TRAINING' || mode === 'VERB_CONJUGATION') {
       const pricingService = PricingService.getInstance();
       await pricingService.checkAiTrainingAccess(userId);
     }

@@ -47,6 +47,8 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         return const Color(0xFFF0932B);
       case 'AI_TRAINING':
         return const Color(0xFF6B46C1);
+      case 'VERB_CONJUGATION':
+        return const Color(0xFF2D9CDB);
       default:
         return Colors.grey;
     }
@@ -61,6 +63,8 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         return l10n.multipleChoice;
       case 'AI_TRAINING':
         return l10n.aiTraining;
+      case 'VERB_CONJUGATION':
+        return 'Irregular Verbs';
       default:
         return mode ?? 'Unknown';
     }
@@ -111,13 +115,18 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_adminMode ? 'Admin Mode' : l10n.myTrainings),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            icon: Icon(_adminMode ? Icons.admin_panel_settings : Icons.admin_panel_settings_outlined),
+            icon: Icon(
+              _adminMode ? Icons.admin_panel_settings : Icons.admin_panel_settings_outlined,
+              color: _adminMode ? colorScheme.primary : null,
+            ),
             tooltip: l10n.toggleAdminMode,
             onPressed: () => setState(() => _adminMode = !_adminMode),
           ),
@@ -131,51 +140,70 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
 
           if (trainingProvider.error != null) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(l10n.errorLoadingTrainings, style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(
-                    trainingProvider.error!,
-                    style: const TextStyle(color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => trainingProvider.loadTrainings(),
-                    icon: const Icon(Icons.refresh),
-                    label: Text(l10n.retry),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.cloud_off_rounded, size: 40, color: Colors.red.shade400),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(l10n.errorLoadingTrainings, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    Text(
+                      trainingProvider.error!,
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton.icon(
+                      onPressed: () => trainingProvider.loadTrainings(),
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(l10n.retry),
+                    ),
+                  ],
+                ),
               ),
             );
           }
 
           if (trainingProvider.trainings.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.quiz_outlined, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(l10n.noTrainingsYet, style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.createFirstTraining,
-                    style: TextStyle(color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => context.go('/trainings/create'),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.createTraining),
-                    style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.quiz_rounded, size: 48, color: colorScheme.primary),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(l10n.noTrainingsYet, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.createFirstTraining,
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 28),
+                    FilledButton.icon(
+                      onPressed: () => context.go('/trainings/create'),
+                      icon: const Icon(Icons.add_rounded),
+                      label: Text(l10n.createTraining),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -195,9 +223,9 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                             Center(
                               child: Column(
                                 children: [
-                                  Icon(Icons.filter_list_off, size: 48, color: Colors.grey.shade400),
+                                  Icon(Icons.filter_list_off_rounded, size: 48, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
                                   const SizedBox(height: 12),
-                                  Text(l10n.noTrainingsMatchFilters, style: const TextStyle(color: Colors.grey)),
+                                  Text(l10n.noTrainingsMatchFilters, style: TextStyle(color: colorScheme.onSurfaceVariant)),
                                   const SizedBox(height: 12),
                                   TextButton(onPressed: _clearFilters, child: Text(l10n.clearFilters)),
                                 ],
@@ -219,7 +247,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/trainings/create'),
         tooltip: l10n.createTraining,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_rounded),
       ),
     );
   }
@@ -270,6 +298,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                     DropdownMenuItem(value: 'TEXT_INPUT', child: Text(l10n.textInput)),
                     DropdownMenuItem(value: 'MULTIPLE_CHOICE', child: Text(l10n.multipleChoice)),
                     DropdownMenuItem(value: 'AI_TRAINING', child: Text(l10n.aiTraining)),
+                    const DropdownMenuItem(value: 'VERB_CONJUGATION', child: Text('Irregular Verbs')),
                   ],
                   onChanged: (v) => setState(() => _selectedMode = v),
                 ),
@@ -322,6 +351,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
   }
 
   void _confirmForceRemove(Map<String, dynamic> training) {
+    final l10n = AppLocalizations.of(context)!;
     final name = training['name'] as String? ?? 'Untitled Training';
     final id = training['id'] as String;
     showDialog(
@@ -347,6 +377,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
   }
 
   Widget _buildTrainingCard(Map<String, dynamic> training) {
+    final l10n = AppLocalizations.of(context)!;
     final name = training['name'] as String? ?? 'Untitled Training';
     final mode = training['mode'] as String?;
     final words = (training['words'] as List<dynamic>?) ?? [];
@@ -377,91 +408,111 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
       targetLangs.length == 1 ? targetLangs.first : null,
     );
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: _getModeColor(mode).withValues(alpha: 0.15),
-          child: Icon(
-            mode == 'MULTIPLE_CHOICE'
-                ? Icons.checklist
-                : mode == 'AI_TRAINING'
-                    ? Icons.psychology
-                    : Icons.keyboard,
-            color: _getModeColor(mode),
-          ),
-        ),
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(
-                name,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (isRandomized) ...[
-              const SizedBox(width: 6),
-              Tooltip(
-                message: 'Randomized training',
-                child: Icon(Icons.shuffle, size: 16, color: Colors.grey.shade600),
-              ),
-            ],
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Row(
+    final colorScheme = Theme.of(context).colorScheme;
+    final modeColor = _getModeColor(mode);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: _adminMode ? null : () => context.go('/trainings/${training['id']}'),
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Row(
               children: [
-                Chip(
-                  label: Text(
-                    _getModeLabel(mode),
-                    style: TextStyle(fontSize: 11, color: _getModeColor(mode)),
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: modeColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  backgroundColor: _getModeColor(mode).withValues(alpha: 0.1),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: VisualDensity.compact,
+                  child: Icon(
+                    mode == 'MULTIPLE_CHOICE'
+                        ? Icons.checklist_rounded
+                        : mode == 'AI_TRAINING'
+                            ? Icons.psychology_rounded
+                            : mode == 'VERB_CONJUGATION'
+                                ? Icons.spellcheck_rounded
+                                : Icons.keyboard_rounded,
+                    color: modeColor,
+                    size: 22,
+                  ),
                 ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              name,
+                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isRandomized) ...[
+                            const SizedBox(width: 6),
+                            Icon(Icons.shuffle_rounded, size: 14, color: colorScheme.onSurfaceVariant),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: modeColor.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              _getModeLabel(mode),
+                              style: TextStyle(fontSize: 11, color: modeColor, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                          if (langPair != null) ...[
+                            const SizedBox(width: 8),
+                            Text(langPair, style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant)),
+                          ],
+                        ],
+                      ),
+                      if (listNames.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          listNames.join(', '),
+                          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: 4),
+                      Text(
+                        isRandomized
+                            ? '${randomizedWordCount ?? 10} random words · ${executions.length} runs'
+                            : '${words.length} words · ${executions.length} runs',
+                        style: TextStyle(color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7), fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_adminMode)
+                  IconButton(
+                    icon: const Icon(Icons.delete_forever_rounded, color: Colors.red),
+                    tooltip: l10n.forceRemove,
+                    onPressed: () => _confirmForceRemove(training),
+                  )
+                else
+                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
               ],
             ),
-            if (listNames.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  if (langPair != null) ...[
-                    Text(langPair, style: const TextStyle(fontSize: 13)),
-                    const SizedBox(width: 8),
-                  ],
-                  Flexible(
-                    child: Text(
-                      listNames.join(', '),
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 4),
-            Text(
-              isRandomized
-                  ? '${randomizedWordCount ?? 10} random words - ${executions.length} executions'
-                  : '${words.length} words - ${executions.length} executions',
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
+          ),
         ),
-        trailing: _adminMode
-            ? IconButton(
-                icon: const Icon(Icons.delete_forever, color: Colors.red),
-                tooltip: l10n.forceRemove,
-                onPressed: () => _confirmForceRemove(training),
-              )
-            : const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: _adminMode ? null : () => context.go('/trainings/${training['id']}'),
       ),
     );
   }

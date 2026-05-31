@@ -31,6 +31,7 @@ enum TrainingMode @aws_cognito_user_pools {
   TEXT_INPUT
   MULTIPLE_CHOICE
   AI_TRAINING
+  VERB_CONJUGATION
 }
 
 enum TrainingDirection @aws_cognito_user_pools {
@@ -138,6 +139,14 @@ type AIExercise @aws_cognito_user_pools {
   ## correctOptionIndex is intentionally omitted to prevent answer leakage
 }
 
+type VerbConjugationExercise @aws_cognito_user_pools {
+  infinitive: String!
+  prompt: String!
+  exerciseType: String!
+  hint: String
+  ## expectedForms is intentionally omitted to prevent answer leakage
+}
+
 type TrainingPromptWord @aws_cognito_user_pools {
   word: String!
   vocabularyListId: String!
@@ -155,6 +164,7 @@ type TrainingExecution @aws_cognito_user_pools {
   multipleChoiceOptions: [MultipleChoiceOption!]
   promptWords: [TrainingPromptWord!]
   aiExercises: [AIExercise!]
+  verbConjugationExercises: [VerbConjugationExercise!]
   correctCount: Int!
   incorrectCount: Int!
 }

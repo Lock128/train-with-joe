@@ -32,7 +32,8 @@ export class TrainingService {
   /**
    * Strip sensitive answer data from an execution before returning to the client.
    * Replaces words with promptWords (prompt-side only, no answers),
-   * strips correctOptionIndex from AI exercises and multiple-choice options.
+   * strips correctOptionIndex from AI exercises and multiple-choice options,
+   * strips expectedForms from verb conjugation exercises.
    */
   private sanitizeExecution(
     execution: TrainingExecution,
@@ -50,6 +51,9 @@ export class TrainingService {
       aiExercises: execution.aiExercises?.map(({ correctOptionIndex: _correctOptionIndex, ...ex }) => ex),
       multipleChoiceOptions: execution.multipleChoiceOptions?.map(
         ({ correctOptionIndex: _correctOptionIndex, ...opt }) => opt,
+      ),
+      verbConjugationExercises: execution.verbConjugationExercises?.map(
+        ({ expectedForms: _expectedForms, ...ex }) => ex,
       ),
     };
   }
@@ -116,6 +120,33 @@ export class TrainingService {
       }
 
       // Static training path: existing behavior unchanged
+      // VERB_CONJUGATION mode doesn't require vocabulary list words — exercises are AI-generated
+      if (mode === 'VERB_CONJUGATION') {
+        const effectiveWordCount = wordCount ? Math.min(Math.max(1, wordCount), 30) : 10;
+        const now = new Date().toISOString();
+        const training: Training = {
+          id: crypto.randomUUID(),
+          userId,
+          name: name || `Irregular Verbs - ${new Date().toLocaleDateString()}`,
+          mode,
+          direction: direction || 'WORD_TO_TRANSLATION',
+          vocabularyListIds: vocabularyListIds || [],
+          words: [],
+          isRandomized: true,
+          randomizedWordCount: effectiveWordCount,
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        if (sourceLanguage) training.sourceLanguage = sourceLanguage;
+        if (targetLanguage) training.targetLanguage = targetLanguage;
+
+        const trainingRepo = TrainingRepository.getInstance();
+        await trainingRepo.create(training);
+
+        return { success: true, training };
+      }
+
       const vocabRepo = VocabularyListRepository.getInstance();
       let words: TrainingWord[] = [];
 
@@ -287,6 +318,35 @@ export class TrainingService {
       }
 
       if (training.isRandomized) {
+        // VERB_CONJUGATION mode: generate exercises directly via AI, no vocabulary words needed
+        if (training.mode === 'VERB_CONJUGATION') {
+          try {
+            const aiService = getAIService();
+            const verbExercises = await aiService.generateVerbConjugationExercises(
+              training.randomizedWordCount ?? 10,
+              userId,
+            );
+
+            const execution: TrainingExecution = {
+              id: crypto.randomUUID(),
+              trainingId,
+              userId,
+              startedAt: new Date().toISOString(),
+              results: [],
+              words: [],
+              verbConjugationExercises: verbExercises,
+              correctCount: 0,
+              incorrectCount: 0,
+            };
+
+            await trainingRepo.createExecution(execution);
+            return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+          } catch (aiError) {
+            const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
+            return { success: false, error: 'Failed to generate verb conjugation exercises: ' + errorMessage };
+          }
+        }
+
         // Randomized path: fetch words dynamically from vocabulary lists
         const vocabRepo = VocabularyListRepository.getInstance();
         const collectedWords: TrainingWord[] = [];
@@ -491,6 +551,32 @@ export class TrainingService {
         }
       }
 
+      // Static path: VERB_CONJUGATION mode
+      if (training.mode === 'VERB_CONJUGATION') {
+        try {
+          const aiService = getAIService();
+          const wordCount = training.words.length > 0 ? training.words.length : 10;
+          const verbExercises = await aiService.generateVerbConjugationExercises(wordCount, userId);
+
+          const execution: TrainingExecution = {
+            id: crypto.randomUUID(),
+            trainingId,
+            userId,
+            startedAt: new Date().toISOString(),
+            results: [],
+            verbConjugationExercises: verbExercises,
+            correctCount: 0,
+            incorrectCount: 0,
+          };
+
+          await trainingRepo.createExecution(execution);
+          return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+        } catch (aiError) {
+          const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
+          return { success: false, error: 'Failed to generate verb conjugation exercises: ' + errorMessage };
+        }
+      }
+
       if (training.mode === 'MULTIPLE_CHOICE' && training.words.length < 3) {
         return { success: false, error: 'Multiple-choice requires at least 3 words' };
       }
@@ -597,6 +683,60 @@ export class TrainingService {
 
         // Completion check: all AI exercises answered
         if (execution.results.length === aiExercises.length) {
+          execution.completedAt = new Date().toISOString();
+        }
+
+        await trainingRepo.updateExecution(executionId, {
+          results: execution.results,
+          correctCount: execution.correctCount,
+          incorrectCount: execution.incorrectCount,
+          completedAt: execution.completedAt,
+        });
+
+        return {
+          success: true,
+          result,
+          completed: !!execution.completedAt,
+          execution: this.sanitizeExecution(execution, training.direction),
+        };
+      }
+
+      // VERB_CONJUGATION answer submission path
+      if (training.mode === 'VERB_CONJUGATION') {
+        const verbExercises = execution.verbConjugationExercises;
+        if (!verbExercises || wordIndex < 0 || wordIndex >= verbExercises.length) {
+          return { success: false, error: 'Invalid word index' };
+        }
+
+        const exercise = verbExercises[wordIndex];
+        const expectedForms = exercise.expectedForms;
+
+        // Parse user answer: split by comma, trim, lowercase
+        const userForms = answer.split(',').map((f) => f.trim().toLowerCase());
+        const expectedNormalized = expectedForms.map((f) => f.trim().toLowerCase());
+
+        // Check correctness: all forms must match in order
+        const correct =
+          userForms.length === expectedNormalized.length &&
+          userForms.every((form, i) => form === expectedNormalized[i]);
+
+        const result: TrainingResult = {
+          wordIndex,
+          word: exercise.prompt,
+          expectedAnswer: expectedForms.join(', '),
+          userAnswer: answer,
+          correct,
+        };
+
+        execution.results.push(result);
+        if (correct) {
+          execution.correctCount++;
+        } else {
+          execution.incorrectCount++;
+        }
+
+        // Completion check: all verb exercises answered
+        if (execution.results.length === verbExercises.length) {
           execution.completedAt = new Date().toISOString();
         }
 
