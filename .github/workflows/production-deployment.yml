@@ -414,6 +414,7 @@ jobs:
 
       - name: Upload deployment state
         uses: actions/upload-artifact@v7
+        continue-on-error: true
         with:
           name: deployment-state-production
           path: deployment-state.json

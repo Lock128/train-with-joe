@@ -215,7 +215,9 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     }
 
     final progress = totalWords > 0 ? (_currentWordIndex + 1) / totalWords : 0.0;
-    final currentWord = isAIMode ? null : (words[_currentWordIndex] as Map<String, dynamic>);
+    final currentWord = (isAIMode || isVerbConjugationMode || words.isEmpty)
+        ? null
+        : (words[_currentWordIndex] as Map<String, dynamic>);
     final training = context.read<TrainingProvider>().currentTraining;
     final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
     final reversed = direction == 'TRANSLATION_TO_WORD';
