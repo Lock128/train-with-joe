@@ -17,15 +17,24 @@ export interface BaseRepositoryConfig {
  * to eliminate duplication across the 5 domain repositories.
  */
 export abstract class BaseRepository<T extends Record<string, unknown>> {
+  private static sharedClient: DynamoDBDocumentClient | null = null;
+
   protected dynamoClient: DynamoDBDocumentClient;
   protected tableName: string;
   protected keyField: string;
   protected entityName: string;
   protected setTimestampsOnCreate: boolean;
 
+  private static getSharedClient(): DynamoDBDocumentClient {
+    if (!BaseRepository.sharedClient) {
+      const client = new DynamoDBClient({});
+      BaseRepository.sharedClient = DynamoDBDocumentClient.from(client);
+    }
+    return BaseRepository.sharedClient;
+  }
+
   protected constructor(config: BaseRepositoryConfig) {
-    const client = new DynamoDBClient({});
-    this.dynamoClient = DynamoDBDocumentClient.from(client);
+    this.dynamoClient = BaseRepository.getSharedClient();
     this.tableName = config.tableName;
     this.keyField = config.keyField;
     this.entityName = config.entityName;
@@ -114,12 +123,23 @@ export abstract class BaseRepository<T extends Record<string, unknown>> {
       }
     });
 
-    // Always update the updatedAt timestamp
-    updateExpressions.push('#updatedAt = :updatedAt');
-    expressionAttributeNames['#updatedAt'] = 'updatedAt';
-    expressionAttributeValues[':updatedAt'] = now;
+    // Only update the updatedAt timestamp if timestamps are enabled
+    if (this.setTimestampsOnCreate) {
+      updateExpressions.push('#updatedAt = :updatedAt');
+      expressionAttributeNames['#updatedAt'] = 'updatedAt';
+      expressionAttributeValues[':updatedAt'] = now;
+    }
 
-    if (updateExpressions.length === 1) {
+    if (updateExpressions.length === 0) {
+      // Nothing meaningful to update
+      const existing = await this.getById(id);
+      if (!existing) {
+        throw new Error(`${this.entityName} with ${this.keyField} ${id} not found`);
+      }
+      return existing;
+    }
+
+    if (updateExpressions.length === 1 && this.setTimestampsOnCreate) {
       // Only updatedAt, nothing meaningful to update
       const existing = await this.getById(id);
       if (!existing) {

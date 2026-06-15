@@ -788,6 +788,17 @@ export class TrainingService {
         const selectedIndex = parseInt(answer, 10);
         const correct = selectedIndex === exercise.correctOptionIndex;
 
+        // Record SRS result for AI_TRAINING using the exercise's sourceWord
+        try {
+          const matchingWord = execution.words?.find((w) => w.word === exercise.sourceWord);
+          if (matchingWord) {
+            const srsService = SpacedRepetitionService.getInstance();
+            await srsService.recordResult(userId, matchingWord.word, matchingWord.vocabularyListId, correct);
+          }
+        } catch (srsError) {
+          console.error('Error recording SRS result for AI_TRAINING:', srsError);
+        }
+
         return this.recordResultAndUpdate(
           executionId,
           execution,
@@ -821,6 +832,17 @@ export class TrainingService {
         const correct =
           userForms.length === expectedNormalized.length &&
           userForms.every((form, i) => form === expectedNormalized[i]);
+
+        // Record SRS result for VERB_CONJUGATION using the exercise's infinitive
+        try {
+          const vocabListId = training.vocabularyListIds?.[0];
+          if (vocabListId) {
+            const srsService = SpacedRepetitionService.getInstance();
+            await srsService.recordResult(userId, exercise.infinitive, vocabListId, correct);
+          }
+        } catch (srsError) {
+          console.error('Error recording SRS result for VERB_CONJUGATION:', srsError);
+        }
 
         return this.recordResultAndUpdate(
           executionId,

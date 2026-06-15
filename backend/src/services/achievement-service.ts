@@ -1,5 +1,6 @@
 import { AchievementRepository } from '../repositories/achievement-repository';
 import { WordMasteryRepository } from '../repositories/word-mastery-repository';
+import { VocabularyListRepository } from '../repositories/vocabulary-list-repository';
 import type { Achievement, UserStreak } from '../model/domain/Achievement';
 import { AchievementType } from '../model/domain/Achievement';
 
@@ -152,7 +153,20 @@ export class AchievementService {
       const uniqueListIds = new Set(allWords.map((w) => w.vocabularyListId));
 
       if (uniqueListIds.size >= 3 && !unlockedTypes.has(AchievementType.POLYGLOT)) {
-        await repo.unlockAchievement(userId, AchievementType.POLYGLOT);
+        // Resolve actual languages from vocabulary lists to confirm 3+ distinct languages
+        const vocabRepo = VocabularyListRepository.getInstance();
+        const languages = new Set<string>();
+
+        for (const listId of uniqueListIds) {
+          const list = await vocabRepo.getById(listId);
+          if (list?.sourceLanguage) {
+            languages.add(list.sourceLanguage.toLowerCase());
+          }
+        }
+
+        if (languages.size >= 3) {
+          await repo.unlockAchievement(userId, AchievementType.POLYGLOT);
+        }
       }
     } catch (error) {
       // Polyglot check failure should not block achievement evaluation
