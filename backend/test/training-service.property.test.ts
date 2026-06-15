@@ -392,8 +392,8 @@ describe('Training Service Property Tests', () => {
               .filter((t) => t !== correctAnswer),
           );
           // Each option has at most min(defaultOptionCount, 1 + uniqueDistractors) choices
-          const expectedOptionCount = Math.min(5, 1 + uniqueDistractors.size);
-          expect(opt.options).toHaveLength(expectedOptionCount);
+          const expectedOptionCountWithDistractors = Math.min(5, 1 + uniqueDistractors.size);
+          expect(opt.options).toHaveLength(expectedOptionCountWithDistractors);
 
           // The correct answer should be among the options (correctOptionIndex is stripped for security)
           expect(opt.options).toContain(words[i].translation);
