@@ -30,7 +30,7 @@ export const handler = async (event: Event) => {
           t.name != null &&
           t.mode != null &&
           Array.isArray(t.vocabularyListIds) &&
-          t.vocabularyListIds.length > 0 &&
+          (t.vocabularyListIds.length > 0 || t.mode === 'VERB_CONJUGATION') &&
           (t.isRandomized || (Array.isArray(t.words) && t.words.length > 0)) &&
           t.createdAt != null &&
           t.updatedAt != null,
