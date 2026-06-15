@@ -609,3 +609,152 @@ describe('submitAnswer dual-path', () => {
     expect(result.result!.word).toBe('dog');
   });
 });
+
+describe('Multiple Choice Options Deduplication', () => {
+  beforeEach(() => {
+    ddbMock.reset();
+  });
+
+  test('should not contain duplicate options when words share the same translation', async () => {
+    const userId = 'user-123';
+    const trainingId = 'training#mc-dedup-1';
+
+    // 5 words where 3 share translation "hola"
+    const training: Training = {
+      id: trainingId,
+      userId,
+      name: 'MC Dedup Training',
+      mode: 'MULTIPLE_CHOICE',
+      direction: 'WORD_TO_TRANSLATION',
+      vocabularyListIds: ['list-1'],
+      words: [
+        { word: 'hello', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'hi', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'hey', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'goodbye', translation: 'adios', vocabularyListId: 'list-1' },
+        { word: 'thanks', translation: 'gracias', vocabularyListId: 'list-1' },
+      ],
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    };
+
+    ddbMock.on(GetCommand).callsFake((input) => {
+      if (input.Key.id === trainingId) {
+        return { Item: { ...training } };
+      }
+      return {};
+    });
+
+    ddbMock.on(PutCommand).resolves({});
+
+    const service = TrainingService.getInstance();
+    const result = await service.startTraining(trainingId, userId);
+
+    expect(result.success).toBe(true);
+    expect(result.execution).toBeDefined();
+    expect(result.execution!.multipleChoiceOptions).toBeDefined();
+
+    const mcOptions = result.execution!.multipleChoiceOptions!;
+
+    for (const opt of mcOptions) {
+      const uniqueOptions = new Set(opt.options);
+      expect(uniqueOptions.size).toBe(opt.options.length);
+    }
+  });
+
+  test('should always include the correct answer in options', async () => {
+    const userId = 'user-123';
+    const trainingId = 'training#mc-dedup-2';
+
+    const training: Training = {
+      id: trainingId,
+      userId,
+      name: 'MC Correct Answer Training',
+      mode: 'MULTIPLE_CHOICE',
+      direction: 'WORD_TO_TRANSLATION',
+      vocabularyListIds: ['list-1'],
+      words: [
+        { word: 'hello', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'hi', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'hey', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'goodbye', translation: 'adios', vocabularyListId: 'list-1' },
+        { word: 'thanks', translation: 'gracias', vocabularyListId: 'list-1' },
+      ],
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    };
+
+    ddbMock.on(GetCommand).callsFake((input) => {
+      if (input.Key.id === trainingId) {
+        return { Item: { ...training } };
+      }
+      return {};
+    });
+
+    ddbMock.on(PutCommand).resolves({});
+
+    const service = TrainingService.getInstance();
+    const result = await service.startTraining(trainingId, userId);
+
+    expect(result.success).toBe(true);
+    const mcOptions = result.execution!.multipleChoiceOptions!;
+
+    for (let i = 0; i < mcOptions.length; i++) {
+      const correctAnswer = training.words[i].translation;
+      expect(mcOptions[i].options).toContain(correctAnswer);
+    }
+  });
+
+  test('should have option count equal to min(optionCount, unique available answers)', async () => {
+    const userId = 'user-123';
+    const trainingId = 'training#mc-dedup-3';
+
+    // All 5 words share translation "hola" except one with "adios"
+    // For a word with translation "hola": unique distractors = ["adios"] (only 1 unique distractor)
+    // So options count = 1 + 1 = 2 (correct + unique distractors)
+    const training: Training = {
+      id: trainingId,
+      userId,
+      name: 'MC Option Count Training',
+      mode: 'MULTIPLE_CHOICE',
+      direction: 'WORD_TO_TRANSLATION',
+      vocabularyListIds: ['list-1'],
+      words: [
+        { word: 'hello', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'hi', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'hey', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'howdy', translation: 'hola', vocabularyListId: 'list-1' },
+        { word: 'goodbye', translation: 'adios', vocabularyListId: 'list-1' },
+      ],
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    };
+
+    ddbMock.on(GetCommand).callsFake((input) => {
+      if (input.Key.id === trainingId) {
+        return { Item: { ...training } };
+      }
+      return {};
+    });
+
+    ddbMock.on(PutCommand).resolves({});
+
+    const service = TrainingService.getInstance();
+    const result = await service.startTraining(trainingId, userId);
+
+    expect(result.success).toBe(true);
+    const mcOptions = result.execution!.multipleChoiceOptions!;
+
+    // For the word "hello" (translation "hola"):
+    // unique distractors from pool = ["adios"] (only 1 unique distractor available)
+    // option count = 1 (correct) + 1 (distractor) = 2
+    const helloOptions = mcOptions[0];
+    expect(helloOptions.options.length).toBe(2);
+
+    // For the word "goodbye" (translation "adios"):
+    // unique distractors from pool = ["hola"] (only 1 unique translation among others)
+    // option count = 1 (correct) + 1 (distractor) = 2
+    const goodbyeOptions = mcOptions[4];
+    expect(goodbyeOptions.options.length).toBe(2);
+  });
+});

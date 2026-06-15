@@ -376,6 +376,13 @@ describe('Training Service Property Tests', () => {
 
         for (let i = 0; i < options.length; i++) {
           const opt = options[i];
+          // Each option has at most min(defaultOptionCount, words.length) choices
+          const expectedOptionCount = Math.min(5, words.length);
+          expect(opt.options.length).toBeLessThanOrEqual(expectedOptionCount);
+
+          // All options within a set should be unique (no duplicates)
+          const uniqueOptions = new Set(opt.options);
+          expect(uniqueOptions.size).toBe(opt.options.length);
           const correctAnswer = words[i].translation;
           // Unique distractors available = unique translations from other words, excluding the correct answer
           const uniqueDistractors = new Set(
