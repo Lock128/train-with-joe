@@ -1,20 +1,21 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import type { UsageCounter } from '../model/domain/UsageCounter';
+import { BaseRepository } from './base-repository';
 
 /**
  * Repository for managing UsageCounter entities in DynamoDB
  * Tracks per-user usage of limited resources (image scans, vocabulary lists)
  */
-export class UsageCounterRepository {
+export class UsageCounterRepository extends BaseRepository<UsageCounter> {
   private static instance: UsageCounterRepository;
-  private dynamoClient: DynamoDBDocumentClient;
-  private tableName: string;
 
   private constructor() {
-    const client = new DynamoDBClient({});
-    this.dynamoClient = DynamoDBDocumentClient.from(client);
-    this.tableName = process.env.USAGE_COUNTERS_TABLE_NAME || 'train-with-joe-usage-counters-sandbox';
+    super({
+      tableName: process.env.USAGE_COUNTERS_TABLE_NAME || 'train-with-joe-usage-counters-sandbox',
+      keyField: 'userId',
+      entityName: 'Usage counter',
+      setTimestampsOnCreate: false,
+    });
   }
 
   public static getInstance(): UsageCounterRepository {
@@ -31,24 +32,7 @@ export class UsageCounterRepository {
    * @throws Error if retrieval fails
    */
   async getByUserId(userId: string): Promise<UsageCounter | null> {
-    try {
-      const response = await this.dynamoClient.send(
-        new GetCommand({
-          TableName: this.tableName,
-          Key: { userId },
-        }),
-      );
-
-      if (!response.Item) {
-        return null;
-      }
-
-      return response.Item as UsageCounter;
-    } catch (error) {
-      const err = error as Error;
-      console.error('Error getting usage counter by userId:', error);
-      throw new Error(`Failed to get usage counter: ${err.message}`);
-    }
+    return this.getById(userId);
   }
 
   /**
@@ -148,7 +132,7 @@ export class UsageCounterRepository {
       );
     } catch (error) {
       const err = error as Error & { name?: string };
-      // If condition check fails, the count is already 0 (or record doesn't exist) — nothing to do
+      // If condition check fails, the count is already 0 (or record doesn't exist) - nothing to do
       if (err.name === 'ConditionalCheckFailedException') {
         return;
       }

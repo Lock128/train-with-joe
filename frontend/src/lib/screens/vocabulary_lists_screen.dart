@@ -35,6 +35,8 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.myVocabularyLists),
@@ -48,51 +50,69 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
 
           if (vocabularyProvider.error != null) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(l10n.errorLoadingVocabularyLists,
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(vocabularyProvider.error!,
-                      style: const TextStyle(color: Colors.grey),
-                      textAlign: TextAlign.center),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => vocabularyProvider.loadVocabularyLists(),
-                    icon: const Icon(Icons.refresh),
-                    label: Text(l10n.retry),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.cloud_off_rounded, size: 40, color: Colors.red.shade400),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(l10n.errorLoadingVocabularyLists,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    Text(vocabularyProvider.error!,
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 24),
+                    FilledButton.icon(
+                      onPressed: () => vocabularyProvider.loadVocabularyLists(),
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: Text(l10n.retry),
+                    ),
+                  ],
+                ),
               ),
             );
           }
 
           if (vocabularyProvider.vocabularyLists.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.library_books, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(l10n.noVocabularyListsYet,
-                      style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(
-                      l10n.analyzeImageToCreate,
-                      style: TextStyle(color: Colors.grey),
-                      textAlign: TextAlign.center),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => context.go('/vocabulary/analyze'),
-                    icon: const Icon(Icons.camera_alt),
-                    label: Text(l10n.analyzeAnImage),
-                    style:
-                        ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.library_books_rounded, size: 48, color: colorScheme.primary),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(l10n.noVocabularyListsYet,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    Text(
+                        l10n.analyzeImageToCreate,
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 28),
+                    FilledButton.icon(
+                      onPressed: () => context.go('/vocabulary/analyze'),
+                      icon: const Icon(Icons.camera_alt_rounded),
+                      label: Text(l10n.analyzeAnImage),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -113,13 +133,14 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/vocabulary/analyze'),
         tooltip: l10n.analyzeImage,
-        child: const Icon(Icons.camera_alt),
+        child: const Icon(Icons.camera_alt_rounded),
       ),
     );
   }
 
   Widget _buildListCard(Map<String, dynamic> list) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
     final title = list['title'] as String? ?? 'Untitled List';
     final sourceLang = list['sourceLanguage'] as String?;
     final targetLang = list['targetLanguage'] as String?;
@@ -134,56 +155,97 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
     if (langPair != null) subtitleParts.add(langPair);
     if (createdAt != null) subtitleParts.add(_formatDate(createdAt));
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: status == 'FAILED'
-              ? Colors.red.shade100
-              : status == 'PENDING'
-                  ? Colors.orange.shade100
-                  : status == 'PARTIALLY_COMPLETED'
-                      ? Colors.amber.shade100
-                      : Theme.of(context).colorScheme.primaryContainer,
-          child: status == 'FAILED'
-              ? Icon(Icons.error_outline, color: Colors.red.shade700)
-              : status == 'PENDING'
-                  ? Icon(Icons.hourglass_top, color: Colors.orange.shade700)
-                  : status == 'PARTIALLY_COMPLETED'
-                      ? Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800)
-                      : const Icon(Icons.list_alt),
-        ),
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  overflow: TextOverflow.ellipsis),
+    Color statusColor;
+    IconData statusIcon;
+    if (status == 'FAILED') {
+      statusColor = Colors.red.shade400;
+      statusIcon = Icons.error_outline_rounded;
+    } else if (status == 'PENDING') {
+      statusColor = Colors.orange.shade400;
+      statusIcon = Icons.hourglass_top_rounded;
+    } else if (status == 'PARTIALLY_COMPLETED') {
+      statusColor = Colors.amber.shade600;
+      statusIcon = Icons.warning_amber_rounded;
+    } else {
+      statusColor = colorScheme.primary;
+      statusIcon = Icons.list_alt_rounded;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: () => context.go('/vocabulary/${list['id']}'),
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(statusIcon, color: statusColor, size: 22),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(title,
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                                overflow: TextOverflow.ellipsis),
+                          ),
+                          if (isPublic) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF6C5CE7).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Icon(Icons.public_rounded, size: 12, color: Color(0xFF6C5CE7)),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(subtitleParts.join(' · '),
+                          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
+                      if (status == 'PENDING')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(l10n.statusAnalyzing,
+                              style: TextStyle(color: Colors.orange.shade600, fontSize: 12, fontWeight: FontWeight.w500)),
+                        ),
+                      if (status == 'FAILED')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(l10n.statusFailed,
+                              style: TextStyle(color: Colors.red.shade600, fontSize: 12, fontWeight: FontWeight.w500)),
+                        ),
+                      if (status == 'PARTIALLY_COMPLETED')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(l10n.statusPartiallyCompleted,
+                              style: TextStyle(color: Colors.amber.shade700, fontSize: 12, fontWeight: FontWeight.w500)),
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios_rounded, size: 14, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
+              ],
             ),
-            if (isPublic) ...[
-              const SizedBox(width: 6),
-              const Icon(Icons.public, size: 16, color: Color(0xFF6C5CE7)),
-            ],
-          ],
+          ),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(subtitleParts.join(' · '),
-                style: const TextStyle(color: Colors.grey)),
-            if (status == 'PENDING')
-              Text(l10n.statusAnalyzing,
-                  style: TextStyle(color: Colors.orange.shade700, fontSize: 12)),
-            if (status == 'FAILED')
-              Text(l10n.statusFailed,
-                  style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
-            if (status == 'PARTIALLY_COMPLETED')
-              Text(l10n.statusPartiallyCompleted,
-                  style: TextStyle(color: Colors.amber.shade800, fontSize: 12)),
-          ],
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () => context.go('/vocabulary/${list['id']}'),
       ),
     );
   }

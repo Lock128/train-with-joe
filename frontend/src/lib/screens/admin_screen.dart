@@ -230,6 +230,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = AppLocalizations.of(context)!;
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -287,8 +288,8 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
             onRefresh: _fetchUsers,
             child: users.isEmpty
                 ? ListView(
-                    children: const [
-                      SizedBox(height: 100),
+                    children: [
+                      const SizedBox(height: 100),
                       Center(child: Text(l10n.noUsersFound, style: const TextStyle(color: Colors.grey))),
                     ],
                   )
@@ -562,10 +563,10 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             if (dailySummaries.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Text(l10n.noTrainingActivity,
-                    textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                    textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
               )
             else
               ListView.separated(
@@ -613,6 +614,7 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
   }
 
   Widget _buildDayExecutions() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isDayLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
@@ -621,9 +623,9 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
     }
     final executions = (_dayStatistics?['executions'] as List<dynamic>?) ?? [];
     if (executions.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Text(l10n.noExecutionDetails, style: TextStyle(color: Colors.grey, fontSize: 13)),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        child: Text(l10n.noExecutionDetails, style: const TextStyle(color: Colors.grey, fontSize: 13)),
       );
     }
     return Padding(
@@ -926,10 +928,10 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             if (dailySummaries.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Text(l10n.noTrainingActivity,
-                    textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                    textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
               )
             else
               ListView.separated(
@@ -977,6 +979,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
   }
 
   Widget _buildDayExecutions() {
+    final l10n = AppLocalizations.of(context)!;
     if (_isDayLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
@@ -985,9 +988,9 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
     }
     final executions = (_dayStatistics?['executions'] as List<dynamic>?) ?? [];
     if (executions.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Text(l10n.noExecutionDetails, style: TextStyle(color: Colors.grey, fontSize: 13)),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        child: Text(l10n.noExecutionDetails, style: const TextStyle(color: Colors.grey, fontSize: 13)),
       );
     }
     return Padding(

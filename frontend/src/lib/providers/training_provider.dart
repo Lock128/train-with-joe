@@ -319,6 +319,7 @@ class TrainingProvider extends ChangeNotifier {
               multipleChoiceOptions { wordIndex options }
               promptWords { word vocabularyListId unit }
               aiExercises { prompt options exerciseType sourceWord }
+              verbConjugationExercises { infinitive prompt exerciseType hint }
             }
             error
           }
@@ -370,6 +371,7 @@ class TrainingProvider extends ChangeNotifier {
               results { wordIndex word expectedAnswer userAnswer correct }
               multipleChoiceOptions { wordIndex options }
               aiExercises { prompt options exerciseType sourceWord }
+              verbConjugationExercises { infinitive prompt exerciseType hint }
             }
             error
           }

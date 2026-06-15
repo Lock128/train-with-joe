@@ -1,6 +1,7 @@
 // This is a generated file; do not edit or check into version control.
 FLUTTER_ROOT=/Users/JohannesKoch/tools/flutter
-FLUTTER_APPLICATION_PATH=/Users/JohannesKoch/git-private/lockhead-flutter-saas-template/frontend/src
+FLUTTER_APPLICATION_PATH=/Users/JohannesKoch/git-private/train-with-joe/frontend/src
+FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=/Users/JohannesKoch/git-private/train-with-joe/frontend/src/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_TARGET=lib/main.dart
 FLUTTER_BUILD_DIR=build

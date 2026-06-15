@@ -57,7 +57,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
   }
 
   Future<void> _createTraining() async {
-    if (_selectedListIds.isEmpty) return;
+    if (_selectedListIds.isEmpty && _selectedMode != 'VERB_CONJUGATION') return;
 
     final trainingProvider = context.read<TrainingProvider>();
     final name = _nameController.text.trim().isNotEmpty
@@ -65,13 +65,15 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
         : null;
 
     final training = await trainingProvider.createTraining(
-      _selectedListIds.toList(),
+      _selectedMode == 'VERB_CONJUGATION' && _selectedListIds.isEmpty
+          ? <String>[]
+          : _selectedListIds.toList(),
       _selectedMode,
       name,
       wordCount: _wordCount,
       direction: _selectedDirection,
-      isRandomized: _isRandomized ? true : null,
-      randomizedWordCount: _isRandomized ? _wordCount : null,
+      isRandomized: (_isRandomized || _selectedMode == 'VERB_CONJUGATION') ? true : null,
+      randomizedWordCount: (_isRandomized || _selectedMode == 'VERB_CONJUGATION') ? _wordCount : null,
       multipleChoiceOptionCount: _selectedMode == 'MULTIPLE_CHOICE' ? _multipleChoiceOptionCount : null,
       sourceLanguage: _selectedMode == 'AI_TRAINING' ? _selectedSourceLanguage : null,
       targetLanguage: _selectedMode == 'AI_TRAINING' ? _selectedTargetLanguage : null,
@@ -282,6 +284,15 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                         _selectedTargetLanguage = null;
                       }),
                     ),
+                    ChoiceChip(
+                      label: const Text('Irregular Verbs'),
+                      selected: _selectedMode == 'VERB_CONJUGATION',
+                      selectedColor: const Color(0xFF2D9CDB).withValues(alpha: 0.2),
+                      onSelected: (_) => setState(() {
+                        _selectedMode = 'VERB_CONJUGATION';
+                        _isRandomized = true;
+                      }),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -308,8 +319,8 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const SizedBox(height: 24),
                 ],
 
-                // Direction selector (not applicable for AI Training)
-                if (_selectedMode != 'AI_TRAINING') ...[
+                // Direction selector (not applicable for AI Training or Verb Conjugation)
+                if (_selectedMode != 'AI_TRAINING' && _selectedMode != 'VERB_CONJUGATION') ...[
                   Text(
                     l10n.trainingDirection,
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -339,7 +350,77 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const SizedBox(height: 24),
                 ],
 
-                // Vocabulary lists
+                // Verb Conjugation mode info (no vocabulary lists needed)
+                if (_selectedMode == 'VERB_CONJUGATION') ...[
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D9CDB).withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF2D9CDB).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.auto_awesome, color: Color(0xFF2D9CDB), size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'English Irregular Verbs',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2D9CDB),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Practice conjugating irregular English verbs. '
+                          'AI will generate exercises asking you to provide verb forms '
+                          'like "put, put, put" or "go, went, gone".',
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'No vocabulary list needed — exercises are generated automatically.',
+                          style: TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Number of questions slider for verb conjugation
+                  Text(
+                    'Number of Questions: $_wordCount',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'How many verb exercises to generate (max 30)',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  Slider(
+                    value: _wordCount.clamp(1, 30).toDouble(),
+                    min: 1,
+                    max: 30,
+                    divisions: 29,
+                    label: _wordCount.toString(),
+                    onChanged: (value) {
+                      setState(() {
+                        _wordCount = value.round();
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                // Vocabulary lists (hidden for Verb Conjugation mode)
+                if (_selectedMode != 'VERB_CONJUGATION') ...[
                 Text(
                   l10n.yourVocabularyLists,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -397,6 +478,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   ...filteredPublicLists.map((list) => _buildListTile(list, isPublic: true)),
                 ],
                 const SizedBox(height: 16),
+                ],
 
                 // Target language selector (AI Training only — shown after list selection)
                 if (_selectedMode == 'AI_TRAINING' && _selectedListIds.isNotEmpty) ...[
@@ -474,7 +556,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                 ],
 
                 // Word count selector
-                if (_selectedListIds.isNotEmpty) ...[
+                if (_selectedListIds.isNotEmpty && _selectedMode != 'VERB_CONJUGATION') ...[
                   Text(
                     _selectedMode == 'AI_TRAINING'
                         ? 'Number of Questions: $_wordCount'
@@ -503,8 +585,8 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const SizedBox(height: 8),
                 ],
 
-                // Randomized mode toggle
-                if (_selectedListIds.isNotEmpty) ...[
+                // Randomized mode toggle (hidden for Verb Conjugation — always randomized)
+                if (_selectedListIds.isNotEmpty && _selectedMode != 'VERB_CONJUGATION') ...[
                   SwitchListTile(
                     title: Text(l10n.randomizedMode),
                     subtitle: Text(
@@ -525,7 +607,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
 
                 // Create button
                 ElevatedButton(
-                  onPressed: _selectedListIds.isEmpty || trainingProvider.isLoading
+                  onPressed: (_selectedListIds.isEmpty && _selectedMode != 'VERB_CONJUGATION') || trainingProvider.isLoading
                       ? null
                       : _createTraining,
                   style: ElevatedButton.styleFrom(

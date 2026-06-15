@@ -43,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.home),
@@ -58,32 +60,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
           if (userProvider.error != null) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.errorLoadingUserData,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    userProvider.error!,
-                    style: const TextStyle(color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton.icon(
-                    onPressed: () => userProvider.loadUser(),
-                    icon: const Icon(Icons.refresh),
-                    label: Text(l10n.retry),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Colors.red.shade400,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n.errorLoadingUserData,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      userProvider.error!,
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => userProvider.loadUser(),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.retry),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -105,10 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.all(24.0),
                         child: Column(
                           children: [
-                            const CircleAvatar(
+                            CircleAvatar(
                               radius: 50,
-                              backgroundColor: Color(0xFFE8F4FD),
-                              child: ClipOval(
+                              backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.4),
+                              child: const ClipOval(
                                 child: Image(
                                   image: AssetImage('assets/images/app_icon.png'),
                                   width: 80,
@@ -120,7 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 16),
                             Text(
                               l10n.welcome,
-                              style: Theme.of(context).textTheme.headlineSmall,
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
                             ),
                             const SizedBox(height: 8),
                             if (user != null && user['name'] != null)
@@ -131,12 +147,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             if (user != null && user['email'] != null)
                               Text(
                                 user['email'] as String,
-                                style: const TextStyle(color: Colors.grey),
+                                style: TextStyle(color: colorScheme.onSurfaceVariant),
                               )
                             else if (currentUser != null)
                               Text(
                                 currentUser.username,
-                                style: const TextStyle(color: Colors.grey),
+                                style: TextStyle(color: colorScheme.onSurfaceVariant),
                               ),
                           ],
                         ),
@@ -147,12 +163,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Subscription status card
                     Card(
                       child: ListTile(
-                        leading: const Icon(Icons.card_membership),
+                        leading: Icon(Icons.card_membership, color: colorScheme.primary),
                         title: Text(l10n.subscription),
                         subtitle: Text(
                           _getTierDisplay(l10n, user),
                         ),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        trailing: Icon(Icons.arrow_forward_ios, size: 16, color: colorScheme.onSurfaceVariant),
                         onTap: () => context.go('/subscription'),
                       ),
                     ),
@@ -163,14 +179,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       l10n.gettingStarted,
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       l10n.gettingStartedSubtitle,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: 14,
                       ),
                     ),
@@ -217,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       l10n.quickActions,
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -298,9 +314,14 @@ class _GettingStartedCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              CircleAvatar(
-                backgroundColor: color.withValues(alpha: 0.12),
-                child: Icon(icon, color: color),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 22),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -309,20 +330,22 @@ class _GettingStartedCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: Theme.of(context).textTheme.titleSmall,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       description,
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[400]),
+              Icon(Icons.arrow_forward_ios, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
             ],
           ),
         ),

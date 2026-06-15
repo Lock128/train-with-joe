@@ -24,13 +24,13 @@ dependencies:
   # Payment integration
   in_app_purchase: ^3.1.13
   in_app_purchase_storekit: ">=0.3.6+7 <0.5.0"
-  flutter_stripe: ">=11.2.0 <13.0.0"
+  flutter_stripe: ">=11.2.0 <14.0.0"
   
   # Image picking
   image_picker: ^1.1.2
 
   # Sharing / export
-  share_plus: ">=10.1.4 <13.0.0"
+  share_plus: ">=10.1.4 <14.0.0"
 
   # Audio feedback
   audioplayers: ^6.1.0
@@ -51,9 +51,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  mockito: ^5.4.6
+  mockito: ^5.7.0
   build_runner: ^2.4.13
-  kiri_check: ^1.3.1
   flutter_launcher_icons: ^0.14.3
 
 flutter_launcher_icons:

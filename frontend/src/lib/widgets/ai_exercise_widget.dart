@@ -32,36 +32,45 @@ class AIExerciseWidget extends StatelessWidget {
     final exerciseType = exercise['exerciseType'] as String? ?? '';
     final prompt = exercise['prompt'] as String? ?? '';
     final options = (exercise['options'] as List<dynamic>?) ?? [];
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Exercise type label
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: const Color(0xFF6B46C1).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            _formatExerciseType(exerciseType),
-            style: const TextStyle(
-              color: Color(0xFF6B46C1),
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6B46C1).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
             ),
-            textAlign: TextAlign.center,
+            child: Text(
+              _formatExerciseType(exerciseType),
+              style: const TextStyle(
+                color: Color(0xFF6B46C1),
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
 
         // Prompt
-        Text(
-          prompt,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-          textAlign: TextAlign.center,
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            prompt,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+            textAlign: TextAlign.center,
+          ),
         ),
         const SizedBox(height: 24),
 
@@ -71,27 +80,48 @@ class AIExerciseWidget extends StatelessWidget {
           final isSelected = selectedIndex == index;
 
           Color? backgroundColor;
+          Color? borderColor;
           Color? textColor;
           if (showFeedback && isSelected) {
             if (isCorrect == true) {
-              backgroundColor = Colors.green.withValues(alpha: 0.2);
-              textColor = Colors.green.shade800;
+              backgroundColor = const Color(0xFFECFDF5);
+              borderColor = const Color(0xFF10B981);
+              textColor = const Color(0xFF065F46);
             } else {
-              backgroundColor = Colors.red.withValues(alpha: 0.2);
-              textColor = Colors.red.shade800;
+              backgroundColor = const Color(0xFFFEF2F2);
+              borderColor = const Color(0xFFEF4444);
+              textColor = const Color(0xFF991B1B);
             }
           }
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: ElevatedButton(
-              onPressed: showFeedback ? null : () => onAnswerSelected(index),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.all(16),
-                backgroundColor: backgroundColor,
-                foregroundColor: textColor,
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Material(
+              color: backgroundColor ?? colorScheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: showFeedback ? null : () => onAnswerSelected(index),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: borderColor ?? colorScheme.outline.withValues(alpha: 0.2),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Text(
+                    optionText,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: textColor ?? colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
-              child: Text(optionText),
             ),
           );
         }),

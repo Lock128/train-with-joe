@@ -2,7 +2,7 @@
  * Domain models for Training entity
  */
 
-export type TrainingMode = 'TEXT_INPUT' | 'MULTIPLE_CHOICE' | 'AI_TRAINING';
+export type TrainingMode = 'TEXT_INPUT' | 'MULTIPLE_CHOICE' | 'AI_TRAINING' | 'VERB_CONJUGATION';
 export type TrainingDirection = 'WORD_TO_TRANSLATION' | 'TRANSLATION_TO_WORD';
 
 export interface TrainingWord {
@@ -53,6 +53,14 @@ export interface AIExercise {
   difficulty?: 'easy' | 'medium' | 'hard';
 }
 
+export interface VerbConjugationExercise {
+  infinitive: string;
+  prompt: string;
+  exerciseType: string;
+  hint?: string;
+  expectedForms: string[];
+}
+
 export interface TrainingExecution {
   id: string;
   trainingId: string;
@@ -64,6 +72,7 @@ export interface TrainingExecution {
   multipleChoiceOptions?: MultipleChoiceOption[];
   words?: TrainingWord[];
   aiExercises?: AIExercise[];
+  verbConjugationExercises?: VerbConjugationExercise[];
   correctCount: number;
   incorrectCount: number;
 }
@@ -80,6 +89,7 @@ export interface SanitizedExecution {
   multipleChoiceOptions?: Omit<MultipleChoiceOption, 'correctOptionIndex'>[];
   promptWords?: { word: string; vocabularyListId: string; unit?: string }[];
   aiExercises?: Omit<AIExercise, 'correctOptionIndex'>[];
+  verbConjugationExercises?: Omit<VerbConjugationExercise, 'expectedForms'>[];
   correctCount: number;
   incorrectCount: number;
 }

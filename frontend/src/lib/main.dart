@@ -244,63 +244,185 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
   @override
   Widget build(BuildContext context) {
     final localeProvider = context.watch<LocaleProvider>();
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF2B6CB0),
+      brightness: Brightness.light,
+      primary: const Color(0xFF2B6CB0),
+      secondary: const Color(0xFFF0932B),
+      tertiary: const Color(0xFF5BC0DE),
+      surface: const Color(0xFFF8FAFB),
+      surfaceContainerLowest: Colors.white,
+      surfaceContainerLow: const Color(0xFFF2F6F8),
+      surfaceContainer: const Color(0xFFEDF2F5),
+      surfaceContainerHigh: const Color(0xFFE4ECF0),
+    );
+
     return MaterialApp.router(
             title: 'Train with Joe',
             locale: localeProvider.locale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2B6CB0),
-                brightness: Brightness.light,
-                primary: const Color(0xFF2B6CB0),
-                secondary: const Color(0xFFF0932B),
-                tertiary: const Color(0xFF5BC0DE),
-              ),
+              colorScheme: colorScheme,
               useMaterial3: true,
               fontFamily: 'Nunito',
+              scaffoldBackgroundColor: colorScheme.surface,
               elevatedButtonTheme: ElevatedButtonThemeData(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2B6CB0),
+                  backgroundColor: colorScheme.primary,
                   foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              filledButtonTheme: FilledButtonThemeData(
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  textStyle: const TextStyle(
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
                   ),
                 ),
               ),
               outlinedButtonTheme: OutlinedButtonThemeData(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF2B6CB0),
+                  foregroundColor: colorScheme.primary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  side: const BorderSide(color: Color(0xFF2B6CB0)),
+                  side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.3)),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  textStyle: const TextStyle(
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
                 ),
               ),
               textButtonTheme: TextButtonThemeData(
                 style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF2B6CB0),
+                  foregroundColor: colorScheme.primary,
+                  textStyle: const TextStyle(
+                    fontFamily: 'Nunito',
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: colorScheme.surfaceContainerLowest,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Color(0xFF2B6CB0), width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
                 ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
               cardTheme: CardThemeData(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                elevation: 2,
-              ),
-              appBarTheme: const AppBarTheme(
-                backgroundColor: Color(0xFF2B6CB0),
-                foregroundColor: Colors.white,
                 elevation: 0,
+                color: colorScheme.surfaceContainerLowest,
+                surfaceTintColor: Colors.transparent,
+              ),
+              appBarTheme: AppBarTheme(
+                backgroundColor: colorScheme.surface,
+                foregroundColor: colorScheme.onSurface,
+                elevation: 0,
+                scrolledUnderElevation: 0.5,
+                centerTitle: false,
+                titleTextStyle: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              navigationBarTheme: NavigationBarThemeData(
+                elevation: 0,
+                backgroundColor: colorScheme.surfaceContainerLowest,
+                indicatorColor: colorScheme.primaryContainer,
+                labelTextStyle: WidgetStatePropertyAll(
+                  TextStyle(
+                    fontFamily: 'Nunito',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              navigationRailTheme: NavigationRailThemeData(
+                backgroundColor: colorScheme.surfaceContainerLowest,
+                indicatorColor: colorScheme.primaryContainer,
+                selectedLabelTextStyle: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.primary,
+                ),
+                unselectedLabelTextStyle: TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              chipTheme: ChipThemeData(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                side: BorderSide.none,
+              ),
+              dividerTheme: DividerThemeData(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                thickness: 1,
+              ),
+              floatingActionButtonTheme: FloatingActionButtonThemeData(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: Colors.white,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              snackBarTheme: SnackBarThemeData(
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              dialogTheme: DialogThemeData(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              bottomSheetTheme: const BottomSheetThemeData(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+              ),
+              progressIndicatorTheme: ProgressIndicatorThemeData(
+                linearTrackColor: colorScheme.primaryContainer.withValues(alpha: 0.3),
               ),
             ),
             routerConfig: _router,

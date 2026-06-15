@@ -1,5 +1,6 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import type { AIExercise } from '../model/domain/Training';
+import type { VerbConjugationExercise } from '../model/domain/Training';
 import type { VocabularyWord } from '../model/domain/VocabularyList';
 
 /**
@@ -1137,6 +1138,171 @@ RULES:
       }
 
       throw new Error('Failed to generate content with AI');
+    }
+  }
+
+  /**
+   * Generate verb conjugation exercises for English irregular verbs.
+   * Produces exercises that ask the user to provide verb forms (base, past simple, past participle).
+   * Exercise types include:
+   * - "three_forms": Given the infinitive, provide all three forms (e.g. "put, put, put")
+   * - "past_simple": Given the infinitive, provide the past simple form
+   * - "past_participle": Given the infinitive, provide the past participle
+   * - "infinitive_from_past": Given a past form, identify the infinitive
+   */
+  async generateVerbConjugationExercises(wordCount: number, userId: string): Promise<VerbConjugationExercise[]> {
+    // Check rate limit
+    if (!this.checkRateLimit(userId)) {
+      throw new Error('Rate limit exceeded. Please wait before making more AI requests.');
+    }
+
+    const effectiveCount = Math.min(Math.max(1, wordCount), 30);
+
+    try {
+      const prompt = `You are generating English irregular verb conjugation exercises for a language learner.
+
+Generate exactly ${effectiveCount} exercises that test knowledge of English irregular verb forms (base form / past simple / past participle).
+
+Create a JSON array with a varied mix of these exercise types:
+
+1. "three_forms" — The user must provide all three forms separated by commas. 
+   - prompt: "Write all three forms of the verb: [infinitive]"
+   - expectedForms: ["base", "past simple", "past participle"] (e.g. ["put", "put", "put"] or ["go", "went", "gone"])
+   - hint: a short example sentence using the verb
+
+2. "past_simple" — The user must provide only the past simple form.
+   - prompt: "What is the past simple of '[infinitive]'?"
+   - expectedForms: ["past simple form"] (single element array, e.g. ["went"])
+   - hint: a short example sentence using the past simple form
+
+3. "past_participle" — The user must provide only the past participle.
+   - prompt: "What is the past participle of '[infinitive]'?"
+   - expectedForms: ["past participle form"] (single element array, e.g. ["gone"])
+   - hint: a short example sentence using the past participle
+
+4. "infinitive_from_past" — Given a past tense form, the user must identify the infinitive/base form.
+   - prompt: "What is the base form of the verb '[past form]'?"
+   - expectedForms: ["base form"] (single element array, e.g. ["go"])
+   - hint: a short example sentence using the base form
+
+RULES:
+- Use ONLY well-known English irregular verbs (go/went/gone, put/put/put, take/took/taken, buy/bought/bought, etc.)
+- Include verbs where all three forms are the same (put/put/put, cut/cut/cut, shut/shut/shut)
+- Include verbs where past simple and past participle differ (go/went/gone, take/took/taken)
+- Include verbs where past simple and past participle are the same (buy/bought/bought, teach/taught/taught)
+- Vary the difficulty — mix common verbs with less common ones
+- Vary the exercise types — do not repeat the same type for every exercise
+- All expectedForms values must be lowercase
+- The hint should be a natural English sentence (max 10 words)
+
+JSON format per exercise:
+- "infinitive": string (the base/infinitive form of the verb being tested)
+- "prompt": string (the question shown to the user)
+- "exerciseType": one of "three_forms", "past_simple", "past_participle", "infinitive_from_past"
+- "expectedForms": array of strings (the correct answer(s) the user must provide)
+- "hint": string (a short example sentence)
+
+Return ONLY a valid JSON array. No markdown, no code blocks, no extra text.`;
+
+      const requestBody = this.buildRequestBody(prompt, 2000);
+
+      const response = await this.bedrockClient.send(
+        new InvokeModelCommand({
+          modelId: this.modelId,
+          contentType: 'application/json',
+          accept: 'application/json',
+          body: JSON.stringify(requestBody),
+        }),
+      );
+
+      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+      const responseText = this.extractResponseText(responseBody);
+
+      if (!responseText) {
+        throw new Error('No content returned from Bedrock');
+      }
+
+      // Parse and validate
+      const stripped = responseText
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/\s*```\s*$/, '')
+        .trim();
+
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(stripped);
+      } catch {
+        throw new Error('Failed to parse verb conjugation exercises response as JSON');
+      }
+
+      if (!Array.isArray(parsed)) {
+        throw new Error('Expected JSON array of verb conjugation exercises');
+      }
+
+      const validExercises: VerbConjugationExercise[] = [];
+
+      for (const exercise of parsed) {
+        const isValid =
+          exercise &&
+          typeof exercise.infinitive === 'string' &&
+          exercise.infinitive.length > 0 &&
+          typeof exercise.prompt === 'string' &&
+          exercise.prompt.length > 0 &&
+          typeof exercise.exerciseType === 'string' &&
+          ['three_forms', 'past_simple', 'past_participle', 'infinitive_from_past'].includes(exercise.exerciseType) &&
+          Array.isArray(exercise.expectedForms) &&
+          exercise.expectedForms.length > 0 &&
+          exercise.expectedForms.every((f: unknown) => typeof f === 'string' && (f as string).length > 0);
+
+        if (isValid) {
+          validExercises.push({
+            infinitive: exercise.infinitive.toLowerCase(),
+            prompt: exercise.prompt,
+            exerciseType: exercise.exerciseType,
+            expectedForms: exercise.expectedForms.map((f: string) => f.toLowerCase()),
+            hint: typeof exercise.hint === 'string' ? exercise.hint : undefined,
+          });
+        } else {
+          console.warn('Invalid verb conjugation exercise filtered out:', JSON.stringify(exercise));
+        }
+      }
+
+      if (validExercises.length === 0) {
+        throw new Error('No valid verb conjugation exercises could be generated');
+      }
+
+      // Log usage
+      const tokenEstimate = responseText.length / 4;
+      this.logUsage(userId, 'generateVerbConjugationExercises', tokenEstimate);
+
+      return validExercises;
+    } catch (error) {
+      console.error('Error generating verb conjugation exercises with Bedrock:', error);
+
+      if (error instanceof Error) {
+        if (error.message.includes('Rate limit')) throw error;
+        if (error.message.includes('No valid verb conjugation')) throw error;
+        if (error.message.includes('Failed to parse') || error.message.includes('Expected JSON array')) throw error;
+        if (error.message.includes('throttling')) {
+          throw new Error('Bedrock service is currently throttling requests. Please try again later.');
+        }
+        if (error.message.includes('is not authorized to perform') || error.message.includes('AccessDeniedException')) {
+          throw new Error(
+            'Bedrock model access is not enabled. Please enable model access in the AWS Bedrock console.',
+          );
+        }
+        if (
+          error.message.includes('Could not resolve the foundation model') ||
+          error.message.includes('ValidationException') ||
+          error.name === 'ValidationException'
+        ) {
+          throw new Error(`Bedrock model '${this.modelId}' is not available in this region. Please contact support.`);
+        }
+      }
+
+      throw new Error(
+        `Failed to generate verb conjugation exercises: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

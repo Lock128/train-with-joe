@@ -8,6 +8,7 @@ import '../providers/vocabulary_provider.dart';
 import '../services/feedback_sound_service.dart';
 import '../widgets/answer_feedback_animation.dart';
 import '../widgets/ai_exercise_widget.dart';
+import '../widgets/verb_conjugation_exercise_widget.dart';
 
 /// Screen for executing a training session
 class TrainingExecutionScreen extends StatefulWidget {
@@ -92,6 +93,10 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
   List<dynamic> get _aiExercises {
     return (_execution?['aiExercises'] as List<dynamic>?) ?? [];
+  }
+
+  List<dynamic> get _verbConjugationExercises {
+    return (_execution?['verbConjugationExercises'] as List<dynamic>?) ?? [];
   }
 
   Future<void> _submitAIAnswer(int optionIndex) async {
@@ -192,7 +197,12 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final words = _words;
 
     final isAIMode = _currentMode == 'AI_TRAINING';
-    final totalWords = isAIMode ? _aiExercises.length : words.length;
+    final isVerbConjugationMode = _currentMode == 'VERB_CONJUGATION';
+    final totalWords = isAIMode
+        ? _aiExercises.length
+        : isVerbConjugationMode
+            ? _verbConjugationExercises.length
+            : words.length;
 
     if (_execution == null || totalWords == 0) {
       return Scaffold(
@@ -205,7 +215,9 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     }
 
     final progress = totalWords > 0 ? (_currentWordIndex + 1) / totalWords : 0.0;
-    final currentWord = isAIMode ? null : (words[_currentWordIndex] as Map<String, dynamic>);
+    final currentWord = (isAIMode || isVerbConjugationMode || words.isEmpty)
+        ? null
+        : (words[_currentWordIndex] as Map<String, dynamic>);
     final training = context.read<TrainingProvider>().currentTraining;
     final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
     final reversed = direction == 'TRANSLATION_TO_WORD';
@@ -219,53 +231,74 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
       appBar: AppBar(
         title: Text(l10n.training),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.close_rounded),
           tooltip: l10n.abortTraining,
           onPressed: _confirmAbort,
         ),
         actions: [_buildFlagButton(), _buildSoundToggle()],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Progress
-            LinearProgressIndicator(value: progress),
-            const SizedBox(height: 8),
-            Text(
-              'Word ${_currentWordIndex + 1} of $totalWords',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 32),
-
-            // Current word (hidden for AI mode - the exercise widget shows the prompt)
-            if (!isAIMode) ...[
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Progress
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 6,
+                ),
+              ),
+              const SizedBox(height: 10),
               Text(
-                wordText,
+                '${_currentWordIndex + 1} / $totalWords',
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 32),
+
+              // Current word (hidden for AI mode and verb conjugation - the exercise widget shows the prompt)
+              if (!isAIMode && !isVerbConjugationMode) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    wordText,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+
+              // Input area
+              if (_currentMode == 'AI_TRAINING')
+                _buildAIExercise()
+              else if (_currentMode == 'VERB_CONJUGATION')
+                _buildVerbConjugationExercise()
+              else if (_showFeedback)
+                _buildFeedback()
+              else if (_currentMode == 'MULTIPLE_CHOICE')
+                _buildMultipleChoice()
+              else
+                _buildTextInput(),
+
+              // Show feedback animation for AI mode and verb conjugation too
+              if (_showFeedback && (isAIMode || isVerbConjugationMode))
+                _buildFeedback(),
             ],
-
-            // Input area
-            if (_currentMode == 'AI_TRAINING')
-              _buildAIExercise()
-            else if (_showFeedback)
-              _buildFeedback()
-            else if (_currentMode == 'MULTIPLE_CHOICE')
-              _buildMultipleChoice()
-            else
-              _buildTextInput(),
-
-            // Show feedback animation for AI mode too
-            if (_showFeedback && isAIMode)
-              _buildFeedback(),
-          ],
+          ),
         ),
       ),
     );
@@ -296,6 +329,7 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   }
 
   Widget _buildTextInput() {
+    final l10n = AppLocalizations.of(context)!;
     final training = context.read<TrainingProvider>().currentTraining;
     final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
     final hintText = direction == 'TRANSLATION_TO_WORD'
@@ -362,6 +396,22 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
       showFeedback: _showFeedback,
       selectedIndex: _selectedAIOptionIndex,
       isCorrect: _lastResult?['correct'] as bool?,
+    );
+  }
+
+  Widget _buildVerbConjugationExercise() {
+    final exercises = _verbConjugationExercises;
+    if (_currentWordIndex >= exercises.length) return const SizedBox.shrink();
+
+    final exercise = exercises[_currentWordIndex] as Map<String, dynamic>;
+
+    return VerbConjugationExerciseWidget(
+      key: ValueKey('verb_exercise_$_currentWordIndex'),
+      exercise: exercise,
+      onAnswerSubmitted: _submitAnswer,
+      showFeedback: _showFeedback,
+      isCorrect: _lastResult?['correct'] as bool?,
+      expectedAnswer: _lastResult?['expectedAnswer'] as String?,
     );
   }
 
