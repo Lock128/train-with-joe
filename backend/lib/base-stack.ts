@@ -35,6 +35,7 @@ export class BaseStack extends Stack {
   public readonly vocabularyListsTable: Table;
   public readonly trainingsTable: Table;
   public readonly usageCountersTable: Table;
+  public readonly wordMasteryTable: Table;
   public readonly assetsBucket: Bucket;
   public readonly assetsBucketNameParameterName: string;
   public readonly identityPoolId: string;
@@ -52,6 +53,7 @@ export class BaseStack extends Stack {
     this.vocabularyListsTable = this.createVocabularyListsTable(namespace);
     this.trainingsTable = this.createTrainingsTable(namespace);
     this.usageCountersTable = this.createUsageCountersTable(namespace);
+    this.wordMasteryTable = this.createWordMasteryTable(namespace);
 
     // Create S3 bucket for application assets
     this.assetsBucket = this.createAssetsBucket(namespace);
@@ -90,6 +92,12 @@ export class BaseStack extends Stack {
     new StringParameter(this, 'UsageCountersTableNameParameter', {
       stringValue: this.usageCountersTable.tableName,
       parameterName: `/${namespace}/config/usage-counters-table-name`,
+      simpleName: false,
+    });
+
+    new StringParameter(this, 'WordMasteryTableNameParameter', {
+      stringValue: this.wordMasteryTable.tableName,
+      parameterName: `/${namespace}/config/word-mastery-table-name`,
       simpleName: false,
     });
 
@@ -441,6 +449,32 @@ export class BaseStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
       tableName: `train-with-joe-usage-counters-${namespace}`,
     });
+  }
+
+  createWordMasteryTable(namespace: string): Table {
+    const table = new Table(this, `WordMasteryTable-${namespace}`, {
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      removalPolicy: RemovalPolicy.DESTROY,
+      tableName: `train-with-joe-word-mastery-${namespace}`,
+    });
+
+    table.addGlobalSecondaryIndex({
+      indexName: 'userId-nextReviewAt-index',
+      partitionKey: {
+        name: 'userId',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'nextReviewAt',
+        type: AttributeType.STRING,
+      },
+    });
+
+    return table;
   }
 
   createAssetsBucket(namespace: string): Bucket {

@@ -242,6 +242,33 @@ type TrainingOverviewStatistics @aws_cognito_user_pools {
   totalLearningTimeSeconds: Float!
 }
 
+type WordMasteryEntry @aws_cognito_user_pools {
+  id: ID!
+  userId: ID!
+  word: String!
+  vocabularyListId: ID!
+  box: Int!
+  correctStreak: Int!
+  lastReviewedAt: AWSDateTime!
+  nextReviewAt: AWSDateTime!
+  totalAttempts: Int!
+  totalCorrect: Int!
+}
+
+type WordMasteryStats @aws_cognito_user_pools {
+  totalWords: Int!
+  masteredCount: Int!
+  strugglingCount: Int!
+  averageBox: Float!
+  words: [WordMasteryEntry!]!
+}
+
+type WordMasteryResponse @aws_cognito_user_pools {
+  success: Boolean!
+  mastery: WordMasteryStats
+  error: String
+}
+
 # ============================================================================
 # INPUT TYPES
 # ============================================================================
@@ -562,6 +589,7 @@ type Query {
   getTrainingStatistics(trainingId: ID!, userId: ID): TrainingStatisticsResponse @aws_cognito_user_pools
   getTrainingDayStatistics(date: String!, userId: ID): TrainingDayStatisticsResponse @aws_cognito_user_pools
   getTrainingOverviewStatistics(fromDate: String!, toDate: String!, userId: ID): TrainingOverviewStatisticsResponse @aws_cognito_user_pools
+  getWordMastery(vocabularyListIds: [String!]!): WordMasteryResponse @aws_cognito_user_pools
   getUsers: [User] @aws_cognito_user_pools
   getUsageLimits: UsageLimitsResponse @aws_cognito_user_pools
   getTierStatistics: TierStatisticsResponse @aws_cognito_user_pools

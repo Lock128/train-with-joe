@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 import { TrainingRepository } from '../repositories/training-repository';
 import { VocabularyListRepository } from '../repositories/vocabulary-list-repository';
+import { SpacedRepetitionService } from './spaced-repetition-service';
 import type {
   Training,
   TrainingMode,
@@ -613,8 +614,45 @@ export class TrainingService {
           return { success: false, error: 'No words available from the selected vocabulary lists' };
         }
 
-        // Select up to randomizedWordCount words using Fisher-Yates shuffle
-        const selectedWords = this.shuffleAndSlice(collectedWords, training.randomizedWordCount ?? 10);
+        // For TEXT_INPUT and MULTIPLE_CHOICE, use SRS to prioritize words due for review
+        let selectedWords: TrainingWord[];
+        if (training.mode === 'TEXT_INPUT' || training.mode === 'MULTIPLE_CHOICE') {
+          const targetCount = training.randomizedWordCount ?? 10;
+          let srsSelectedWords: TrainingWord[] = [];
+
+          try {
+            const srsService = SpacedRepetitionService.getInstance();
+            const srsWords = await srsService.getWordsForReview(userId, training.vocabularyListIds, targetCount);
+
+            // Map SRS words to training words from the collected set
+            for (const srsWord of srsWords) {
+              const match = collectedWords.find(
+                (w) => w.word === srsWord.word && w.vocabularyListId === srsWord.vocabularyListId,
+              );
+              if (match) {
+                srsSelectedWords.push(match);
+              }
+            }
+          } catch (srsError) {
+            // SRS failure should not block training - fall back to random selection
+            console.error('Error fetching SRS words, falling back to random selection:', srsError);
+            srsSelectedWords = [];
+          }
+
+          if (srsSelectedWords.length >= targetCount) {
+            selectedWords = srsSelectedWords.slice(0, targetCount);
+          } else {
+            // Fill remaining slots with random words not already selected
+            const remaining = collectedWords.filter(
+              (w) => !srsSelectedWords.some((s) => s.word === w.word && s.vocabularyListId === w.vocabularyListId),
+            );
+            const fillerWords = this.shuffleAndSlice(remaining, targetCount - srsSelectedWords.length);
+            selectedWords = [...srsSelectedWords, ...fillerWords];
+          }
+        } else {
+          // Select up to randomizedWordCount words using Fisher-Yates shuffle
+          selectedWords = this.shuffleAndSlice(collectedWords, training.randomizedWordCount ?? 10);
+        }
 
         if (training.mode === 'AI_TRAINING') {
           if (selectedWords.length < 1) {
@@ -792,6 +830,15 @@ export class TrainingService {
       const expectedAnswer = reversed ? word.word : word.translation;
       const promptWord = reversed ? word.translation : word.word;
       const correct = answer.trim().toLowerCase() === expectedAnswer.trim().toLowerCase();
+
+      // Record result into the SRS system
+      try {
+        const srsService = SpacedRepetitionService.getInstance();
+        await srsService.recordResult(userId, word.word, word.vocabularyListId, correct);
+      } catch (srsError) {
+        // SRS recording failure should not block the answer submission
+        console.error('Error recording SRS result:', srsError);
+      }
 
       return this.recordResultAndUpdate(
         executionId,
