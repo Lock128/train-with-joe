@@ -36,6 +36,7 @@ export class BaseStack extends Stack {
   public readonly trainingsTable: Table;
   public readonly usageCountersTable: Table;
   public readonly wordMasteryTable: Table;
+  public readonly achievementsTable: Table;
   public readonly assetsBucket: Bucket;
   public readonly assetsBucketNameParameterName: string;
   public readonly identityPoolId: string;
@@ -54,6 +55,7 @@ export class BaseStack extends Stack {
     this.trainingsTable = this.createTrainingsTable(namespace);
     this.usageCountersTable = this.createUsageCountersTable(namespace);
     this.wordMasteryTable = this.createWordMasteryTable(namespace);
+    this.achievementsTable = this.createAchievementsTable(namespace);
 
     // Create S3 bucket for application assets
     this.assetsBucket = this.createAssetsBucket(namespace);
@@ -98,6 +100,12 @@ export class BaseStack extends Stack {
     new StringParameter(this, 'WordMasteryTableNameParameter', {
       stringValue: this.wordMasteryTable.tableName,
       parameterName: `/${namespace}/config/word-mastery-table-name`,
+      simpleName: false,
+    });
+
+    new StringParameter(this, 'AchievementsTableNameParameter', {
+      stringValue: this.achievementsTable.tableName,
+      parameterName: `/${namespace}/config/achievements-table-name`,
       simpleName: false,
     });
 
@@ -475,6 +483,22 @@ export class BaseStack extends Stack {
     });
 
     return table;
+  }
+
+  createAchievementsTable(namespace: string): Table {
+    return new Table(this, `AchievementsTable-${namespace}`, {
+      billingMode: BillingMode.PAY_PER_REQUEST,
+      partitionKey: {
+        name: 'userId',
+        type: AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'id',
+        type: AttributeType.STRING,
+      },
+      removalPolicy: RemovalPolicy.DESTROY,
+      tableName: `train-with-joe-achievements-${namespace}`,
+    });
   }
 
   createAssetsBucket(namespace: string): Bucket {

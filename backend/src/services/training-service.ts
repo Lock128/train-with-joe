@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import { TrainingRepository } from '../repositories/training-repository';
 import { VocabularyListRepository } from '../repositories/vocabulary-list-repository';
 import { SpacedRepetitionService } from './spaced-repetition-service';
+import { AchievementService } from './achievement-service';
 import type {
   Training,
   TrainingMode,
@@ -258,6 +259,23 @@ export class TrainingService {
       incorrectCount: execution.incorrectCount,
       completedAt: execution.completedAt,
     });
+
+    // When execution is completed, record achievement progress
+    if (execution.completedAt) {
+      try {
+        const durationSeconds = this.getExecutionDurationSeconds(execution);
+        const achievementService = AchievementService.getInstance();
+        await achievementService.recordTrainingCompleted(execution.userId, {
+          correctCount: execution.correctCount,
+          incorrectCount: execution.incorrectCount,
+          durationSeconds,
+          trainingId: execution.trainingId,
+        });
+      } catch (achievementError) {
+        // Achievement tracking failure should not break training flow
+        console.error('Error recording achievement progress:', achievementError);
+      }
+    }
 
     return {
       success: true,

@@ -50,6 +50,21 @@ enum TierSource @aws_cognito_user_pools {
   MANUAL
 }
 
+enum AchievementType @aws_cognito_user_pools {
+  FIRST_TRAINING
+  STREAK_3
+  STREAK_7
+  STREAK_14
+  STREAK_30
+  WORDS_MASTERED_10
+  WORDS_MASTERED_50
+  WORDS_MASTERED_100
+  WORDS_MASTERED_500
+  PERFECT_SCORE
+  SPEED_DEMON
+  POLYGLOT
+}
+
 # ============================================================================
 # TYPES
 # ============================================================================
@@ -266,6 +281,27 @@ type WordMasteryStats @aws_cognito_user_pools {
 type WordMasteryResponse @aws_cognito_user_pools {
   success: Boolean!
   mastery: WordMasteryStats
+  error: String
+}
+
+type UserStreak @aws_cognito_user_pools {
+  currentStreak: Int!
+  longestStreak: Int!
+  lastTrainingDate: String!
+  totalTrainingDays: Int!
+}
+
+type Achievement @aws_cognito_user_pools {
+  id: ID!
+  type: AchievementType!
+  unlockedAt: AWSDateTime!
+  metadata: String
+}
+
+type UserProgressResponse @aws_cognito_user_pools {
+  success: Boolean!
+  streak: UserStreak
+  achievements: [Achievement!]
   error: String
 }
 
@@ -590,6 +626,7 @@ type Query {
   getTrainingDayStatistics(date: String!, userId: ID): TrainingDayStatisticsResponse @aws_cognito_user_pools
   getTrainingOverviewStatistics(fromDate: String!, toDate: String!, userId: ID): TrainingOverviewStatisticsResponse @aws_cognito_user_pools
   getWordMastery(vocabularyListIds: [String!]!): WordMasteryResponse @aws_cognito_user_pools
+  getAchievements: UserProgressResponse @aws_cognito_user_pools
   getUsers: [User] @aws_cognito_user_pools
   getUsageLimits: UsageLimitsResponse @aws_cognito_user_pools
   getTierStatistics: TierStatisticsResponse @aws_cognito_user_pools

@@ -65,6 +65,7 @@ const apiStack = new APIStack(app, `APIStack-${namespace}`, {
   trainingsTable: baseStack.trainingsTable,
   usageCountersTable: baseStack.usageCountersTable,
   wordMasteryTable: baseStack.wordMasteryTable,
+  achievementsTable: baseStack.achievementsTable,
   assetsBucket: baseStack.assetsBucket,
 });
 apiStack.addDependency(baseStack);

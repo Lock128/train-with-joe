@@ -28,6 +28,7 @@ interface APIStackProps extends cdk.StackProps {
   trainingsTable: Table;
   usageCountersTable: Table;
   wordMasteryTable: Table;
+  achievementsTable: Table;
   assetsBucket: Bucket;
 }
 
@@ -46,6 +47,7 @@ export class APIStack extends cdk.Stack {
       trainingsTable,
       usageCountersTable,
       wordMasteryTable,
+      achievementsTable,
       assetsBucket,
     } = props;
 
@@ -684,10 +686,15 @@ export class APIStack extends cdk.Stack {
       ...trainingLambdaProps,
       entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.submitAnswer.ts'),
       handler: 'handler',
+      environment: {
+        ...trainingLambdaProps.environment,
+        ACHIEVEMENTS_TABLE_NAME: achievementsTable.tableName,
+      },
     });
 
     trainingsTable.grantReadWriteData(submitAnswerFunction);
     wordMasteryTable.grantReadWriteData(submitAnswerFunction);
+    achievementsTable.grantReadWriteData(submitAnswerFunction);
 
     const submitAnswerDataSource = api.addLambdaDataSource('SubmitAnswerDataSource', submitAnswerFunction);
 
@@ -726,6 +733,27 @@ export class APIStack extends cdk.Stack {
     getWordMasteryDataSource.createResolver('GetWordMasteryResolver', {
       typeName: 'Query',
       fieldName: 'getWordMastery',
+    });
+
+    // Create getAchievements Lambda function
+    const getAchievementsFunction = new NodejsFunction(this, 'GetAchievementsFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getAchievements.ts'),
+      handler: 'handler',
+      environment: {
+        ...trainingLambdaProps.environment,
+        ACHIEVEMENTS_TABLE_NAME: achievementsTable.tableName,
+      },
+    });
+
+    achievementsTable.grantReadData(getAchievementsFunction);
+    wordMasteryTable.grantReadData(getAchievementsFunction);
+
+    const getAchievementsDataSource = api.addLambdaDataSource('GetAchievementsDataSource', getAchievementsFunction);
+
+    getAchievementsDataSource.createResolver('GetAchievementsResolver', {
+      typeName: 'Query',
+      fieldName: 'getAchievements',
     });
 
     // Create getTraining Lambda function
