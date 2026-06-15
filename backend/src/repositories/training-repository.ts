@@ -1,27 +1,21 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocumentClient,
-  PutCommand,
-  GetCommand,
-  UpdateCommand,
-  DeleteCommand,
-  QueryCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { PutCommand, GetCommand, UpdateCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import type { Training, TrainingExecution } from '../model/domain/Training';
+import { BaseRepository } from './base-repository';
 
 /**
  * Repository for managing Training and TrainingExecution entities in DynamoDB
  * Provides CRUD operations with GSI support for userId and trainingId lookup
  */
-export class TrainingRepository {
+export class TrainingRepository extends BaseRepository<Training> {
   private static instance: TrainingRepository;
-  private dynamoClient: DynamoDBDocumentClient;
-  private tableName: string;
 
   private constructor() {
-    const client = new DynamoDBClient({});
-    this.dynamoClient = DynamoDBDocumentClient.from(client);
-    this.tableName = process.env.TRAININGS_TABLE_NAME || 'train-with-joe-trainings-sandbox';
+    super({
+      tableName: process.env.TRAININGS_TABLE_NAME || 'train-with-joe-trainings-sandbox',
+      keyField: 'id',
+      entityName: 'Training',
+      setTimestampsOnCreate: false,
+    });
   }
 
   public static getInstance(): TrainingRepository {
@@ -29,59 +23,6 @@ export class TrainingRepository {
       TrainingRepository.instance = new TrainingRepository();
     }
     return TrainingRepository.instance;
-  }
-
-  /**
-   * Create a new training
-   * @param training Training data to create
-   * @returns Created training
-   * @throws Error if creation fails
-   */
-  async create(training: Training): Promise<Training> {
-    try {
-      await this.dynamoClient.send(
-        new PutCommand({
-          TableName: this.tableName,
-          Item: training,
-          ConditionExpression: 'attribute_not_exists(id)',
-        }),
-      );
-      return training;
-    } catch (error) {
-      const err = error as Error & { name?: string };
-      if (err.name === 'ConditionalCheckFailedException') {
-        throw new Error(`Training with id ${training.id} already exists`);
-      }
-      console.error('Error creating training:', error);
-      throw new Error(`Failed to create training: ${err.message}`);
-    }
-  }
-
-  /**
-   * Get training by ID
-   * @param id Training ID
-   * @returns Training if found, null otherwise
-   * @throws Error if retrieval fails
-   */
-  async getById(id: string): Promise<Training | null> {
-    try {
-      const response = await this.dynamoClient.send(
-        new GetCommand({
-          TableName: this.tableName,
-          Key: { id },
-        }),
-      );
-
-      if (!response.Item) {
-        return null;
-      }
-
-      return response.Item as Training;
-    } catch (error) {
-      const err = error as Error;
-      console.error('Error getting training by id:', error);
-      throw new Error(`Failed to get training: ${err.message}`);
-    }
   }
 
   /**
@@ -118,86 +59,6 @@ export class TrainingRepository {
       const err = error as Error;
       console.error('Error getting trainings by userId:', error);
       throw new Error(`Failed to get trainings by userId: ${err.message}`);
-    }
-  }
-
-  /**
-   * Update training by ID
-   * @param id Training ID
-   * @param updates Partial training data to update
-   * @returns Updated training
-   * @throws Error if update fails or training not found
-   */
-  async update(id: string, updates: Partial<Training>): Promise<Training> {
-    const now = new Date().toISOString();
-    const updateExpressions: string[] = [];
-    const expressionAttributeNames: Record<string, string> = {};
-    const expressionAttributeValues: Record<string, unknown> = {};
-
-    // Build update expression dynamically
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value !== undefined && key !== 'id' && key !== 'createdAt') {
-        updateExpressions.push(`#${key} = :${key}`);
-        expressionAttributeNames[`#${key}`] = key;
-        expressionAttributeValues[`:${key}`] = value;
-      }
-    });
-
-    // Always update the updatedAt timestamp
-    updateExpressions.push('#updatedAt = :updatedAt');
-    expressionAttributeNames['#updatedAt'] = 'updatedAt';
-    expressionAttributeValues[':updatedAt'] = now;
-
-    if (updateExpressions.length === 1) {
-      // Only updatedAt, nothing to update
-      const existing = await this.getById(id);
-      if (!existing) {
-        throw new Error(`Training with id ${id} not found`);
-      }
-      return { ...existing, updatedAt: now };
-    }
-
-    try {
-      const response = await this.dynamoClient.send(
-        new UpdateCommand({
-          TableName: this.tableName,
-          Key: { id },
-          UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-          ExpressionAttributeNames: expressionAttributeNames,
-          ExpressionAttributeValues: expressionAttributeValues,
-          ConditionExpression: 'attribute_exists(id)',
-          ReturnValues: 'ALL_NEW',
-        }),
-      );
-
-      return response.Attributes as Training;
-    } catch (error) {
-      const err = error as Error & { name?: string };
-      if (err.name === 'ConditionalCheckFailedException') {
-        throw new Error(`Training with id ${id} not found`);
-      }
-      console.error('Error updating training:', error);
-      throw new Error(`Failed to update training: ${err.message}`);
-    }
-  }
-
-  /**
-   * Delete training by ID
-   * @param id Training ID
-   * @throws Error if deletion fails
-   */
-  async delete(id: string): Promise<void> {
-    try {
-      await this.dynamoClient.send(
-        new DeleteCommand({
-          TableName: this.tableName,
-          Key: { id },
-        }),
-      );
-    } catch (error) {
-      const err = error as Error;
-      console.error('Error deleting training:', error);
-      throw new Error(`Failed to delete training: ${err.message}`);
     }
   }
 

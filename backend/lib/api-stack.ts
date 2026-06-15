@@ -27,6 +27,8 @@ interface APIStackProps extends cdk.StackProps {
   vocabularyListsTable: Table;
   trainingsTable: Table;
   usageCountersTable: Table;
+  wordMasteryTable: Table;
+  achievementsTable: Table;
   assetsBucket: Bucket;
 }
 
@@ -44,6 +46,8 @@ export class APIStack extends cdk.Stack {
       vocabularyListsTable,
       trainingsTable,
       usageCountersTable,
+      wordMasteryTable,
+      achievementsTable,
       assetsBucket,
     } = props;
 
@@ -586,6 +590,7 @@ export class APIStack extends cdk.Stack {
         VOCABULARY_LISTS_TABLE_NAME: vocabularyListsTable.tableName,
         USERS_TABLE_NAME: usersTable.tableName,
         USER_POOL_ID: userPool.userPoolId,
+        WORD_MASTERY_TABLE_NAME: wordMasteryTable.tableName,
       },
     };
 
@@ -658,6 +663,7 @@ export class APIStack extends cdk.Stack {
 
     trainingsTable.grantReadWriteData(startTrainingFunction);
     vocabularyListsTable.grantReadData(startTrainingFunction);
+    wordMasteryTable.grantReadWriteData(startTrainingFunction);
 
     // Grant Bedrock access for AI training mode
     startTrainingFunction.addToRolePolicy(
@@ -680,9 +686,15 @@ export class APIStack extends cdk.Stack {
       ...trainingLambdaProps,
       entry: path.join(__dirname, '../src/gql-lambda-functions/Mutation.submitAnswer.ts'),
       handler: 'handler',
+      environment: {
+        ...trainingLambdaProps.environment,
+        ACHIEVEMENTS_TABLE_NAME: achievementsTable.tableName,
+      },
     });
 
     trainingsTable.grantReadWriteData(submitAnswerFunction);
+    wordMasteryTable.grantReadWriteData(submitAnswerFunction);
+    achievementsTable.grantReadWriteData(submitAnswerFunction);
 
     const submitAnswerDataSource = api.addLambdaDataSource('SubmitAnswerDataSource', submitAnswerFunction);
 
@@ -705,6 +717,43 @@ export class APIStack extends cdk.Stack {
     abortTrainingDataSource.createResolver('AbortTrainingResolver', {
       typeName: 'Mutation',
       fieldName: 'abortTraining',
+    });
+
+    // Create getWordMastery Lambda function
+    const getWordMasteryFunction = new NodejsFunction(this, 'GetWordMasteryFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getWordMastery.ts'),
+      handler: 'handler',
+    });
+
+    wordMasteryTable.grantReadData(getWordMasteryFunction);
+
+    const getWordMasteryDataSource = api.addLambdaDataSource('GetWordMasteryDataSource', getWordMasteryFunction);
+
+    getWordMasteryDataSource.createResolver('GetWordMasteryResolver', {
+      typeName: 'Query',
+      fieldName: 'getWordMastery',
+    });
+
+    // Create getAchievements Lambda function
+    const getAchievementsFunction = new NodejsFunction(this, 'GetAchievementsFunction', {
+      ...trainingLambdaProps,
+      entry: path.join(__dirname, '../src/gql-lambda-functions/Query.getAchievements.ts'),
+      handler: 'handler',
+      environment: {
+        ...trainingLambdaProps.environment,
+        ACHIEVEMENTS_TABLE_NAME: achievementsTable.tableName,
+      },
+    });
+
+    achievementsTable.grantReadData(getAchievementsFunction);
+    wordMasteryTable.grantReadData(getAchievementsFunction);
+
+    const getAchievementsDataSource = api.addLambdaDataSource('GetAchievementsDataSource', getAchievementsFunction);
+
+    getAchievementsDataSource.createResolver('GetAchievementsResolver', {
+      typeName: 'Query',
+      fieldName: 'getAchievements',
     });
 
     // Create getTraining Lambda function

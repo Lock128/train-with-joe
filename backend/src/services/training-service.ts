@@ -1,6 +1,8 @@
 import * as crypto from 'crypto';
 import { TrainingRepository } from '../repositories/training-repository';
 import { VocabularyListRepository } from '../repositories/vocabulary-list-repository';
+import { SpacedRepetitionService } from './spaced-repetition-service';
+import { AchievementService } from './achievement-service';
 import type {
   Training,
   TrainingMode,
@@ -10,8 +12,49 @@ import type {
   TrainingResult,
   MultipleChoiceOption,
   SanitizedExecution,
+  VerbConjugationExercise,
+  AIExercise,
 } from '../model/domain/Training';
 import { getAIService } from './ai-service';
+
+interface DayExecutionEntry {
+  executionId: string;
+  trainingId: string;
+  trainingName: string;
+  startedAt: string;
+  completedAt?: string;
+  correctCount: number;
+  incorrectCount: number;
+  durationSeconds?: number;
+}
+
+interface PerWordStat {
+  word: string;
+  translation: string;
+  correctCount: number;
+  totalCount: number;
+  accuracyPercentage: number;
+}
+
+interface MissedWord {
+  word: string;
+  translation: string;
+  incorrectCount: number;
+}
+
+interface AccuracyTrendEntry {
+  executionId: string;
+  startedAt: string;
+  accuracy: number;
+}
+
+interface EnrichedWord {
+  word: string;
+  translation?: string;
+  definition?: string;
+  partOfSpeech?: string;
+  exampleSentence?: string;
+}
 
 /**
  * Service for managing vocabulary trainings
@@ -56,6 +99,248 @@ export class TrainingService {
         ({ expectedForms: _expectedForms, ...ex }) => ex,
       ),
     };
+  }
+
+  /**
+   * Shuffle an array in-place using Fisher-Yates algorithm and return a slice.
+   */
+  private shuffleAndSlice<T>(items: T[], count: number): T[] {
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items.slice(0, count);
+  }
+
+  /**
+   * Enrich selected words with full vocabulary list details (definition, partOfSpeech, exampleSentence)
+   * and resolve source/target languages from vocabulary lists.
+   */
+  private async enrichWordsForAI(
+    selectedWords: TrainingWord[],
+    vocabularyListIds: string[],
+    training: { sourceLanguage?: string; targetLanguage?: string },
+  ): Promise<{
+    enrichedWords: EnrichedWord[];
+    sourceLanguage: string;
+    targetLanguage: string;
+  }> {
+    const vocabRepo = VocabularyListRepository.getInstance();
+    let sourceLanguage = training.sourceLanguage || 'English';
+    let targetLanguage = training.targetLanguage || 'English';
+    const enrichedWords: EnrichedWord[] = [];
+
+    for (const listId of vocabularyListIds) {
+      const list = await vocabRepo.getById(listId);
+      if (!list) continue;
+      if (!training.sourceLanguage && list.sourceLanguage) sourceLanguage = list.sourceLanguage;
+      if (!training.targetLanguage && list.targetLanguage) targetLanguage = list.targetLanguage;
+
+      for (const selectedWord of selectedWords) {
+        if (selectedWord.vocabularyListId === listId) {
+          const fullWord = list.words.find((w) => w.word === selectedWord.word);
+          enrichedWords.push({
+            word: selectedWord.word,
+            translation: selectedWord.translation,
+            definition: fullWord?.definition,
+            partOfSpeech: fullWord?.partOfSpeech,
+            exampleSentence: fullWord?.exampleSentence,
+          });
+        }
+      }
+    }
+
+    return { enrichedWords, sourceLanguage, targetLanguage };
+  }
+
+  /**
+   * Generate AI exercises and create a training execution for them.
+   */
+  private async createAITrainingExecution(
+    trainingId: string,
+    userId: string,
+    words: TrainingWord[],
+    vocabularyListIds: string[],
+    training: { sourceLanguage?: string; targetLanguage?: string; direction: TrainingDirection },
+  ): Promise<{ success: boolean; execution?: SanitizedExecution; error?: string }> {
+    const { enrichedWords, sourceLanguage, targetLanguage } = await this.enrichWordsForAI(
+      words,
+      vocabularyListIds,
+      training,
+    );
+
+    const aiService = getAIService();
+    const aiExercises: AIExercise[] = await aiService.generateExercises(
+      enrichedWords,
+      sourceLanguage,
+      targetLanguage,
+      userId,
+    );
+
+    const trainingRepo = TrainingRepository.getInstance();
+    const execution: TrainingExecution = {
+      id: crypto.randomUUID(),
+      trainingId,
+      userId,
+      startedAt: new Date().toISOString(),
+      results: [],
+      words,
+      aiExercises,
+      correctCount: 0,
+      incorrectCount: 0,
+    };
+
+    await trainingRepo.createExecution(execution);
+    return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+  }
+
+  /**
+   * Generate verb conjugation exercises and create a training execution.
+   */
+  private async createVerbConjugationExecution(
+    trainingId: string,
+    userId: string,
+    wordCount: number,
+    direction: TrainingDirection,
+  ): Promise<{ success: boolean; execution?: SanitizedExecution; error?: string }> {
+    const aiService = getAIService();
+    const verbExercises: VerbConjugationExercise[] = await aiService.generateVerbConjugationExercises(
+      wordCount,
+      userId,
+    );
+
+    const trainingRepo = TrainingRepository.getInstance();
+    const execution: TrainingExecution = {
+      id: crypto.randomUUID(),
+      trainingId,
+      userId,
+      startedAt: new Date().toISOString(),
+      results: [],
+      words: [],
+      verbConjugationExercises: verbExercises,
+      correctCount: 0,
+      incorrectCount: 0,
+    };
+
+    await trainingRepo.createExecution(execution);
+    return { success: true, execution: this.sanitizeExecution(execution, direction) };
+  }
+
+  /**
+   * Record a training result, update execution counts, check completion, persist, and return.
+   */
+  private async recordResultAndUpdate(
+    executionId: string,
+    execution: TrainingExecution,
+    result: TrainingResult,
+    totalExercises: number,
+    direction: TrainingDirection,
+  ): Promise<{
+    success: boolean;
+    result?: TrainingResult;
+    completed?: boolean;
+    execution?: SanitizedExecution;
+  }> {
+    execution.results.push(result);
+    if (result.correct) {
+      execution.correctCount++;
+    } else {
+      execution.incorrectCount++;
+    }
+
+    if (execution.results.length === totalExercises) {
+      execution.completedAt = new Date().toISOString();
+    }
+
+    const trainingRepo = TrainingRepository.getInstance();
+    await trainingRepo.updateExecution(executionId, {
+      results: execution.results,
+      correctCount: execution.correctCount,
+      incorrectCount: execution.incorrectCount,
+      completedAt: execution.completedAt,
+    });
+
+    // When execution is completed, record achievement progress
+    if (execution.completedAt) {
+      try {
+        const durationSeconds = this.getExecutionDurationSeconds(execution);
+        const achievementService = AchievementService.getInstance();
+        await achievementService.recordTrainingCompleted(execution.userId, {
+          correctCount: execution.correctCount,
+          incorrectCount: execution.incorrectCount,
+          durationSeconds,
+          trainingId: execution.trainingId,
+        });
+      } catch (achievementError) {
+        // Achievement tracking failure should not break training flow
+        console.error('Error recording achievement progress:', achievementError);
+      }
+    }
+
+    return {
+      success: true,
+      result,
+      completed: !!execution.completedAt,
+      execution: this.sanitizeExecution(execution, direction),
+    };
+  }
+
+  /**
+   * Calculate duration in seconds for a completed/aborted execution.
+   */
+  private getExecutionDurationSeconds(execution: {
+    startedAt: string;
+    completedAt?: string;
+    abortedAt?: string;
+  }): number | undefined {
+    const endTime = execution.completedAt || execution.abortedAt;
+    if (!endTime) return undefined;
+    const start = new Date(execution.startedAt).getTime();
+    const end = new Date(endTime).getTime();
+    return (end - start) / 1000;
+  }
+
+  /**
+   * Collect words from vocabulary lists, applying unit filtering and deduplication.
+   */
+  private async collectWordsFromLists(
+    vocabularyListIds: string[],
+    units?: string[],
+    deduplicate: boolean = false,
+  ): Promise<TrainingWord[]> {
+    const vocabRepo = VocabularyListRepository.getInstance();
+    const collectedWords: TrainingWord[] = [];
+
+    for (const listId of vocabularyListIds) {
+      const list = await vocabRepo.getById(listId);
+      if (!list) continue;
+
+      let validWords = list.words.filter((w) => w.translation && w.translation.length > 0);
+
+      // Filter by units if specified
+      if (units && units.length > 0) {
+        validWords = validWords.filter((w) => w.unit && units.includes(w.unit));
+      }
+
+      for (const word of validWords) {
+        if (deduplicate) {
+          const isDuplicate = collectedWords.some((cw) => cw.word === word.word && cw.translation === word.translation);
+          if (isDuplicate) continue;
+        }
+
+        const trainingWord: TrainingWord = {
+          word: word.word,
+          translation: word.translation!,
+          vocabularyListId: list.id,
+        };
+        if (word.unit) {
+          trainingWord.unit = word.unit;
+        }
+        collectedWords.push(trainingWord);
+      }
+    }
+
+    return collectedWords;
   }
 
   /**
@@ -104,23 +389,19 @@ export class TrainingService {
 
         if (sourceLanguage) training.sourceLanguage = sourceLanguage;
         if (targetLanguage) training.targetLanguage = targetLanguage;
-
         if (multipleChoiceOptionCount && [3, 4, 5].includes(multipleChoiceOptionCount)) {
           training.multipleChoiceOptionCount = multipleChoiceOptionCount;
         }
-
         if (units && units.length > 0) {
           training.units = units;
         }
 
         const trainingRepo = TrainingRepository.getInstance();
         await trainingRepo.create(training);
-
         return { success: true, training };
       }
 
-      // Static training path: existing behavior unchanged
-      // VERB_CONJUGATION mode doesn't require vocabulary list words — exercises are AI-generated
+      // VERB_CONJUGATION mode doesn't require vocabulary list words - exercises are AI-generated
       if (mode === 'VERB_CONJUGATION') {
         const effectiveWordCount = wordCount ? Math.min(Math.max(1, wordCount), 30) : 10;
         const now = new Date().toISOString();
@@ -143,36 +424,10 @@ export class TrainingService {
 
         const trainingRepo = TrainingRepository.getInstance();
         await trainingRepo.create(training);
-
         return { success: true, training };
       }
 
-      const vocabRepo = VocabularyListRepository.getInstance();
-      let words: TrainingWord[] = [];
-
-      for (const listId of vocabularyListIds) {
-        const list = await vocabRepo.getById(listId);
-        if (!list) continue;
-
-        let validWords = list.words.filter((w) => w.translation);
-
-        // Filter by units if specified
-        if (units && units.length > 0) {
-          validWords = validWords.filter((w) => w.unit && units.includes(w.unit));
-        }
-
-        for (const word of validWords) {
-          const trainingWord: TrainingWord = {
-            word: word.word,
-            translation: word.translation!,
-            vocabularyListId: list.id,
-          };
-          if (word.unit) {
-            trainingWord.unit = word.unit;
-          }
-          words.push(trainingWord);
-        }
-      }
+      let words = await this.collectWordsFromLists(vocabularyListIds, units);
 
       if (words.length === 0) {
         return { success: false, error: 'No words available from the selected vocabulary lists' };
@@ -182,13 +437,8 @@ export class TrainingService {
       const maxWords = 100;
       const requestedCount = wordCount ? Math.min(Math.max(1, wordCount), maxWords) : Math.min(words.length, maxWords);
 
-      // Randomly select words if we have more than requested
       if (words.length > requestedCount) {
-        for (let i = words.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [words[i], words[j]] = [words[j], words[i]];
-        }
-        words = words.slice(0, requestedCount);
+        words = this.shuffleAndSlice(words, requestedCount);
       }
 
       const now = new Date().toISOString();
@@ -206,14 +456,12 @@ export class TrainingService {
 
       if (sourceLanguage) training.sourceLanguage = sourceLanguage;
       if (targetLanguage) training.targetLanguage = targetLanguage;
-
       if (multipleChoiceOptionCount && [3, 4, 5].includes(multipleChoiceOptionCount)) {
         training.multipleChoiceOptionCount = multipleChoiceOptionCount;
       }
 
       const trainingRepo = TrainingRepository.getInstance();
       await trainingRepo.create(training);
-
       return { success: true, training };
     } catch (error) {
       console.error('Error creating training:', error);
@@ -299,6 +547,50 @@ export class TrainingService {
   }
 
   /**
+   * Create a standard (TEXT_INPUT or MULTIPLE_CHOICE) training execution.
+   */
+  private async createStandardExecution(
+    trainingId: string,
+    userId: string,
+    words: TrainingWord[],
+    training: {
+      mode: TrainingMode;
+      direction: TrainingDirection;
+      multipleChoiceOptionCount?: number;
+      isRandomized?: boolean;
+    },
+  ): Promise<{ success: boolean; execution?: SanitizedExecution; error?: string }> {
+    if (training.mode === 'MULTIPLE_CHOICE' && words.length < 3) {
+      return { success: false, error: 'Multiple-choice requires at least 3 words' };
+    }
+
+    let multipleChoiceOptions: MultipleChoiceOption[] | undefined;
+    if (training.mode === 'MULTIPLE_CHOICE') {
+      multipleChoiceOptions = this.generateMultipleChoiceOptions(
+        words,
+        training.direction,
+        training.multipleChoiceOptionCount ?? 5,
+      );
+    }
+
+    const trainingRepo = TrainingRepository.getInstance();
+    const execution: TrainingExecution = {
+      id: crypto.randomUUID(),
+      trainingId,
+      userId,
+      startedAt: new Date().toISOString(),
+      results: [],
+      multipleChoiceOptions,
+      words: training.isRandomized ? words : undefined,
+      correctCount: 0,
+      incorrectCount: 0,
+    };
+
+    await trainingRepo.createExecution(execution);
+    return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+  }
+
+  /**
    * Start a new training execution
    */
   async startTraining(
@@ -321,26 +613,12 @@ export class TrainingService {
         // VERB_CONJUGATION mode: generate exercises directly via AI, no vocabulary words needed
         if (training.mode === 'VERB_CONJUGATION') {
           try {
-            const aiService = getAIService();
-            const verbExercises = await aiService.generateVerbConjugationExercises(
-              training.randomizedWordCount ?? 10,
-              userId,
-            );
-
-            const execution: TrainingExecution = {
-              id: crypto.randomUUID(),
+            return await this.createVerbConjugationExecution(
               trainingId,
               userId,
-              startedAt: new Date().toISOString(),
-              results: [],
-              words: [],
-              verbConjugationExercises: verbExercises,
-              correctCount: 0,
-              incorrectCount: 0,
-            };
-
-            await trainingRepo.createExecution(execution);
-            return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+              training.randomizedWordCount ?? 10,
+              training.direction,
+            );
           } catch (aiError) {
             const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
             return { success: false, error: 'Failed to generate verb conjugation exercises: ' + errorMessage };
@@ -348,203 +626,88 @@ export class TrainingService {
         }
 
         // Randomized path: fetch words dynamically from vocabulary lists
-        const vocabRepo = VocabularyListRepository.getInstance();
-        const collectedWords: TrainingWord[] = [];
-
-        for (const listId of training.vocabularyListIds) {
-          const list = await vocabRepo.getById(listId);
-          if (!list) continue; // skip deleted lists
-
-          let validWords = list.words.filter((w) => w.translation && w.translation.length > 0);
-
-          // Filter by units if present
-          if (training.units && training.units.length > 0) {
-            validWords = validWords.filter((w) => w.unit && training.units!.includes(w.unit));
-          }
-
-          for (const word of validWords) {
-            // Deduplicate: skip if we already collected a word with the same word+translation pair
-            const isDuplicate = collectedWords.some(
-              (cw) => cw.word === word.word && cw.translation === word.translation,
-            );
-            if (isDuplicate) continue;
-
-            const trainingWord: TrainingWord = {
-              word: word.word,
-              translation: word.translation!,
-              vocabularyListId: list.id,
-            };
-            if (word.unit) {
-              trainingWord.unit = word.unit;
-            }
-            collectedWords.push(trainingWord);
-          }
-        }
+        const collectedWords = await this.collectWordsFromLists(training.vocabularyListIds, training.units, true);
 
         if (collectedWords.length === 0) {
           return { success: false, error: 'No words available from the selected vocabulary lists' };
         }
 
-        // Fisher-Yates shuffle
-        for (let i = collectedWords.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [collectedWords[i], collectedWords[j]] = [collectedWords[j], collectedWords[i]];
-        }
+        // For TEXT_INPUT and MULTIPLE_CHOICE, use SRS to prioritize words due for review
+        let selectedWords: TrainingWord[];
+        if (training.mode === 'TEXT_INPUT' || training.mode === 'MULTIPLE_CHOICE') {
+          const targetCount = training.randomizedWordCount ?? 10;
+          let srsSelectedWords: TrainingWord[] = [];
 
-        // Select up to randomizedWordCount words
-        const selectedWords = collectedWords.slice(0, training.randomizedWordCount ?? 10);
+          try {
+            const srsService = SpacedRepetitionService.getInstance();
+            const srsWords = await srsService.getWordsForReview(userId, training.vocabularyListIds, targetCount);
+
+            // Map SRS words to training words from the collected set
+            for (const srsWord of srsWords) {
+              const match = collectedWords.find(
+                (w) => w.word === srsWord.word && w.vocabularyListId === srsWord.vocabularyListId,
+              );
+              if (match) {
+                srsSelectedWords.push(match);
+              }
+            }
+          } catch (srsError) {
+            // SRS failure should not block training - fall back to random selection
+            console.error('Error fetching SRS words, falling back to random selection:', srsError);
+            srsSelectedWords = [];
+          }
+
+          if (srsSelectedWords.length >= targetCount) {
+            selectedWords = srsSelectedWords.slice(0, targetCount);
+          } else {
+            // Fill remaining slots with random words not already selected
+            const remaining = collectedWords.filter(
+              (w) => !srsSelectedWords.some((s) => s.word === w.word && s.vocabularyListId === w.vocabularyListId),
+            );
+            const fillerWords = this.shuffleAndSlice(remaining, targetCount - srsSelectedWords.length);
+            selectedWords = [...srsSelectedWords, ...fillerWords];
+          }
+        } else {
+          // Select up to randomizedWordCount words using Fisher-Yates shuffle
+          selectedWords = this.shuffleAndSlice(collectedWords, training.randomizedWordCount ?? 10);
+        }
 
         if (training.mode === 'AI_TRAINING') {
           if (selectedWords.length < 1) {
             return { success: false, error: 'No words available from the selected vocabulary lists' };
           }
 
-          // Fetch vocabulary lists for full word details and language info
-          const vocabRepoAI = VocabularyListRepository.getInstance();
-          let sourceLanguage = training.sourceLanguage || 'English';
-          let targetLanguage = training.targetLanguage || 'English';
-          const enrichedWords: {
-            word: string;
-            translation?: string;
-            definition?: string;
-            partOfSpeech?: string;
-            exampleSentence?: string;
-          }[] = [];
-
-          for (const listId of training.vocabularyListIds) {
-            const list = await vocabRepoAI.getById(listId);
-            if (!list) continue;
-            if (!training.sourceLanguage && list.sourceLanguage) sourceLanguage = list.sourceLanguage;
-            if (!training.targetLanguage && list.targetLanguage) targetLanguage = list.targetLanguage;
-
-            for (const selectedWord of selectedWords) {
-              if (selectedWord.vocabularyListId === listId) {
-                const fullWord = list.words.find((w) => w.word === selectedWord.word);
-                enrichedWords.push({
-                  word: selectedWord.word,
-                  translation: selectedWord.translation,
-                  definition: fullWord?.definition,
-                  partOfSpeech: fullWord?.partOfSpeech,
-                  exampleSentence: fullWord?.exampleSentence,
-                });
-              }
-            }
-          }
-
           try {
-            const aiService = getAIService();
-            const aiExercises = await aiService.generateExercises(
-              enrichedWords,
-              sourceLanguage,
-              targetLanguage,
-              userId,
-            );
-
-            const execution: TrainingExecution = {
-              id: crypto.randomUUID(),
+            return await this.createAITrainingExecution(
               trainingId,
               userId,
-              startedAt: new Date().toISOString(),
-              results: [],
-              words: selectedWords,
-              aiExercises,
-              correctCount: 0,
-              incorrectCount: 0,
-            };
-
-            await trainingRepo.createExecution(execution);
-            return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+              selectedWords,
+              training.vocabularyListIds,
+              training,
+            );
           } catch (aiError) {
             const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
             return { success: false, error: 'Failed to generate AI exercises: ' + errorMessage };
           }
         }
 
-        if (training.mode === 'MULTIPLE_CHOICE' && selectedWords.length < 3) {
-          return { success: false, error: 'Multiple-choice requires at least 3 words' };
-        }
-
-        let multipleChoiceOptions: MultipleChoiceOption[] | undefined;
-        if (training.mode === 'MULTIPLE_CHOICE') {
-          multipleChoiceOptions = this.generateMultipleChoiceOptions(
-            selectedWords,
-            training.direction,
-            training.multipleChoiceOptionCount ?? 5,
-          );
-        }
-
-        const execution: TrainingExecution = {
-          id: crypto.randomUUID(),
-          trainingId,
-          userId,
-          startedAt: new Date().toISOString(),
-          results: [],
-          multipleChoiceOptions,
-          words: selectedWords,
-          correctCount: 0,
-          incorrectCount: 0,
-        };
-
-        await trainingRepo.createExecution(execution);
-
-        return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+        return this.createStandardExecution(trainingId, userId, selectedWords, training);
       }
 
-      // Static path: existing behavior unchanged
+      // Static path: AI_TRAINING mode
       if (training.mode === 'AI_TRAINING') {
         if (training.words.length < 1) {
           return { success: false, error: 'No words available from the selected vocabulary lists' };
         }
 
-        // Fetch vocabulary lists for full word details and language info
-        const vocabRepoAI = VocabularyListRepository.getInstance();
-        let sourceLanguage = training.sourceLanguage || 'English';
-        let targetLanguage = training.targetLanguage || 'English';
-        const enrichedWords: {
-          word: string;
-          translation?: string;
-          definition?: string;
-          partOfSpeech?: string;
-          exampleSentence?: string;
-        }[] = [];
-
-        for (const listId of training.vocabularyListIds) {
-          const list = await vocabRepoAI.getById(listId);
-          if (!list) continue;
-          if (!training.sourceLanguage && list.sourceLanguage) sourceLanguage = list.sourceLanguage;
-          if (!training.targetLanguage && list.targetLanguage) targetLanguage = list.targetLanguage;
-
-          for (const trainingWord of training.words) {
-            if (trainingWord.vocabularyListId === listId) {
-              const fullWord = list.words.find((w) => w.word === trainingWord.word);
-              enrichedWords.push({
-                word: trainingWord.word,
-                translation: trainingWord.translation,
-                definition: fullWord?.definition,
-                partOfSpeech: fullWord?.partOfSpeech,
-                exampleSentence: fullWord?.exampleSentence,
-              });
-            }
-          }
-        }
-
         try {
-          const aiService = getAIService();
-          const aiExercises = await aiService.generateExercises(enrichedWords, sourceLanguage, targetLanguage, userId);
-
-          const execution: TrainingExecution = {
-            id: crypto.randomUUID(),
+          return await this.createAITrainingExecution(
             trainingId,
             userId,
-            startedAt: new Date().toISOString(),
-            results: [],
-            aiExercises,
-            correctCount: 0,
-            incorrectCount: 0,
-          };
-
-          await trainingRepo.createExecution(execution);
-          return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+            training.words,
+            training.vocabularyListIds,
+            training,
+          );
         } catch (aiError) {
           const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
           return { success: false, error: 'Failed to generate AI exercises: ' + errorMessage };
@@ -554,56 +717,15 @@ export class TrainingService {
       // Static path: VERB_CONJUGATION mode
       if (training.mode === 'VERB_CONJUGATION') {
         try {
-          const aiService = getAIService();
           const wordCount = training.words.length > 0 ? training.words.length : 10;
-          const verbExercises = await aiService.generateVerbConjugationExercises(wordCount, userId);
-
-          const execution: TrainingExecution = {
-            id: crypto.randomUUID(),
-            trainingId,
-            userId,
-            startedAt: new Date().toISOString(),
-            results: [],
-            verbConjugationExercises: verbExercises,
-            correctCount: 0,
-            incorrectCount: 0,
-          };
-
-          await trainingRepo.createExecution(execution);
-          return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+          return await this.createVerbConjugationExecution(trainingId, userId, wordCount, training.direction);
         } catch (aiError) {
           const errorMessage = aiError instanceof Error ? aiError.message : 'Unknown error';
           return { success: false, error: 'Failed to generate verb conjugation exercises: ' + errorMessage };
         }
       }
 
-      if (training.mode === 'MULTIPLE_CHOICE' && training.words.length < 3) {
-        return { success: false, error: 'Multiple-choice requires at least 3 words' };
-      }
-
-      let multipleChoiceOptions: MultipleChoiceOption[] | undefined;
-      if (training.mode === 'MULTIPLE_CHOICE') {
-        multipleChoiceOptions = this.generateMultipleChoiceOptions(
-          training.words,
-          training.direction,
-          training.multipleChoiceOptionCount ?? 5,
-        );
-      }
-
-      const execution: TrainingExecution = {
-        id: crypto.randomUUID(),
-        trainingId,
-        userId,
-        startedAt: new Date().toISOString(),
-        results: [],
-        multipleChoiceOptions,
-        correctCount: 0,
-        incorrectCount: 0,
-      };
-
-      await trainingRepo.createExecution(execution);
-
-      return { success: true, execution: this.sanitizeExecution(execution, training.direction) };
+      return this.createStandardExecution(trainingId, userId, training.words, training);
     } catch (error) {
       console.error('Error starting training:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Failed to start training' };
@@ -666,39 +788,30 @@ export class TrainingService {
         const selectedIndex = parseInt(answer, 10);
         const correct = selectedIndex === exercise.correctOptionIndex;
 
-        const result: TrainingResult = {
-          wordIndex,
-          word: exercise.prompt,
-          expectedAnswer: exercise.options[exercise.correctOptionIndex],
-          userAnswer: exercise.options[selectedIndex] ?? answer,
-          correct,
-        };
-
-        execution.results.push(result);
-        if (correct) {
-          execution.correctCount++;
-        } else {
-          execution.incorrectCount++;
+        // Record SRS result for AI_TRAINING using the exercise's sourceWord
+        try {
+          const matchingWord = execution.words?.find((w) => w.word === exercise.sourceWord);
+          if (matchingWord) {
+            const srsService = SpacedRepetitionService.getInstance();
+            await srsService.recordResult(userId, matchingWord.word, matchingWord.vocabularyListId, correct);
+          }
+        } catch (srsError) {
+          console.error('Error recording SRS result for AI_TRAINING:', srsError);
         }
 
-        // Completion check: all AI exercises answered
-        if (execution.results.length === aiExercises.length) {
-          execution.completedAt = new Date().toISOString();
-        }
-
-        await trainingRepo.updateExecution(executionId, {
-          results: execution.results,
-          correctCount: execution.correctCount,
-          incorrectCount: execution.incorrectCount,
-          completedAt: execution.completedAt,
-        });
-
-        return {
-          success: true,
-          result,
-          completed: !!execution.completedAt,
-          execution: this.sanitizeExecution(execution, training.direction),
-        };
+        return this.recordResultAndUpdate(
+          executionId,
+          execution,
+          {
+            wordIndex,
+            word: exercise.prompt,
+            expectedAnswer: exercise.options[exercise.correctOptionIndex],
+            userAnswer: exercise.options[selectedIndex] ?? answer,
+            correct,
+          },
+          aiExercises.length,
+          training.direction,
+        );
       }
 
       // VERB_CONJUGATION answer submission path
@@ -720,39 +833,30 @@ export class TrainingService {
           userForms.length === expectedNormalized.length &&
           userForms.every((form, i) => form === expectedNormalized[i]);
 
-        const result: TrainingResult = {
-          wordIndex,
-          word: exercise.prompt,
-          expectedAnswer: expectedForms.join(', '),
-          userAnswer: answer,
-          correct,
-        };
-
-        execution.results.push(result);
-        if (correct) {
-          execution.correctCount++;
-        } else {
-          execution.incorrectCount++;
+        // Record SRS result for VERB_CONJUGATION using the exercise's infinitive
+        try {
+          const vocabListId = training.vocabularyListIds?.[0];
+          if (vocabListId) {
+            const srsService = SpacedRepetitionService.getInstance();
+            await srsService.recordResult(userId, exercise.infinitive, vocabListId, correct);
+          }
+        } catch (srsError) {
+          console.error('Error recording SRS result for VERB_CONJUGATION:', srsError);
         }
 
-        // Completion check: all verb exercises answered
-        if (execution.results.length === verbExercises.length) {
-          execution.completedAt = new Date().toISOString();
-        }
-
-        await trainingRepo.updateExecution(executionId, {
-          results: execution.results,
-          correctCount: execution.correctCount,
-          incorrectCount: execution.incorrectCount,
-          completedAt: execution.completedAt,
-        });
-
-        return {
-          success: true,
-          result,
-          completed: !!execution.completedAt,
-          execution: this.sanitizeExecution(execution, training.direction),
-        };
+        return this.recordResultAndUpdate(
+          executionId,
+          execution,
+          {
+            wordIndex,
+            word: exercise.prompt,
+            expectedAnswer: expectedForms.join(', '),
+            userAnswer: answer,
+            correct,
+          },
+          verbExercises.length,
+          training.direction,
+        );
       }
 
       // Dual-path word resolution: randomized uses execution.words, static uses training.words
@@ -767,39 +871,22 @@ export class TrainingService {
       const promptWord = reversed ? word.translation : word.word;
       const correct = answer.trim().toLowerCase() === expectedAnswer.trim().toLowerCase();
 
-      const result: TrainingResult = {
-        wordIndex,
-        word: promptWord,
-        expectedAnswer,
-        userAnswer: answer,
-        correct,
-      };
-
-      execution.results.push(result);
-      if (correct) {
-        execution.correctCount++;
-      } else {
-        execution.incorrectCount++;
+      // Record result into the SRS system
+      try {
+        const srsService = SpacedRepetitionService.getInstance();
+        await srsService.recordResult(userId, word.word, word.vocabularyListId, correct);
+      } catch (srsError) {
+        // SRS recording failure should not block the answer submission
+        console.error('Error recording SRS result:', srsError);
       }
 
-      // Completion check: compare against the appropriate word list length
-      if (execution.results.length === wordList.length) {
-        execution.completedAt = new Date().toISOString();
-      }
-
-      await trainingRepo.updateExecution(executionId, {
-        results: execution.results,
-        correctCount: execution.correctCount,
-        incorrectCount: execution.incorrectCount,
-        completedAt: execution.completedAt,
-      });
-
-      return {
-        success: true,
-        result,
-        completed: !!execution.completedAt,
-        execution: this.sanitizeExecution(execution, training.direction),
-      };
+      return this.recordResultAndUpdate(
+        executionId,
+        execution,
+        { wordIndex, word: promptWord, expectedAnswer, userAnswer: answer, correct },
+        wordList.length,
+        training.direction,
+      );
     } catch (error) {
       console.error('Error submitting answer:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Failed to submit answer' };
@@ -838,7 +925,7 @@ export class TrainingService {
 
       const training = await trainingRepo.getById(execution.trainingId);
       const direction = training?.direction ?? 'WORD_TO_TRANSLATION';
-      return { success: true, execution: updated ? this.sanitizeExecution(updated, direction) : updated };
+      return { success: true, execution: updated ? this.sanitizeExecution(updated, direction) : undefined };
     } catch (error) {
       console.error('Error aborting training:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Failed to abort training' };
@@ -897,23 +984,9 @@ export class TrainingService {
       overallAccuracy: number;
       averageTimeSeconds: number;
       totalExecutions: number;
-      perWordStatistics: {
-        word: string;
-        translation: string;
-        correctCount: number;
-        totalCount: number;
-        accuracyPercentage: number;
-      }[];
-      mostMissedWords: {
-        word: string;
-        translation: string;
-        incorrectCount: number;
-      }[];
-      accuracyTrend: {
-        executionId: string;
-        startedAt: string;
-        accuracy: number;
-      }[];
+      perWordStatistics: PerWordStat[];
+      mostMissedWords: MissedWord[];
+      accuracyTrend: AccuracyTrendEntry[];
     };
     error?: string;
   }> {
@@ -960,11 +1033,7 @@ export class TrainingService {
       const timedExecutions = executions.filter((e) => (e.completedAt || e.abortedAt) && e.startedAt);
       let averageTimeSeconds = 0;
       if (timedExecutions.length > 0) {
-        const totalTime = timedExecutions.reduce((sum, e) => {
-          const start = new Date(e.startedAt).getTime();
-          const end = new Date((e.completedAt || e.abortedAt)!).getTime();
-          return sum + (end - start) / 1000;
-        }, 0);
+        const totalTime = timedExecutions.reduce((sum, e) => sum + (this.getExecutionDurationSeconds(e) ?? 0), 0);
         averageTimeSeconds = totalTime / timedExecutions.length;
       }
 
@@ -1026,16 +1095,7 @@ export class TrainingService {
     success: boolean;
     dayStatistics?: {
       date: string;
-      executions: {
-        executionId: string;
-        trainingId: string;
-        trainingName: string;
-        startedAt: string;
-        completedAt?: string;
-        correctCount: number;
-        incorrectCount: number;
-        durationSeconds?: number;
-      }[];
+      executions: DayExecutionEntry[];
       totalExecutions: number;
       totalCorrect: number;
       totalIncorrect: number;
@@ -1045,17 +1105,7 @@ export class TrainingService {
     try {
       const trainingRepo = TrainingRepository.getInstance();
       const trainings = await trainingRepo.getAllByUserId(userId);
-
-      const dayExecutions: {
-        executionId: string;
-        trainingId: string;
-        trainingName: string;
-        startedAt: string;
-        completedAt?: string;
-        correctCount: number;
-        incorrectCount: number;
-        durationSeconds?: number;
-      }[] = [];
+      const dayExecutions: DayExecutionEntry[] = [];
 
       for (const training of trainings) {
         const executions = await trainingRepo.getExecutionsByTrainingId(training.id);
@@ -1063,13 +1113,6 @@ export class TrainingService {
         for (const execution of executions) {
           const executionDate = execution.startedAt.substring(0, 10);
           if (executionDate === date) {
-            let durationSeconds: number | undefined;
-            if (execution.completedAt || execution.abortedAt) {
-              const start = new Date(execution.startedAt).getTime();
-              const end = new Date((execution.completedAt || execution.abortedAt)!).getTime();
-              durationSeconds = (end - start) / 1000;
-            }
-
             dayExecutions.push({
               executionId: execution.id,
               trainingId: training.id,
@@ -1078,7 +1121,7 @@ export class TrainingService {
               completedAt: execution.completedAt,
               correctCount: execution.correctCount,
               incorrectCount: execution.incorrectCount,
-              durationSeconds,
+              durationSeconds: this.getExecutionDurationSeconds(execution),
             });
           }
         }
@@ -1111,7 +1154,7 @@ export class TrainingService {
   }
 
   /**
-   * Get overview statistics across a date range — per-day training count and total learning time
+   * Get overview statistics across a date range - per-day training count and total learning time
    */
   async getTrainingOverviewStatistics(
     userId: string,
@@ -1146,10 +1189,9 @@ export class TrainingService {
 
           dayMap[executionDate].trainingCount++;
 
-          if (execution.completedAt || execution.abortedAt) {
-            const start = new Date(execution.startedAt).getTime();
-            const end = new Date((execution.completedAt || execution.abortedAt)!).getTime();
-            dayMap[executionDate].totalLearningTimeSeconds += (end - start) / 1000;
+          const duration = this.getExecutionDurationSeconds(execution);
+          if (duration !== undefined) {
+            dayMap[executionDate].totalLearningTimeSeconds += duration;
           }
         }
       }
