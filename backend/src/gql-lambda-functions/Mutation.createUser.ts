@@ -64,7 +64,7 @@ export const handler = async (event: PostConfirmationConfirmSignUpTriggerEvent) 
           Source: SES_FROM_EMAIL,
           Destination: { ToAddresses: [ADMIN_EMAIL] },
           Message: {
-            Subject: { Data: `New User Signup: ${email}` },
+            Subject: { Data: 'New User Signup - Train with Joe' },
             Body: {
               Html: {
                 Data: `
