@@ -23,7 +23,7 @@ jobs:
       profile_cards: ${{ steps.changes.outputs.profile_cards == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: changes
         with:
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -86,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -195,7 +195,7 @@ jobs:
       deployment_tag: ${{ steps.create-tag.outputs.tag }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v6

@@ -44,7 +44,7 @@ jobs:
       deployment_tag: ${{ steps.create-tag.outputs.tag }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.inputs.ref }}
           fetch-depth: 0
@@ -194,7 +194,7 @@ jobs:
       deployment_id: ${{ steps.deploy.outputs.deployment_id }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.validate-production-deployment.outputs.ref }}
 

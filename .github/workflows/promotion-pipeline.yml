@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.validate-inputs.outputs.ref }}
 
@@ -110,7 +110,7 @@ jobs:
       deployment_id: ${{ steps.deploy.outputs.deployment_id }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.validate-inputs.outputs.ref }}
 
@@ -300,7 +300,7 @@ jobs:
       release_url: ${{ steps.create-release.outputs.release_url }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ needs.validate-inputs.outputs.ref }}
           fetch-depth: 0
