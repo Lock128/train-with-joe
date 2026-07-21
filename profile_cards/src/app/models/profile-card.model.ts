@@ -61,16 +61,7 @@ export interface RecentPost {
 
 export interface PlatformLink {
   network:
-    | 'X'
-    | 'LINKEDIN'
-    | 'BLUESKY'
-    | 'THREADS'
-    | 'MASTODON'
-    | 'SLACK'
-    | 'YOUTUBE'
-    | 'TIKTOK'
-    | 'FACEBOOK'
-    | 'INSTAGRAM';
+    'X' | 'LINKEDIN' | 'BLUESKY' | 'THREADS' | 'MASTODON' | 'SLACK' | 'YOUTUBE' | 'TIKTOK' | 'FACEBOOK' | 'INSTAGRAM';
   url: string;
   handle: string;
 }

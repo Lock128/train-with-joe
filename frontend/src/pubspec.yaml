@@ -10,40 +10,40 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   
   # AWS Amplify integration
-  amplify_flutter: ^2.6.2
-  amplify_auth_cognito: ^2.6.2
-  amplify_api: ^2.6.2
+  amplify_flutter: ^2.11.0
+  amplify_auth_cognito: ^2.11.0
+  amplify_api: ^2.11.0
   
   # State management and routing
   provider: ^6.1.5
-  go_router: ^17.0.0
+  go_router: ^17.3.0
   
   # Payment integration
-  in_app_purchase: ^3.1.13
+  in_app_purchase: ^3.3.0
   in_app_purchase_storekit: ">=0.3.6+7 <0.5.0"
-  flutter_stripe: ">=11.2.0 <14.0.0"
+  flutter_stripe: ^13.0.0
   
   # Image picking
-  image_picker: ^1.1.2
+  image_picker: ^1.2.2
 
   # Sharing / export
   share_plus: ">=10.1.4 <14.0.0"
 
   # Audio feedback
-  audioplayers: ^6.1.0
-  path_provider: ^2.1.5
+  audioplayers: ^6.8.1
+  path_provider: ^2.1.6
 
   # Utilities
-  intl: ^0.20.2
-  shared_preferences: ^2.5.3
-  http: ^1.4.0
-  uuid: ^4.5.1
-  url_launcher: ^6.3.1
-  universal_io: ^2.2.2
-  connectivity_plus: ^7.0.0
+  intl: ^0.20.3
+  shared_preferences: ^2.5.5
+  http: ^1.6.0
+  uuid: ^4.5.3
+  url_launcher: ^6.3.2
+  universal_io: ^2.3.1
+  connectivity_plus: ^7.2.0
 
 dev_dependencies:
   flutter_test:
@@ -51,10 +51,10 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  mockito: ^5.6.4
-  build_runner: ^2.4.13
-  flutter_launcher_icons: ^0.14.3
-  kiri_check: ^1.2.2
+  mockito: ^5.7.0
+  build_runner: ^2.15.0
+  flutter_launcher_icons: ^0.14.4
+  kiri_check: ^1.3.1
 
 flutter_launcher_icons:
   android: true

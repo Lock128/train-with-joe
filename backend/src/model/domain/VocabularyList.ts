@@ -3,12 +3,7 @@
  */
 
 export type VocabularyListStatus =
-  | 'PENDING'
-  | 'RECOGNIZED'
-  | 'TRANSLATING'
-  | 'COMPLETED'
-  | 'PARTIALLY_COMPLETED'
-  | 'FAILED';
+  'PENDING' | 'RECOGNIZED' | 'TRANSLATING' | 'COMPLETED' | 'PARTIALLY_COMPLETED' | 'FAILED';
 
 export interface VocabularyWord {
   word: string;
