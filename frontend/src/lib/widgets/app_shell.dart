@@ -148,7 +148,8 @@ class AppShell extends StatelessWidget {
                 ),
               ),
               ...overflow.map((dest) {
-                final isActive = _allDestinations(context).indexOf(dest) == currentIdx;
+                final destIndex = _allDestinations(context).indexWhere((d) => d.path == dest.path);
+                final isActive = destIndex == currentIdx;
                 return ListTile(
                   leading: Container(
                     width: 40,
@@ -174,7 +175,11 @@ class AppShell extends StatelessWidget {
                   ),
                   onTap: () {
                     Navigator.of(sheetContext).pop();
-                    _onDestinationSelected(context, _allDestinations(context).indexOf(dest));
+                    final all = _allDestinations(context);
+                    final index = all.indexWhere((d) => d.path == dest.path);
+                    if (index >= 0) {
+                      _onDestinationSelected(context, index);
+                    }
                   },
                 );
               }),

@@ -5,6 +5,7 @@ import '../domain/models/training_statistics.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 import '../providers/user_provider.dart';
+import 'admin_dashboard_tabs.dart';
 
 /// Admin screen with user list, statistics, and data migration tools.
 class AdminScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
   }
 
   @override
@@ -48,29 +49,32 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         title: Text(l10n.admin),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
           isScrollable: true,
           tabs: const [
+            Tab(icon: Icon(Icons.dashboard), text: 'Dashboard'),
+            Tab(icon: Icon(Icons.notifications_active), text: 'Engagement'),
             Tab(icon: Icon(Icons.people), text: 'Users'),
             Tab(icon: Icon(Icons.bar_chart), text: 'Statistics'),
             Tab(icon: Icon(Icons.pie_chart), text: 'Tier Stats'),
             Tab(icon: Icon(Icons.swap_horiz), text: 'Migrate Data'),
+            Tab(icon: Icon(Icons.monitor_heart), text: 'Health'),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: [
+          const ActivityDashboardTab(),
+          const EngagementAlertsTab(),
           _UsersTab(onTierOverride: () => _refreshTierStats?.call()),
           const _StatisticsTab(),
           _TierStatsTab(
             tabController: _tabController,
-            tabIndex: 2,
+            tabIndex: 4,
             onRegisterRefresh: (cb) => _refreshTierStats = cb,
           ),
           const _MigrateDataTab(),
+          const AppHealthTab(),
         ],
       ),
     );

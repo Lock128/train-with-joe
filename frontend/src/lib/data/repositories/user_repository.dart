@@ -113,6 +113,7 @@ class UserRepository {
             tier
             tierSource
             subscriptionProvider
+            createdAt
           }
         }
       ''';
