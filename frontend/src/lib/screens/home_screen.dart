@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/user.dart';
 import '../providers/auth_provider.dart';
 import '../providers/user_provider.dart';
 import '../l10n/generated/app_localizations.dart';
@@ -24,18 +25,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Returns a localized tier display string based on user data.
-  String _getTierDisplay(AppLocalizations l10n, Map<String, dynamic>? user) {
-    if (user == null || user['tier'] == null) {
+  String _getTierDisplay(AppLocalizations l10n, AppUser? user) {
+    if (user == null) {
       return l10n.tierLabel(l10n.tierFree);
     }
-    final tier = user['tier'] as String;
-    switch (tier) {
-      case 'BASIC':
+    switch (user.tier) {
+      case UserTier.basic:
         return l10n.tierLabel(l10n.tierBasic);
-      case 'PRO':
+      case UserTier.pro:
         return l10n.tierLabel(l10n.tierPro);
-      case 'FREE':
-      default:
+      case UserTier.free:
         return l10n.tierLabel(l10n.tierFree);
     }
   }
@@ -139,14 +138,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                             ),
                             const SizedBox(height: 8),
-                            if (user != null && user['name'] != null)
+                            if (user != null && user.name != null)
                               Text(
-                                user['name'] as String,
+                                user.name!,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
-                            if (user != null && user['email'] != null)
+                            if (user != null && user.email != null)
                               Text(
-                                user['email'] as String,
+                                user.email!,
                                 style: TextStyle(color: colorScheme.onSurfaceVariant),
                               )
                             else if (currentUser != null)

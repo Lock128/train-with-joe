@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../domain/models/vocabulary_list.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/vocabulary_provider.dart';
 
@@ -32,8 +33,8 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
   final List<Uint8List> _selectedImages = [];
 
   _ScreenPhase _phase = _ScreenPhase.imageSelection;
-  Map<String, dynamic>? _recognizedList;
-  Map<String, dynamic>? _completedList;
+  VocabularyList? _recognizedList;
+  VocabularyList? _completedList;
   String? _errorMessage;
 
   String? _selectedTargetLanguage;
@@ -145,13 +146,13 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
   // --- Phase 2: Translation ---
 
   Future<void> _startTranslation() async {
-    final listId = _recognizedList?['id'] as String?;
+    final listId = _recognizedList?.id;
     if (listId == null || _selectedTargetLanguage == null) return;
 
     final provider = Provider.of<VocabularyProvider>(context, listen: false);
 
     // Check source == target language
-    final sourceLanguage = _recognizedList?['sourceLanguage'] as String?;
+    final sourceLanguage = _recognizedList?.sourceLanguage;
     if (sourceLanguage != null &&
         sourceLanguage.toLowerCase() == _selectedTargetLanguage!.toLowerCase()) {
       final proceed = await _showSourceTargetWarning(sourceLanguage);
@@ -204,7 +205,7 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
   }
 
   /// Poll until the vocabulary list reaches COMPLETED/PARTIALLY_COMPLETED or FAILED.
-  Future<Map<String, dynamic>?> _pollUntilCompleted(
+  Future<VocabularyList?> _pollUntilCompleted(
     VocabularyProvider provider,
     String id,
   ) async {
@@ -219,15 +220,15 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
         final list = await provider.getVocabularyList(id);
         if (list == null) continue;
 
-        final status = list['status'] as String?;
-        if (status == 'COMPLETED' || status == 'PARTIALLY_COMPLETED') {
+        final status = list.status;
+        if (status == VocabularyListStatus.ready) {
           return list;
         }
-        if (status == 'FAILED') {
-          _errorMessage = list['errorMessage'] as String? ?? 'Translation failed';
+        if (status == VocabularyListStatus.failed) {
+          _errorMessage = list.errorMessage ?? 'Translation failed';
           return null;
         }
-        // TRANSLATING — keep polling
+        // PROCESSING — keep polling
       } catch (_) {
         // Transient error, keep trying
       }
@@ -481,9 +482,9 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
   // --- Recognized Phase ---
 
   Widget _buildRecognized() {
-    final words = (_recognizedList?['words'] as List<dynamic>?) ?? [];
-    final sourceLanguage = _recognizedList?['sourceLanguage'] as String? ?? 'Unknown';
-    final title = _recognizedList?['title'] as String? ?? 'Recognized Words';
+    final words = _recognizedList?.words ?? [];
+    final sourceLanguage = _recognizedList?.sourceLanguage ?? 'Unknown';
+    final title = _recognizedList?.title ?? 'Recognized Words';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -538,8 +539,7 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: words.map((w) {
-                    final word = (w as Map<String, dynamic>)['word'] as String? ?? '';
-                    return Chip(label: Text(word));
+                    return Chip(label: Text(w.word));
                   }).toList(),
                 ),
               ],
@@ -627,10 +627,10 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
   // --- Completed Phase ---
 
   Widget _buildCompleted() {
-    final title = _completedList?['title'] as String? ?? 'Vocabulary List';
-    final sourceLang = _completedList?['sourceLanguage'] as String?;
-    final targetLang = _completedList?['targetLanguage'] as String?;
-    final words = (_completedList?['words'] as List<dynamic>?) ?? [];
+    final title = _completedList?.title ?? 'Vocabulary List';
+    final sourceLang = _completedList?.sourceLanguage;
+    final targetLang = _completedList?.targetLanguage;
+    final words = _completedList?.words ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -674,7 +674,7 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
         const SizedBox(height: 16),
 
         // Word cards
-        ...words.map((w) => _buildWordCard(w as Map<String, dynamic>)),
+        ...words.map((w) => _buildWordCard(w)),
 
         // Bottom actions
         const SizedBox(height: 24),
@@ -695,13 +695,13 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
     );
   }
 
-  Widget _buildWordCard(Map<String, dynamic> word) {
-    final wordText = word['word'] as String? ?? '';
-    final translation = word['translation'] as String?;
-    final definition = word['definition'] as String? ?? '';
-    final partOfSpeech = word['partOfSpeech'] as String?;
-    final exampleSentence = word['exampleSentence'] as String?;
-    final difficulty = word['difficulty'] as String?;
+  Widget _buildWordCard(VocabularyWord word) {
+    final wordText = word.word;
+    final translation = word.translation;
+    final definition = word.definition ?? '';
+    final partOfSpeech = word.partOfSpeech;
+    final exampleSentence = word.exampleSentence;
+    final difficulty = word.difficulty;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),

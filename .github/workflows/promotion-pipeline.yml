@@ -95,7 +95,7 @@ jobs:
           path: |
             coverage/
             frontend/coverage/
-          retention-days: 30
+          retention-days: 10
 
   deploy-to-beta:
     name: Deploy to Beta
@@ -275,7 +275,7 @@ jobs:
         with:
           name: deployment-state-beta
           path: deployment-state.json
-          retention-days: 90
+          retention-days: 10
 
       - name: Create deployment summary
         run: |

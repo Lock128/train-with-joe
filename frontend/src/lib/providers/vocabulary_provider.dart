@@ -1,29 +1,35 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:amplify_flutter/amplify_flutter.dart' hide AuthProvider;
 import 'package:share_plus/share_plus.dart';
-import '../services/api_service.dart';
+
+import '../data/repositories/vocabulary_repository.dart';
+import '../domain/models/vocabulary_list.dart';
+import '../domain/result.dart';
 import '../providers/auth_provider.dart';
 
-/// Provider for managing vocabulary list state
+/// Provider for managing vocabulary list state.
+///
+/// Delegates data fetching to [VocabularyRepository] and exposes typed
+/// [VocabularyList] state to the UI layer.
 class VocabularyProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final VocabularyRepository _repository;
 
-  List<Map<String, dynamic>> _vocabularyLists = [];
-  Map<String, dynamic>? _currentList;
+  List<VocabularyList> _vocabularyLists = [];
+  VocabularyList? _currentList;
   bool _isLoading = false;
   bool _isAnalyzing = false;
   String? _error;
   AuthProvider? _authProvider;
 
-  List<Map<String, dynamic>> get vocabularyLists => _vocabularyLists;
-  Map<String, dynamic>? get currentList => _currentList;
+  VocabularyProvider({VocabularyRepository? repository})
+      : _repository = repository ?? VocabularyRepository();
+
+  List<VocabularyList> get vocabularyLists => _vocabularyLists;
+  VocabularyList? get currentList => _currentList;
   bool get isLoading => _isLoading;
   bool get isAnalyzing => _isAnalyzing;
   String? get error => _error;
 
-  /// Update auth provider reference
+  /// Update auth provider reference.
   void updateAuth(AuthProvider authProvider) {
     _authProvider = authProvider;
     if (authProvider.isAuthenticated && _vocabularyLists.isEmpty) {
@@ -31,46 +37,58 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Get presigned upload URLs from the backend
-  Future<List<Map<String, dynamic>>?> _getUploadUrls(int count) async {
-    const query = '''
-      query GetImageUploadUrls(\$input: GetImageUploadUrlsInput!) {
-        getImageUploadUrls(input: \$input) {
-          success
-          uploads { s3Key uploadUrl }
-          error
-        }
+  /// Load all vocabulary lists for the current user.
+  Future<void> loadVocabularyLists() async {
+    if (_authProvider == null || !_authProvider!.isAuthenticated) return;
+
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await _repository.getVocabularyLists();
+      switch (result) {
+        case Success(:final value):
+          _vocabularyLists = value;
+          _error = null;
+        case Failure(:final error):
+          _error = error;
+          _vocabularyLists = [];
       }
-    ''';
-
-    final response = await _apiService.query(
-      query,
-      variables: {'input': {'count': count}},
-    );
-
-    final result = response['getImageUploadUrls'] as Map<String, dynamic>?;
-    if (result?['success'] == true) {
-      return (result!['uploads'] as List<dynamic>)
-          .map((u) => u as Map<String, dynamic>)
-          .toList();
-    }
-    throw Exception(result?['error'] ?? 'Failed to get upload URLs');
-  }
-
-  /// Upload a single image to S3 via presigned URL
-  Future<void> _uploadToS3(String uploadUrl, Uint8List imageBytes) async {
-    final response = await http.put(
-      Uri.parse(uploadUrl),
-      headers: {'Content-Type': 'image/jpeg'},
-      body: imageBytes,
-    );
-    if (response.statusCode != 200) {
-      throw Exception('S3 upload failed with status ${response.statusCode}');
+    } catch (e) {
+      debugPrint('Error loading vocabulary lists: $e');
+      _error = e.toString();
+      _vocabularyLists = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
-  /// Upload images to S3 and analyze them for vocabulary words
-  Future<Map<String, dynamic>?> analyzeImages(
+  /// Get a single vocabulary list by ID.
+  Future<VocabularyList?> getVocabularyList(String id) async {
+    try {
+      final result = await _repository.getVocabularyList(id);
+      switch (result) {
+        case Success(:final value):
+          _currentList = value;
+          notifyListeners();
+          return value;
+        case Failure(:final error):
+          _error = error;
+          notifyListeners();
+          return null;
+      }
+    } catch (e) {
+      debugPrint('Error getting vocabulary list: $e');
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Upload images to S3 and analyze them for vocabulary words.
+  Future<VocabularyList?> analyzeImages(
     List<Uint8List> images, {
     String? sourceLanguage,
     String? targetLanguage,
@@ -81,72 +99,59 @@ class VocabularyProvider extends ChangeNotifier {
 
     try {
       // 1. Get presigned upload URLs
-      final uploads = await _getUploadUrls(images.length);
-      if (uploads == null || uploads.length != images.length) {
+      final urlsResult = await _repository.getUploadUrls(images.length);
+      if (urlsResult.isFailure) {
+        throw Exception(urlsResult.errorOrNull ?? 'Failed to get upload URLs');
+      }
+      final uploads = urlsResult.valueOrNull!;
+      if (uploads.length != images.length) {
         throw Exception('Failed to get upload URLs');
       }
 
       // 2. Upload all images to S3 in parallel
       await Future.wait(
-        List.generate(images.length, (i) =>
-          _uploadToS3(uploads[i]['uploadUrl'] as String, images[i]),
-        ),
+        List.generate(images.length, (i) async {
+          final uploadResult = await _repository.uploadToS3(
+            uploads[i]['uploadUrl'] as String,
+            images[i],
+          );
+          if (uploadResult.isFailure) {
+            throw Exception(uploadResult.errorOrNull ?? 'S3 upload failed');
+          }
+        }),
       );
 
-      // 3. Call the mutation with S3 keys
+      // 3. Call the analyze mutation with S3 keys
       final s3Keys = uploads.map((u) => u['s3Key'] as String).toList();
-
-      const mutation = '''
-        mutation AnalyzeImageVocabulary(\$input: AnalyzeImageVocabularyInput!) {
-          analyzeImageVocabulary(input: \$input) {
-            success
-            vocabularyList {
-              id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
-            }
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {
-            'imageS3Keys': s3Keys,
-            if (sourceLanguage != null) 'sourceLanguage': sourceLanguage,
-            if (targetLanguage != null) 'targetLanguage': targetLanguage,
-          },
-        },
+      final analyzeResult = await _repository.analyzeImageVocabulary(
+        s3Keys: s3Keys,
+        sourceLanguage: sourceLanguage,
+        targetLanguage: targetLanguage,
       );
 
-      final result = response['analyzeImageVocabulary'] as Map<String, dynamic>?;
-
-      if (result != null && result['success'] == true) {
-        final vocabularyList = result['vocabularyList'] as Map<String, dynamic>?;
-        if (vocabularyList != null) {
+      switch (analyzeResult) {
+        case Success(:final value):
           // Poll until the async processing completes
-          final completed = await _pollForCompletion(vocabularyList['id'] as String);
-          if (completed != null) {
-            _currentList = completed;
-            _vocabularyLists.add(completed);
-            return completed;
-          } else if (_error == null) {
-            // Polling timed out but no error — still processing in the background
-            _error = 'Processing is running in the background. Please check your vocabulary lists in a few minutes.';
-            _vocabularyLists.add(vocabularyList);
-            notifyListeners();
-            return null;
-          } else {
-            // Actual failure (e.g. status == FAILED)
-            _vocabularyLists.add(vocabularyList);
-            return null;
+          final pollResult = await _repository.pollForCompletion(value.id);
+          switch (pollResult) {
+            case Success(:final value):
+              _currentList = value;
+              _vocabularyLists.add(value);
+              return value;
+            case Failure(:final error):
+              if (error == 'Polling timed out') {
+                _error = 'Processing is running in the background. Please check your vocabulary lists in a few minutes.';
+                _vocabularyLists.add(value);
+                notifyListeners();
+                return null;
+              }
+              _error = error;
+              _vocabularyLists.add(value);
+              return null;
           }
-        }
-        return vocabularyList;
-      } else {
-        _error = result?['error'] as String? ?? 'Failed to analyze images';
-        return null;
+        case Failure(:final error):
+          _error = error;
+          return null;
       }
     } catch (e) {
       debugPrint('Error analyzing images: $e');
@@ -158,200 +163,125 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Load all vocabulary lists for the current user
-  Future<void> loadVocabularyLists() async {
-    if (_authProvider == null || !_authProvider!.isAuthenticated) return;
-
-    _isLoading = true;
+  /// Upload images and perform Phase 1 (OCR recognition) of Scan & Translate.
+  Future<VocabularyList?> analyzeScanTranslate(List<Uint8List> images) async {
+    _isAnalyzing = true;
     _error = null;
     notifyListeners();
 
     try {
-      const query = '''
-        query GetVocabularyLists {
-          getVocabularyLists {
-            id userId title sourceImageKey sourceImageKeys sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
-            words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
-          }
-        }
-      ''';
+      // 1. Get presigned upload URLs
+      final urlsResult = await _repository.getUploadUrls(images.length);
+      if (urlsResult.isFailure) {
+        throw Exception(urlsResult.errorOrNull ?? 'Failed to get upload URLs');
+      }
+      final uploads = urlsResult.valueOrNull!;
 
-      final response = await _apiService.query(query);
-      final lists = response['getVocabularyLists'] as List<dynamic>?;
-      _vocabularyLists = lists?.map((item) => item as Map<String, dynamic>).toList() ?? [];
-      _error = null;
+      // 2. Upload all images to S3 in parallel
+      await Future.wait(
+        List.generate(images.length, (i) async {
+          final uploadResult = await _repository.uploadToS3(
+            uploads[i]['uploadUrl'] as String,
+            images[i],
+          );
+          if (uploadResult.isFailure) {
+            throw Exception(uploadResult.errorOrNull ?? 'S3 upload failed');
+          }
+        }),
+      );
+
+      // 3. Call the mutation with scan_translate mode
+      final s3Keys = uploads.map((u) => u['s3Key'] as String).toList();
+      final analyzeResult = await _repository.analyzeImageVocabulary(
+        s3Keys: s3Keys,
+        mode: 'scan_translate',
+      );
+
+      switch (analyzeResult) {
+        case Success(:final value):
+          // Poll until Phase 1 completes (RECOGNIZED status)
+          final pollResult = await _repository.pollForCompletion(
+            value.id,
+            targetStatus: 'RECOGNIZED',
+          );
+          switch (pollResult) {
+            case Success(:final value):
+              _currentList = value;
+              _vocabularyLists.add(value);
+              return value;
+            case Failure(:final error):
+              if (error == 'Polling timed out') {
+                _error = 'Processing is running in the background. Please check your vocabulary lists in a few minutes.';
+                _vocabularyLists.add(value);
+                notifyListeners();
+                return null;
+              }
+              _error = error;
+              _vocabularyLists.add(value);
+              return null;
+          }
+        case Failure(:final error):
+          _error = error;
+          return null;
+      }
     } catch (e) {
-      debugPrint('Error loading vocabulary lists: $e');
+      debugPrint('Error in scan & translate: $e');
       _error = e.toString();
-      _vocabularyLists = [];
+      return null;
     } finally {
-      _isLoading = false;
+      _isAnalyzing = false;
       notifyListeners();
     }
   }
 
-  /// Get a single vocabulary list by ID
-  Future<Map<String, dynamic>?> getVocabularyList(String id) async {
+  /// Trigger Phase 2 translation of recognized words.
+  Future<VocabularyList?> translateRecognizedWords(
+    String vocabularyListId,
+    String targetLanguage,
+  ) async {
     try {
-      const query = '''
-        query GetVocabularyList(\$id: ID!) {
-          getVocabularyList(id: \$id) {
-            id userId title sourceImageKey sourceImageKeys sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
-            words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
-          }
-        }
-      ''';
-
-      final response = await _apiService.query(query, variables: {'id': id});
-      _currentList = response['getVocabularyList'] as Map<String, dynamic>?;
-      notifyListeners();
-      return _currentList;
+      final result = await _repository.translateRecognizedWords(
+        vocabularyListId,
+        targetLanguage,
+      );
+      switch (result) {
+        case Success(:final value):
+          final idx = _vocabularyLists.indexWhere((l) => l.id == vocabularyListId);
+          if (idx != -1) _vocabularyLists[idx] = value;
+          if (_currentList?.id == vocabularyListId) _currentList = value;
+          notifyListeners();
+          return value;
+        case Failure(:final error):
+          _error = error;
+          notifyListeners();
+          return null;
+      }
     } catch (e) {
-      debugPrint('Error getting vocabulary list: $e');
+      debugPrint('Error translating recognized words: $e');
       _error = e.toString();
       notifyListeners();
       return null;
     }
   }
 
-  /// Poll getVocabularyList until the target status is reached or FAILED.
-  ///
-  /// When [targetStatus] is null (default), stops at COMPLETED or PARTIALLY_COMPLETED
-  /// (preserving existing behavior). When set to 'RECOGNIZED', stops at RECOGNIZED.
-  /// FAILED always stops polling regardless of targetStatus.
-  /// TRANSLATING is treated as in-progress during Phase 2 polling.
-  Future<Map<String, dynamic>?> _pollForCompletion(String id, {String? targetStatus}) async {
-    const maxAttempts = 60; // up to ~3 minutes with 3s intervals
-    const pollInterval = Duration(seconds: 3);
-
-    debugPrint('[VocabularyProvider] Starting polling for id=$id');
-
-    for (var i = 0; i < maxAttempts; i++) {
-      await Future.delayed(pollInterval);
-
-      try {
-        // Use a fresh query string each iteration to avoid any client-side caching
-        final query = '''
-          query GetVocabularyListPoll(\$id: ID!) {
-            getVocabularyList(id: \$id) {
-              id
-              userId
-              title
-              sourceLanguage
-              targetLanguage
-              status
-              errorMessage
-              createdAt
-              updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
-            }
-          }
-        ''';
-
-        debugPrint('[VocabularyProvider] Poll attempt ${i + 1}/$maxAttempts for id=$id');
-
-        final request = GraphQLRequest<String>(
-          document: query,
-          variables: {'id': id},
-        );
-        final gqlResponse = await Amplify.API.query(request: request).response;
-
-        if (gqlResponse.hasErrors) {
-          final errors = gqlResponse.errors.map((e) => e.message).join(', ');
-          debugPrint('[VocabularyProvider] Poll GraphQL errors: $errors');
-          continue;
-        }
-
-        if (gqlResponse.data == null) {
-          debugPrint('[VocabularyProvider] Poll returned null data');
-          continue;
-        }
-
-        final parsed = jsonDecode(gqlResponse.data!) as Map<String, dynamic>;
-        final list = parsed['getVocabularyList'] as Map<String, dynamic>?;
-
-        if (list == null) {
-          debugPrint('[VocabularyProvider] Poll returned null list');
-          continue;
-        }
-
-        final status = list['status'] as String?;
-        final wordsCount = (list['words'] as List<dynamic>?)?.length ?? 0;
-        debugPrint('[VocabularyProvider] Poll result: status=$status, words=$wordsCount, title=${list['title']}');
-
-        // FAILED always stops polling regardless of targetStatus
-        if (status == 'FAILED') {
-          _error = list['errorMessage'] as String? ?? 'Analysis failed';
-          return null;
-        }
-
-        // Check if we've reached the target status
-        if (targetStatus == 'RECOGNIZED') {
-          // Phase 1 polling: stop when RECOGNIZED is reached
-          if (status == 'RECOGNIZED') return list;
-        } else {
-          // Default / Phase 2 polling: stop at COMPLETED or PARTIALLY_COMPLETED
-          if (status == 'COMPLETED' || status == 'PARTIALLY_COMPLETED') return list;
-          // TRANSLATING is in-progress during Phase 2 — keep polling
-        }
-
-        // Fallback: if status field is missing (schema not deployed yet),
-        // check if words have been populated as a completion signal
-        if (status == null && wordsCount > 0) {
-          debugPrint('[VocabularyProvider] No status field but words found — treating as completed');
-          return list;
-        }
-
-        // Still in progress — keep polling
-      } catch (e) {
-        debugPrint('[VocabularyProvider] Polling error (attempt ${i + 1}): $e');
-        // Don't break on transient errors, keep trying
-      }
-    }
-
-    debugPrint('[VocabularyProvider] Polling timed out for id=$id');
-    return null;
-  }
-
-  /// Rename a vocabulary list
+  /// Rename a vocabulary list.
   Future<bool> renameVocabularyList(String id, String newTitle) async {
     try {
-      const mutation = '''
-        mutation RenameVocabularyList(\$input: RenameVocabularyListInput!) {
-          renameVocabularyList(input: \$input) {
-            success
-            vocabularyList {
-              id title
-            }
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {'id': id, 'title': newTitle},
-        },
-      );
-
-      final result = response['renameVocabularyList'] as Map<String, dynamic>?;
-
-      if (result != null && result['success'] == true) {
-        final idx = _vocabularyLists.indexWhere((list) => list['id'] == id);
+      final result = await _repository.renameVocabularyList(id, newTitle);
+      if (result.isSuccess) {
+        final idx = _vocabularyLists.indexWhere((l) => l.id == id);
         if (idx != -1) {
-          _vocabularyLists[idx]['title'] = newTitle;
+          _vocabularyLists[idx] = _vocabularyLists[idx].copyWith(title: newTitle);
         }
-        if (_currentList?['id'] == id) {
-          _currentList?['title'] = newTitle;
+        if (_currentList?.id == id) {
+          _currentList = _currentList!.copyWith(title: newTitle);
         }
         notifyListeners();
         return true;
-      } else {
-        _error = result?['error'] as String? ?? 'Failed to rename vocabulary list';
-        notifyListeners();
-        return false;
       }
+      _error = result.errorOrNull;
+      notifyListeners();
+      return false;
     } catch (e) {
       debugPrint('Error renaming vocabulary list: $e');
       _error = e.toString();
@@ -360,37 +290,19 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Delete a vocabulary list by ID
+  /// Delete a vocabulary list by ID.
   Future<bool> deleteVocabularyList(String id) async {
     try {
-      const mutation = '''
-        mutation DeleteVocabularyList(\$id: ID!) {
-          deleteVocabularyList(id: \$id) {
-            success
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {'id': id},
-      );
-
-      final result = response['deleteVocabularyList'] as Map<String, dynamic>?;
-
-      if (result != null && result['success'] == true) {
-        _vocabularyLists.removeWhere((list) => list['id'] == id);
-        if (_currentList?['id'] == id) {
-          _currentList = null;
-        }
+      final result = await _repository.deleteVocabularyList(id);
+      if (result.isSuccess) {
+        _vocabularyLists.removeWhere((l) => l.id == id);
+        if (_currentList?.id == id) _currentList = null;
         notifyListeners();
         return true;
-      } else {
-        _error = result?['error'] as String? ?? 'Failed to delete vocabulary list';
-        notifyListeners();
-        return false;
       }
+      _error = result.errorOrNull;
+      notifyListeners();
+      return false;
     } catch (e) {
       debugPrint('Error deleting vocabulary list: $e');
       _error = e.toString();
@@ -399,45 +311,24 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Set a vocabulary list's public visibility
+  /// Set a vocabulary list's public visibility.
   Future<bool> setVocabularyListPublic(String id, bool isPublic) async {
     try {
-      const mutation = '''
-        mutation SetVocabularyListPublic(\$input: SetVocabularyListPublicInput!) {
-          setVocabularyListPublic(input: \$input) {
-            success
-            vocabularyList {
-              id isPublic
-            }
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {'id': id, 'isPublic': isPublic},
-        },
-      );
-
-      final result = response['setVocabularyListPublic'] as Map<String, dynamic>?;
-
-      if (result != null && result['success'] == true) {
-        final idx = _vocabularyLists.indexWhere((list) => list['id'] == id);
+      final result = await _repository.setVocabularyListPublic(id, isPublic);
+      if (result.isSuccess) {
+        final idx = _vocabularyLists.indexWhere((l) => l.id == id);
         if (idx != -1) {
-          _vocabularyLists[idx]['isPublic'] = isPublic;
+          _vocabularyLists[idx] = _vocabularyLists[idx].copyWith(isPublic: isPublic);
         }
-        if (_currentList?['id'] == id) {
-          _currentList?['isPublic'] = isPublic;
+        if (_currentList?.id == id) {
+          _currentList = _currentList!.copyWith(isPublic: isPublic);
         }
         notifyListeners();
         return true;
-      } else {
-        _error = result?['error'] as String? ?? 'Failed to update visibility';
-        notifyListeners();
-        return false;
       }
+      _error = result.errorOrNull;
+      notifyListeners();
+      return false;
     } catch (e) {
       debugPrint('Error setting vocabulary list public: $e');
       _error = e.toString();
@@ -446,29 +337,25 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  List<Map<String, dynamic>> _publicVocabularyLists = [];
-  List<Map<String, dynamic>> get publicVocabularyLists => _publicVocabularyLists;
+  List<VocabularyList> _publicVocabularyLists = [];
+  List<VocabularyList> get publicVocabularyLists => _publicVocabularyLists;
 
-  /// Load all public vocabulary lists
+  /// Load all public vocabulary lists.
   Future<void> loadPublicVocabularyLists() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      const query = '''
-        query GetPublicVocabularyLists {
-          getPublicVocabularyLists {
-            id userId title sourceLanguage targetLanguage status isPublic publisher schoolForm grade isbn createdAt updatedAt
-            words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
-          }
-        }
-      ''';
-
-      final response = await _apiService.query(query);
-      final lists = response['getPublicVocabularyLists'] as List<dynamic>?;
-      _publicVocabularyLists = lists?.map((item) => item as Map<String, dynamic>).toList() ?? [];
-      _error = null;
+      final result = await _repository.getPublicVocabularyLists();
+      switch (result) {
+        case Success(:final value):
+          _publicVocabularyLists = value;
+          _error = null;
+        case Failure(:final error):
+          _error = error;
+          _publicVocabularyLists = [];
+      }
     } catch (e) {
       debugPrint('Error loading public vocabulary lists: $e');
       _error = e.toString();
@@ -479,7 +366,7 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Update a vocabulary list (title, languages, words, metadata)
+  /// Update a vocabulary list (title, languages, words, metadata).
   Future<bool> updateVocabularyList(
     String id, {
     String? title,
@@ -492,53 +379,28 @@ class VocabularyProvider extends ChangeNotifier {
     String? isbn,
   }) async {
     try {
-      const mutation = '''
-        mutation UpdateVocabularyList(\$input: UpdateVocabularyListInput!) {
-          updateVocabularyList(input: \$input) {
-            success
-            vocabularyList {
-              id userId title sourceLanguage targetLanguage status errorMessage isPublic publisher schoolForm grade isbn createdAt updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
-            }
-            error
-          }
-        }
-      ''';
-
-      final input = <String, dynamic>{'id': id};
-      if (title != null) input['title'] = title;
-      if (sourceLanguage != null) input['sourceLanguage'] = sourceLanguage;
-      if (targetLanguage != null) input['targetLanguage'] = targetLanguage;
-      if (words != null) input['words'] = words;
-      if (publisher != null) input['publisher'] = publisher;
-      if (schoolForm != null) input['schoolForm'] = schoolForm;
-      if (grade != null) input['grade'] = grade;
-      if (isbn != null) input['isbn'] = isbn;
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {'input': input},
+      final result = await _repository.updateVocabularyList(
+        id,
+        title: title,
+        sourceLanguage: sourceLanguage,
+        targetLanguage: targetLanguage,
+        words: words,
+        publisher: publisher,
+        schoolForm: schoolForm,
+        grade: grade,
+        isbn: isbn,
       );
-
-      final result = response['updateVocabularyList'] as Map<String, dynamic>?;
-
-      if (result != null && result['success'] == true) {
-        final updated = result['vocabularyList'] as Map<String, dynamic>?;
-        if (updated != null) {
-          final idx = _vocabularyLists.indexWhere((l) => l['id'] == id);
-          if (idx != -1) {
-            _vocabularyLists[idx] = updated;
-          }
-          if (_currentList?['id'] == id) {
-            _currentList = updated;
-          }
-        }
-        notifyListeners();
-        return true;
-      } else {
-        _error = result?['error'] as String? ?? 'Failed to update vocabulary list';
-        notifyListeners();
-        return false;
+      switch (result) {
+        case Success(:final value):
+          final idx = _vocabularyLists.indexWhere((l) => l.id == id);
+          if (idx != -1) _vocabularyLists[idx] = value;
+          if (_currentList?.id == id) _currentList = value;
+          notifyListeners();
+          return true;
+        case Failure(:final error):
+          _error = error;
+          notifyListeners();
+          return false;
       }
     } catch (e) {
       debugPrint('Error updating vocabulary list: $e');
@@ -548,199 +410,14 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Export a vocabulary list as a txt file in "word = translation" format
-  Future<void> exportAsText(Map<String, dynamic> list) async {
-    final title = list['title'] as String? ?? 'vocabulary';
-    final words = (list['words'] as List<dynamic>?) ?? [];
-
-    final lines = words.map((w) {
-      final word = (w as Map<String, dynamic>)['word'] as String? ?? '';
-      final translation = w['translation'] as String? ?? '';
-      return '$word = $translation';
-    });
-
-    final content = lines.join('\n');
-
-    await SharePlus.instance.share(ShareParams(text: content, title: title));
-  }
-
-  /// Upload images and perform Phase 1 (OCR recognition) of the Scan & Translate flow.
-  ///
-  /// Uploads images to S3, calls `analyzeImageVocabulary` with `mode: 'scan_translate'`,
-  /// and polls until the vocabulary list reaches `RECOGNIZED` status.
-  /// Returns the recognized vocabulary list (words without translations) for word review.
-  Future<Map<String, dynamic>?> analyzeScanTranslate(List<Uint8List> images) async {
-    _isAnalyzing = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      // 1. Get presigned upload URLs
-      final uploads = await _getUploadUrls(images.length);
-      if (uploads == null || uploads.length != images.length) {
-        throw Exception('Failed to get upload URLs');
-      }
-
-      // 2. Upload all images to S3 in parallel
-      await Future.wait(
-        List.generate(images.length, (i) =>
-          _uploadToS3(uploads[i]['uploadUrl'] as String, images[i]),
-        ),
-      );
-
-      // 3. Call the mutation with S3 keys and scan_translate mode
-      final s3Keys = uploads.map((u) => u['s3Key'] as String).toList();
-
-      const mutation = '''
-        mutation AnalyzeImageVocabulary(\$input: AnalyzeImageVocabularyInput!) {
-          analyzeImageVocabulary(input: \$input) {
-            success
-            vocabularyList {
-              id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
-            }
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {
-            'imageS3Keys': s3Keys,
-            'mode': 'scan_translate',
-          },
-        },
-      );
-
-      final result = response['analyzeImageVocabulary'] as Map<String, dynamic>?;
-
-      if (result != null && result['success'] == true) {
-        final vocabularyList = result['vocabularyList'] as Map<String, dynamic>?;
-        if (vocabularyList != null) {
-          // Poll until Phase 1 completes (RECOGNIZED status)
-          final completed = await _pollForCompletion(
-            vocabularyList['id'] as String,
-            targetStatus: 'RECOGNIZED',
-          );
-          if (completed != null) {
-            _currentList = completed;
-            _vocabularyLists.add(completed);
-            return completed;
-          } else if (_error == null) {
-            _error = 'Processing is running in the background. Please check your vocabulary lists in a few minutes.';
-            _vocabularyLists.add(vocabularyList);
-            notifyListeners();
-            return null;
-          } else {
-            _vocabularyLists.add(vocabularyList);
-            return null;
-          }
-        }
-        return vocabularyList;
-      } else {
-        _error = result?['error'] as String? ?? 'Failed to analyze images';
-        return null;
-      }
-    } catch (e) {
-      debugPrint('Error in scan & translate: $e');
-      _error = e.toString();
-      return null;
-    } finally {
-      _isAnalyzing = false;
-      notifyListeners();
-    }
-  }
-
-  /// Trigger Phase 2 translation of recognized words
-  Future<Map<String, dynamic>?> translateRecognizedWords(
-    String vocabularyListId,
-    String targetLanguage,
-  ) async {
-    try {
-      const mutation = '''
-        mutation TranslateRecognizedWords(\$input: TranslateRecognizedWordsInput!) {
-          translateRecognizedWords(input: \$input) {
-            success
-            vocabularyList {
-              id userId title sourceLanguage targetLanguage status errorMessage createdAt updatedAt
-              words { word translation definition partOfSpeech exampleSentence difficulty unit flagged }
-            }
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {
-            'vocabularyListId': vocabularyListId,
-            'targetLanguage': targetLanguage,
-          },
-        },
-      );
-
-      final result = response['translateRecognizedWords'] as Map<String, dynamic>?;
-
-      if (result != null && result['success'] == true) {
-        final vocabularyList = result['vocabularyList'] as Map<String, dynamic>?;
-        if (vocabularyList != null) {
-          // Update local state with the returned list (now TRANSLATING)
-          final idx = _vocabularyLists.indexWhere((l) => l['id'] == vocabularyListId);
-          if (idx != -1) {
-            _vocabularyLists[idx] = vocabularyList;
-          }
-          if (_currentList?['id'] == vocabularyListId) {
-            _currentList = vocabularyList;
-          }
-          notifyListeners();
-        }
-        return vocabularyList;
-      } else {
-        _error = result?['error'] as String? ?? 'Failed to translate recognized words';
-        notifyListeners();
-        return null;
-      }
-    } catch (e) {
-      debugPrint('Error translating recognized words: $e');
-      _error = e.toString();
-      notifyListeners();
-      return null;
-    }
-  }
-
-  /// Flag a word in a vocabulary list for review by the list owner
+  /// Flag a word in a vocabulary list for review.
   Future<bool> flagWord(String vocabularyListId, String word) async {
     try {
-      const mutation = '''
-        mutation FlagWord(\$input: FlagWordInput!) {
-          flagWord(input: \$input) {
-            success
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {
-            'vocabularyListId': vocabularyListId,
-            'word': word,
-          },
-        },
-      );
-
-      final result = response['flagWord'] as Map<String, dynamic>?;
-      if (result != null && result['success'] == true) {
-        return true;
-      } else {
-        _error = result?['error'] as String? ?? 'Failed to flag word';
-        notifyListeners();
-        return false;
-      }
+      final result = await _repository.flagWord(vocabularyListId, word);
+      if (result.isSuccess) return true;
+      _error = result.errorOrNull;
+      notifyListeners();
+      return false;
     } catch (e) {
       debugPrint('Error flagging word: $e');
       _error = e.toString();
@@ -749,46 +426,29 @@ class VocabularyProvider extends ChangeNotifier {
     }
   }
 
-  /// Get a presigned download URL for a source image
+  /// Export a vocabulary list as a text file in "word = translation" format.
+  Future<void> exportAsText(VocabularyList list) async {
+    final lines = list.words.map((w) => '${w.word} = ${w.translation ?? ""}');
+    final content = lines.join('\n');
+    await SharePlus.instance.share(ShareParams(text: content, title: list.title));
+  }
+
+  /// Get a presigned download URL for a source image.
   Future<String?> getImageDownloadUrl(String s3Key) async {
     final urls = await getImageDownloadUrls([s3Key]);
     return urls?.isNotEmpty == true ? urls!.first['downloadUrl'] as String? : null;
   }
 
-  /// Get presigned download URLs for multiple source images
+  /// Get presigned download URLs for multiple source images.
   Future<List<Map<String, dynamic>>?> getImageDownloadUrls(List<String> s3Keys) async {
-    try {
-      const query = '''
-        query GetImageDownloadUrl(\$input: GetImageDownloadUrlInput!) {
-          getImageDownloadUrl(input: \$input) {
-            success
-            downloadUrls { s3Key downloadUrl }
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.query(
-        query,
-        variables: {'input': {'s3Keys': s3Keys}},
-      );
-
-      final result = response['getImageDownloadUrl'] as Map<String, dynamic>?;
-      if (result?['success'] == true) {
-        return (result!['downloadUrls'] as List<dynamic>)
-            .map((u) => u as Map<String, dynamic>)
-            .toList();
-      }
-      return null;
-    } catch (e) {
-      debugPrint('Error getting image download URLs: $e');
-      return null;
-    }
+    final result = await _repository.getImageDownloadUrls(s3Keys);
+    return result.valueOrNull;
   }
 
-  /// Clear vocabulary data (on sign out)
+  /// Clear vocabulary data (on sign out).
   void clear() {
     _vocabularyLists = [];
+    _publicVocabularyLists = [];
     _currentList = null;
     _error = null;
     _isLoading = false;

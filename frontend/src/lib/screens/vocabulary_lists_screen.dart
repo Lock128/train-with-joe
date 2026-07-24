@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/vocabulary_list.dart';
 import '../providers/vocabulary_provider.dart';
 import '../utils/language_flags.dart';
 import '../l10n/generated/app_localizations.dart';
@@ -138,16 +139,16 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
     );
   }
 
-  Widget _buildListCard(Map<String, dynamic> list) {
+  Widget _buildListCard(VocabularyList list) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    final title = list['title'] as String? ?? 'Untitled List';
-    final sourceLang = list['sourceLanguage'] as String?;
-    final targetLang = list['targetLanguage'] as String?;
-    final createdAt = list['createdAt'] as String?;
-    final words = (list['words'] as List<dynamic>?) ?? [];
-    final isPublic = list['isPublic'] == true;
-    final status = list['status'] as String?;
+    final title = list.title;
+    final sourceLang = list.sourceLanguage;
+    final targetLang = list.targetLanguage;
+    final createdAt = list.createdAt?.toIso8601String();
+    final words = list.words;
+    final isPublic = list.isPublic;
+    final status = list.status;
 
     final langPair = formatLanguagePair(sourceLang, targetLang);
 
@@ -157,15 +158,12 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
 
     Color statusColor;
     IconData statusIcon;
-    if (status == 'FAILED') {
+    if (status == VocabularyListStatus.failed) {
       statusColor = Colors.red.shade400;
       statusIcon = Icons.error_outline_rounded;
-    } else if (status == 'PENDING') {
+    } else if (status == VocabularyListStatus.processing) {
       statusColor = Colors.orange.shade400;
       statusIcon = Icons.hourglass_top_rounded;
-    } else if (status == 'PARTIALLY_COMPLETED') {
-      statusColor = Colors.amber.shade600;
-      statusIcon = Icons.warning_amber_rounded;
     } else {
       statusColor = colorScheme.primary;
       statusIcon = Icons.list_alt_rounded;
@@ -177,7 +175,7 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
         color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
-          onTap: () => context.go('/vocabulary/${list['id']}'),
+          onTap: () => context.go('/vocabulary/${list.id}'),
           borderRadius: BorderRadius.circular(14),
           child: Padding(
             padding: const EdgeInsets.all(14.0),
@@ -220,23 +218,17 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
                       const SizedBox(height: 4),
                       Text(subtitleParts.join(' · '),
                           style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13)),
-                      if (status == 'PENDING')
+                      if (status == VocabularyListStatus.processing)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(l10n.statusAnalyzing,
                               style: TextStyle(color: Colors.orange.shade600, fontSize: 12, fontWeight: FontWeight.w500)),
                         ),
-                      if (status == 'FAILED')
+                      if (status == VocabularyListStatus.failed)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(l10n.statusFailed,
                               style: TextStyle(color: Colors.red.shade600, fontSize: 12, fontWeight: FontWeight.w500)),
-                        ),
-                      if (status == 'PARTIALLY_COMPLETED')
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(l10n.statusPartiallyCompleted,
-                              style: TextStyle(color: Colors.amber.shade700, fontSize: 12, fontWeight: FontWeight.w500)),
                         ),
                     ],
                   ),

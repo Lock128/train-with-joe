@@ -418,7 +418,7 @@ jobs:
         with:
           name: deployment-state-production
           path: deployment-state.json
-          retention-days: 365
+          retention-days: 10
 
       - name: Verify production deployment
         if: steps.get-url.outputs.url_available == 'true'

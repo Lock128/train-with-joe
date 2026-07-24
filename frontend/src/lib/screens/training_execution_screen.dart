@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/training_execution.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 import '../providers/vocabulary_provider.dart';
@@ -27,10 +28,10 @@ class TrainingExecutionScreen extends StatefulWidget {
 
 class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   int _currentWordIndex = 0;
-  Map<String, dynamic>? _execution;
-  List<dynamic> _words = [];
+  TrainingExecution? _execution;
+  List<PromptWord> _words = [];
   bool _showFeedback = false;
-  Map<String, dynamic>? _lastResult;
+  AnswerResult? _lastResult;
   bool _soundMuted = FeedbackSoundService().isMuted;
   final TextEditingController _answerController = TextEditingController();
   final Set<int> _flaggedIndices = {};
@@ -65,12 +66,15 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
         // Use promptWords from execution (direction-resolved, no answers).
         // Falls back to training words for non-randomized trainings.
         if (_words.isEmpty) {
-          final promptWords = (execution['promptWords'] as List<dynamic>?) ?? [];
+          final promptWords = execution.promptWords;
           if (promptWords.isNotEmpty) {
             _words = promptWords;
           } else {
             final training = provider.currentTraining;
-            _words = (training?['words'] as List<dynamic>?) ?? [];
+            _words = training?.words
+                    .map((w) => PromptWord(word: w.word, vocabularyListId: w.vocabularyListId, unit: w.unit))
+                    .toList() ??
+                [];
           }
         }
       });
@@ -79,24 +83,23 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
   String get _currentMode {
     final training = context.read<TrainingProvider>().currentTraining;
-    return training?['mode'] as String? ?? 'TEXT_INPUT';
+    return training?.mode.value ?? 'TEXT_INPUT';
   }
 
-  Map<String, dynamic>? _getMultipleChoiceOptions(int wordIndex) {
-    final options = (_execution?['multipleChoiceOptions'] as List<dynamic>?) ?? [];
+  MultipleChoiceOption? _getMultipleChoiceOptions(int wordIndex) {
+    final options = _execution?.multipleChoiceOptions ?? [];
     for (final opt in options) {
-      final m = opt as Map<String, dynamic>;
-      if (m['wordIndex'] == wordIndex) return m;
+      if (opt.wordIndex == wordIndex) return opt;
     }
     return null;
   }
 
-  List<dynamic> get _aiExercises {
-    return (_execution?['aiExercises'] as List<dynamic>?) ?? [];
+  List<AiExercise> get _aiExercises {
+    return _execution?.aiExercises ?? [];
   }
 
-  List<dynamic> get _verbConjugationExercises {
-    return (_execution?['verbConjugationExercises'] as List<dynamic>?) ?? [];
+  List<VerbConjugationExercise> get _verbConjugationExercises {
+    return _execution?.verbConjugationExercises ?? [];
   }
 
   Future<void> _submitAIAnswer(int optionIndex) async {
@@ -116,9 +119,9 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
     if (!mounted || result == null) return;
 
-    final answerResult = result['result'] as Map<String, dynamic>?;
-    final completed = result['completed'] as bool? ?? false;
-    final updatedExecution = result['execution'] as Map<String, dynamic>?;
+    final answerResult = result.result;
+    final completed = result.completed;
+    final updatedExecution = result.execution;
 
     setState(() {
       _lastResult = answerResult;
@@ -148,10 +151,11 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
   Future<void> _flagCurrentWord() async {
     if (_flaggedIndices.contains(_currentWordIndex)) return;
+    if (_currentWordIndex >= _words.length) return;
 
-    final currentWord = _words[_currentWordIndex] as Map<String, dynamic>;
-    final wordText = currentWord['word'] as String? ?? '';
-    final vocabListId = currentWord['vocabularyListId'] as String? ?? '';
+    final currentWord = _words[_currentWordIndex];
+    final wordText = currentWord.word;
+    final vocabListId = currentWord.vocabularyListId ?? '';
 
     if (vocabListId.isEmpty || wordText.isEmpty) return;
 
@@ -217,16 +221,9 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final progress = totalWords > 0 ? (_currentWordIndex + 1) / totalWords : 0.0;
     final currentWord = (isAIMode || isVerbConjugationMode || words.isEmpty)
         ? null
-        : (words[_currentWordIndex] as Map<String, dynamic>);
-    final training = context.read<TrainingProvider>().currentTraining;
-    final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
-    final reversed = direction == 'TRANSLATION_TO_WORD';
-    // promptWords already have direction-resolved 'word'; training words need direction check
-    final wordText = currentWord?['translation'] != null
-        ? (reversed
-            ? (currentWord?['translation'] as String? ?? '')
-            : (currentWord?['word'] as String? ?? ''))
-        : (currentWord?['word'] as String? ?? '');
+        : words[_currentWordIndex];
+    // promptWords already have direction-resolved 'word'
+    final wordText = currentWord?.word ?? '';
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.training),
@@ -331,8 +328,8 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
   Widget _buildTextInput() {
     final l10n = AppLocalizations.of(context)!;
     final training = context.read<TrainingProvider>().currentTraining;
-    final direction = training?['direction'] as String? ?? 'WORD_TO_TRANSLATION';
-    final hintText = direction == 'TRANSLATION_TO_WORD'
+    final direction = training?.direction.value ?? 'SOURCE_TO_TARGET';
+    final hintText = direction == 'TARGET_TO_SOURCE'
         ? 'Type the original word'
         : 'Type the translation';
     return Column(
@@ -364,12 +361,11 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
 
   Widget _buildMultipleChoice() {
     final mcOptions = _getMultipleChoiceOptions(_currentWordIndex);
-    final options = (mcOptions?['options'] as List<dynamic>?) ?? [];
+    final options = mcOptions?.options ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: options.map((option) {
-        final text = option as String? ?? '';
+      children: options.map((text) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: ElevatedButton(
@@ -388,14 +384,19 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final exercises = _aiExercises;
     if (_currentWordIndex >= exercises.length) return const SizedBox.shrink();
 
-    final exercise = exercises[_currentWordIndex] as Map<String, dynamic>;
+    final exercise = exercises[_currentWordIndex];
 
     return AIExerciseWidget(
-      exercise: exercise,
+      exercise: {
+        'prompt': exercise.prompt,
+        'options': exercise.options,
+        'exerciseType': exercise.exerciseType,
+        'sourceWord': exercise.sourceWord,
+      },
       onAnswerSelected: _submitAIAnswer,
       showFeedback: _showFeedback,
       selectedIndex: _selectedAIOptionIndex,
-      isCorrect: _lastResult?['correct'] as bool?,
+      isCorrect: _lastResult?.correct,
     );
   }
 
@@ -403,21 +404,26 @@ class _TrainingExecutionScreenState extends State<TrainingExecutionScreen> {
     final exercises = _verbConjugationExercises;
     if (_currentWordIndex >= exercises.length) return const SizedBox.shrink();
 
-    final exercise = exercises[_currentWordIndex] as Map<String, dynamic>;
+    final exercise = exercises[_currentWordIndex];
 
     return VerbConjugationExerciseWidget(
       key: ValueKey('verb_exercise_$_currentWordIndex'),
-      exercise: exercise,
+      exercise: {
+        'infinitive': exercise.infinitive,
+        'prompt': exercise.prompt,
+        'exerciseType': exercise.exerciseType,
+        'hint': exercise.hint,
+      },
       onAnswerSubmitted: _submitAnswer,
       showFeedback: _showFeedback,
-      isCorrect: _lastResult?['correct'] as bool?,
-      expectedAnswer: _lastResult?['expectedAnswer'] as String?,
+      isCorrect: _lastResult?.correct,
+      expectedAnswer: _lastResult?.expectedAnswer,
     );
   }
 
   Widget _buildFeedback() {
-    final isCorrect = _lastResult?['correct'] as bool? ?? false;
-    final expected = _lastResult?['expectedAnswer'] as String?;
+    final isCorrect = _lastResult?.correct ?? false;
+    final expected = _lastResult?.expectedAnswer;
 
     return AnswerFeedbackAnimation(
       key: ValueKey('feedback_${_currentWordIndex}_$isCorrect'),

@@ -118,6 +118,7 @@ void main() {
   setUp(() {
     mockAuthService = MockAuthService();
     when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => false);
+    when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
     authProvider = app.AuthProvider(authService: mockAuthService);
     router = createRouterHelper(authProvider);
   });

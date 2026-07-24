@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/training.dart';
+import '../domain/models/vocabulary_list.dart';
 import '../providers/training_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../utils/language_flags.dart';
@@ -70,28 +72,27 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
     }
   }
 
-  List<Map<String, dynamic>> _applyFilters(List<Map<String, dynamic>> trainings) {
+  List<Training> _applyFilters(List<Training> trainings) {
     var filtered = trainings;
 
     // Filter by name search
     final query = _searchController.text.trim().toLowerCase();
     if (query.isNotEmpty) {
       filtered = filtered.where((t) {
-        final name = (t['name'] as String? ?? '').toLowerCase();
+        final name = (t.name ?? '').toLowerCase();
         return name.contains(query);
       }).toList();
     }
 
     // Filter by mode
     if (_selectedMode != null) {
-      filtered = filtered.where((t) => t['mode'] == _selectedMode).toList();
+      filtered = filtered.where((t) => t.mode.value == _selectedMode).toList();
     }
 
     // Filter by vocabulary list
     if (_selectedListId != null) {
       filtered = filtered.where((t) {
-        final ids = (t['vocabularyListIds'] as List<dynamic>?) ?? [];
-        return ids.contains(_selectedListId);
+        return t.vocabularyListIds.contains(_selectedListId);
       }).toList();
     }
 
@@ -318,9 +319,9 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
                   items: [
                     DropdownMenuItem<String>(value: null, child: Text(l10n.allLists)),
                     ...vocabLists.map((l) => DropdownMenuItem<String>(
-                          value: l['id'] as String,
+                          value: l.id,
                           child: Text(
-                            l['title'] as String? ?? 'Untitled',
+                            l.title,
                             overflow: TextOverflow.ellipsis,
                           ),
                         )),
@@ -350,10 +351,10 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
     );
   }
 
-  void _confirmForceRemove(Map<String, dynamic> training) {
+  void _confirmForceRemove(Training training) {
     final l10n = AppLocalizations.of(context)!;
-    final name = training['name'] as String? ?? 'Untitled Training';
-    final id = training['id'] as String;
+    final name = training.name ?? 'Untitled Training';
+    final id = training.id;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -376,31 +377,31 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
     );
   }
 
-  Widget _buildTrainingCard(Map<String, dynamic> training) {
+  Widget _buildTrainingCard(Training training) {
     final l10n = AppLocalizations.of(context)!;
-    final name = training['name'] as String? ?? 'Untitled Training';
-    final mode = training['mode'] as String?;
-    final words = (training['words'] as List<dynamic>?) ?? [];
-    final executions = (training['executions'] as List<dynamic>?) ?? [];
-    final vocabularyListIds = (training['vocabularyListIds'] as List<dynamic>?) ?? [];
-    final isRandomized = training['isRandomized'] as bool? ?? false;
-    final randomizedWordCount = training['randomizedWordCount'] as int?;
+    final name = training.name ?? 'Untitled Training';
+    final mode = training.mode.value;
+    final words = training.words;
+    final executions = training.executions;
+    final vocabularyListIds = training.vocabularyListIds;
+    final isRandomized = training.isRandomized;
+    final randomizedWordCount = training.randomizedWordCount;
 
     final vocabLists = context.read<VocabularyProvider>().vocabularyLists;
     final matchedLists = vocabularyListIds
-        .map((id) => vocabLists.where((l) => l['id'] == id).firstOrNull)
-        .whereType<Map<String, dynamic>>()
+        .map((id) => vocabLists.where((l) => l.id == id).firstOrNull)
+        .whereType<VocabularyList>()
         .toList();
     final listNames = matchedLists
-        .map((l) => l['title'] as String? ?? 'Unknown list')
+        .map((l) => l.title)
         .toList();
 
     final sourceLangs = matchedLists
-        .map((l) => l['sourceLanguage'] as String?)
+        .map((l) => l.sourceLanguage)
         .whereType<String>()
         .toSet();
     final targetLangs = matchedLists
-        .map((l) => l['targetLanguage'] as String?)
+        .map((l) => l.targetLanguage)
         .whereType<String>()
         .toSet();
     final langPair = formatLanguagePair(
@@ -417,7 +418,7 @@ class _TrainingListScreenState extends State<TrainingListScreen> {
         color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(14),
         child: InkWell(
-          onTap: _adminMode ? null : () => context.go('/trainings/${training['id']}'),
+          onTap: _adminMode ? null : () => context.go('/trainings/${training.id}'),
           borderRadius: BorderRadius.circular(14),
           child: Padding(
             padding: const EdgeInsets.all(14.0),

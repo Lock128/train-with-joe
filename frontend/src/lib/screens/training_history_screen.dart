@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/training.dart';
+import '../domain/models/training_statistics.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 
@@ -14,9 +16,9 @@ class TrainingHistoryScreen extends StatefulWidget {
 }
 
 class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
-  Map<String, dynamic>? _training;
-  Map<String, dynamic>? _statistics;
-  Map<String, dynamic>? _dayStatistics;
+  Training? _training;
+  TrainingStatistics? _statistics;
+  DayStatistics? _dayStatistics;
   bool _isLoading = true;
   String? _error;
   DateTime? _selectedDate;
@@ -88,9 +90,9 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
     }
   }
 
-  int _executionAccuracy(Map<String, dynamic> exec) {
-    final correct = exec['correctCount'] as int? ?? 0;
-    final incorrect = exec['incorrectCount'] as int? ?? 0;
+  int _executionAccuracy(TrainingExecutionSummary exec) {
+    final correct = exec.correctCount;
+    final incorrect = exec.incorrectCount;
     final total = correct + incorrect;
     return total > 0 ? (correct / total * 100).round() : 0;
   }
@@ -121,11 +123,10 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
       );
     }
 
-    final executions = List<Map<String, dynamic>>.from(
-      ((_training!['executions'] as List<dynamic>?) ?? []).map((e) => e as Map<String, dynamic>),
-    )..sort((a, b) {
-        final aDate = a['startedAt'] as String? ?? '';
-        final bDate = b['startedAt'] as String? ?? '';
+    final executions = List<TrainingExecutionSummary>.from(_training!.executions)
+      ..sort((a, b) {
+        final aDate = a.startedAt?.toIso8601String() ?? '';
+        final bDate = b.startedAt?.toIso8601String() ?? '';
         return bDate.compareTo(aDate);
       });
 
@@ -166,13 +167,13 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
                 final exec = executions[index];
                 final accuracy = _executionAccuracy(exec);
                 return ListTile(
-                  title: Text(_formatDate(exec['startedAt'] as String?)),
-                  subtitle: Text('Duration: ${_formatDuration(exec['startedAt'] as String?, exec['completedAt'] as String?)}'),
+                  title: Text(_formatDate(exec.startedAt?.toIso8601String())),
+                  subtitle: Text('Duration: ${_formatDuration(exec.startedAt?.toIso8601String(), exec.completedAt?.toIso8601String())}'),
                   trailing: Text('$accuracy%', style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: accuracy >= 80 ? Colors.green : accuracy >= 50 ? Colors.orange : Colors.red,
                   )),
-                  onTap: () => context.go('/trainings/${widget.trainingId}/results/${exec['id']}'),
+                  onTap: () => context.go('/trainings/${widget.trainingId}/results/${exec.id}'),
                 );
               },
             ),
@@ -187,9 +188,9 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
   }
 
   Widget _buildStatisticsCard() {
-    final overallAccuracy = (_statistics!['overallAccuracy'] as num?)?.toDouble() ?? 0;
-    final avgTime = (_statistics!['averageTimeSeconds'] as num?)?.toDouble() ?? 0;
-    final totalExec = _statistics!['totalExecutions'] as int? ?? 0;
+    final overallAccuracy = _statistics!.overallAccuracy;
+    final avgTime = _statistics!.averageTimeSeconds;
+    final totalExec = _statistics!.totalExecutions;
 
     return Card(
       child: Padding(
@@ -214,17 +215,16 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
   ]);
 
   Widget _buildMostMissedWords() {
-    final missed = (_statistics!['mostMissedWords'] as List<dynamic>?) ?? [];
+    final missed = _statistics!.mostMissedWords;
     if (missed.isEmpty) return const SizedBox.shrink();
 
     final top5 = missed.take(5).toList();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Most Missed Words', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
       const SizedBox(height: 8),
-      ...top5.map((item) {
-        final w = item as Map<String, dynamic>;
-        final acc = (w['accuracyPercentage'] as num?)?.toDouble() ?? 0;
-        return ListTile(dense: true, title: Text('${w['word']} - ${w['translation']}'),
+      ...top5.map((w) {
+        final acc = w.accuracyPercentage;
+        return ListTile(dense: true, title: Text('${w.word} - ${w.translation ?? ''}'),
           trailing: Text('${acc.round()}%', style: TextStyle(color: acc < 50 ? Colors.red : Colors.orange)));
       }),
       const SizedBox(height: 16),
@@ -232,18 +232,17 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
   }
 
   Widget _buildAccuracyTrend() {
-    final trend = (_statistics!['accuracyTrend'] as List<dynamic>?) ?? [];
+    final trend = _statistics!.accuracyTrend;
     if (trend.isEmpty) return const SizedBox.shrink();
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Accuracy Trend', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
       const SizedBox(height: 8),
-      ...trend.map((item) {
-        final t = item as Map<String, dynamic>;
-        final acc = (t['accuracy'] as num?)?.toDouble() ?? 0;
+      ...trend.map((t) {
+        final acc = t.accuracy;
         return ListTile(
           dense: true,
-          title: Text(_formatDate(t['startedAt'] as String?)),
+          title: Text(_formatDate(t.startedAt?.toIso8601String())),
           trailing: Text('${acc.round()}%', style: TextStyle(
             color: acc >= 80 ? Colors.green : acc >= 50 ? Colors.orange : Colors.red,
           )),
@@ -273,13 +272,13 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Date: ${_dayStatistics!['date'] ?? '--'}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('Date: ${_dayStatistics!.date}', style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              Text('Total executions: ${_dayStatistics!['totalExecutions'] ?? 0}'),
-              Text('Correct: ${_dayStatistics!['totalCorrect'] ?? 0}  |  Incorrect: ${_dayStatistics!['totalIncorrect'] ?? 0}'),
+              Text('Total executions: ${_dayStatistics!.totalExecutions}'),
+              Text('Correct: ${_dayStatistics!.totalCorrect}  |  Incorrect: ${_dayStatistics!.totalIncorrect}'),
               Builder(builder: (_) {
-                final correct = _dayStatistics!['totalCorrect'] as int? ?? 0;
-                final incorrect = _dayStatistics!['totalIncorrect'] as int? ?? 0;
+                final correct = _dayStatistics!.totalCorrect;
+                final incorrect = _dayStatistics!.totalIncorrect;
                 final total = correct + incorrect;
                 final acc = total > 0 ? (correct / total * 100).round() : 0;
                 return Text(AppLocalizations.of(context)!.overallAccuracy(acc));
@@ -288,11 +287,10 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        ...(((_dayStatistics!['executions'] as List<dynamic>?) ?? []).map((exec) {
-          final e = exec as Map<String, dynamic>;
-          final dur = (e['durationSeconds'] as num?)?.toDouble() ?? 0;
-          final correct = e['correctCount'] as int? ?? 0;
-          final incorrect = e['incorrectCount'] as int? ?? 0;
+        ...(_dayStatistics!.executions.map((e) {
+          final dur = e.durationSeconds.toDouble();
+          final correct = e.correctCount;
+          final incorrect = e.incorrectCount;
           final total = correct + incorrect;
           final acc = total > 0 ? (correct / total * 100).round() : 0;
           final durMinutes = (dur / 60).floor();
@@ -300,8 +298,8 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
           final durStr = durMinutes > 0 ? '${durMinutes}m ${durSeconds}s' : '${durSeconds}s';
           return ListTile(
             dense: true,
-            title: Text(e['trainingName'] as String? ?? 'Training'),
-            subtitle: Text('${_formatDate(e['startedAt'] as String?)}  |  $durStr'),
+            title: Text(e.trainingName ?? 'Training'),
+            subtitle: Text('${_formatDate(e.startedAt?.toIso8601String())}  |  $durStr'),
             trailing: Text('$acc%', style: TextStyle(
               fontWeight: FontWeight.bold,
               color: acc >= 80 ? Colors.green : acc >= 50 ? Colors.orange : Colors.red,

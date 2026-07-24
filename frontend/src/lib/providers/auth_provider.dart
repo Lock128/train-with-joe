@@ -12,12 +12,16 @@ class AuthProvider extends ChangeNotifier {
   String? _error;
   /// Set when sign-in requires a new password (admin-created users).
   bool _needsNewPassword = false;
+  /// The user's email fetched from Cognito attributes (reliable on all platforms).
+  String? _cognitoEmail;
 
   AuthUser? get currentUser => _currentUser;
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get needsNewPassword => _needsNewPassword;
+  /// The user's email from Cognito user attributes. Reliable on web, iOS, and Android.
+  String? get cognitoEmail => _cognitoEmail;
 
   AuthProvider({AuthService? authService}) : _authService = authService ?? AuthService() {
     _checkAuthStatus();
@@ -43,15 +47,18 @@ class AuthProvider extends ChangeNotifier {
       final isSignedIn = await _authService.isUserSignedIn();
       if (isSignedIn) {
         _currentUser = await _authService.getCurrentUser();
+        _cognitoEmail = await _authService.fetchUserEmail();
         _isAuthenticated = true;
       } else {
         _currentUser = null;
+        _cognitoEmail = null;
         _isAuthenticated = false;
       }
       _error = null;
     } catch (e) {
       debugPrint('Error checking auth status: $e');
       _currentUser = null;
+      _cognitoEmail = null;
       _isAuthenticated = false;
       _error = null; // Don't show error on initial check
     } finally {
@@ -84,6 +91,7 @@ class AuthProvider extends ChangeNotifier {
       }
 
       _currentUser = await _authService.getCurrentUser();
+      _cognitoEmail = await _authService.fetchUserEmail();
       _isAuthenticated = true;
       _error = null;
       _isLoading = false;
@@ -111,6 +119,7 @@ class AuthProvider extends ChangeNotifier {
         throw Exception('Sign in failed after setting new password');
       }
       _currentUser = await _authService.getCurrentUser();
+      _cognitoEmail = await _authService.fetchUserEmail();
       _isAuthenticated = true;
       _needsNewPassword = false;
       _error = null;
@@ -174,6 +183,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _authService.signOut();
       _currentUser = null;
+      _cognitoEmail = null;
       _isAuthenticated = false;
       _error = null;
     } catch (e) {
@@ -226,6 +236,7 @@ class AuthProvider extends ChangeNotifier {
         throw Exception('Sign in failed after verification');
       }
       _currentUser = await _authService.getCurrentUser();
+      _cognitoEmail = await _authService.fetchUserEmail();
       _isAuthenticated = true;
       _error = null;
       _isLoading = false;

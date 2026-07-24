@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../domain/models/vocabulary_list.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/vocabulary_provider.dart';
 
@@ -20,7 +21,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
   final List<Uint8List> _selectedImages = [];
   String? _selectedSourceLanguage;
   String? _selectedTargetLanguage;
-  final List<Map<String, dynamic>> _analysisResults = [];
+  final List<VocabularyList> _analysisResults = [];
   int _analyzedCount = 0;
 
   final List<String> _supportedLanguages = [
@@ -484,10 +485,10 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
     final l10n = AppLocalizations.of(context)!;
     if (_analysisResults.isEmpty) return const SizedBox.shrink();
     final result = _analysisResults.first;
-    final title = result['title'] as String? ?? 'Vocabulary List';
-    final sourceLang = result['sourceLanguage'] as String?;
-    final targetLang = result['targetLanguage'] as String?;
-    final words = (result['words'] as List<dynamic>?) ?? [];
+    final title = result.title;
+    final sourceLang = result.sourceLanguage;
+    final targetLang = result.targetLanguage;
+    final words = result.words;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -538,19 +539,19 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        ...words.map((wordData) => _buildWordCard(wordData as Map<String, dynamic>)),
+        ...words.map((word) => _buildWordCard(word)),
       ],
     );
   }
 
-  Widget _buildWordCard(Map<String, dynamic> word) {
-    final wordText = word['word'] as String? ?? '';
-    final translation = word['translation'] as String?;
-    final definition = word['definition'] as String? ?? '';
-    final partOfSpeech = word['partOfSpeech'] as String?;
-    final exampleSentence = word['exampleSentence'] as String?;
-    final difficulty = word['difficulty'] as String?;
-    final unit = word['unit'] as String?;
+  Widget _buildWordCard(VocabularyWord word) {
+    final wordText = word.word;
+    final translation = word.translation;
+    final definition = word.definition ?? '';
+    final partOfSpeech = word.partOfSpeech;
+    final exampleSentence = word.exampleSentence;
+    final difficulty = word.difficulty;
+    final unit = word.unit;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),

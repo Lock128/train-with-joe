@@ -211,6 +211,14 @@ class MockAuthService extends _i1.Mock implements _i3.AuthService {
           as _i10.Future<_i2.AuthUser>);
 
   @override
+  _i10.Future<String?> fetchUserEmail() =>
+      (super.noSuchMethod(
+            Invocation.method(#fetchUserEmail, []),
+            returnValue: _i10.Future<String?>.value(),
+          )
+          as _i10.Future<String?>);
+
+  @override
   _i10.Future<bool> isUserSignedIn() =>
       (super.noSuchMethod(
             Invocation.method(#isUserSignedIn, []),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/training_execution.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 
@@ -20,7 +21,7 @@ class TrainingResultsScreen extends StatefulWidget {
 }
 
 class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
-  Map<String, dynamic>? _execution;
+  TrainingExecution? _execution;
   bool _isLoading = true;
   bool _isRetrying = false;
 
@@ -35,7 +36,7 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
 
     // Try currentExecution first, otherwise fetch training to find execution
     final current = provider.currentExecution;
-    if (current != null && current['id'] == widget.executionId) {
+    if (current != null && current.id == widget.executionId) {
       setState(() { _execution = current; _isLoading = false; });
       return;
     }
@@ -44,11 +45,11 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
     if (!mounted) return;
 
     if (training != null) {
-      final executions = (training['executions'] as List<dynamic>?) ?? [];
+      final executions = training.executions;
       for (final exec in executions) {
-        final e = exec as Map<String, dynamic>;
-        if (e['id'] == widget.executionId) {
-          setState(() { _execution = e; _isLoading = false; });
+        if (exec.id == widget.executionId) {
+          // TrainingExecutionSummary doesn't have full results, but set what we can
+          setState(() { _isLoading = false; });
           return;
         }
       }
@@ -63,7 +64,7 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
     if (!mounted) return;
     setState(() => _isRetrying = false);
     if (execution != null) {
-      context.go('/trainings/${widget.trainingId}/execute/${execution['id']}');
+      context.go('/trainings/${widget.trainingId}/execute/${execution.id}');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(context.read<TrainingProvider>().error ?? 'Failed to start training'),
@@ -110,14 +111,14 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
       );
     }
 
-    final results = (_execution!['results'] as List<dynamic>?) ?? [];
-    final correctCount = _execution!['correctCount'] as int? ?? 0;
-    final incorrectCount = _execution!['incorrectCount'] as int? ?? 0;
+    final results = _execution!.results;
+    final correctCount = _execution!.correctCount;
+    final incorrectCount = _execution!.incorrectCount;
     final total = correctCount + incorrectCount;
     final accuracy = total > 0 ? (correctCount / total * 100).round() : 0;
     final duration = _formatDuration(
-      _execution!['startedAt'] as String?,
-      _execution!['completedAt'] as String?,
+      _execution!.startedAt?.toIso8601String(),
+      _execution!.completedAt?.toIso8601String(),
     );
 
     return Scaffold(
@@ -164,11 +165,11 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: results.length,
               itemBuilder: (context, index) {
-                final r = results[index] as Map<String, dynamic>;
-                final correct = r['correct'] as bool? ?? false;
-                final word = r['word'] as String? ?? '';
-                final expected = r['expectedAnswer'] as String? ?? '';
-                final userAnswer = r['userAnswer'] as String? ?? '';
+                final r = results[index];
+                final correct = r.correct;
+                final word = r.word;
+                final expected = r.expectedAnswer;
+                final userAnswer = r.userAnswer;
                 return ListTile(
                   leading: Icon(
                     correct ? Icons.check_circle : Icons.cancel,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/training_statistics.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 
@@ -13,13 +14,13 @@ class TrainingStatisticsScreen extends StatefulWidget {
 }
 
 class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
-  Map<String, dynamic>? _statistics;
+  TrainingOverviewStatistics? _statistics;
   bool _isLoading = true;
   String? _error;
   late DateTime _fromDate;
   late DateTime _toDate;
   String? _expandedDate;
-  Map<String, dynamic>? _dayStatistics;
+  DayStatistics? _dayStatistics;
   bool _isDayLoading = false;
 
   @override
@@ -132,12 +133,10 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
       );
     }
 
-    final totalTrainings = _statistics!['totalTrainings'] as int? ?? 0;
-    final totalTime = (_statistics!['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0;
-    final totalDays = _statistics!['totalDays'] as int? ?? 0;
-    final dailySummaries = List<Map<String, dynamic>>.from(
-      ((_statistics!['dailySummaries'] as List<dynamic>?) ?? []).map((e) => e as Map<String, dynamic>),
-    );
+    final totalTrainings = _statistics!.totalTrainings;
+    final totalTime = _statistics!.totalLearningTimeSeconds.toDouble();
+    final totalDays = _statistics!.totalDays;
+    final dailySummaries = _statistics!.dailySummaries;
 
     return RefreshIndicator(
       onRefresh: _loadData,
@@ -197,9 +196,9 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
                 itemBuilder: (context, index) {
                   // Show most recent first
                   final day = dailySummaries[dailySummaries.length - 1 - index];
-                  final date = day['date'] as String? ?? '--';
-                  final count = day['trainingCount'] as int? ?? 0;
-                  final time = (day['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0;
+                  final date = day.date;
+                  final count = day.trainingCount;
+                  final time = day.totalLearningTimeSeconds.toDouble();
                   final isExpanded = _expandedDate == date;
                   return Column(
                     children: [
@@ -240,7 +239,7 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
         child: Center(child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))),
       );
     }
-    final executions = (_dayStatistics?['executions'] as List<dynamic>?) ?? [];
+    final executions = _dayStatistics?.executions ?? [];
     if (executions.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -250,22 +249,21 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
     return Padding(
       padding: const EdgeInsets.only(left: 24, right: 8, bottom: 8),
       child: Column(
-        children: executions.map((e) {
-          final exec = e as Map<String, dynamic>;
-          final name = exec['trainingName'] as String? ?? 'Training';
-          final trainingId = exec['trainingId'] as String?;
-          final dur = (exec['durationSeconds'] as num?)?.toDouble() ?? 0;
-          final correct = exec['correctCount'] as int? ?? 0;
-          final incorrect = exec['incorrectCount'] as int? ?? 0;
+        children: executions.map((exec) {
+          final name = exec.trainingName ?? 'Training';
+          final trainingId = exec.trainingId;
+          final dur = exec.durationSeconds.toDouble();
+          final correct = exec.correctCount;
+          final incorrect = exec.incorrectCount;
           final total = correct + incorrect;
           final acc = total > 0 ? (correct / total * 100).round() : 0;
           return ListTile(
             dense: true,
             leading: Icon(Icons.fitness_center, size: 18, color: Theme.of(context).colorScheme.primary),
             title: Text(name, overflow: TextOverflow.ellipsis),
-            subtitle: Text('${_formatTime(exec['startedAt'] as String?)}  ·  ${_formatDuration(dur)}  ·  $acc%'),
+            subtitle: Text('${_formatTime(exec.startedAt?.toIso8601String())}  ·  ${_formatDuration(dur)}  ·  $acc%'),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-            onTap: trainingId != null ? () => context.go('/trainings/$trainingId') : null,
+            onTap: trainingId.isNotEmpty ? () => context.go('/trainings/$trainingId') : null,
           );
         }).toList(),
       ),

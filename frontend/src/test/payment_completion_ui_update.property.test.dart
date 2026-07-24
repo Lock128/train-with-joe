@@ -69,6 +69,7 @@ void main() {
 
           // Mock auth state
           when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
           when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
           final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -154,6 +155,7 @@ void main() {
           );
 
           when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
           when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
           final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -229,6 +231,7 @@ void main() {
           );
 
           when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
           when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
           final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -301,6 +304,7 @@ void main() {
           );
 
           when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
           when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
           final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -364,6 +368,7 @@ void main() {
           );
 
           when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
           when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
           final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -426,6 +431,7 @@ void main() {
       );
 
       when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -474,6 +480,7 @@ void main() {
       );
 
       when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -519,6 +526,7 @@ void main() {
       );
 
       when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -562,6 +570,7 @@ void main() {
       );
 
       when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       final authProvider = app.AuthProvider(authService: mockAuthService);
@@ -616,6 +625,7 @@ void main() {
       );
 
       when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => true);
+          when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
       when(mockAuthService.getCurrentUser()).thenAnswer((_) async => mockUser);
 
       final authProvider = app.AuthProvider(authService: mockAuthService);

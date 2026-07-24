@@ -138,6 +138,25 @@ class AuthService {
     }
   }
 
+  /// Fetch the current user's email from Cognito user attributes.
+  /// This is reliable on all platforms (web, iOS, Android).
+  Future<String?> fetchUserEmail() async {
+    try {
+      final attributes = await Amplify.Auth.fetchUserAttributes();
+      final emailAttr = attributes.firstWhere(
+        (attr) => attr.userAttributeKey == AuthUserAttributeKey.email,
+        orElse: () => AuthUserAttribute(
+          userAttributeKey: AuthUserAttributeKey.email,
+          value: '',
+        ),
+      );
+      return emailAttr.value.isNotEmpty ? emailAttr.value : null;
+    } on AuthException catch (e) {
+      debugPrint('Error fetching user email: ${e.message}');
+      return null;
+    }
+  }
+
   /// Check if a user is currently signed in
   Future<bool> isUserSignedIn() async {
     try {

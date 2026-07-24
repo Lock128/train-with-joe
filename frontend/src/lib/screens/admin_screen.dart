@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../domain/models/user.dart';
+import '../domain/models/training_statistics.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/training_provider.dart';
 import '../providers/user_provider.dart';
@@ -88,7 +90,7 @@ class _UsersTab extends StatefulWidget {
 }
 
 class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin {
-  List<Map<String, dynamic>> _allUsers = [];
+  List<AppUser> _allUsers = [];
   bool _isLoading = true;
   String _searchQuery = '';
   final _searchController = TextEditingController();
@@ -123,27 +125,27 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
     }
   }
 
-  List<Map<String, dynamic>> get _filteredUsers {
+  List<AppUser> get _filteredUsers {
     if (_searchQuery.isEmpty) return _allUsers;
     final q = _searchQuery.toLowerCase();
     return _allUsers.where((u) {
-      final email = (u['email'] as String? ?? '').toLowerCase();
-      final name = (u['name'] as String? ?? '').toLowerCase();
-      final id = (u['id'] as String? ?? '').toLowerCase();
+      final email = (u.email ?? '').toLowerCase();
+      final name = (u.name ?? '').toLowerCase();
+      final id = u.id.toLowerCase();
       return email.contains(q) || name.contains(q) || id.contains(q);
     }).toList();
   }
 
-  String _userLabel(Map<String, dynamic> user) {
-    final email = user['email'] as String? ?? '';
-    final name = user['name'] as String?;
+  String _userLabel(AppUser user) {
+    final email = user.email ?? '';
+    final name = user.name;
     return name != null && name.isNotEmpty ? '$name ($email)' : email;
   }
 
-  String _tierSourceLabel(Map<String, dynamic> user) {
-    final tierSource = user['tierSource'] as String?;
+  String _tierSourceLabel(AppUser user) {
+    final tierSource = user.tierSource;
     if (tierSource == 'MANUAL') return 'Manual';
-    final provider = user['subscriptionProvider'] as String?;
+    final provider = user.subscriptionProvider;
     if (provider != null && provider.isNotEmpty) {
       switch (provider) {
         case 'STRIPE':
@@ -208,9 +210,9 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
     if (updatedUser != null) {
       // Update the user in the local list
       setState(() {
-        final idx = _allUsers.indexWhere((u) => u['id'] == userId);
+        final idx = _allUsers.indexWhere((u) => u.id == userId);
         if (idx >= 0) {
-          _allUsers[idx] = {..._allUsers[idx], ...updatedUser};
+          _allUsers[idx] = updatedUser;
         }
         _selectedTiers.remove(userId);
         _applyingTier.remove(userId);
@@ -299,8 +301,8 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                     itemBuilder: (context, index) {
                       final user = users[index];
                       final label = _userLabel(user);
-                      final id = user['id'] as String? ?? '';
-                      final tier = user['tier'] as String? ?? 'FREE';
+                      final id = user.id;
+                      final tier = user.tier.name.toUpperCase();
                       final tierSourceLabel = _tierSourceLabel(user);
                       final isApplying = _applyingTier.contains(id);
                       final selectedTier = _selectedTiers[id];
@@ -403,13 +405,13 @@ class _UserStatisticsDetail extends StatefulWidget {
 }
 
 class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
-  Map<String, dynamic>? _statistics;
+  TrainingOverviewStatistics? _statistics;
   bool _isLoading = true;
   String? _error;
   late DateTime _fromDate;
   late DateTime _toDate;
   String? _expandedDate;
-  Map<String, dynamic>? _dayStatistics;
+  DayStatistics? _dayStatistics;
   bool _isDayLoading = false;
 
   @override
@@ -516,12 +518,10 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
       );
     }
 
-    final totalTrainings = _statistics!['totalTrainings'] as int? ?? 0;
-    final totalTime = (_statistics!['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0;
-    final totalDays = _statistics!['totalDays'] as int? ?? 0;
-    final dailySummaries = List<Map<String, dynamic>>.from(
-      ((_statistics!['dailySummaries'] as List<dynamic>?) ?? []).map((e) => e as Map<String, dynamic>),
-    );
+    final totalTrainings = _statistics!.totalTrainings;
+    final totalTime = _statistics!.totalLearningTimeSeconds.toDouble();
+    final totalDays = _statistics!.totalDays;
+    final dailySummaries = _statistics!.dailySummaries;
 
     return RefreshIndicator(
       onRefresh: _loadData,
@@ -576,9 +576,9 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
                 separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final day = dailySummaries[dailySummaries.length - 1 - index];
-                  final date = day['date'] as String? ?? '--';
-                  final count = day['trainingCount'] as int? ?? 0;
-                  final time = (day['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0;
+                  final date = day.date;
+                  final count = day.trainingCount;
+                  final time = day.totalLearningTimeSeconds.toDouble();
                   final isExpanded = _expandedDate == date;
                   return Column(
                     children: [
@@ -621,7 +621,7 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
         child: Center(child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))),
       );
     }
-    final executions = (_dayStatistics?['executions'] as List<dynamic>?) ?? [];
+    final executions = _dayStatistics?.executions ?? [];
     if (executions.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -631,19 +631,18 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
     return Padding(
       padding: const EdgeInsets.only(left: 24, right: 8, bottom: 8),
       child: Column(
-        children: executions.map((e) {
-          final exec = e as Map<String, dynamic>;
-          final name = exec['trainingName'] as String? ?? 'Training';
-          final dur = (exec['durationSeconds'] as num?)?.toDouble() ?? 0;
-          final correct = exec['correctCount'] as int? ?? 0;
-          final incorrect = exec['incorrectCount'] as int? ?? 0;
+        children: executions.map((exec) {
+          final name = exec.trainingName ?? 'Training';
+          final dur = exec.durationSeconds.toDouble();
+          final correct = exec.correctCount;
+          final incorrect = exec.incorrectCount;
           final total = correct + incorrect;
           final acc = total > 0 ? (correct / total * 100).round() : 0;
           return ListTile(
             dense: true,
             leading: Icon(Icons.fitness_center, size: 18, color: Theme.of(context).colorScheme.primary),
             title: Text(name, overflow: TextOverflow.ellipsis),
-            subtitle: Text('${_formatTime(exec['startedAt'] as String?)}  ·  ${_formatDuration(dur)}  ·  $acc%'),
+            subtitle: Text('${_formatTime(exec.startedAt?.toIso8601String())}  ·  ${_formatDuration(dur)}  ·  $acc%'),
           );
         }).toList(),
       ),
@@ -677,16 +676,16 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
   final _userIdController = TextEditingController();
   String? _activeUserId;
   String? _activeUserLabel;
-  Map<String, dynamic>? _statistics;
+  TrainingOverviewStatistics? _statistics;
   bool _isLoading = false;
   String? _error;
   late DateTime _fromDate;
   late DateTime _toDate;
   String? _expandedDate;
-  Map<String, dynamic>? _dayStatistics;
+  DayStatistics? _dayStatistics;
   bool _isDayLoading = false;
 
-  List<Map<String, dynamic>> _allUsers = [];
+  List<AppUser> _allUsers = [];
   bool _usersLoaded = false;
 
   @override
@@ -723,9 +722,9 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
     String? resolvedId;
     String label = userId;
     for (final u in _allUsers) {
-      final uid = u['id'] as String? ?? '';
-      final email = u['email'] as String? ?? '';
-      final name = u['name'] as String?;
+      final uid = u.id;
+      final email = u.email ?? '';
+      final name = u.name;
       if (uid == userId || email == userId) {
         resolvedId = uid;
         label = name != null && name.isNotEmpty ? '$name ($email)' : email;
@@ -802,24 +801,24 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
           child: Row(
             children: [
               Expanded(
-                child: Autocomplete<Map<String, dynamic>>(
+                child: Autocomplete<AppUser>(
                   displayStringForOption: (user) {
-                    final email = user['email'] as String? ?? '';
-                    final name = user['name'] as String?;
+                    final email = user.email ?? '';
+                    final name = user.name;
                     return name != null && name.isNotEmpty ? '$name ($email)' : email;
                   },
                   optionsBuilder: (textEditingValue) {
                     final query = textEditingValue.text.toLowerCase();
                     if (query.isEmpty) return _allUsers;
                     return _allUsers.where((u) {
-                      final email = (u['email'] as String? ?? '').toLowerCase();
-                      final name = (u['name'] as String? ?? '').toLowerCase();
-                      final id = (u['id'] as String? ?? '').toLowerCase();
+                      final email = (u.email ?? '').toLowerCase();
+                      final name = (u.name ?? '').toLowerCase();
+                      final id = u.id.toLowerCase();
                       return email.contains(query) || name.contains(query) || id.contains(query);
                     });
                   },
                   onSelected: (user) {
-                    final userId = user['id'] as String? ?? '';
+                    final userId = user.id;
                     _userIdController.text = userId;
                     _loadData(userId);
                   },
@@ -880,12 +879,10 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
       );
     }
 
-    final totalTrainings = _statistics!['totalTrainings'] as int? ?? 0;
-    final totalTime = (_statistics!['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0;
-    final totalDays = _statistics!['totalDays'] as int? ?? 0;
-    final dailySummaries = List<Map<String, dynamic>>.from(
-      ((_statistics!['dailySummaries'] as List<dynamic>?) ?? []).map((e) => e as Map<String, dynamic>),
-    );
+    final totalTrainings = _statistics!.totalTrainings;
+    final totalTime = _statistics!.totalLearningTimeSeconds.toDouble();
+    final totalDays = _statistics!.totalDays;
+    final dailySummaries = _statistics!.dailySummaries;
 
     return RefreshIndicator(
       onRefresh: _loadData,
@@ -941,9 +938,9 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
                 separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final day = dailySummaries[dailySummaries.length - 1 - index];
-                  final date = day['date'] as String? ?? '--';
-                  final count = day['trainingCount'] as int? ?? 0;
-                  final time = (day['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0;
+                  final date = day.date;
+                  final count = day.trainingCount;
+                  final time = day.totalLearningTimeSeconds.toDouble();
                   final isExpanded = _expandedDate == date;
                   return Column(
                     children: [
@@ -986,7 +983,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
         child: Center(child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))),
       );
     }
-    final executions = (_dayStatistics?['executions'] as List<dynamic>?) ?? [];
+    final executions = _dayStatistics?.executions ?? [];
     if (executions.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -996,19 +993,18 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
     return Padding(
       padding: const EdgeInsets.only(left: 24, right: 8, bottom: 8),
       child: Column(
-        children: executions.map((e) {
-          final exec = e as Map<String, dynamic>;
-          final name = exec['trainingName'] as String? ?? 'Training';
-          final dur = (exec['durationSeconds'] as num?)?.toDouble() ?? 0;
-          final correct = exec['correctCount'] as int? ?? 0;
-          final incorrect = exec['incorrectCount'] as int? ?? 0;
+        children: executions.map((exec) {
+          final name = exec.trainingName ?? 'Training';
+          final dur = exec.durationSeconds.toDouble();
+          final correct = exec.correctCount;
+          final incorrect = exec.incorrectCount;
           final total = correct + incorrect;
           final acc = total > 0 ? (correct / total * 100).round() : 0;
           return ListTile(
             dense: true,
             leading: Icon(Icons.fitness_center, size: 18, color: Theme.of(context).colorScheme.primary),
             title: Text(name, overflow: TextOverflow.ellipsis),
-            subtitle: Text('${_formatTime(exec['startedAt'] as String?)}  ·  ${_formatDuration(dur)}  ·  $acc%'),
+            subtitle: Text('${_formatTime(exec.startedAt?.toIso8601String())}  ·  ${_formatDuration(dur)}  ·  $acc%'),
           );
         }).toList(),
       ),
@@ -1239,7 +1235,7 @@ class _MigrateDataTab extends StatefulWidget {
 }
 
 class _MigrateDataTabState extends State<_MigrateDataTab> with AutomaticKeepAliveClientMixin {
-  List<Map<String, dynamic>> _allUsers = [];
+  List<AppUser> _allUsers = [];
   bool _usersLoaded = false;
 
   String? _sourceUserId;
@@ -1261,9 +1257,9 @@ class _MigrateDataTabState extends State<_MigrateDataTab> with AutomaticKeepAliv
     if (mounted) setState(() { _allUsers = users; _usersLoaded = true; });
   }
 
-  String _userLabel(Map<String, dynamic> user) {
-    final email = user['email'] as String? ?? '';
-    final name = user['name'] as String?;
+  String _userLabel(AppUser user) {
+    final email = user.email ?? '';
+    final name = user.name;
     return name != null && name.isNotEmpty ? '$name ($email)' : email;
   }
 
@@ -1369,19 +1365,19 @@ class _MigrateDataTabState extends State<_MigrateDataTab> with AutomaticKeepAliv
     required IconData icon,
     required ValueChanged<String> onSelected,
   }) {
-    return Autocomplete<Map<String, dynamic>>(
+    return Autocomplete<AppUser>(
       displayStringForOption: _userLabel,
       optionsBuilder: (textEditingValue) {
         final query = textEditingValue.text.toLowerCase();
         if (query.isEmpty) return _allUsers;
         return _allUsers.where((u) {
-          final email = (u['email'] as String? ?? '').toLowerCase();
-          final name = (u['name'] as String? ?? '').toLowerCase();
-          final id = (u['id'] as String? ?? '').toLowerCase();
+          final email = (u.email ?? '').toLowerCase();
+          final name = (u.name ?? '').toLowerCase();
+          final id = u.id.toLowerCase();
           return email.contains(query) || name.contains(query) || id.contains(query);
         });
       },
-      onSelected: (user) => onSelected(user['id'] as String? ?? ''),
+      onSelected: (user) => onSelected(user.id),
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         return TextField(
           controller: controller,

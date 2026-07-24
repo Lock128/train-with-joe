@@ -1,32 +1,46 @@
 import 'package:flutter/foundation.dart';
-import '../services/api_service.dart';
+import '../data/repositories/user_repository.dart';
+import '../domain/models/user.dart';
+import '../domain/result.dart';
 import '../providers/auth_provider.dart';
 
-/// Provider for managing user data
+/// Provider for managing user data.
+///
+/// Delegates data fetching to [UserRepository] and exposes typed [AppUser]
+/// state to the UI layer.
 class UserProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
-  
-  Map<String, dynamic>? _user;
+  final UserRepository _repository;
+
+  AppUser? _user;
   bool _isLoading = false;
   String? _error;
   AuthProvider? _authProvider;
 
-  static const _adminEmails = ['johannes.koch@gmail.com', 'lockhead+joe1@lockhead.info', 'lockhead@lockhead.info'];
+  static const _adminEmails = [
+    'johannes.koch@gmail.com',
+    'lockhead+joe1@lockhead.info',
+    'lockhead@lockhead.info',
+  ];
 
-  Map<String, dynamic>? get user => _user;
+  UserProvider({UserRepository? repository})
+      : _repository = repository ?? UserRepository();
+
+  /// The current user's typed domain model.
+  AppUser? get user => _user;
+
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  /// Whether the current user is an admin or not
+  /// Whether the current user is an admin.
   bool get isAdmin {
-    // Try DB email first, fall back to Cognito username (which is the email for email-based auth)
-    final email = (_user?['email'] as String?) ?? _authProvider?.currentUser?.username;
+    final email = _user?.email
+        ?? _authProvider?.cognitoEmail
+        ?? _authProvider?.currentUser?.username;
     final trimmedEmail = email?.trim().toLowerCase();
-    debugPrint('[UserProvider] isAdmin check — raw email: "$email", trimmed: "$trimmedEmail", adminList: $_adminEmails, match: ${trimmedEmail != null && _adminEmails.contains(trimmedEmail)}');
     return trimmedEmail != null && _adminEmails.contains(trimmedEmail);
   }
 
-  /// Update auth provider reference
+  /// Update auth provider reference.
   void updateAuth(AuthProvider authProvider) {
     _authProvider = authProvider;
     if (authProvider.isAuthenticated && _user == null) {
@@ -34,7 +48,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  /// Load user data from API
+  /// Load user data from API.
   Future<void> loadUser() async {
     if (_authProvider == null || !_authProvider!.isAuthenticated) {
       return;
@@ -50,32 +64,16 @@ class UserProvider extends ChangeNotifier {
         throw Exception('No user ID available');
       }
 
-      const query = '''
-        query GetUser(\$id: ID!) {
-          getUser(id: \$id) {
-            id
-            email
-            name
-            subscriptionStatus
-            subscriptionProvider
-            tier
-            tierSource
-            createdAt
-            updatedAt
-          }
-        }
-      ''';
-
-      final response = await _apiService.query(
-        query,
-        variables: {'id': userId},
-      );
-
-      _user = response['getUser'] as Map<String, dynamic>?;
-      _error = null;
-
-      // Auto-repair: if DB email is missing but we have it from Cognito, backfill it
-      await _autoRepairEmail();
+      final result = await _repository.getUser(userId);
+      switch (result) {
+        case Success(:final value):
+          _user = value;
+          _error = null;
+          await _autoRepairEmail();
+        case Failure(:final error):
+          _error = error;
+          _user = null;
+      }
     } catch (e) {
       debugPrint('Error loading user: $e');
       _error = e.toString();
@@ -86,52 +84,27 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  /// Update user data
+  /// Update user data.
   Future<bool> updateUser(String userId, {String? name, String? email}) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      const mutation = '''
-        mutation UpdateUser(\$input: UpdateUserInput!) {
-          updateUser(input: \$input) {
-            success
-            user {
-              id
-              email
-              name
-              subscriptionStatus
-              subscriptionProvider
-              tier
-              tierSource
-              createdAt
-              updatedAt
-            }
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {
-            'id': userId,
-            if (name != null) 'name': name,
-            if (email != null) 'email': email,
-          },
-        },
-      );
-
-      final result = response['updateUser'] as Map<String, dynamic>?;
-      if (result != null && result['success'] == true) {
-        _user = result['user'] as Map<String, dynamic>?;
+      final result = await _repository.updateUser(userId, name: name, email: email);
+      switch (result) {
+        case Success(:final value):
+          _user = value;
+          _error = null;
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        case Failure(:final error):
+          _error = error;
+          _isLoading = false;
+          notifyListeners();
+          return false;
       }
-      _error = null;
-      _isLoading = false;
-      notifyListeners();
-      return true;
     } catch (e) {
       debugPrint('Error updating user: $e');
       _error = e.toString();
@@ -141,177 +114,70 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  /// Auto-repair: backfill email in DynamoDB if missing
+  /// Auto-repair: backfill email in DynamoDB if missing.
   Future<void> _autoRepairEmail() async {
     if (_user == null) return;
-    final dbEmail = _user!['email'] as String?;
+    final dbEmail = _user!.email;
     final cognitoEmail = _authProvider?.currentUser?.username;
-    if ((dbEmail == null || dbEmail.isEmpty) && cognitoEmail != null && cognitoEmail.isNotEmpty) {
-      debugPrint('[UserProvider] Auto-repairing missing email in DB with Cognito email: $cognitoEmail');
-      final userId = _user!['id'] as String?;
-      if (userId != null) {
-        await updateUser(userId, email: cognitoEmail);
-      }
+    if ((dbEmail == null || dbEmail.isEmpty) &&
+        cognitoEmail != null &&
+        cognitoEmail.isNotEmpty) {
+      debugPrint(
+          '[UserProvider] Auto-repairing missing email in DB with Cognito email: $cognitoEmail');
+      await updateUser(_user!.id, email: cognitoEmail);
     }
   }
 
-  /// Fetch all users (admin only). Returns a list of {id, email, name, tier, tierSource, subscriptionProvider}.
-  Future<List<Map<String, dynamic>>> getUsers() async {
-    try {
-      const query = '''
-        query GetUsers {
-          getUsers {
-            id
-            email
-            name
-            tier
-            tierSource
-            subscriptionProvider
-          }
-        }
-      ''';
-      final response = await _apiService.query(query);
-      final list = response['getUsers'] as List<dynamic>?;
-      if (list == null) return [];
-      return list.cast<Map<String, dynamic>>();
-    } catch (e) {
-      debugPrint('Error fetching users: $e');
-      return [];
-    }
+  /// Fetch all users (admin only).
+  Future<List<AppUser>> getUsers() async {
+    final result = await _repository.getUsers();
+    return result.valueOrNull ?? [];
   }
 
-  /// Admin set user tier (admin only). Returns the updated user or null on failure.
-  Future<Map<String, dynamic>?> adminSetUserTier(String userId, String tier) async {
-    try {
-      const mutation = '''
-        mutation AdminSetUserTier(\$input: AdminSetUserTierInput!) {
-          adminSetUserTier(input: \$input) {
-            success
-            user {
-              id
-              email
-              name
-              tier
-              tierSource
-              subscriptionProvider
-              createdAt
-              updatedAt
-            }
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {
-            'userId': userId,
-            'tier': tier,
-          },
-        },
-      );
-
-      final result = response['adminSetUserTier'] as Map<String, dynamic>?;
-      if (result != null && result['success'] == true) {
-        return result['user'] as Map<String, dynamic>?;
-      }
-      debugPrint('adminSetUserTier failed: ${result?['error']}');
-      return null;
-    } catch (e) {
-      debugPrint('Error setting user tier: $e');
-      return null;
-    }
+  /// Admin set user tier (admin only).
+  Future<AppUser?> adminSetUserTier(String userId, String tier) async {
+    final result = await _repository.adminSetUserTier(userId, tier);
+    return result.valueOrNull;
   }
 
-  /// Fetch tier statistics (admin only). Returns list of {tier, subscriptionCount, manualCount, totalCount}.
+  /// Fetch tier statistics (admin only).
   Future<List<Map<String, dynamic>>> getTierStatistics() async {
-    try {
-      const query = '''
-        query GetTierStatistics {
-          getTierStatistics {
-            success
-            statistics {
-              tier
-              subscriptionCount
-              manualCount
-              totalCount
-            }
-            error
-          }
-        }
-      ''';
-      final response = await _apiService.query(query);
-      final result = response['getTierStatistics'] as Map<String, dynamic>?;
-      if (result != null && result['success'] == true) {
-        final list = result['statistics'] as List<dynamic>?;
-        if (list == null) return [];
-        return list.cast<Map<String, dynamic>>();
-      }
-      debugPrint('getTierStatistics failed: ${result?['error']}');
-      return [];
-    } catch (e) {
-      debugPrint('Error fetching tier statistics: $e');
-      return [];
-    }
+    final result = await _repository.getTierStatistics();
+    return result.valueOrNull ?? [];
   }
 
-  /// Migrate vocabulary lists, trainings, and executions from one user to another (admin only).
-  /// Returns the response map with success, counts, and error.
-  Future<Map<String, dynamic>?> migrateUserData(String sourceUserId, String targetUserId) async {
-    try {
-      const mutation = '''
-        mutation MigrateUserData(\$input: MigrateUserDataInput!) {
-          migrateUserData(input: \$input) {
-            success
-            migratedVocabularyLists
-            migratedTrainings
-            migratedExecutions
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(
-        mutation,
-        variables: {
-          'input': {
-            'sourceUserId': sourceUserId,
-            'targetUserId': targetUserId,
-          },
-        },
-      );
-
-      return response['migrateUserData'] as Map<String, dynamic>?;
-    } catch (e) {
-      debugPrint('Error migrating user data: $e');
-      return {'success': false, 'error': e.toString(), 'migratedVocabularyLists': 0, 'migratedTrainings': 0, 'migratedExecutions': 0};
+  /// Migrate data from one user to another (admin only).
+  Future<Map<String, dynamic>?> migrateUserData(
+    String sourceUserId,
+    String targetUserId,
+  ) async {
+    final result = await _repository.migrateUserData(sourceUserId, targetUserId);
+    switch (result) {
+      case Success(:final value):
+        return value;
+      case Failure(:final error):
+        return {
+          'success': false,
+          'error': error,
+          'migratedVocabularyLists': 0,
+          'migratedTrainings': 0,
+          'migratedExecutions': 0,
+        };
     }
   }
 
   /// Sync Cognito users missing from DynamoDB (admin only).
-  /// Returns {success, createdCount, error}.
   Future<Map<String, dynamic>?> syncMissingUsers() async {
-    try {
-      const mutation = '''
-        mutation SyncMissingUsers {
-          syncMissingUsers {
-            success
-            createdCount
-            error
-          }
-        }
-      ''';
-
-      final response = await _apiService.mutate(mutation);
-      return response['syncMissingUsers'] as Map<String, dynamic>?;
-    } catch (e) {
-      debugPrint('Error syncing missing users: $e');
-      return {'success': false, 'createdCount': 0, 'error': e.toString()};
+    final result = await _repository.syncMissingUsers();
+    switch (result) {
+      case Success(:final value):
+        return {'success': true, 'createdCount': value};
+      case Failure(:final error):
+        return {'success': false, 'createdCount': 0, 'error': error};
     }
   }
 
-  /// Clear user data (on sign out)
+  /// Clear user data (on sign out).
   void clear() {
     _user = null;
     _error = null;

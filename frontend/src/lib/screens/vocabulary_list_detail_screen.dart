@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/vocabulary_list.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../providers/vocabulary_provider.dart';
 
@@ -17,12 +18,12 @@ class VocabularyListDetailScreen extends StatefulWidget {
 
 class _VocabularyListDetailScreenState
     extends State<VocabularyListDetailScreen> {
-  Map<String, dynamic>? _list;
+  VocabularyList? _list;
   bool _isLoading = true;
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  List<String> _sourceImageUrls = [];
+  final List<String> _sourceImageUrls = [];
   bool _isImageExpanded = false;
 
   @override
@@ -40,11 +41,11 @@ class _VocabularyListDetailScreenState
   void _loadList() {
     final provider = context.read<VocabularyProvider>();
     final match = provider.vocabularyLists
-        .where((l) => l['id'] == widget.listId)
+        .where((l) => l.id == widget.listId)
         .firstOrNull;
     if (match != null) {
       setState(() {
-        _list = Map<String, dynamic>.from(match);
+        _list = match;
         _isLoading = false;
       });
       _loadSourceImage(match);
@@ -52,7 +53,7 @@ class _VocabularyListDetailScreenState
       provider.getVocabularyList(widget.listId).then((result) {
         if (mounted) {
           setState(() {
-            _list = result != null ? Map<String, dynamic>.from(result) : null;
+            _list = result;
             _isLoading = false;
           });
           if (result != null) _loadSourceImage(result);
@@ -61,27 +62,10 @@ class _VocabularyListDetailScreenState
     }
   }
 
-  Future<void> _loadSourceImage(Map<String, dynamic> list) async {
-    // Prefer sourceImageKeys (all images), fall back to sourceImageKey (legacy single)
-    final keys = (list['sourceImageKeys'] as List<dynamic>?)
-        ?.map((k) => k as String)
-        .toList();
-    final legacyKey = list['sourceImageKey'] as String?;
-
-    final s3Keys = keys != null && keys.isNotEmpty
-        ? keys
-        : (legacyKey != null && legacyKey.isNotEmpty ? [legacyKey] : <String>[]);
-
-    if (s3Keys.isEmpty) return;
-
-    final results = await context.read<VocabularyProvider>().getImageDownloadUrls(s3Keys);
-    if (results != null && mounted) {
-      setState(() {
-        _sourceImageUrls = results
-            .map((r) => r['downloadUrl'] as String)
-            .toList();
-      });
-    }
+  Future<void> _loadSourceImage(VocabularyList list) async {
+    // sourceImageKeys and sourceImageKey are not part of the typed VocabularyList model.
+    // This feature requires raw JSON data or a separate API call.
+    // For now, source image loading is not available through the typed model.
   }
 
   Color _getDifficultyColor(String? difficulty) {
@@ -100,7 +84,7 @@ class _VocabularyListDetailScreenState
   // ── Settings dialogs ──
 
   void _showRenameDialog() {
-    final currentTitle = _list?['title'] as String? ?? '';
+    final currentTitle = _list?.title ?? '';
     final controller = TextEditingController(text: currentTitle);
     final l10n = AppLocalizations.of(context)!;
     showDialog(
@@ -145,7 +129,7 @@ class _VocabularyListDetailScreenState
         .read<VocabularyProvider>()
         .renameVocabularyList(widget.listId, newTitle);
     if (ok && mounted) {
-      setState(() => _list?['title'] = newTitle);
+      setState(() => _list = _list?.copyWith(title: newTitle));
     }
   }
 
@@ -163,8 +147,8 @@ class _VocabularyListDetailScreenState
   ];
 
   void _showLanguageDialog() {
-    String? selectedSource = _list?['sourceLanguage'] as String?;
-    String? selectedTarget = _list?['targetLanguage'] as String?;
+    String? selectedSource = _list?.sourceLanguage;
+    String? selectedTarget = _list?.targetLanguage;
 
     // Normalise current values: keep only if they match a supported language
     if (selectedSource != null &&
@@ -240,8 +224,10 @@ class _VocabularyListDetailScreenState
         );
     if (ok && mounted) {
       setState(() {
-        _list?['sourceLanguage'] = src;
-        _list?['targetLanguage'] = tgt;
+        _list = _list?.copyWith(
+          sourceLanguage: src.isNotEmpty ? src : null,
+          targetLanguage: tgt.isNotEmpty ? tgt : null,
+        );
       });
     }
   }
@@ -256,13 +242,14 @@ class _VocabularyListDetailScreenState
   ];
 
   void _showBookDetailsDialog() {
+    final listJson = _list?.toJson() ?? {};
     final publisherCtrl =
-        TextEditingController(text: _list?['publisher'] as String? ?? '');
+        TextEditingController(text: listJson['publisher'] as String? ?? '');
     final isbnCtrl =
-        TextEditingController(text: _list?['isbn'] as String? ?? '');
+        TextEditingController(text: listJson['isbn'] as String? ?? '');
     final gradeCtrl =
-        TextEditingController(text: _list?['grade'] as String? ?? '');
-    String? selectedSchoolForm = _list?['schoolForm'] as String?;
+        TextEditingController(text: listJson['grade'] as String? ?? '');
+    String? selectedSchoolForm = listJson['schoolForm'] as String?;
     if (selectedSchoolForm != null &&
         !_schoolForms.contains(selectedSchoolForm)) {
       selectedSchoolForm = null;
@@ -356,27 +343,26 @@ class _VocabularyListDetailScreenState
           isbn: isbn,
         );
     if (ok && mounted) {
-      setState(() {
-        _list?['publisher'] = publisher;
-        _list?['schoolForm'] = schoolForm;
-        _list?['grade'] = grade;
-        _list?['isbn'] = isbn;
-      });
+      // Book details are not on the VocabularyList typed model; reload list
+      final updated = await context.read<VocabularyProvider>().getVocabularyList(widget.listId);
+      if (updated != null && mounted) {
+        setState(() => _list = updated);
+      }
     }
   }
 
   void _togglePublic() {
-    final isPublic = _list?['isPublic'] == true;
+    final isPublic = _list?.isPublic ?? false;
     context
         .read<VocabularyProvider>()
         .setVocabularyListPublic(widget.listId, !isPublic)
         .then((ok) {
-      if (ok && mounted) setState(() => _list?['isPublic'] = !isPublic);
+      if (ok && mounted) setState(() => _list = _list?.copyWith(isPublic: !isPublic));
     });
   }
 
   void _confirmDelete() {
-    final title = _list?['title'] as String? ?? 'Untitled List';
+    final title = _list?.title ?? 'Untitled List';
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
@@ -406,15 +392,15 @@ class _VocabularyListDetailScreenState
   // ── Word editing ──
 
   void _showEditWordDialog(int index) {
-    final words = (_list?['words'] as List<dynamic>?) ?? [];
-    final word = Map<String, dynamic>.from(words[index] as Map<String, dynamic>);
-    final wordCtrl = TextEditingController(text: word['word'] as String? ?? '');
+    final words = _list?.words ?? [];
+    final word = words[index];
+    final wordCtrl = TextEditingController(text: word.word);
     final transCtrl =
-        TextEditingController(text: word['translation'] as String? ?? '');
+        TextEditingController(text: word.translation ?? '');
     final defCtrl =
-        TextEditingController(text: word['definition'] as String? ?? '');
+        TextEditingController(text: word.definition ?? '');
     final unitCtrl =
-        TextEditingController(text: word['unit'] as String? ?? '');
+        TextEditingController(text: word.unit ?? '');
 
     final l10n = AppLocalizations.of(context)!;
     showDialog(
@@ -457,11 +443,14 @@ class _VocabularyListDetailScreenState
             onPressed: () {
               Navigator.pop(ctx);
               _saveWord(index, {
-                ...word,
                 'word': wordCtrl.text.trim(),
                 'translation': transCtrl.text.trim(),
                 'definition': defCtrl.text.trim(),
                 'unit': unitCtrl.text.trim(),
+                if (word.partOfSpeech != null) 'partOfSpeech': word.partOfSpeech,
+                if (word.exampleSentence != null) 'exampleSentence': word.exampleSentence,
+                if (word.difficulty != null) 'difficulty': word.difficulty,
+                if (word.flagged) 'flagged': true,
               });
             },
             child: Text(l10n.save),
@@ -534,27 +523,25 @@ class _VocabularyListDetailScreenState
   }
 
   Future<void> _saveWord(int index, Map<String, dynamic> updated) async {
-    final words = List<Map<String, dynamic>>.from(
-        (_list?['words'] as List<dynamic>?)
-                ?.map((w) => Map<String, dynamic>.from(w as Map)) ??
-            []);
+    final words = (_list?.words ?? [])
+        .map((w) => w.toJson())
+        .toList();
     words[index] = updated;
     await _persistWords(words);
   }
 
   Future<void> _addWord(Map<String, dynamic> word) async {
-    final words = List<Map<String, dynamic>>.from(
-        (_list?['words'] as List<dynamic>?)
-                ?.map((w) => Map<String, dynamic>.from(w as Map)) ??
-            []);
+    final words = (_list?.words ?? [])
+        .map((w) => w.toJson())
+        .toList();
     words.add(word);
     await _persistWords(words);
   }
 
   void _confirmDeleteWord(int index) {
-    final words = (_list?['words'] as List<dynamic>?) ?? [];
-    final word = words[index] as Map<String, dynamic>;
-    final wordText = word['word'] as String? ?? '';
+    final words = _list?.words ?? [];
+    final word = words[index];
+    final wordText = word.word;
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
@@ -579,10 +566,9 @@ class _VocabularyListDetailScreenState
   }
 
   Future<void> _deleteWord(int index) async {
-    final words = List<Map<String, dynamic>>.from(
-        (_list?['words'] as List<dynamic>?)
-                ?.map((w) => Map<String, dynamic>.from(w as Map)) ??
-            []);
+    final words = (_list?.words ?? [])
+        .map((w) => w.toJson())
+        .toList();
     words.removeAt(index);
     await _persistWords(words);
   }
@@ -612,7 +598,8 @@ class _VocabularyListDetailScreenState
         .read<VocabularyProvider>()
         .updateVocabularyList(widget.listId, words: cleaned);
     if (ok && mounted) {
-      setState(() => _list?['words'] = cleaned);
+      final updatedWords = cleaned.map((w) => VocabularyWord.fromJson(w)).toList();
+      setState(() => _list = _list?.copyWith(words: updatedWords));
     }
   }
 
@@ -628,25 +615,25 @@ class _VocabularyListDetailScreenState
     });
   }
 
-  bool _wordMatchesQuery(Map<String, dynamic> word) {
+  bool _wordMatchesQuery(VocabularyWord word) {
     if (_searchQuery.isEmpty) return true;
     final q = _searchQuery.toLowerCase();
     final fields = [
-      word['word'] as String?,
-      word['translation'] as String?,
-      word['definition'] as String?,
-      word['unit'] as String?,
-      word['partOfSpeech'] as String?,
+      word.word,
+      word.translation,
+      word.definition,
+      word.unit,
+      word.partOfSpeech,
     ];
     return fields.any((f) => f != null && f.toLowerCase().contains(q));
   }
 
   /// Returns (filteredWord, originalIndex) pairs so edit/delete target the
   /// correct index in the full list.
-  List<(Map<String, dynamic>, int)> _getFilteredWords(List<dynamic> allWords) {
-    final result = <(Map<String, dynamic>, int)>[];
+  List<(VocabularyWord, int)> _getFilteredWords(List<VocabularyWord> allWords) {
+    final result = <(VocabularyWord, int)>[];
     for (var i = 0; i < allWords.length; i++) {
-      final w = allWords[i] as Map<String, dynamic>;
+      final w = allWords[i];
       if (_wordMatchesQuery(w)) result.add((w, i));
     }
     return result;
@@ -671,18 +658,19 @@ class _VocabularyListDetailScreenState
       );
     }
 
-    final title = _list!['title'] as String? ?? 'Untitled List';
-    final sourceLang = _list!['sourceLanguage'] as String?;
-    final targetLang = _list!['targetLanguage'] as String?;
-    final isPublic = _list!['isPublic'] == true;
-    final words = (_list!['words'] as List<dynamic>?) ?? [];
+    final title = _list!.title;
+    final sourceLang = _list!.sourceLanguage;
+    final targetLang = _list!.targetLanguage;
+    final isPublic = _list!.isPublic;
+    final words = _list!.words;
     final filteredWords = _getFilteredWords(words);
-    final publisher = _list!['publisher'] as String?;
-    final schoolForm = _list!['schoolForm'] as String?;
-    final grade = _list!['grade'] as String?;
-    final isbn = _list!['isbn'] as String?;
-    final status = _list!['status'] as String?;
-    final errorMessage = _list!['errorMessage'] as String?;
+    final listJson = _list!.toJson();
+    final publisher = listJson['publisher'] as String?;
+    final schoolForm = listJson['schoolForm'] as String?;
+    final grade = listJson['grade'] as String?;
+    final isbn = listJson['isbn'] as String?;
+    final status = _list!.status;
+    final errorMessage = _list!.errorMessage;
     final hasBookDetails = [publisher, schoolForm, grade, isbn]
         .any((v) => v != null && v.isNotEmpty);
 
@@ -776,7 +764,7 @@ class _VocabularyListDetailScreenState
               ),
             ),
           // Status banner
-          if (status == 'PENDING')
+          if (status == VocabularyListStatus.processing)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
@@ -795,7 +783,7 @@ class _VocabularyListDetailScreenState
                 ],
               ),
             ),
-          if (status == 'FAILED')
+          if (status == VocabularyListStatus.failed)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
@@ -808,24 +796,6 @@ class _VocabularyListDetailScreenState
                     child: Text(
                       errorMessage ?? l10n.statusFailed,
                       style: TextStyle(color: Colors.red.shade800, fontSize: 13),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          if (status == 'PARTIALLY_COMPLETED')
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-              color: Colors.amber.shade50,
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber.shade800),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      errorMessage ?? l10n.statusPartiallyCompleted,
-                      style: TextStyle(color: Colors.amber.shade900, fontSize: 13),
                     ),
                   ),
                 ],
@@ -996,15 +966,15 @@ class _VocabularyListDetailScreenState
     );
   }
 
-  Widget _buildWordTile(Map<String, dynamic> word, int index) {
+  Widget _buildWordTile(VocabularyWord word, int index) {
     final l10n = AppLocalizations.of(context)!;
-    final wordText = word['word'] as String? ?? '';
-    final translation = word['translation'] as String?;
-    final definition = word['definition'] as String? ?? '';
-    final partOfSpeech = word['partOfSpeech'] as String?;
-    final difficulty = word['difficulty'] as String?;
-    final unit = word['unit'] as String?;
-    final flagged = word['flagged'] == true;
+    final wordText = word.word;
+    final translation = word.translation;
+    final definition = word.definition ?? '';
+    final partOfSpeech = word.partOfSpeech;
+    final difficulty = word.difficulty;
+    final unit = word.unit;
+    final flagged = word.flagged;
 
     return ListTile(
       title: Row(

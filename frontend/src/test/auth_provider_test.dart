@@ -39,6 +39,8 @@ void main() {
     mockAuthService = MockAuthService();
     // Stub the isUserSignedIn method that's called in constructor
     when(mockAuthService.isUserSignedIn()).thenAnswer((_) async => false);
+    // Stub fetchUserEmail for sign-in flows
+    when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => null);
     // Inject mock service via constructor
     authProvider = app.AuthProvider(authService: mockAuthService);
   });

@@ -79,7 +79,7 @@ jobs:
         with:
           name: backend-coverage
           path: coverage/
-          retention-days: 7
+          retention-days: 10
 
   frontend-test:
     name: Frontend Tests
@@ -126,7 +126,7 @@ jobs:
         with:
           name: frontend-coverage
           path: frontend/coverage/
-          retention-days: 7
+          retention-days: 10
 
   join-page-test:
     name: Join Page Tests

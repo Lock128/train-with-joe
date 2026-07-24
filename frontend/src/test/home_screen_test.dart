@@ -38,6 +38,7 @@ void main() {
     when(mockAuthService.getCurrentUser()).thenAnswer(
       (_) async => MockAuthUser(username: 'test@example.com', userId: 'user-123'),
     );
+    when(mockAuthService.fetchUserEmail()).thenAnswer((_) async => 'test@example.com');
     when(mockAuthService.signOut()).thenAnswer((_) async => {});
 
     authProvider = app.AuthProvider(authService: mockAuthService);

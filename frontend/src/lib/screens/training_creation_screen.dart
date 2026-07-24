@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/vocabulary_list.dart';
 import '../providers/vocabulary_provider.dart';
 import '../providers/training_provider.dart';
 import '../utils/language_flags.dart';
@@ -82,7 +83,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
     if (!mounted) return;
 
     if (training != null) {
-      context.go('/trainings/${training['id']}');
+      context.go('/trainings/${training.id}');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -93,24 +94,16 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
     }
   }
 
-  Widget _buildListTile(Map<String, dynamic> list, {required bool isPublic}) {
-    final id = list['id'] as String;
-    final title = list['title'] as String? ?? 'Untitled List';
-    final words = (list['words'] as List<dynamic>?) ?? [];
-    final publisher = list['publisher'] as String?;
-    final schoolForm = list['schoolForm'] as String?;
-    final grade = list['grade'] as String?;
-    final isbn = list['isbn'] as String?;
-    final sourceLang = list['sourceLanguage'] as String?;
-    final targetLang = list['targetLanguage'] as String?;
+  Widget _buildListTile(VocabularyList list, {required bool isPublic}) {
+    final id = list.id;
+    final title = list.title;
+    final words = list.words;
+    final sourceLang = list.sourceLanguage;
+    final targetLang = list.targetLanguage;
 
     final langPair = formatLanguagePair(sourceLang, targetLang);
     final metaParts = <String>[AppLocalizations.of(context)!.nWords(words.length)];
     if (langPair != null) metaParts.add(langPair);
-    if (publisher != null && publisher.isNotEmpty) metaParts.add(publisher);
-    if (schoolForm != null && schoolForm.isNotEmpty) metaParts.add(schoolForm);
-    if (grade != null && grade.isNotEmpty) metaParts.add('Klasse $grade');
-    if (isbn != null && isbn.isNotEmpty) metaParts.add('ISBN: $isbn');
 
     return CheckboxListTile(
       title: Text(title),
@@ -177,25 +170,20 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
 
           final myLists = vocabProvider.vocabularyLists;
           // Public lists that the user doesn't own
-          final myListIds = myLists.map((l) => l['id'] as String).toSet();
+          final myListIds = myLists.map((l) => l.id).toSet();
           final publicLists = vocabProvider.publicVocabularyLists
-              .where((l) => !myListIds.contains(l['id'] as String))
+              .where((l) => !myListIds.contains(l.id))
               .toList();
           final allLists = [...myLists, ...publicLists];
 
           // Filter lists by search query
-          bool matchesSearch(Map<String, dynamic> list) {
+          bool matchesSearch(VocabularyList list) {
             if (_searchQuery.isEmpty) return true;
             final q = _searchQuery.toLowerCase();
-            final fields = [
-              list['title'] as String?,
-              list['publisher'] as String?,
-              list['schoolForm'] as String?,
-              list['grade'] as String?,
-              list['isbn'] as String?,
-              list['sourceLanguage'] as String?,
-              list['targetLanguage'] as String?,
-            ];
+            final title = list.title;
+            final sourceLang = list.sourceLanguage;
+            final targetLang = list.targetLanguage;
+            final fields = [title, sourceLang, targetLang];
             return fields.any((f) => f != null && f.toLowerCase().contains(q));
           }
 
@@ -232,8 +220,8 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
 
           // Count total words across selected lists
           final totalWords = allLists
-              .where((l) => _selectedListIds.contains(l['id'] as String))
-              .fold<int>(0, (sum, l) => sum + ((l['words'] as List<dynamic>?)?.length ?? 0));
+              .where((l) => _selectedListIds.contains(l.id))
+              .fold<int>(0, (sum, l) => sum + l.words.length);
           final effectiveMax = totalWords > 100 ? 100 : (totalWords > 0 ? totalWords : 1);
 
           return SingleChildScrollView(
@@ -496,9 +484,9 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     // Collect languages from selected vocabulary lists
                     final languages = <String>{};
                     for (final list in allLists) {
-                      if (!_selectedListIds.contains(list['id'] as String)) continue;
-                      final src = list['sourceLanguage'] as String?;
-                      final tgt = list['targetLanguage'] as String?;
+                      if (!_selectedListIds.contains(list.id)) continue;
+                      final src = list.sourceLanguage;
+                      final tgt = list.targetLanguage;
                       if (src != null && src.isNotEmpty) languages.add(src);
                       if (tgt != null && tgt.isNotEmpty) languages.add(tgt);
                     }
@@ -506,12 +494,11 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
 
                     // Auto-select target language if not set
                     if (_selectedTargetLanguage == null && langList.isNotEmpty) {
-                      final firstSelected = allLists.firstWhere(
-                        (l) => _selectedListIds.contains(l['id'] as String),
-                        orElse: () => <String, dynamic>{},
-                      );
-                      final defaultTarget = firstSelected['targetLanguage'] as String?;
-                      final defaultSource = firstSelected['sourceLanguage'] as String?;
+                      final firstSelected = allLists.where(
+                        (l) => _selectedListIds.contains(l.id),
+                      ).firstOrNull;
+                      final defaultTarget = firstSelected?.targetLanguage;
+                      final defaultSource = firstSelected?.sourceLanguage;
                       _selectedTargetLanguage = (defaultTarget != null && langList.contains(defaultTarget))
                           ? defaultTarget
                           : langList.first;

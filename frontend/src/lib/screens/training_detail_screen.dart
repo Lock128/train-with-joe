@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../domain/models/training.dart';
 import '../providers/training_provider.dart';
 import '../providers/vocabulary_provider.dart';
 import '../l10n/generated/app_localizations.dart';
@@ -15,7 +16,7 @@ class TrainingDetailScreen extends StatefulWidget {
 }
 
 class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
-  Map<String, dynamic>? _training;
+  Training? _training;
   bool _isLoading = true;
   bool _isStarting = false;
   String? _error;
@@ -40,9 +41,9 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
 
   Future<void> _deleteWord(int index) async {
     if (_training == null) return;
-    final words = List<Map<String, dynamic>>.from(
-      (_training!['words'] as List<dynamic>).map((w) => Map<String, dynamic>.from(w as Map)),
-    );
+    final words = _training!.words
+        .map((w) => w.toJson())
+        .toList();
     words.removeAt(index);
     final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, words: words);
     if (!mounted) return;
@@ -60,18 +61,16 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     await context.read<VocabularyProvider>().loadVocabularyLists();
     if (!mounted) return;
     final vocabLists = context.read<VocabularyProvider>().vocabularyLists;
-    final trainingWords = (_training!['words'] as List<dynamic>?) ?? [];
+    final trainingWords = _training!.words;
     final existingKeys = trainingWords.map((w) {
-      final m = w as Map<String, dynamic>;
-      return '${m['word']}::${m['translation']}';
+      return '${w.word}::${w.translation}';
     }).toSet();
 
     final availableWords = <Map<String, dynamic>>[];
     for (final list in vocabLists) {
-      for (final w in (list['words'] as List<dynamic>?) ?? []) {
-        final m = Map<String, dynamic>.from(w as Map);
-        if (!existingKeys.contains('${m['word']}::${m['translation']}')) {
-          availableWords.add({'word': m['word'], 'translation': m['translation'], 'vocabularyListId': list['id']});
+      for (final w in list.words) {
+        if (!existingKeys.contains('${w.word}::${w.translation}')) {
+          availableWords.add({'word': w.word, 'translation': w.translation, 'vocabularyListId': list.id});
         }
       }
     }
@@ -83,9 +82,9 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
         availableWords: availableWords,
         onAdd: (selected) async {
           Navigator.of(sheetCtx).pop();
-          final current = List<Map<String, dynamic>>.from(
-            (_training!['words'] as List<dynamic>).map((w) => Map<String, dynamic>.from(w as Map)),
-          );
+          final current = _training!.words
+              .map((w) => w.toJson())
+              .toList();
           current.addAll(selected);
           final updated = await context.read<TrainingProvider>().updateTraining(widget.trainingId, words: current);
           if (mounted && updated != null) setState(() => _training = updated);
@@ -100,7 +99,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     if (!mounted) return;
     setState(() => _isStarting = false);
     if (execution != null) {
-      context.go('/trainings/${widget.trainingId}/execute/${execution['id']}');
+      context.go('/trainings/${widget.trainingId}/execute/${execution.id}');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(context.read<TrainingProvider>().error ?? 'Failed to start training'),
@@ -209,13 +208,13 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
       );
     }
 
-    final name = _training!['name'] as String? ?? 'Untitled Training';
-    final mode = _training!['mode'] as String?;
-    final direction = _training!['direction'] as String? ?? 'WORD_TO_TRANSLATION';
-    final words = (_training!['words'] as List<dynamic>?) ?? [];
-    final isRandomized = _training!['isRandomized'] as bool? ?? false;
-    final randomizedWordCount = _training!['randomizedWordCount'] as int? ?? 10;
-    final vocabularyListIds = (_training!['vocabularyListIds'] as List<dynamic>?) ?? [];
+    final name = _training!.name ?? 'Untitled Training';
+    final mode = _training!.mode.value;
+    final direction = _training!.direction.value;
+    final words = _training!.words;
+    final isRandomized = _training!.isRandomized;
+    final randomizedWordCount = _training!.randomizedWordCount ?? 10;
+    final vocabularyListIds = _training!.vocabularyListIds;
     final isMcTooFew = !isRandomized && mode == 'MULTIPLE_CHOICE' && words.length < 3;
 
     return Scaffold(
@@ -313,10 +312,10 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
                 child: ListView.builder(
                   itemCount: words.length,
                   itemBuilder: (context, index) {
-                    final word = words[index] as Map<String, dynamic>;
-                    final unit = word['unit'] as String?;
+                    final word = words[index];
+                    final unit = word.unit;
                     return ListTile(
-                      title: Text(word['word'] as String? ?? ''),
+                      title: Text(word.word),
                       subtitle: unit != null && unit.isNotEmpty
                           ? Text(unit, style: TextStyle(fontSize: 12, color: Colors.blueGrey.shade600))
                           : null,
