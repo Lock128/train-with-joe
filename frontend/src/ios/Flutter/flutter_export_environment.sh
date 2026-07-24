@@ -1,6 +1,6 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/opt/flutter"
+export "FLUTTER_ROOT=/root/flutter"
 export "FLUTTER_APPLICATION_PATH=/projects/sandbox/train-with-joe/frontend/src"
 export "FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=/projects/sandbox/train-with-joe/frontend/src/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
