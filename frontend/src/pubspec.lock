@@ -13,90 +13,90 @@ packages:
     dependency: transitive
     description:
       name: amplify_analytics_pinpoint
-      sha256: c2a5f69f51b920ae31a24aa7d6d280b4e14af0e1061e0f3dd392b852629348f6
+      sha256: "661e6d5ae5c204247a44ad04255ee28811b4b6c3cc94d916f5abd6fd5684c594"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.14.0"
   amplify_analytics_pinpoint_dart:
     dependency: transitive
     description:
       name: amplify_analytics_pinpoint_dart
-      sha256: a65a76b321f03b86b41439a20fb0ed850c58b05a16ab4c00d806e67456f08fcc
+      sha256: "2e41f37b589619e541c71cef7a8a9e488cbda44b1391211ce371787db5ed8926"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.19"
+    version: "0.4.20"
   amplify_api:
     dependency: "direct main"
     description:
       name: amplify_api
-      sha256: "2bd7febcc600b9a34b637ca17504715b76dcaf8839efb949d3522abeedada5fc"
+      sha256: "8c97ecfa242232e9295bb319a9046134106e2a1051ab2caf8b83985fcc944eea"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.14.0"
   amplify_api_dart:
     dependency: transitive
     description:
       name: amplify_api_dart
-      sha256: f51583be03fd65af7c6f57b73cf969e668f8d87e289853c192ea9fa97188a805
+      sha256: "11bd94caa5d857bdcddf0e2eb799f3b6f7971e54e7fd3f78930522ee542c4b62"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.20"
+    version: "0.5.21"
   amplify_auth_cognito:
     dependency: "direct main"
     description:
       name: amplify_auth_cognito
-      sha256: a8dc746c800f00ea98d62ec3a85c9027c627786f3e866dd0a3438ae840534538
+      sha256: "8c467e54b83c85a0b408848ae4cf0f4b7800b501217da053c0b8e2bd76b81431"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.14.0"
   amplify_auth_cognito_dart:
     dependency: transitive
     description:
       name: amplify_auth_cognito_dart
-      sha256: f92e4d74550cf683f241dccded498ecdf0607ed9cc01d6580e1144cd7023c2cf
+      sha256: dda39e8931e8c8b6b563e0bd1fc6212fadb7d2d9245b0a78d07e40bbdaf710b6
       url: "https://pub.dev"
     source: hosted
-    version: "0.11.23"
+    version: "0.11.24"
   amplify_core:
     dependency: transitive
     description:
       name: amplify_core
-      sha256: "9fc26730ec446ad7a3b255e9348382baeb195b649c948c7f88e0f2ceb5f96e34"
+      sha256: "7604b1674472f22cf425e118572650b7bea19d762cd756af9230e28288ce7af1"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.14.0"
   amplify_db_common:
     dependency: transitive
     description:
       name: amplify_db_common
-      sha256: "83bcbd661cea62443b9bcfaee3d0e9547ad5e02039c79739fa432d311ada786c"
+      sha256: "439ec5033b6fbee37efd9186a55a559dddb639793a2f4e212ace3f6fc953a3c9"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.19"
+    version: "0.4.20"
   amplify_db_common_dart:
     dependency: transitive
     description:
       name: amplify_db_common_dart
-      sha256: fc6af9bd7728531fa278940d9b03576d43a4de9fddb41e3335e499b309268ab0
+      sha256: "78eb75bb7eff12acb1762747058367e2662ebcf39db84a74d9414cd17210f511"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.21"
+    version: "0.4.22"
   amplify_flutter:
     dependency: "direct main"
     description:
       name: amplify_flutter
-      sha256: aba2fcf36faf74bc48af6ee413623bd2213ad7b0027280704713e92982d351f8
+      sha256: "39dfd8fb4c9574338d06adae94ce78fd6933c5f51e91e440ae2c957b0988b1ea"
       url: "https://pub.dev"
     source: hosted
-    version: "2.13.0"
+    version: "2.14.0"
   amplify_secure_storage:
     dependency: transitive
     description:
       name: amplify_secure_storage
-      sha256: b0e28bf827c1427b8181590830cdaacfa6542b4abb6affef26e931137f24d72c
+      sha256: "8f59dabae7a49ea1aaf14e2159b918bf573bf05771cbc1f5cbba2eedb1769e63"
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.19"
+    version: "0.5.20"
   amplify_secure_storage_dart:
     dependency: transitive
     description:
@@ -603,10 +603,10 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: "5922b2861e2235a3504896f0d6fa07d84141b480cf52eecd2f42cd25585a9e8a"
+      sha256: "55973bf1b27790489f8710ea615fe939f911ddcc5986fe97305e4fc19fa29ee9"
       url: "https://pub.dev"
     source: hosted
-    version: "17.3.0"
+    version: "17.4.0"
   graphs:
     dependency: transitive
     description:
