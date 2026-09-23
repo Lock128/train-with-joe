@@ -367,7 +367,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                   ),
                                   Text(
                                     _getPlatformName(),
-                                    style: const TextStyle(color: Colors.grey),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                                   ),
                                 ],
                               ),
@@ -618,7 +618,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         child: Text.rich(
                           TextSpan(
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontSize: 13,
                             ),
                             children: [
@@ -677,7 +677,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       child: Text(
                         l10n.subscriptionDisclosure,
                         style: TextStyle(
-                          color: Colors.grey[500],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 11,
                           height: 1.5,
                         ),
@@ -786,7 +786,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             Text(
               isUnlimited ? '$used used (unlimited)' : '$used/$limit used',
               style: TextStyle(
-                color: isAtLimit ? Colors.red : Colors.grey[600],
+                color: isAtLimit ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: isAtLimit ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -798,7 +798,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.grey[200],
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(
                 isAtLimit ? Colors.red : const Color(0xFF2B6CB0),
               ),
@@ -915,7 +915,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   Text(
                     priceSubtitle,
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 14,
                     ),
                   ),
@@ -927,7 +927,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   child: Text(
                     subscriptionLength,
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 12,
                     ),
                   ),
@@ -996,8 +996,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.grey,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),

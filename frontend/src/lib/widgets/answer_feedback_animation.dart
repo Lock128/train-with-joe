@@ -206,7 +206,7 @@ class _AnswerFeedbackAnimationState extends State<AnswerFeedbackAnimation>
             const SizedBox(height: 6),
             Text(
               'Answer: ${widget.expectedAnswer}',
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
+              style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
           const SizedBox(height: 16),

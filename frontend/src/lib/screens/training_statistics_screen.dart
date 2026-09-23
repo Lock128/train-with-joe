@@ -183,9 +183,9 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
             const SizedBox(height: 8),
 
             if (dailySummaries.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Text('No training activity in this period.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Text('No training activity in this period.', textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               )
             else
               ListView.separated(
@@ -241,9 +241,9 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
     }
     final executions = _dayStatistics?.executions ?? [];
     if (executions.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Text('No execution details available.', style: TextStyle(color: Colors.grey, fontSize: 13)),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        child: Text('No execution details available.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
       );
     }
     return Padding(
@@ -277,7 +277,7 @@ class _TrainingStatisticsScreenState extends State<TrainingStatisticsScreen> {
         const SizedBox(height: 8),
         Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
       ],
     );
   }

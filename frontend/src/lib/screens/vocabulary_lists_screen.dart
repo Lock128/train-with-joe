@@ -59,10 +59,10 @@ class _VocabularyListsScreenState extends State<VocabularyListsScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade50,
+                        color: colorScheme.error.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.cloud_off_rounded, size: 40, color: Colors.red.shade400),
+                      child: Icon(Icons.cloud_off_rounded, size: 40, color: colorScheme.error),
                     ),
                     const SizedBox(height: 20),
                     Text(l10n.errorLoadingVocabularyLists,

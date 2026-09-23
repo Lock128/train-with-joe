@@ -159,7 +159,7 @@ class _VerbConjugationExerciseWidgetState
             label: Text(
               _showHint ? hint : 'Show hint',
               style: TextStyle(
-                color: _showHint ? Colors.amber.shade800 : Colors.grey,
+                color: _showHint ? Colors.amber.shade800 : Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 13,
               ),
             ),
@@ -175,11 +175,11 @@ class _VerbConjugationExerciseWidgetState
               color: Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text(
+            child: Text(
               'Format: base form, past simple, past participle\n'
               'Example: put, put, put',
               style: TextStyle(
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 12,
                 fontStyle: FontStyle.italic,
               ),

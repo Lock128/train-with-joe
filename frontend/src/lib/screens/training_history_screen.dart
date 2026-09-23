@@ -154,9 +154,9 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
           const SizedBox(height: 8),
 
           if (executions.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Text('No executions yet.', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text('No executions yet.', textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             )
           else
             ListView.builder(
@@ -211,7 +211,7 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
   Widget _statItem(String label, String value) => Column(children: [
     Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
     const SizedBox(height: 4),
-    Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+    Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
   ]);
 
   Widget _buildMostMissedWords() {
@@ -264,8 +264,8 @@ class _TrainingHistoryScreenState extends State<TrainingHistoryScreen> {
             : 'Filter by Date'),
       ),
       if (_selectedDate != null && _dayStatistics == null)
-        const Padding(padding: EdgeInsets.symmetric(vertical: 16),
-          child: Text('No data for this date.', style: TextStyle(color: Colors.grey))),
+        Padding(padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Text('No data for this date.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))),
       if (_dayStatistics != null) ...[
         const SizedBox(height: 8),
         Card(

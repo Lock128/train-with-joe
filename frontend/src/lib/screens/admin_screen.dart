@@ -272,7 +272,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
             children: [
               Text(
                 '${users.length} user${users.length == 1 ? '' : 's'}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               const Spacer(),
               _isSyncing
@@ -296,7 +296,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                 ? ListView(
                     children: [
                       const SizedBox(height: 100),
-                      Center(child: Text(l10n.noUsersFound, style: const TextStyle(color: Colors.grey))),
+                      Center(child: Text(l10n.noUsersFound, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))),
                     ],
                   )
                 : ListView.separated(
@@ -343,7 +343,7 @@ class _UsersTabState extends State<_UsersTab> with AutomaticKeepAliveClientMixin
                             const SizedBox(width: 6),
                             Text(
                               tierSourceLabel,
-                              style: const TextStyle(fontSize: 11, color: Colors.grey),
+                              style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                             ),
                           ],
                         ),
@@ -570,7 +570,7 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Text(l10n.noTrainingActivity,
-                    textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
+                    textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               )
             else
               ListView.separated(
@@ -629,7 +629,7 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
     if (executions.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Text(l10n.noExecutionDetails, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+        child: Text(l10n.noExecutionDetails, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
       );
     }
     return Padding(
@@ -660,7 +660,7 @@ class _UserStatisticsDetailState extends State<_UserStatisticsDetail> {
         const SizedBox(height: 8),
         Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
       ],
     );
   }
@@ -864,7 +864,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
     final l10n = AppLocalizations.of(context)!;
     if (_activeUserId == null) {
       return Center(
-        child: Text(l10n.searchUserAbove, style: const TextStyle(color: Colors.grey)),
+        child: Text(l10n.searchUserAbove, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
       );
     }
     if (_isLoading) return const Center(child: CircularProgressIndicator());
@@ -910,7 +910,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
                 child: Column(
                   children: [
                     Text('User: ${_activeUserLabel ?? _activeUserId}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -932,7 +932,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Text(l10n.noTrainingActivity,
-                    textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
+                    textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
               )
             else
               ListView.separated(
@@ -991,7 +991,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
     if (executions.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Text(l10n.noExecutionDetails, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+        child: Text(l10n.noExecutionDetails, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
       );
     }
     return Padding(
@@ -1022,7 +1022,7 @@ class _StatisticsTabState extends State<_StatisticsTab> with AutomaticKeepAliveC
         const SizedBox(height: 8),
         Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
       ],
     );
   }
@@ -1105,9 +1105,9 @@ class _TierStatsTabState extends State<_TierStatsTab> with AutomaticKeepAliveCli
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.pie_chart_outline, size: 64, color: Colors.grey),
+            Icon(Icons.pie_chart_outline, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(height: 16),
-            const Text('No tier statistics available.', style: TextStyle(color: Colors.grey)),
+            Text('No tier statistics available.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _loadStatistics,
@@ -1141,7 +1141,7 @@ class _TierStatsTabState extends State<_TierStatsTab> with AutomaticKeepAliveCli
                     const SizedBox(height: 8),
                     Text(
                       '$totalUsers total users',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -1190,7 +1190,7 @@ class _TierStatsTabState extends State<_TierStatsTab> with AutomaticKeepAliveCli
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
                             value: totalCount / totalUsers,
-                            backgroundColor: Colors.grey.shade200,
+                            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                             color: _tierColor(tier),
                             minHeight: 6,
                           ),
@@ -1222,7 +1222,7 @@ class _TierStatsTabState extends State<_TierStatsTab> with AutomaticKeepAliveCli
       children: [
         Text('$count', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 2),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
       ],
     );
   }
@@ -1326,7 +1326,7 @@ class _MigrateDataTabState extends State<_MigrateDataTab> with AutomaticKeepAliv
                   const SizedBox(height: 8),
                   Text(
                     'Move all vocabulary lists, trainings, and training executions from one user to another.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 20),
                   _buildUserAutocomplete(
@@ -1405,7 +1405,7 @@ class _MigrateDataTabState extends State<_MigrateDataTab> with AutomaticKeepAliv
     final executions = _result!['migratedExecutions'] as int? ?? 0;
 
     return Card(
-      color: success ? Colors.green.shade50 : Colors.red.shade50,
+      color: (success ? Colors.green : Colors.red).withValues(alpha: 0.12),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1425,7 +1425,7 @@ class _MigrateDataTabState extends State<_MigrateDataTab> with AutomaticKeepAliv
             _resultRow('Executions', executions),
             if (error != null && error.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(error, style: TextStyle(color: Colors.red.shade700, fontSize: 13)),
+              Text(error, style: const TextStyle(color: Colors.red, fontSize: 13)),
             ],
           ],
         ),

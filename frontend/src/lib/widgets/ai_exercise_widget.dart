@@ -84,13 +84,13 @@ class AIExerciseWidget extends StatelessWidget {
           Color? textColor;
           if (showFeedback && isSelected) {
             if (isCorrect == true) {
-              backgroundColor = const Color(0xFFECFDF5);
               borderColor = const Color(0xFF10B981);
-              textColor = const Color(0xFF065F46);
+              backgroundColor = borderColor.withValues(alpha: 0.15);
+              textColor = borderColor;
             } else {
-              backgroundColor = const Color(0xFFFEF2F2);
               borderColor = const Color(0xFFEF4444);
-              textColor = const Color(0xFF991B1B);
+              backgroundColor = borderColor.withValues(alpha: 0.15);
+              textColor = borderColor;
             }
           }
 

@@ -189,14 +189,14 @@ class AppShell extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
+                    color: colorScheme.error.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(Icons.logout_rounded, color: Colors.red.shade400, size: 20),
+                  child: Icon(Icons.logout_rounded, color: colorScheme.error, size: 20),
                 ),
                 title: Text(
                   l10n.signOut,
-                  style: TextStyle(color: Colors.red.shade600, fontWeight: FontWeight.w500),
+                  style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.w500),
                 ),
                 onTap: () {
                   Navigator.of(sheetContext).pop();

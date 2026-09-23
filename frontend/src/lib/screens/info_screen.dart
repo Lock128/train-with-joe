@@ -171,10 +171,10 @@ class _InfoScreenState extends State<InfoScreen> {
                     padding: const EdgeInsets.all(24.0),
                     child: Column(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 40,
-                          backgroundColor: Color(0xFFE8F4FD),
-                          child: ClipOval(
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                          child: const ClipOval(
                             child: Image(
                               image: AssetImage('assets/images/app_image.png'),
                               width: 64,
@@ -302,7 +302,7 @@ class _InfoScreenState extends State<InfoScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey)),
+          Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
           Flexible(
             child: Text(
               value,
@@ -334,10 +334,10 @@ class _InfoScreenState extends State<InfoScreen> {
         padding: const EdgeInsets.symmetric(vertical: 10.0),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: Colors.grey),
+            Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 12),
             Expanded(child: Text(label)),
-            Icon(isInternalRoute ? Icons.chevron_right : Icons.open_in_new, size: 16, color: Colors.grey),
+            Icon(isInternalRoute ? Icons.chevron_right : Icons.open_in_new, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ],
         ),
       ),
