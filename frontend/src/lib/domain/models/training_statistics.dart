@@ -84,7 +84,7 @@ class AccuracyTrendPoint {
 class TrainingOverviewStatistics {
   final int totalDays;
   final int totalTrainings;
-  final int totalLearningTimeSeconds;
+  final double totalLearningTimeSeconds;
   final List<DailySummary> dailySummaries;
 
   const TrainingOverviewStatistics({
@@ -97,9 +97,9 @@ class TrainingOverviewStatistics {
   factory TrainingOverviewStatistics.fromJson(Map<String, dynamic> json) {
     final summaries = json['dailySummaries'] as List<dynamic>?;
     return TrainingOverviewStatistics(
-      totalDays: json['totalDays'] as int? ?? 0,
-      totalTrainings: json['totalTrainings'] as int? ?? 0,
-      totalLearningTimeSeconds: json['totalLearningTimeSeconds'] as int? ?? 0,
+      totalDays: (json['totalDays'] as num?)?.toInt() ?? 0,
+      totalTrainings: (json['totalTrainings'] as num?)?.toInt() ?? 0,
+      totalLearningTimeSeconds: (json['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0,
       dailySummaries: summaries?.map((s) => DailySummary.fromJson(s as Map<String, dynamic>)).toList() ?? [],
     );
   }
@@ -109,7 +109,7 @@ class TrainingOverviewStatistics {
 class DailySummary {
   final String date;
   final int trainingCount;
-  final int totalLearningTimeSeconds;
+  final double totalLearningTimeSeconds;
 
   const DailySummary({
     required this.date,
@@ -120,8 +120,8 @@ class DailySummary {
   factory DailySummary.fromJson(Map<String, dynamic> json) {
     return DailySummary(
       date: json['date'] as String? ?? '',
-      trainingCount: json['trainingCount'] as int? ?? 0,
-      totalLearningTimeSeconds: json['totalLearningTimeSeconds'] as int? ?? 0,
+      trainingCount: (json['trainingCount'] as num?)?.toInt() ?? 0,
+      totalLearningTimeSeconds: (json['totalLearningTimeSeconds'] as num?)?.toDouble() ?? 0,
     );
   }
 }
@@ -163,7 +163,7 @@ class DayExecution {
   final DateTime? completedAt;
   final int correctCount;
   final int incorrectCount;
-  final int durationSeconds;
+  final double durationSeconds;
 
   const DayExecution({
     required this.executionId,
@@ -183,9 +183,9 @@ class DayExecution {
       trainingName: json['trainingName'] as String?,
       startedAt: _parseDateTime(json['startedAt']),
       completedAt: _parseDateTime(json['completedAt']),
-      correctCount: json['correctCount'] as int? ?? 0,
-      incorrectCount: json['incorrectCount'] as int? ?? 0,
-      durationSeconds: json['durationSeconds'] as int? ?? 0,
+      correctCount: (json['correctCount'] as num?)?.toInt() ?? 0,
+      incorrectCount: (json['incorrectCount'] as num?)?.toInt() ?? 0,
+      durationSeconds: (json['durationSeconds'] as num?)?.toDouble() ?? 0,
     );
   }
 }

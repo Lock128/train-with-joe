@@ -245,7 +245,7 @@ class _ActivityDashboardTabState extends State<ActivityDashboardTab>
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Center(
-            child: Text('No activity data', style: TextStyle(color: Colors.grey[500])),
+            child: Text('No activity data', style: TextStyle(color: colorScheme.onSurfaceVariant)),
           ),
         ),
       );
@@ -291,11 +291,11 @@ class _ActivityDashboardTabState extends State<ActivityDashboardTab>
               children: [
                 Text(
                   last14.first.date.substring(5),
-                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
                 ),
                 Text(
                   last14.last.date.substring(5),
-                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -429,13 +429,13 @@ class _EngagementAlertsTabState extends State<EngagementAlertsTab>
   Widget build(BuildContext context) {
     super.build(context);
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading user activity...', style: TextStyle(color: Colors.grey)),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text('Loading user activity...', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
           ],
         ),
       );
@@ -533,7 +533,7 @@ class _EngagementAlertsTabState extends State<EngagementAlertsTab>
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
                   '+ ${churning.length - 20} more inactive users',
-                  style: TextStyle(color: Colors.grey[600], fontStyle: FontStyle.italic),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -629,8 +629,8 @@ class _AppHealthTabState extends State<AppHealthTab>
             // Status banner
             Card(
               color: _error != null
-                  ? Colors.red.shade50
-                  : Colors.green.shade50,
+                  ? Colors.red.withValues(alpha: 0.12)
+                  : Colors.green.withValues(alpha: 0.12),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Row(
@@ -650,7 +650,7 @@ class _AppHealthTabState extends State<AppHealthTab>
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: _error != null ? Colors.red.shade800 : Colors.green.shade800,
+                              color: _error != null ? Colors.red : Colors.green,
                             ),
                           ),
                           if (_checkedAt != null)
@@ -658,7 +658,7 @@ class _AppHealthTabState extends State<AppHealthTab>
                               'Checked: ${_checkedAt!.hour.toString().padLeft(2, '0')}:${_checkedAt!.minute.toString().padLeft(2, '0')}',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                         ],
@@ -747,15 +747,15 @@ class _AppHealthTabState extends State<AppHealthTab>
               _SectionHeader(icon: Icons.bug_report, title: 'Error Details'),
               const SizedBox(height: 12),
               Card(
-                color: Colors.red.shade50,
+                color: Colors.red.withValues(alpha: 0.12),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: SelectableText(
                     _error!,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       fontFamily: 'monospace',
-                      color: Colors.red.shade800,
+                      color: Colors.red,
                     ),
                   ),
                 ),
@@ -846,7 +846,7 @@ class _MetricCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               title,
-              style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
           ],
@@ -877,7 +877,7 @@ class _StatColumn extends StatelessWidget {
         const SizedBox(height: 8),
         Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+        Text(label, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
       ],
     );
   }
@@ -964,7 +964,7 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Text(
         message,
-        style: TextStyle(color: Colors.grey[500], fontStyle: FontStyle.italic),
+        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic),
         textAlign: TextAlign.center,
       ),
     );
@@ -990,9 +990,9 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
+        Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
         const SizedBox(width: 12),
-        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+        Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
         const Spacer(),
         Tooltip(
           message: fullValue ?? value,

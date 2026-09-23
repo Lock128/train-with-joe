@@ -111,7 +111,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
         metaParts.join(' · '),
         style: const TextStyle(fontSize: 12),
       ),
-      secondary: isPublic ? const Icon(Icons.public, size: 20, color: Colors.grey) : null,
+      secondary: isPublic ? Icon(Icons.public, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant) : null,
       value: _selectedListIds.contains(id),
       onChanged: (checked) {
         setState(() {
@@ -154,7 +154,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const SizedBox(height: 8),
                   Text(
                     vocabProvider.error!,
-                    style: const TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
@@ -195,7 +195,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.library_books, size: 64, color: Colors.grey),
+                  Icon(Icons.library_books, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   const SizedBox(height: 16),
                   Text(
                     l10n.noVocabularyListsAvailable,
@@ -204,7 +204,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const SizedBox(height: 8),
                   Text(
                     l10n.createVocabularyListsFirst,
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
@@ -349,10 +349,10 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                         color: const Color(0xFF2D9CDB).withValues(alpha: 0.3),
                       ),
                     ),
-                    child: const Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        const Row(
                           children: [
                             Icon(Icons.auto_awesome, color: Color(0xFF2D9CDB), size: 20),
                             SizedBox(width: 8),
@@ -366,17 +366,17 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'Practice conjugating irregular English verbs. '
                           'AI will generate exercises asking you to provide verb forms '
                           'like "put, put, put" or "go, went, gone".',
-                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                          style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           'No vocabulary list needed — exercises are generated automatically.',
-                          style: TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
+                          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic),
                         ),
                       ],
                     ),
@@ -388,9 +388,9 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     'How many verb exercises to generate (max 30)',
-                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                   ),
                   Slider(
                     value: _wordCount.clamp(1, 30).toDouble(),
@@ -444,7 +444,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
                       l10n.noListsYet,
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 if (filteredMyLists.isEmpty && _searchQuery.isNotEmpty && filteredPublicLists.isEmpty)
@@ -452,7 +452,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
                       l10n.noListsMatchSearch,
-                      style: const TextStyle(color: Colors.grey),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ...filteredMyLists.map((list) => _buildListTile(list, isPublic: false)),
@@ -477,7 +477,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'The language you want to practice and learn',
-                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                   ),
                   const SizedBox(height: 8),
                   Builder(builder: (context) {
@@ -508,9 +508,9 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     }
 
                     if (langList.isEmpty) {
-                      return const Text(
+                      return Text(
                         'No languages detected from selected lists',
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       );
                     }
 
@@ -555,7 +555,7 @@ class _TrainingCreationScreenState extends State<TrainingCreationScreen> {
                     totalWords > 100
                         ? l10n.maxWordsPicked(totalWords)
                         : l10n.wordsAvailable(totalWords),
-                    style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                   ),
                   Slider(
                     value: _wordCount.clamp(1, effectiveMax).toDouble(),

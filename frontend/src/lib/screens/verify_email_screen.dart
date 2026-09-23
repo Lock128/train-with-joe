@@ -193,18 +193,20 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.red.shade50,
+                            color: Theme.of(context).colorScheme.errorContainer,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red.shade200),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.error.withValues(alpha: 0.4),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline, color: Colors.red.shade700),
+                              Icon(Icons.error_outline, color: Theme.of(context).colorScheme.onErrorContainer),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   authProvider.error!,
-                                  style: TextStyle(color: Colors.red.shade700),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
                                 ),
                               ),
                             ],
@@ -217,18 +219,18 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.green.shade50,
+                            color: Colors.green.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.green.shade200),
+                            border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.check_circle_outline, color: Colors.green.shade700),
+                              const Icon(Icons.check_circle_outline, color: Colors.green),
                               const SizedBox(width: 8),
-                              Expanded(
+                              const Expanded(
                                 child: Text(
                                   'A new code has been sent to your email',
-                                  style: TextStyle(color: Colors.green.shade700),
+                                  style: TextStyle(color: Colors.green),
                                 ),
                               ),
                             ],

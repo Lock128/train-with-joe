@@ -680,10 +680,12 @@ class _VocabularyListDetailScreenState
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                 decoration: InputDecoration(
                   hintText: l10n.searchLists,
-                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   border: InputBorder.none,
                 ),
                 onChanged: (value) => setState(() => _searchQuery = value),
@@ -749,17 +751,17 @@ class _VocabularyListDetailScreenState
                 children: [
                   if (sourceLang != null && targetLang != null)
                     Text('$sourceLang → $targetLang',
-                        style: const TextStyle(color: Colors.grey))
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))
                   else if (sourceLang != null)
                     Text(sourceLang,
-                        style: const TextStyle(color: Colors.grey)),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                   const Spacer(),
                   if (_searchQuery.isNotEmpty)
                     Text('${filteredWords.length} / ${words.length}',
-                        style: const TextStyle(color: Colors.grey))
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))
                   else
                     Text(l10n.nWords(words.length),
-                        style: const TextStyle(color: Colors.grey)),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),
@@ -768,17 +770,17 @@ class _VocabularyListDetailScreenState
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-              color: Colors.orange.shade50,
+              color: Colors.orange.withValues(alpha: 0.15),
               child: Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 16, height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange.shade700),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(l10n.statusAnalyzing,
-                        style: TextStyle(color: Colors.orange.shade800, fontSize: 13)),
+                        style: const TextStyle(color: Colors.orange, fontSize: 13)),
                   ),
                 ],
               ),
@@ -787,15 +789,15 @@ class _VocabularyListDetailScreenState
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-              color: Colors.red.shade50,
+              color: Theme.of(context).colorScheme.errorContainer,
               child: Row(
                 children: [
-                  Icon(Icons.error_outline, size: 18, color: Colors.red.shade700),
+                  Icon(Icons.error_outline, size: 18, color: Theme.of(context).colorScheme.onErrorContainer),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       errorMessage ?? l10n.statusFailed,
-                      style: TextStyle(color: Colors.red.shade800, fontSize: 13),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer, fontSize: 13),
                     ),
                   ),
                 ],
@@ -838,11 +840,11 @@ class _VocabularyListDetailScreenState
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.library_books,
-                            size: 48, color: Colors.grey),
+                        Icon(Icons.library_books,
+                            size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         const SizedBox(height: 8),
-                        const Text('No words yet',
-                            style: TextStyle(color: Colors.grey)),
+                        Text('No words yet',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: _showAddWordDialog,
@@ -857,11 +859,11 @@ class _VocabularyListDetailScreenState
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.search_off,
-                                size: 48, color: Colors.grey),
+                            Icon(Icons.search_off,
+                                size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
                             const SizedBox(height: 8),
                             Text('No words matching "$_searchQuery"',
-                                style: const TextStyle(color: Colors.grey)),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       )
@@ -941,16 +943,16 @@ class _VocabularyListDetailScreenState
                           ),
                         );
                       },
-                      errorBuilder: (context, error, stackTrace) => const SizedBox(
+                      errorBuilder: (context, error, stackTrace) => SizedBox(
                         height: 100,
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.broken_image, color: Colors.grey),
-                              SizedBox(height: 4),
+                              Icon(Icons.broken_image, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                              const SizedBox(height: 4),
                               Text('Failed to load image',
-                                  style: TextStyle(color: Colors.grey, fontSize: 12)),
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
                             ],
                           ),
                         ),
@@ -986,9 +988,9 @@ class _VocabularyListDetailScreenState
             ),
           Text(wordText, style: const TextStyle(fontWeight: FontWeight.bold)),
           if (translation != null && translation.isNotEmpty) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 6),
-              child: Icon(Icons.arrow_forward, size: 14, color: Colors.grey),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Icon(Icons.arrow_forward, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             Flexible(
               child: Text(

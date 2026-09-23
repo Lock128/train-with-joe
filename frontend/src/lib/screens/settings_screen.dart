@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/locale_provider.dart';
+import '../providers/theme_provider.dart';
 import '../services/feedback_sound_service.dart';
 import '../l10n/generated/app_localizations.dart';
 
@@ -42,6 +43,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  /// Returns the display label for a theme mode.
+  String _themeModeLabel(ThemeMode mode, AppLocalizations l10n) {
+    switch (mode) {
+      case ThemeMode.system:
+        return l10n.themeSystem;
+      case ThemeMode.light:
+        return l10n.themeLight;
+      case ThemeMode.dark:
+        return l10n.themeDark;
+    }
+  }
+
+  IconData _themeModeIcon(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return Icons.brightness_auto_rounded;
+      case ThemeMode.light:
+        return Icons.light_mode_rounded;
+      case ThemeMode.dark:
+        return Icons.dark_mode_rounded;
+    }
+  }
+
   String _languageEmoji(String code) {
     switch (code) {
       case 'en':
@@ -67,6 +91,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final localeProvider = context.watch<LocaleProvider>();
     final currentLocale = localeProvider.locale;
+    final themeProvider = context.watch<ThemeProvider>();
+    final currentThemeMode = themeProvider.themeMode;
 
     return Scaffold(
       appBar: AppBar(
@@ -131,6 +157,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           );
                         })
                         .toList(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Appearance / theme section
+                _SectionHeader(
+                  icon: Icons.brightness_6_rounded,
+                  title: l10n.appearance,
+                ),
+                const SizedBox(height: 10),
+                Material(
+                  color: colorScheme.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(14),
+                  child: Column(
+                    children: ThemeMode.values.map((mode) {
+                      final isSelected = mode == currentThemeMode;
+                      return InkWell(
+                        onTap: () => themeProvider.setThemeMode(mode),
+                        borderRadius: BorderRadius.circular(14),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          child: Row(
+                            children: [
+                              Icon(
+                                _themeModeIcon(mode),
+                                size: 22,
+                                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Text(
+                                  _themeModeLabel(mode, l10n),
+                                  style: TextStyle(
+                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                    color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                              if (isSelected)
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.check_rounded, color: Colors.white, size: 16),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
                 const SizedBox(height: 24),

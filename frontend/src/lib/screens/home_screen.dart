@@ -67,13 +67,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade50,
+                        color: colorScheme.error.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.error_outline,
                         size: 48,
-                        color: Colors.red.shade400,
+                        color: colorScheme.error,
                       ),
                     ),
                     const SizedBox(height: 20),

@@ -145,7 +145,7 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(l10n.totalTime(duration), style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                Text(l10n.totalTime(duration), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14)),
               ]),
             ),
           ),
@@ -157,7 +157,7 @@ class _TrainingResultsScreenState extends State<TrainingResultsScreen> {
           if (results.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(l10n.noResultsAvailable, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
+              child: Text(l10n.noResultsAvailable, textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             )
           else
             ListView.builder(

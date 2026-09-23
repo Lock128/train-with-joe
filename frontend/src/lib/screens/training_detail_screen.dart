@@ -257,9 +257,9 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
             if (isRandomized) ...[
               const SizedBox(width: 8),
               Chip(
-                avatar: Icon(Icons.shuffle, size: 16, color: Colors.grey.shade700),
-                label: Text(l10n.randomized, style: TextStyle(color: Colors.grey.shade700)),
-                backgroundColor: Colors.grey.shade200,
+                avatar: Icon(Icons.shuffle, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                label: Text(l10n.randomized, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
             ],
           ]),
@@ -282,21 +282,21 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(children: [
-                    Icon(Icons.shuffle, color: Colors.grey.shade600),
+                    Icon(Icons.shuffle, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     const SizedBox(width: 8),
                     Text('$randomizedWordCount random words per session',
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ]),
                   const SizedBox(height: 8),
                   Row(children: [
-                    Icon(Icons.list_alt, color: Colors.grey.shade600),
+                    Icon(Icons.list_alt, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     const SizedBox(width: 8),
                     Text(l10n.fromNLists(vocabularyListIds.length),
-                      style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+                      style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                   ]),
                   const SizedBox(height: 8),
                   Text(l10n.wordsRandomlySelected,
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ]),
               ),
             ),
@@ -305,7 +305,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
             const SizedBox(height: 8),
             if (words.isEmpty)
               Padding(padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(l10n.noWordsInTraining, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)))
+                child: Text(l10n.noWordsInTraining, textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)))
             else
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 300),
@@ -473,7 +473,7 @@ class _AddWordsSheetState extends State<_AddWordsSheet> {
           child: filtered.isEmpty
               ? Center(child: Text(
                   widget.availableWords.isEmpty ? 'No additional words available.' : 'No words match your filter.',
-                  style: const TextStyle(color: Colors.grey)))
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)))
               : ListView.builder(
                   controller: scrollController, itemCount: filtered.length,
                   itemBuilder: (context, index) {

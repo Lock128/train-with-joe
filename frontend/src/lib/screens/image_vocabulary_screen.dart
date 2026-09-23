@@ -161,7 +161,12 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           final doneAnalyzing = !isAnalyzing && _analyzedCount == _selectedImages.length && _selectedImages.isNotEmpty;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.fromLTRB(
+              24.0,
+              24.0,
+              24.0,
+              24.0 + MediaQuery.paddingOf(context).bottom,
+            ),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 600),
@@ -208,13 +213,13 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
         padding: const EdgeInsets.all(32.0),
         child: Column(
           children: [
-            const Icon(Icons.image_search, size: 64, color: Colors.grey),
+            Icon(Icons.image_search, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(height: 16),
             Text(l10n.selectImages, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Pick one or more images to analyze and extract vocabulary words',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -272,6 +277,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
           constraints: const BoxConstraints(maxHeight: 300),
           child: GridView.builder(
           shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             crossAxisSpacing: 8,
@@ -339,9 +345,9 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Languages (optional — auto-detected from image)',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -428,9 +434,9 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Extracting vocabulary words — this may take a moment',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -459,7 +465,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
             const SizedBox(height: 8),
             Text(
               provider.error!,
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -622,7 +628,7 @@ class _ImageVocabularyScreenState extends State<ImageVocabularyScreen> {
               const SizedBox(height: 8),
               Text(
                 exampleSentence,
-                style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                style: TextStyle(fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ],

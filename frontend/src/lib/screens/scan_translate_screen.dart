@@ -305,7 +305,12 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: EdgeInsets.fromLTRB(
+          24.0,
+          24.0,
+          24.0,
+          24.0 + MediaQuery.paddingOf(context).bottom,
+        ),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
@@ -337,13 +342,13 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
           padding: const EdgeInsets.all(32.0),
           child: Column(
             children: [
-              const Icon(Icons.document_scanner, size: 64, color: Colors.grey),
+              Icon(Icons.document_scanner, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(height: 16),
               Text('Scan & Translate', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Pick images of signs, menus, labels, or any text to recognize and translate words',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -385,6 +390,7 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
           constraints: const BoxConstraints(maxHeight: 300),
           child: GridView.builder(
             shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               crossAxisSpacing: 8,
@@ -469,9 +475,9 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Extracting text from your images — this may take a moment',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -614,9 +620,9 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Translating and enriching your vocabulary — this may take a moment',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -767,7 +773,7 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
               const SizedBox(height: 8),
               Text(
                 exampleSentence,
-                style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                style: TextStyle(fontStyle: FontStyle.italic, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ],
@@ -800,7 +806,7 @@ class _ScanTranslateScreenState extends State<ScanTranslateScreen> {
             const SizedBox(height: 8),
             Text(
               _errorMessage ?? 'An unexpected error occurred',
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

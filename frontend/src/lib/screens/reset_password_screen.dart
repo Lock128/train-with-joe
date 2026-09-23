@@ -260,36 +260,39 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Widget _errorBanner(String message) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: Colors.red.shade700),
-          const SizedBox(width: 8),
-          Expanded(child: Text(message, style: TextStyle(color: Colors.red.shade700))),
-        ],
-      ),
-    );
+    return Builder(builder: (context) {
+      final colorScheme = Theme.of(context).colorScheme;
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colorScheme.error.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline, color: colorScheme.onErrorContainer),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message, style: TextStyle(color: colorScheme.onErrorContainer))),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _successBanner(String message) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
+        color: Colors.green.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.green.shade200),
+        border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
-          Icon(Icons.check_circle_outline, color: Colors.green.shade700),
+          const Icon(Icons.check_circle_outline, color: Colors.green),
           const SizedBox(width: 8),
-          Expanded(child: Text(message, style: TextStyle(color: Colors.green.shade700))),
+          Expanded(child: Text(message, style: const TextStyle(color: Colors.green))),
         ],
       ),
     );

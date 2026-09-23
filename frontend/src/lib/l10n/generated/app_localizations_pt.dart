@@ -88,6 +88,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get language => 'Idioma';
 
   @override
+  String get appearance => 'Aparência';
+
+  @override
+  String get themeSystem => 'Configurações do sistema';
+
+  @override
+  String get themeLight => 'Modo claro';
+
+  @override
+  String get themeDark => 'Modo escuro';
+
+  @override
   String get trainingSounds => 'Sons de treino';
 
   @override

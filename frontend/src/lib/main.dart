@@ -37,6 +37,7 @@ import 'screens/settings_screen.dart';
 import 'widgets/app_shell.dart';
 import 'services/feedback_sound_service.dart';
 import 'providers/locale_provider.dart';
+import 'providers/theme_provider.dart';
 import 'l10n/generated/app_localizations.dart';
 
 void main() {
@@ -195,6 +196,7 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => app.AuthProvider()),
         ChangeNotifierProxyProvider<app.AuthProvider, UserProvider>(
           create: (_) => UserProvider(),
@@ -244,25 +246,53 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
   @override
   Widget build(BuildContext context) {
     final localeProvider = context.watch<LocaleProvider>();
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF2B6CB0),
-      brightness: Brightness.light,
-      primary: const Color(0xFF2B6CB0),
-      secondary: const Color(0xFFF0932B),
-      tertiary: const Color(0xFF5BC0DE),
-      surface: const Color(0xFFF8FAFB),
-      surfaceContainerLowest: Colors.white,
-      surfaceContainerLow: const Color(0xFFF2F6F8),
-      surfaceContainer: const Color(0xFFEDF2F5),
-      surfaceContainerHigh: const Color(0xFFE4ECF0),
-    );
+    final themeProvider = context.watch<ThemeProvider>();
 
     return MaterialApp.router(
             title: 'Train with Joe',
             locale: localeProvider.locale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            theme: ThemeData(
+            themeMode: themeProvider.themeMode,
+            theme: _buildAppTheme(_lightColorScheme),
+            darkTheme: _buildAppTheme(_darkColorScheme),
+            routerConfig: _router,
+    );
+  }
+
+  /// Light color scheme (original app palette).
+  static final ColorScheme _lightColorScheme = ColorScheme.fromSeed(
+    seedColor: const Color(0xFF2B6CB0),
+    brightness: Brightness.light,
+    primary: const Color(0xFF2B6CB0),
+    secondary: const Color(0xFFF0932B),
+    tertiary: const Color(0xFF5BC0DE),
+    surface: const Color(0xFFF8FAFB),
+    surfaceContainerLowest: Colors.white,
+    surfaceContainerLow: const Color(0xFFF2F6F8),
+    surfaceContainer: const Color(0xFFEDF2F5),
+    surfaceContainerHigh: const Color(0xFFE4ECF0),
+  );
+
+  /// Dark color scheme derived from the same brand seed. Keeps the brand blue
+  /// as primary while using darker surfaces tuned for readability.
+  static final ColorScheme _darkColorScheme = ColorScheme.fromSeed(
+    seedColor: const Color(0xFF2B6CB0),
+    brightness: Brightness.dark,
+    primary: const Color(0xFF5B9BD5),
+    secondary: const Color(0xFFF0932B),
+    tertiary: const Color(0xFF5BC0DE),
+    surface: const Color(0xFF14181C),
+    surfaceContainerLowest: const Color(0xFF1B2026),
+    surfaceContainerLow: const Color(0xFF20262D),
+    surfaceContainer: const Color(0xFF262D35),
+    surfaceContainerHigh: const Color(0xFF2E363F),
+  );
+
+  /// Builds the app [ThemeData] for a given [colorScheme] so the light and dark
+  /// themes share the exact same component styling.
+  ThemeData _buildAppTheme(ColorScheme colorScheme) {
+    return ThemeData(
               colorScheme: colorScheme,
               useMaterial3: true,
               fontFamily: 'Nunito',
@@ -358,6 +388,21 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
                   color: colorScheme.onSurface,
                 ),
               ),
+              tabBarTheme: TabBarThemeData(
+                labelColor: colorScheme.primary,
+                unselectedLabelColor: colorScheme.onSurfaceVariant,
+                indicatorColor: colorScheme.primary,
+                labelStyle: const TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontFamily: 'Nunito',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               navigationBarTheme: NavigationBarThemeData(
                 elevation: 0,
                 backgroundColor: colorScheme.surfaceContainerLowest,
@@ -424,9 +469,7 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
               progressIndicatorTheme: ProgressIndicatorThemeData(
                 linearTrackColor: colorScheme.primaryContainer.withValues(alpha: 0.3),
               ),
-            ),
-            routerConfig: _router,
-    );
+            );
   }
 
   GoRouter _createRouter(app.AuthProvider authProvider) {

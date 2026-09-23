@@ -41,12 +41,12 @@ class ImpressumScreen extends StatelessWidget {
                     Uri.parse('mailto:lockhead@lockhead.info'),
                     mode: LaunchMode.externalApplication,
                   ),
-                  child: const Text(
+                  child: Text(
                     'E-Mail: lockhead@lockhead.info',
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.6,
-                      color: Color(0xFF2B6CB0),
+                      color: Theme.of(context).colorScheme.primary,
                       decoration: TextDecoration.underline,
                     ),
                   ),
