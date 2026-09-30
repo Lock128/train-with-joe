@@ -25,11 +25,11 @@
     "zone.js": "^0.16.3"
   },
   "devDependencies": {
-    "@angular/build": "^22.1.9",
-    "@angular/cli": "^22.1.9",
+    "@angular/build": "^22.2.0",
+    "@angular/cli": "^22.2.0",
     "@angular/compiler": "^22.2.0",
     "@angular/compiler-cli": "^22.2.0",
-    "baseline-browser-mapping": "^2.11.25",
+    "baseline-browser-mapping": "^2.11.26",
     "typescript": "~6.0.3"
   }
 }
