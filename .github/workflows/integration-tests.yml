@@ -1,0 +1,118 @@
+name: Integration Tests
+
+# Manual-only: the registration spec is an interactive, LIVE signup -> verify ->
+# login flow against a real deployed environment and a real email inbox. It is
+# NOT suitable for unattended CI unless CONFIRMATION_CODE is supplied (and even
+# then it hits real email), so this workflow is dispatch-only.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - sandbox
+          - beta
+          - production
+        default: sandbox
+      app_base_url:
+        description: 'App base URL for /signin (the app subdomain is a deploy-time value; confirm it)'
+        required: false
+        type: string
+      confirmation_code:
+        description: 'Emailed verification code (required for non-interactive CI runs)'
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  integration-tests:
+    name: Integration Tests (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+      # Secrets cannot be referenced directly in step-level `if:` conditions, so
+      # we surface AWS_ROLE_ARN as a job env var and gate the AWS step on it.
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      # AWS credentials are only needed for the OPTIONAL best-effort admin
+      # cleanup (Cognito AdminDeleteUser). train-with-joe has NO join_page delete
+      # surface, so this is the only automated cleanup path. If AWS_ROLE_ARN is
+      # not configured this step is skipped and the spec still runs (it just logs
+      # a cleanup WARNING).
+      - name: Configure AWS credentials
+        if: ${{ env.AWS_ROLE_ARN != '' }}
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - name: Install integration test dependencies
+        working-directory: integration-tests
+        run: npm ci
+
+      - name: Install Playwright
+        working-directory: integration-tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Run registration integration test
+        working-directory: integration-tests
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          AWS_REGION: eu-central-1
+          # The app subdomain is a deploy-time value (environment.ts ships a
+          # REPLACE_WITH_APP_URL placeholder). Supply it here (or as a repo var)
+          # if the https://app.trainwithjoe.app default is wrong.
+          APP_BASE_URL: ${{ inputs.app_base_url }}
+          # Optional: enables the best-effort admin Cognito cleanup.
+          COGNITO_USER_POOL_ID: ${{ vars.COGNITO_USER_POOL_ID }}
+          COGNITO_CLIENT_ID: ${{ vars.COGNITO_CLIENT_ID }}
+          # Interactive by design: supply the emailed code for a non-interactive
+          # CI run. Without it the spec will fail waiting for stdin input.
+          CONFIRMATION_CODE: ${{ inputs.confirmation_code }}
+        run: npx playwright test tests/ui/registration.spec.ts --project=ui-tests
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: integration-test-report-${{ inputs.environment }}
+          path: |
+            integration-tests/reports/
+            integration-tests/test-results/
+          retention-days: 14
+
+      - name: Create test summary
+        if: always()
+        run: |
+          echo "## 🧪 Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Run At** | $(date -u +'%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | $(git rev-parse --short HEAD) |" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f integration-tests/reports/results.json ]; then
+            TOTAL=$(jq '.stats.expected + .stats.unexpected + .stats.skipped' integration-tests/reports/results.json 2>/dev/null || echo "?")
+            PASSED=$(jq '.stats.expected' integration-tests/reports/results.json 2>/dev/null || echo "?")
+            FAILED=$(jq '.stats.unexpected' integration-tests/reports/results.json 2>/dev/null || echo "?")
+            SKIPPED=$(jq '.stats.skipped' integration-tests/reports/results.json 2>/dev/null || echo "?")
+            echo "| **Total** | ${TOTAL} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Passed** | ✅ ${PASSED} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Failed** | ❌ ${FAILED} |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Skipped** | ⏭️ ${SKIPPED} |" >> $GITHUB_STEP_SUMMARY
+          fi
