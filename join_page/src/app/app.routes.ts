@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { DeleteDataComponent } from './pages/delete-data.component';
 import { HomeComponent } from './pages/home.component';
 import { ImpressumComponent } from './pages/impressum.component';
 import { PrivacyComponent } from './pages/privacy.component';
@@ -9,5 +10,6 @@ export const routes: Routes = [
   { path: 'privacy', component: PrivacyComponent },
   { path: 'terms', component: TermsComponent },
   { path: 'impressum', component: ImpressumComponent },
+  { path: 'delete-data', component: DeleteDataComponent },
   { path: '**', redirectTo: '' },
 ];
