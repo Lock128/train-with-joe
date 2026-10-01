@@ -1,0 +1,22 @@
+{
+  "name": "train-with-joe-integration-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Integration test suite for Train with Joe — browser-based signup -> verify -> login flow against deployed environments",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --project=ui-tests",
+    "test:sandbox": "ENVIRONMENT=sandbox playwright test",
+    "test:production": "ENVIRONMENT=production playwright test",
+    "test:registration": "ENVIRONMENT=production playwright test tests/ui/registration.spec.ts --project=ui-tests --headed"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "3.709.0",
+    "@playwright/test": "1.62.1",
+    "@types/node": "22.10.2",
+    "dotenv": "17.4.2"
+  },
+  "dependencies": {
+    "playwright": "^1.63.0"
+  }
+}
