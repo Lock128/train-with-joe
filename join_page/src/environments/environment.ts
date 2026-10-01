@@ -6,4 +6,5 @@ export const environment = {
     userPoolClientId: 'REPLACE_WITH_USER_POOL_CLIENT_ID',
   },
   appUrl: 'REPLACE_WITH_APP_URL',
+  deletionRequestUrl: '',
 };
