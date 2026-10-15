@@ -222,6 +222,61 @@ export class TranslationService {
     'apps.ios': { en: 'Download on the App Store', de: 'Im App Store laden' },
     'apps.android': { en: 'Get it on Google Play', de: 'Bei Google Play laden' },
 
+    // Delete data page
+    'delete.title': { en: 'Delete Your Data', de: 'Deine Daten löschen' },
+    'delete.intro': {
+      en: 'You can request deletion of your Train with Joe account and all associated data. This action is permanent and cannot be undone.',
+      de: 'Du kannst die Löschung deines Train-with-Joe-Kontos und aller zugehörigen Daten beantragen. Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden.',
+    },
+    'delete.whatTitle': { en: 'What gets deleted', de: 'Was gelöscht wird' },
+    'delete.what.account': { en: 'Your account and login credentials', de: 'Dein Konto und deine Anmeldedaten' },
+    'delete.what.vocab': {
+      en: 'All your vocabulary lists and learning progress',
+      de: 'Alle deine Vokabellisten und dein Lernfortschritt',
+    },
+    'delete.what.profile': {
+      en: 'Your profile information and preferences',
+      de: 'Deine Profilinformationen und Einstellungen',
+    },
+    'delete.what.usage': { en: 'Usage data and training history', de: 'Nutzungsdaten und Trainingsverlauf' },
+    'delete.beforeTitle': { en: 'Before you delete', de: 'Bevor du löschst' },
+    'delete.beforeNote': {
+      en: 'Deletion is permanent. If you have an active subscription, please cancel it first through the app store where you subscribed. Questions? Email us at',
+      de: 'Die Löschung ist endgültig. Wenn du ein aktives Abonnement hast, kündige es bitte zuerst über den App Store, in dem du es abgeschlossen hast. Fragen? Schreib uns an',
+    },
+    'delete.form.emailLabel': { en: 'Email address', de: 'E-Mail-Adresse' },
+    'delete.form.emailPlaceholder': { en: 'Enter your account email', de: 'E-Mail deines Kontos eingeben' },
+    'delete.form.reasonLabel': { en: 'Reason for leaving (optional)', de: 'Grund für die Löschung (optional)' },
+    'delete.form.reasonPlaceholder': {
+      en: 'Let us know why you are leaving',
+      de: 'Lass uns wissen, warum du gehst',
+    },
+    'delete.form.confirmLabel': { en: 'Type DELETE to confirm', de: 'Tippe DELETE zur Bestätigung' },
+    'delete.form.confirmPlaceholder': { en: 'DELETE', de: 'DELETE' },
+    'delete.form.submit': { en: 'Request data deletion', de: 'Datenlöschung beantragen' },
+    'delete.form.submitting': { en: 'Submitting request...', de: 'Anfrage wird gesendet...' },
+    'delete.processingNote': {
+      en: 'We will process your request and remove your personal data within 30 days.',
+      de: 'Wir bearbeiten deine Anfrage und entfernen deine personenbezogenen Daten innerhalb von 30 Tagen.',
+    },
+    'delete.error.invalid': {
+      en: 'Please enter your email and type DELETE to confirm.',
+      de: 'Bitte gib deine E-Mail-Adresse ein und tippe DELETE zur Bestätigung.',
+    },
+    'delete.error.failed': {
+      en: 'We could not submit your request. Please try again or email privacy@trainwithjoe.app.',
+      de: 'Wir konnten deine Anfrage nicht senden. Bitte versuche es erneut oder schreibe an privacy@trainwithjoe.app.',
+    },
+    'delete.manual': {
+      en: 'To request deletion, please email privacy@trainwithjoe.app from your account email address and we will process your request within 30 days.',
+      de: 'Um die Löschung zu beantragen, schreibe bitte von deiner Konto-E-Mail-Adresse an privacy@trainwithjoe.app, und wir bearbeiten deine Anfrage innerhalb von 30 Tagen.',
+    },
+    'delete.success.title': { en: 'Request received', de: 'Anfrage erhalten' },
+    'delete.success.body': {
+      en: 'We have received your data deletion request. Your personal data will be removed within 30 days. You will receive a confirmation email.',
+      de: 'Wir haben deine Anfrage zur Datenlöschung erhalten. Deine personenbezogenen Daten werden innerhalb von 30 Tagen entfernt. Du erhältst eine Bestätigungs-E-Mail.',
+    },
+
     // Footer
     'footer.rights': { en: 'All rights reserved.', de: 'Alle Rechte vorbehalten.' },
     'footer.privacy': { en: 'Privacy Policy', de: 'Datenschutz' },
