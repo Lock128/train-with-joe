@@ -233,8 +233,8 @@ import { TranslationService } from '../services/translation.service';
             <ul>
               <li><strong>AWS (Amazon Web Services)</strong> — Hosting, Authentifizierung und Datenspeicherung</li>
               <li>
-                <strong>Dash0</strong> — Auftragsverarbeiter für Diagnose- und Leistungstelemetrie, Speicherung in der EU
-                (AWS-Region eu-west-1)
+                <strong>Dash0</strong> — Auftragsverarbeiter für Diagnose- und Leistungstelemetrie, Speicherung in der
+                EU (AWS-Region eu-west-1)
               </li>
               <li><strong>Stripe</strong> — Zahlungsabwicklung für Abonnements</li>
               <li><strong>Apple App Store / Google Play Store</strong> — App-Vertrieb und In-App-Käufe</li>
