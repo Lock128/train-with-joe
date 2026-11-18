@@ -183,9 +183,48 @@ jobs:
       - name: Inject Amplify config
         run: bash scripts/inject-amplify-config.sh beta ${{ env.AWS_REGION }}
 
+      - name: Generate OTLP config for Flutter
+        working-directory: frontend/src
+        run: |
+          jq -n \
+            --arg endpoint "$OTLP_ENDPOINT" \
+            --arg headers "$OTLP_HEADERS" \
+            --arg environment "$DASH0_ENVIRONMENT" \
+            --arg deployment_name "train-with-joe-$DASH0_ENVIRONMENT" \
+            --arg deployment_id "$DASH0_DEPLOYMENT_ID" \
+            --arg vcs_revision "$DASH0_VCS_REVISION" \
+            --arg vcs_ref "$DASH0_VCS_REF_NAME" \
+            --arg vcs_url "$DASH0_VCS_REPOSITORY_URL" \
+            '{
+              OTEL_EXPORTER_OTLP_ENDPOINT: $endpoint,
+              OTEL_EXPORTER_OTLP_HEADERS: $headers,
+              DASH0_ENVIRONMENT: $environment,
+              DASH0_DEPLOYMENT_NAME: $deployment_name,
+              DASH0_DEPLOYMENT_ID: $deployment_id,
+              DASH0_VCS_REF_HEAD_REVISION: $vcs_revision,
+              DASH0_VCS_REF_HEAD_NAME: $vcs_ref,
+              DASH0_VCS_REPOSITORY_URL_FULL: $vcs_url
+            }' > otlp_config.json
+          echo "OTLP config written to otlp_config.json"
+          echo "  Endpoint: $([ -n "$OTLP_ENDPOINT" ] && echo 'set' || echo 'EMPTY (telemetry disabled)')"
+          echo "  Headers:  $([ -n "$OTLP_HEADERS" ] && echo 'set' || echo 'EMPTY (telemetry disabled)')"
+          # Dash0 needs a dataset; fail the build if headers are set without one (value is never printed)
+          if [ -n "$OTLP_HEADERS" ] && ! printf '%s' "$OTLP_HEADERS" | grep -q 'Dash0-Dataset='; then
+            echo "::error::OTLP headers secret is set but has no Dash0-Dataset= entry. Expected format: Authorization=Bearer <token>,Dash0-Dataset=<dataset>"
+            exit 1
+          fi
+        env:
+          OTLP_ENDPOINT: ${{ secrets.NONPROD_FLUTTER_OTLP_ENDPOINT || secrets.FLUTTER_OTLP_ENDPOINT }}
+          OTLP_HEADERS: ${{ secrets.NONPROD_FLUTTER_OTLP_HEADERS || secrets.FLUTTER_OTLP_HEADERS }}
+          DASH0_ENVIRONMENT: beta
+          DASH0_DEPLOYMENT_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          DASH0_VCS_REVISION: ${{ github.sha }}
+          DASH0_VCS_REF_NAME: ${{ github.ref_name }}
+          DASH0_VCS_REPOSITORY_URL: https://github.com/${{ github.repository }}
+
       - name: Build Flutter web app
         working-directory: frontend/src
-        run: flutter build web --release --dart-define=COMMIT_ID=${{ github.sha }} --dart-define=GITHUB_RUN_NUMBER=${{ github.run_number }}
+        run: flutter build web --release --dart-define=COMMIT_ID=${{ github.sha }} --dart-define=GITHUB_RUN_NUMBER=${{ github.run_number }} --dart-define-from-file=otlp_config.json
 
       - name: Inject join page config
         run: bash scripts/inject-join-page-config.sh beta ${{ env.AWS_REGION }}

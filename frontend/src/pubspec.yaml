@@ -1,5 +1,6 @@
 name: train_with_joe
 description: Train with Joe - A fun vocabulary training app for kids
+publish_to: none
 version: 1.0.0+1
 
 environment:
@@ -44,6 +45,15 @@ dependencies:
   url_launcher: ^6.3.2
   universal_io: ^2.3.1
   connectivity_plus: ^7.2.0
+  device_info_plus: ">=11.5.0 <14.0.0"
+
+  # Dash0 RUM telemetry. For local SDK development switch to: path: ../../../flutter-dash0-sdk
+  dash0_flutter_sdk:
+    git:
+      url: https://github.com/Lock128/flutter-dash0-sdk.git
+      ref: v0.10.0
+
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import '../services/auth_service.dart';
+import '../utils/dash0_identity.dart';
 
 /// Provider for managing authentication state
 class AuthProvider extends ChangeNotifier {
@@ -27,6 +28,10 @@ class AuthProvider extends ChangeNotifier {
     _checkAuthStatus();
   }
 
+  /// Identifies the telemetry session with the Cognito user id only. This is a
+  /// children's app, so no email or name is sent. Never throws.
+  void _identifyTelemetryUser() => identifyDash0User(_currentUser?.userId);
+
   /// Check current authentication status
   Future<void> _checkAuthStatus() async {
     _isLoading = true;
@@ -49,10 +54,12 @@ class AuthProvider extends ChangeNotifier {
         _currentUser = await _authService.getCurrentUser();
         _cognitoEmail = await _authService.fetchUserEmail();
         _isAuthenticated = true;
+        _identifyTelemetryUser();
       } else {
         _currentUser = null;
         _cognitoEmail = null;
         _isAuthenticated = false;
+        clearDash0User();
       }
       _error = null;
     } catch (e) {
@@ -60,6 +67,7 @@ class AuthProvider extends ChangeNotifier {
       _currentUser = null;
       _cognitoEmail = null;
       _isAuthenticated = false;
+      clearDash0User();
       _error = null; // Don't show error on initial check
     } finally {
       _isLoading = false;
@@ -93,6 +101,7 @@ class AuthProvider extends ChangeNotifier {
       _currentUser = await _authService.getCurrentUser();
       _cognitoEmail = await _authService.fetchUserEmail();
       _isAuthenticated = true;
+      _identifyTelemetryUser();
       _error = null;
       _isLoading = false;
       notifyListeners();
@@ -121,6 +130,7 @@ class AuthProvider extends ChangeNotifier {
       _currentUser = await _authService.getCurrentUser();
       _cognitoEmail = await _authService.fetchUserEmail();
       _isAuthenticated = true;
+      _identifyTelemetryUser();
       _needsNewPassword = false;
       _error = null;
       _isLoading = false;
@@ -185,6 +195,7 @@ class AuthProvider extends ChangeNotifier {
       _currentUser = null;
       _cognitoEmail = null;
       _isAuthenticated = false;
+      clearDash0User();
       _error = null;
     } catch (e) {
       debugPrint('Error signing out: $e');
@@ -238,6 +249,7 @@ class AuthProvider extends ChangeNotifier {
       _currentUser = await _authService.getCurrentUser();
       _cognitoEmail = await _authService.fetchUserEmail();
       _isAuthenticated = true;
+      _identifyTelemetryUser();
       _error = null;
       _isLoading = false;
       notifyListeners();

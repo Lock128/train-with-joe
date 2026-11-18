@@ -90,9 +90,9 @@ Design details:
 
 **Fix:** Added a "Privacy & Data Collection" section to the App Store review notes in `documentation/store-listing.md` with the following answers:
 
-- **Third-party analytics:** None. No Firebase, Amplitude, or other analytics SDKs.
-- **Third-party advertising:** None.
-- **Data sharing:** No user data is shared with third parties.
+- **Diagnostics telemetry:** Diagnostics and performance telemetry (usage/performance, errors, page views without query strings, device model, OS and app version, pseudonymous Cognito user ID) is sent to Dash0 as a processor (EU, eu-west-1, 30 day retention). No Firebase, Amplitude, or other product analytics SDKs. Session replay and profiling are off.
+- **Third-party advertising:** None. No tracking, no behavioral advertising.
+- **Data sharing:** No user data is sold or shared for advertising. Dash0 only processes telemetry on our behalf.
 - **Data collection:** Only what's needed for core functionality — email for authentication (AWS Cognito), vocabulary lists, training progress, and subscription status. All stored in AWS (DynamoDB, S3).
 
 These answers should be copied into the App Store Connect reply to the review team.

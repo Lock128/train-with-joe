@@ -162,6 +162,7 @@ npm run destroy
 - Architecture documentation in `/documentation`
 - API documentation generated from GraphQL schema
 - Inline code comments for complex logic
+- Dash0 telemetry setup (manual steps): [SETUP_OTEL.md](SETUP_OTEL.md)
 
 ## Contributing
 

@@ -84,3 +84,11 @@ After deploying the backend infrastructure, update the following in `lib/models/
 - `REPLACE_WITH_APP_CLIENT_ID`: Your Cognito App Client ID
 - `REPLACE_WITH_REGION`: Your AWS region (e.g., us-east-1)
 - `REPLACE_WITH_API_ENDPOINT`: Your AppSync GraphQL API endpoint
+
+## Telemetry (Dash0)
+
+The app reports RUM telemetry (page views, errors, HTTP spans, web vitals) with the
+[Dash0 Flutter SDK](https://github.com/Lock128/flutter-dash0-sdk). It is a no-op unless
+`OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` are passed with `--dart-define`
+(CI does this through `otlp_config.json`). Only the Cognito user id is sent to identify users, never
+email or name. See [SETUP_OTEL.md](../../SETUP_OTEL.md) for configuration.
