@@ -115,6 +115,50 @@ Ingest-only, dataset-restricted tokens are safe to ship in web builds: they can 
 They are still public, so rotate them if abused. Because this is a children's app, the privacy gate in section 7 stays:
 do not enable telemetry in production before the privacy release gate listed there is complete.
 
+## 1b. Local setup script
+
+`scripts/setup-otel.sh` does section 1a and the secrets of section 2 in one run, from your own machine. Use it when
+setting secrets through an agent or gateway fails with HTTP 403: the script uses your own `gh` login.
+
+Prerequisites:
+
+- `dash0` CLI 1.22 or newer, `gh` and `jq`.
+- `gh auth login` with permission to write Actions secrets on `Lock128/train-with-joe`: a classic token with the
+  `repo` scope, or a fine-grained token with Secrets: Read and write (plus Metadata: Read) on that repository.
+- `DASH0_AUTH_TOKEN` in the environment, set to a Dash0 admin token. It is never accepted as an argument.
+  `DASH0_API_URL` defaults to `https://api.eu-west-1.aws.dash0.com`.
+
+```bash
+read -rs DASH0_AUTH_TOKEN && export DASH0_AUTH_TOKEN
+scripts/setup-otel.sh --dry-run          # validate and print the plan, change nothing
+scripts/setup-otel.sh                    # nonprod and prod
+scripts/setup-otel.sh --only nonprod     # one environment
+scripts/setup-otel.sh --rotate           # replace existing tokens
+```
+
+For each environment (`nonprod-train-with-joe`, `train-with-joe`) the script:
+
+1. Creates or updates the dataset (`dash0 -X datasets create`, which upserts by slug).
+2. Ensures the token `<slug>-flutter-ingest` (`ingest:*`, restricted to that dataset). Dash0 returns a token secret only
+   at creation. If the token exists, the script stops with a message unless you pass `--rotate`. With `--rotate` it
+   deletes the old token (the old one stops working at once) and creates a new one.
+3. Sets `NONPROD_FLUTTER_OTLP_ENDPOINT`, `NONPROD_FLUTTER_OTLP_HEADERS`, `PROD_FLUTTER_OTLP_ENDPOINT` and
+   `PROD_FLUTTER_OTLP_HEADERS` with `gh secret set --body -`.
+
+The token secret is written with `--secret-file` into a private temporary directory that an exit trap removes, and is
+passed to `gh` on stdin. It is never printed, put on a command line, or written into the repository.
+
+Rotation: run `scripts/setup-otel.sh --rotate` (add `--only` to limit it), for example after a token is abused. Then
+rerun the deployments so builds pick up the new secrets.
+
+Troubleshooting a 403 from `gh`: the script checks `gh api repos/Lock128/train-with-joe/actions/secrets/public-key`
+first. If that fails, your login lacks secrets permission. Create a token as described above and run `gh auth login`
+again. A `GH_TOKEN` or `GITHUB_TOKEN` variable overrides the stored login, so unset it if it holds an old token.
+Dash0 errors usually mean `DASH0_AUTH_TOKEN` is not an admin token or `DASH0_API_URL` is the wrong region.
+
+Setting the secrets does not lift the privacy release gate in section 7: do not ship production telemetry before it
+is complete.
+
 ## 2. GitHub Actions secrets
 
 Add these in the repository secrets (Settings, Secrets and variables, Actions). The workflows `ci-cd.yml` (sandbox),
