@@ -17,6 +17,104 @@ Builds without them behave exactly as before.
 3. Note your OTLP endpoint (Settings, Endpoints), for example `https://ingress.eu-west-1.aws.dash0.com`. Use the base
    URL only, without `/v1/traces`. The app strips a trailing signal path if present.
 
+## 1a. Set up Dash0 with the dash0 CLI
+
+The [dash0 CLI](https://github.com/dash0hq/dash0-cli) can create the datasets and tokens from YAML files. The
+commands below were verified with CLI v1.22.1.
+
+**Current state:** the datasets `train-with-joe` (production) and `nonprod-train-with-joe` (sandbox and beta) and the
+ingest-only tokens `train-with-joe-flutter-ingest` and `nonprod-train-with-joe-flutter-ingest` already exist in the
+`eu-west-1` region. The maintainer's script sets the GitHub secrets from those tokens. You only need this section to
+recreate them or to set up another environment.
+
+Install:
+
+```bash
+brew install --cask dash0hq/dash0-cli/dash0
+# or download a release binary from https://github.com/dash0hq/dash0-cli/releases
+```
+
+Authenticate with an admin token (a token with permission to manage datasets and auth tokens, not the ingest tokens):
+
+```bash
+export DASH0_API_URL=https://api.eu-west-1.aws.dash0.com
+export DASH0_AUTH_TOKEN=<admin token>
+# or interactively: dash0 login
+```
+
+Dataset file `ds.yaml` (repeat with slug `nonprod-train-with-joe` for the second dataset):
+
+```yaml
+apiVersion: dash0.com/v1alpha1
+kind: Dash0Dataset
+metadata:
+  name: train-with-joe
+  labels:
+    dash0.com/id: train-with-joe
+spec:
+  slug: train-with-joe
+  preferred: false
+  permissions:
+    - actions: [dataset:read]
+      role: basic_member
+  privacy:
+    geoLocation:
+      endUser:
+        storage: up_to_city
+    ipAddresses:
+      endUser:
+        storage: anonymize
+  retention:
+    logs: 30d
+    metrics: 13M
+    profiles: 30d
+    traces: 30d
+    webEvents: 30d
+```
+
+Token file `tok.yaml` (repeat with `nonprod-train-with-joe-flutter-ingest` and slug `nonprod-train-with-joe`):
+
+```yaml
+apiVersion: dash0.com/v1alpha1
+kind: Dash0AuthToken
+metadata:
+  name: train-with-joe-flutter-ingest
+spec:
+  actions: [ingest:*]
+  ingestion:
+    defaultDataset: train-with-joe
+  scope:
+    datasets:
+      restriction: restricted
+      slugs: [train-with-joe]
+    signals:
+      restriction: unrestricted
+      types: []
+```
+
+Create and check:
+
+```bash
+dash0 -X datasets create -f ds.yaml --dry-run
+dash0 -X datasets create -f ds.yaml
+dash0 -X auth-tokens create -f tok.yaml --secret-file ./train-with-joe.tok   # new file, outside git or gitignored
+dash0 -X datasets list
+dash0 -X auth-tokens list
+```
+
+The token secret is only available at creation time, in the `--secret-file`. Never commit that file.
+
+Build the header value from the token and the dataset slug, and use the OTLP base URL
+`https://ingress.eu-west-1.aws.dash0.com` as endpoint:
+
+```text
+Authorization=Bearer <token>,Dash0-Dataset=<slug>
+```
+
+Ingest-only, dataset-restricted tokens are safe to ship in web builds: they can write to one dataset and read nothing.
+They are still public, so rotate them if abused. Because this is a children's app, the privacy gate in section 7 stays:
+do not enable telemetry in production before the consent and privacy policy decisions listed there.
+
 ## 2. GitHub Actions secrets
 
 Add these in the repository secrets (Settings, Secrets and variables, Actions). The workflows `ci-cd.yml` (sandbox),
@@ -30,11 +128,12 @@ secrets or secrets of those GitHub environments.
 | `NONPROD_FLUTTER_OTLP_HEADERS` | sandbox and beta builds | `Authorization=Bearer <token>,Dash0-Dataset=<dataset>` |
 | `PROD_FLUTTER_OTLP_ENDPOINT` | production builds | `https://ingress.<region>.aws.dash0.com` |
 | `PROD_FLUTTER_OTLP_HEADERS` | production builds | `Authorization=Bearer <token>,Dash0-Dataset=<dataset>` |
-| `FLUTTER_OTLP_ENDPOINT` | fallback for all environments | same format as above |
-| `FLUTTER_OTLP_HEADERS` | fallback for all environments | same format as above |
+| `FLUTTER_OTLP_ENDPOINT` | fallback for sandbox and beta only | same format as above |
+| `FLUTTER_OTLP_HEADERS` | fallback for sandbox and beta only | same format as above |
 
-The `NONPROD_`/`PROD_` secrets win. The unprefixed `FLUTTER_OTLP_*` secrets are used only when the prefixed one is
-empty. Header format rules:
+The `NONPROD_` secrets win for sandbox and beta. The unprefixed `FLUTTER_OTLP_*` secrets are used there only when the
+`NONPROD_` one is empty. Production reads only the `PROD_` secrets and never falls back, so a nonprod token can never
+end up in a production build. If `PROD_*` are unset, production builds have telemetry disabled. Header format rules:
 
 - Comma separated `key=value` pairs, no spaces around the comma, no quotes.
 - `Authorization=Bearer <token>` is required, `Dash0-Dataset=<dataset>` is required. The workflow fails the build when
@@ -83,8 +182,8 @@ them to the Codemagic step if you want deployment and commit data on mobile tele
 
 Add these as secure environment variables in the Codemagic workflow. In the script above, map the endpoint and headers
 of the target environment to `FLUTTER_OTLP_ENDPOINT` and `FLUTTER_OTLP_HEADERS`. Use the `NONPROD_` values for sandbox
-and beta builds, the `PROD_` values for production, and the unprefixed `FLUTTER_OTLP_*` values as the fallback when the
-prefixed one is empty, as the GitHub workflows do.
+and beta builds and the `PROD_` values for production. Do not fall back to unprefixed values for production builds,
+as the GitHub workflows do not either.
 
 | Variable | Purpose |
 | --- | --- |
@@ -92,7 +191,7 @@ prefixed one is empty, as the GitHub workflows do.
 | `NONPROD_FLUTTER_OTLP_HEADERS` | Headers for non-production builds (secure) |
 | `PROD_FLUTTER_OTLP_ENDPOINT` | Dash0 ingress URL for production builds |
 | `PROD_FLUTTER_OTLP_HEADERS` | Headers for production builds (secure) |
-| `FLUTTER_OTLP_ENDPOINT` / `FLUTTER_OTLP_HEADERS` | Fallback for all environments |
+| `FLUTTER_OTLP_ENDPOINT` / `FLUTTER_OTLP_HEADERS` | Optional fallback for non-production builds only |
 | `DASH0_ENVIRONMENT` | Value of `deployment.environment.name` (for example `beta` or `production`) |
 
 The headers value must contain both `Authorization=Bearer <token>` and `Dash0-Dataset=<dataset>`, for example

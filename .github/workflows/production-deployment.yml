@@ -344,8 +344,8 @@ jobs:
             exit 1
           fi
         env:
-          OTLP_ENDPOINT: ${{ secrets.PROD_FLUTTER_OTLP_ENDPOINT || secrets.FLUTTER_OTLP_ENDPOINT }}
-          OTLP_HEADERS: ${{ secrets.PROD_FLUTTER_OTLP_HEADERS || secrets.FLUTTER_OTLP_HEADERS }}
+          OTLP_ENDPOINT: ${{ secrets.PROD_FLUTTER_OTLP_ENDPOINT }}
+          OTLP_HEADERS: ${{ secrets.PROD_FLUTTER_OTLP_HEADERS }}
           DASH0_ENVIRONMENT: production
           DASH0_DEPLOYMENT_ID: ${{ github.run_id }}-${{ github.run_attempt }}
           DASH0_VCS_REVISION: ${{ steps.commit-info.outputs.commit_full }}
