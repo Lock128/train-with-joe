@@ -153,4 +153,15 @@ void main() {
       expect(currentDash0Environment(), 'development');
     });
   });
+
+  group('scrubDash0Url', () {
+    test('redacts query strings with emails', () {
+      expect(scrubDash0Url('https://app.example.com/signin?email=a%40b.com&registered=true'), 'https://app.example.com/signin?REDACTED');
+    });
+
+    test('redacts fragments and leaves plain URLs untouched', () {
+      expect(scrubDash0Url('https://x.com/a#t=1'), 'https://x.com/a?REDACTED');
+      expect(scrubDash0Url('https://x.com/home'), 'https://x.com/home');
+    });
+  });
 }

@@ -162,6 +162,8 @@ Before enabling telemetry in production:
   forms). The Cognito user id is a pseudonymous identifier and counts as personal data.
 - Update the privacy policy and the Impressum screen (`frontend/src/lib/screens/impressum_screen.dart`) and the store
   declarations in `documentation/store-listing.md`. Dash0 should be listed as a processor, with the data region you chose.
+- URLs are scrubbed in the app (`urlScrubber`): query strings and fragments, such as `?email=` on `/signin`, are replaced
+  with `?REDACTED` in page views, HTTP spans, errors and logs.
 - Follow the Dash0 sensitive data guidance: do not put emails, names, tokens, vocabulary text or free text in span
   names, attributes, error messages or log messages. Scrub such data in the Dash0 pipeline if it can appear anyway.
 

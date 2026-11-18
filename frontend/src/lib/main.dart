@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -74,12 +72,8 @@ Future<void> main() async {
     return true;
   };
 
-  // Catch zone errors that escape the handlers above
-  runZonedGuarded(() => runApp(const MyApp()), (error, stack) {
-    Dash0.reportError(error, stackTrace: stack);
-    debugPrint('Zone error caught: $error');
-    debugPrint('Stack trace: $stack');
-  });
+  // PlatformDispatcher.onError covers async errors, so no extra zone is used.
+  runApp(const MyApp());
 }
 
 /// Initializes the Dash0 Flutter SDK from build-time `--dart-define` values
@@ -143,6 +137,7 @@ Future<void> _initializeOpenTelemetry() async {
         ),
         propagators: propagateTraceHeaders ? [Dash0Propagator.traceparent(dash0PropagationTargets)] : const [],
         compression: Dash0Compression.gzip,
+        urlScrubber: scrubDash0Url,
         metricExportInterval: parseSeconds(metricIntervalRaw) ?? const Duration(seconds: 30),
         sessionReplaySamplingRate: replaySamplingRate,
       ),

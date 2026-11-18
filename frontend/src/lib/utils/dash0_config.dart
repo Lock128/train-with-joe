@@ -157,7 +157,11 @@ final List<RegExp> dash0PropagationTargets = [
   RegExp(r'^https://[a-z0-9-]+\.appsync-api\.[a-z0-9-]+\.amazonaws\.com(/|$)'),
 ];
 
-/// Effective OpenTelemetry (Dash0) configuration, recorded at startup for the
-/// debug information screen. Never contains the auth token. Null until
-/// initialization was attempted.
-Map<String, Object?>? dash0DebugConfig;
+/// Redacts the query string and fragment of URLs sent to Dash0. Router URLs
+/// such as `/signin?email=...` carry email addresses, which must never leave
+/// the device in this children's app.
+String scrubDash0Url(String url) {
+  final cut = url.indexOf(RegExp(r'[?#]'));
+  if (cut < 0) return url;
+  return '${url.substring(0, cut)}?REDACTED';
+}
