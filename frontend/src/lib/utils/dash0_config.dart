@@ -111,12 +111,22 @@ String? resolveDash0Environment(String raw, {required bool isDebug}) {
   return isDebug ? 'development' : null;
 }
 
-/// The `deployment.environment.name` of this build. Shared by `Dash0.init` and
-/// the admin status display so both show the same value.
+/// The `deployment.environment.name` of this build, used by `Dash0.init` and
+/// to suffix the service name.
 String? currentDash0Environment() => resolveDash0Environment(
   const String.fromEnvironment('DASH0_ENVIRONMENT', defaultValue: ''),
   isDebug: kDebugMode,
 );
+
+/// Builds the `service.version` value `<version>+<buildNumber>`. Returns just
+/// the version when the build number is empty and null when the version is
+/// empty.
+String? resolveDash0ServiceVersion(String? version, String? buildNumber) {
+  final v = version?.trim() ?? '';
+  if (v.isEmpty) return null;
+  final b = buildNumber?.trim() ?? '';
+  return b.isEmpty ? v : '$v+$b';
+}
 
 /// Service name reported to Dash0 (shown as the site name). Returns
 /// [baseName] for production (null, empty, `production` or `prod`), otherwise

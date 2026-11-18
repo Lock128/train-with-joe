@@ -46,39 +46,60 @@ The workflow writes `frontend/src/otlp_config.json` (gitignored) and builds with
 
 ## 3. Mobile builds (Codemagic)
 
-There is no `codemagic.yaml` in this repository. Mobile builds are configured in the Codemagic UI, with the Amplify
-values from `scripts/extract-codemagic-env.sh`. Add these environment variables to the Codemagic group of each
-environment (mark the headers as secure):
+**No iOS or Android build is defined in this repository.** There is no `codemagic.yaml`, fastlane setup or GitHub
+workflow that builds an APK or iOS app. Mobile builds run in the Codemagic UI (with the Amplify values from
+`scripts/extract-codemagic-env.sh`), so the telemetry configuration must be added to that build as described here.
+Without it the app starts with telemetry disabled.
 
-| Variable | Value |
-| --- | --- |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | `https://ingress.<region>.aws.dash0.com` |
-| `OTEL_EXPORTER_OTLP_HEADERS` | `Authorization=Bearer <token>,Dash0-Dataset=<dataset>` (secure) |
-| `DASH0_ENVIRONMENT` | `beta` or `production` (becomes `deployment.environment.name`) |
-
-Then append the defines to the existing build commands in the Codemagic workflow, next to the Amplify defines:
+The app reads its OTLP settings from build-time variables. Generate `otlp_config.json` with the same `jq` step as
+`Generate OTLP config for Flutter` in `.github/workflows/ci-cd.yml`, then pass it with `--dart-define-from-file`:
 
 ```bash
 cd frontend/src
+jq -n \
+  --arg endpoint "$FLUTTER_OTLP_ENDPOINT" \
+  --arg headers "$FLUTTER_OTLP_HEADERS" \
+  --arg environment "$DASH0_ENVIRONMENT" \
+  --arg deployment_name "train-with-joe-$DASH0_ENVIRONMENT" \
+  '{
+    OTEL_EXPORTER_OTLP_ENDPOINT: $endpoint,
+    OTEL_EXPORTER_OTLP_HEADERS: $headers,
+    DASH0_ENVIRONMENT: $environment,
+    DASH0_DEPLOYMENT_NAME: $deployment_name
+  }' > otlp_config.json
+
 flutter build apk --release \
-  --dart-define=OTEL_EXPORTER_OTLP_ENDPOINT="$OTEL_EXPORTER_OTLP_ENDPOINT" \
-  --dart-define=OTEL_EXPORTER_OTLP_HEADERS="$OTEL_EXPORTER_OTLP_HEADERS" \
-  --dart-define=DASH0_ENVIRONMENT="$DASH0_ENVIRONMENT"
+  --dart-define-from-file=otlp_config.json
 
 flutter build ipa --release \
-  --dart-define=OTEL_EXPORTER_OTLP_ENDPOINT="$OTEL_EXPORTER_OTLP_ENDPOINT" \
-  --dart-define=OTEL_EXPORTER_OTLP_HEADERS="$OTEL_EXPORTER_OTLP_HEADERS" \
-  --dart-define=DASH0_ENVIRONMENT="$DASH0_ENVIRONMENT"
+  --dart-define-from-file=otlp_config.json
 ```
 
-Alternatively write a JSON file in a script step and use `--dart-define-from-file=otlp_config.json`, like the GitHub
-workflows do:
+Add the existing Amplify defines of the Codemagic build next to `--dart-define-from-file`. The CI step also sets
+`DASH0_DEPLOYMENT_ID`, `DASH0_VCS_REF_HEAD_REVISION`, `DASH0_VCS_REF_HEAD_NAME` and `DASH0_VCS_REPOSITORY_URL_FULL`. Add
+them to the Codemagic step if you want deployment and commit data on mobile telemetry.
 
-```bash
-jq -n --arg e "$OTEL_EXPORTER_OTLP_ENDPOINT" --arg h "$OTEL_EXPORTER_OTLP_HEADERS" --arg env "$DASH0_ENVIRONMENT" \
-  '{OTEL_EXPORTER_OTLP_ENDPOINT: $e, OTEL_EXPORTER_OTLP_HEADERS: $h, DASH0_ENVIRONMENT: $env}' \
-  > frontend/src/otlp_config.json
-```
+### Codemagic secrets
+
+Add these as secure environment variables in the Codemagic workflow. In the script above, map the endpoint and headers
+of the target environment to `FLUTTER_OTLP_ENDPOINT` and `FLUTTER_OTLP_HEADERS`. Use the `NONPROD_` values for sandbox
+and beta builds, the `PROD_` values for production, and the unprefixed `FLUTTER_OTLP_*` values as the fallback when the
+prefixed one is empty, as the GitHub workflows do.
+
+| Variable | Purpose |
+| --- | --- |
+| `NONPROD_FLUTTER_OTLP_ENDPOINT` | Dash0 ingress URL for non-production builds |
+| `NONPROD_FLUTTER_OTLP_HEADERS` | Headers for non-production builds (secure) |
+| `PROD_FLUTTER_OTLP_ENDPOINT` | Dash0 ingress URL for production builds |
+| `PROD_FLUTTER_OTLP_HEADERS` | Headers for production builds (secure) |
+| `FLUTTER_OTLP_ENDPOINT` / `FLUTTER_OTLP_HEADERS` | Fallback for all environments |
+| `DASH0_ENVIRONMENT` | Value of `deployment.environment.name` (for example `beta` or `production`) |
+
+The headers value must contain both `Authorization=Bearer <token>` and `Dash0-Dataset=<dataset>`, for example
+`Authorization=Bearer auth_xxx,Dash0-Dataset=your-dataset`.
+
+Native apps send `service.version` as `<version>+<build number>` (from `package_info_plus`) and a synthetic user agent
+built by the SDK. iPads report `os.name` as `iPadOS`.
 
 Optional: pass `--dart-define=COMMIT_ID=$FCI_COMMIT` and `--dart-define=GITHUB_RUN_NUMBER=$BUILD_NUMBER` so mobile
 builds report `app.version` and `app.build_number`. Without them the values are `local` and `0`.
@@ -154,6 +175,8 @@ Train with Joe is used by children, so the integration is deliberately minimal:
   sent.
 - Session replay is off (`DASH0_SESSION_REPLAY_SAMPLING_RATE=0`). Do not enable it without a legal review, since replays
   can capture vocabulary content and on-screen text.
+- Native apps send a synthetic user agent built by the SDK from the platform and app version. It contains no device
+  name or identifiers. Web builds keep the browser user agent.
 - Screen names are fixed route templates (for example `vocabulary-detail`), never ids or user text.
 
 Before enabling telemetry in production:

@@ -13,12 +13,15 @@ Map<String, Object?> dash0DeviceAttributes({
   String? manufacturer,
   String? modelIdentifier,
   String? osVersion,
+  String? iosSystemName,
 }) {
   String? clean(String? v) => v == null || v.trim().isEmpty ? null : v.trim();
   final values = <String, String?>{
     'device.manufacturer': clean(manufacturer),
     'device.model.identifier': clean(modelIdentifier),
     'os.version': clean(osVersion),
+    // The SDK reports iOS for iPads too. Only iPadOS needs an override.
+    'os.name': clean(iosSystemName) == 'iPadOS' ? 'iPadOS' : null,
   };
   return {
     for (final e in values.entries)
@@ -48,6 +51,7 @@ Future<Map<String, Object?>> loadDash0DeviceAttributes({
           manufacturer: 'Apple',
           modelIdentifier: i.utsname.machine,
           osVersion: i.systemVersion,
+          iosSystemName: i.systemName,
         );
       case TargetPlatform.macOS:
         final m = await info.macOsInfo;

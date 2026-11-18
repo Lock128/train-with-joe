@@ -164,4 +164,18 @@ void main() {
       expect(scrubDash0Url('https://x.com/home'), 'https://x.com/home');
     });
   });
+
+  group('resolveDash0ServiceVersion', () {
+    test('joins version and build number', () {
+      expect(resolveDash0ServiceVersion('1.2.3', '45'), '1.2.3+45');
+    });
+    test('omits an empty build number', () {
+      expect(resolveDash0ServiceVersion(' 1.2.3 ', ''), '1.2.3');
+      expect(resolveDash0ServiceVersion('1.2.3', null), '1.2.3');
+    });
+    test('returns null without a version', () {
+      expect(resolveDash0ServiceVersion('', '45'), isNull);
+      expect(resolveDash0ServiceVersion(null, null), isNull);
+    });
+  });
 }

@@ -413,11 +413,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.9.0"
-      resolved-ref: "7c3c362b16a4e8d79f3e73ceb03579ddcebb964a"
+      ref: "v0.10.0"
+      resolved-ref: "0a05f8a676facc9c69a3b1502618d355c9efcdd0"
       url: "https://github.com/Lock128/flutter-dash0-sdk.git"
     source: git
-    version: "0.9.0"
+    version: "0.10.0"
   date_kit:
     dependency: transitive
     description:
@@ -998,7 +998,7 @@ packages:
     source: hosted
     version: "2.2.0"
   package_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: package_info_plus
       sha256: "73ef2cd5c11a7548f9b7f6fc2a4f6113de2e64aa2a70de63feede95548822908"

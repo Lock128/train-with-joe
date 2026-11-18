@@ -33,4 +33,15 @@ void main() {
     // failure path and must not throw.
     expect(await loadDash0DeviceAttributes(), isEmpty);
   });
+
+  test('sets os.name only for iPadOS', () {
+    expect(
+      dash0DeviceAttributes(modelIdentifier: 'iPad13,1', iosSystemName: 'iPadOS'),
+      {'device.model.identifier': 'iPad13,1', 'os.name': 'iPadOS'},
+    );
+    expect(
+      dash0DeviceAttributes(modelIdentifier: 'iPhone15,2', iosSystemName: 'iOS'),
+      {'device.model.identifier': 'iPhone15,2'},
+    );
+  });
 }

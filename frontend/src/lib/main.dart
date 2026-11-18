@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
@@ -111,9 +112,21 @@ Future<void> _initializeOpenTelemetry() async {
 
     final serviceName = resolveDash0ServiceName('train-with-joe-flutter', currentDash0Environment());
 
+    String? serviceVersion;
+    try {
+      final info = await PackageInfo.fromPlatform();
+      serviceVersion = resolveDash0ServiceVersion(info.version, info.buildNumber);
+    } catch (_) {
+      // The version is optional.
+    }
+
     await Dash0.init(
       Dash0Options(
         serviceName: serviceName,
+        serviceVersion: serviceVersion,
+        // Native apps have no browser user agent, so the SDK builds a
+        // synthetic one without identifiers.
+        syntheticUserAgent: !kIsWeb,
         endpoint: Dash0Endpoint(
           url: normalizeOtlpEndpoint(otlpEndpoint),
           authToken: authToken,
