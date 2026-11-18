@@ -194,40 +194,64 @@ workflow that builds an APK or iOS app. Mobile builds run in the Codemagic UI (w
 `scripts/extract-codemagic-env.sh`), so the telemetry configuration must be added to that build as described here.
 Without it the app starts with telemetry disabled.
 
-The app reads its OTLP settings from build-time variables. Generate `otlp_config.json` with the same `jq` step as
-`Generate OTLP config for Flutter` in `.github/workflows/ci-cd.yml`, then pass it with `--dart-define-from-file`:
+The app reads its OTLP settings from build-time variables. A pre-build script writes them to
+`frontend/src/otlp_config.json` (gitignored), and the build passes that file with `--dart-define-from-file`.
+
+### Get the variable values
+
+Dash0 never returns a token secret after creation, so the values come from new, dedicated ingest-only tokens named
+`<slug>-codemagic-ingest` (`nonprod-train-with-joe` for beta, `train-with-joe` for production). They are separate
+from the GitHub `-flutter-ingest` tokens, which the script never touches. Run this on your own machine in a terminal
+with a Dash0 admin token (dash0 CLI >= 1.22 and `jq` installed):
 
 ```bash
-cd frontend/src
-jq -n \
-  --arg endpoint "$FLUTTER_OTLP_ENDPOINT" \
-  --arg headers "$FLUTTER_OTLP_HEADERS" \
-  --arg environment "$DASH0_ENVIRONMENT" \
-  --arg deployment_name "train-with-joe-$DASH0_ENVIRONMENT" \
-  '{
-    OTEL_EXPORTER_OTLP_ENDPOINT: $endpoint,
-    OTEL_EXPORTER_OTLP_HEADERS: $headers,
-    DASH0_ENVIRONMENT: $environment,
-    DASH0_DEPLOYMENT_NAME: $deployment_name
-  }' > otlp_config.json
-
-flutter build apk --release \
-  --dart-define-from-file=otlp_config.json
-
-flutter build ipa --release \
-  --dart-define-from-file=otlp_config.json
+read -rs DASH0_AUTH_TOKEN && export DASH0_AUTH_TOKEN
+./scripts/codemagic-otel-vars.sh --env all            # or beta / production
+./scripts/codemagic-otel-vars.sh --dry-run            # validate only, creates nothing
+./scripts/codemagic-otel-vars.sh --rotate --env beta  # replace an existing token (old one stops working)
 ```
 
-Add the existing Amplify defines of the Codemagic build next to `--dart-define-from-file`. The CI step also sets
-`DASH0_DEPLOYMENT_ID`, `DASH0_VCS_REF_HEAD_REVISION`, `DASH0_VCS_REF_HEAD_NAME` and `DASH0_VCS_REPOSITORY_URL_FULL`. Add
-them to the Codemagic step if you want deployment and commit data on mobile telemetry.
+It prints ready-to-paste `NAME=value` lines. Paste them into the Codemagic environment variables and tick **Secure**
+for the `*_HEADERS` lines. The secret is shown once. If the token already exists, the script prints the other values and
+says the secret cannot be retrieved again. Use `--rotate` for a new one. The script refuses to print secrets when stdout
+is not a terminal (unless `--print-secrets-to-pipe`) or when `CI` or `CM_BUILD_ID` is set, and never writes them to a
+file. Without `DASH0_AUTH_TOKEN` it prints placeholders only.
+
+### Pre-build step and build commands
+
+Add this as the Codemagic pre-build script (works from any directory, needs `jq`, bash 3.2 compatible):
+
+```bash
+bash scripts/codemagic-otel-prebuild.sh
+```
+
+It selects the `PROD_` pair when `DASH0_ENVIRONMENT=production` (no `NONPROD_` fallback) and the `NONPROD_` pair
+otherwise. It exits with an error if the headers lack `Authorization=Bearer` or `Dash0-Dataset=`, and prints a warning
+and writes `{}` if endpoint or headers are unset, so the build still works with telemetry off. It never prints header
+values, writes `otlp_config.json` with mode 600, and sets the deployment name, deployment id (`BUILD_NUMBER`) and VCS
+fields (`FCI_*`, credentials removed from the repository URL).
+
+Then build from `frontend/src`:
+
+```bash
+flutter build apk --release \
+  --dart-define=COMMIT_ID="$FCI_COMMIT" \
+  --dart-define=GITHUB_RUN_NUMBER="$BUILD_NUMBER" \
+  --dart-define-from-file=otlp_config.json
+  # + your existing Amplify --dart-define flags
+
+flutter build ipa --release \
+  --dart-define=COMMIT_ID="$FCI_COMMIT" \
+  --dart-define=GITHUB_RUN_NUMBER="$BUILD_NUMBER" \
+  --dart-define-from-file=otlp_config.json
+  # + your existing Amplify --dart-define flags
+```
 
 ### Codemagic secrets
 
-Add these as secure environment variables in the Codemagic workflow. In the script above, map the endpoint and headers
-of the target environment to `FLUTTER_OTLP_ENDPOINT` and `FLUTTER_OTLP_HEADERS`. Use the `NONPROD_` values for sandbox
-and beta builds and the `PROD_` values for production. Do not fall back to unprefixed values for production builds,
-as the GitHub workflows do not either.
+Add these as secure environment variables in the Codemagic workflow (`scripts/codemagic-otel-vars.sh` prints them).
+Use the `NONPROD_` values for sandbox and beta builds and the `PROD_` values for production. Do not fall back to
+unprefixed values for production builds, as the GitHub workflows do not either.
 
 | Variable | Purpose |
 | --- | --- |
@@ -235,7 +259,6 @@ as the GitHub workflows do not either.
 | `NONPROD_FLUTTER_OTLP_HEADERS` | Headers for non-production builds (secure) |
 | `PROD_FLUTTER_OTLP_ENDPOINT` | Dash0 ingress URL for production builds |
 | `PROD_FLUTTER_OTLP_HEADERS` | Headers for production builds (secure) |
-| `FLUTTER_OTLP_ENDPOINT` / `FLUTTER_OTLP_HEADERS` | Optional fallback for non-production builds only |
 | `DASH0_ENVIRONMENT` | Value of `deployment.environment.name` (for example `beta` or `production`) |
 
 The headers value must contain both `Authorization=Bearer <token>` and `Dash0-Dataset=<dataset>`, for example
