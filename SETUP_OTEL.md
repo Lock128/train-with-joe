@@ -143,7 +143,7 @@ For each environment (`nonprod-train-with-joe`, `train-with-joe`) the script:
    at creation. If the token exists, the script stops with a message unless you pass `--rotate`. With `--rotate` it
    deletes the old token (the old one stops working at once) and creates a new one.
 3. Sets `NONPROD_FLUTTER_OTLP_ENDPOINT`, `NONPROD_FLUTTER_OTLP_HEADERS`, `PROD_FLUTTER_OTLP_ENDPOINT` and
-   `PROD_FLUTTER_OTLP_HEADERS` with `gh secret set --body -`.
+   `PROD_FLUTTER_OTLP_HEADERS` with `gh secret set` (value on stdin).
 
 The token secret is written with `--secret-file` into a private temporary directory that an exit trap removes, and is
 passed to `gh` on stdin. It is never printed, put on a command line, or written into the repository.

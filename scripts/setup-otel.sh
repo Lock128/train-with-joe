@@ -221,9 +221,9 @@ setup_env() {
   # and piped to gh on stdin.
   local token
   token="$(tr -d '[:space:]' <"$secret_file")"
-  printf '%s' "$OTLP_ENDPOINT" | gh secret set "${prefix}_FLUTTER_OTLP_ENDPOINT" --repo "$REPO" --body -
+  printf '%s' "$OTLP_ENDPOINT" | gh secret set "${prefix}_FLUTTER_OTLP_ENDPOINT" --repo "$REPO"
   printf 'Authorization=Bearer %s,Dash0-Dataset=%s' "$token" "$slug" |
-    gh secret set "${prefix}_FLUTTER_OTLP_HEADERS" --repo "$REPO" --body -
+    gh secret set "${prefix}_FLUTTER_OTLP_HEADERS" --repo "$REPO"
   token=""
   rm -f "$secret_file"
 }
