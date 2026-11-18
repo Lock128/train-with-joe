@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +7,12 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_api/amplify_api.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dash0_flutter_sdk/dash0_flutter_sdk.dart';
+
+import 'models/app_version.dart';
+import 'utils/dash0_amplify_http_client.dart';
+import 'utils/dash0_config.dart';
+import 'utils/dash0_device.dart';
 
 import 'models/amplifyconfiguration.dart';
 import 'providers/auth_provider.dart' as app;
@@ -40,14 +48,19 @@ import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
 import 'l10n/generated/app_localizations.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Pre-generate feedback jingles so playback is instant
   FeedbackSoundService().init();
-  
+
+  // Initialize Dash0 telemetry first so later errors are captured. This never
+  // throws and does nothing when no OTLP endpoint and token were built in.
+  await _initializeOpenTelemetry();
+
   // Set up global error handling
   FlutterError.onError = (FlutterErrorDetails details) {
+    Dash0.reportError(details.exception, stackTrace: details.stack);
     debugPrint('Flutter error: ${details.exception}');
     debugPrint('Stack trace: ${details.stack}');
     FlutterError.presentError(details);
@@ -55,12 +68,91 @@ void main() {
 
   // Handle errors in async operations
   PlatformDispatcher.instance.onError = (error, stack) {
+    Dash0.reportError(error, stackTrace: stack);
     debugPrint('Async error caught: $error');
     debugPrint('Stack trace: $stack');
     return true;
   };
 
-  runApp(const MyApp());
+  // Catch zone errors that escape the handlers above
+  runZonedGuarded(() => runApp(const MyApp()), (error, stack) {
+    Dash0.reportError(error, stackTrace: stack);
+    debugPrint('Zone error caught: $error');
+    debugPrint('Stack trace: $stack');
+  });
+}
+
+/// Initializes the Dash0 Flutter SDK from build-time `--dart-define` values
+/// (see SETUP_OTEL.md). Telemetry must never block or break app start: any
+/// failure is logged and ignored, and nothing is started without an OTLP
+/// endpoint and bearer token. There is no backend feature flag in this app, so
+/// the SDK records as soon as it is configured. Session replay and profiling
+/// are off unless enabled at build time.
+Future<void> _initializeOpenTelemetry() async {
+  try {
+    const otlpEndpoint = String.fromEnvironment('OTEL_EXPORTER_OTLP_ENDPOINT', defaultValue: '');
+    const otlpHeaders = String.fromEnvironment('OTEL_EXPORTER_OTLP_HEADERS', defaultValue: '');
+
+    final headers = parseOtlpHeaders(otlpHeaders);
+    final authToken = extractBearerToken(headers);
+
+    if (otlpEndpoint.isEmpty || authToken == null) {
+      debugPrint('Dash0: no OTLP endpoint or auth token, telemetry disabled');
+      return;
+    }
+
+    const replayRate = String.fromEnvironment('DASH0_SESSION_REPLAY_SAMPLING_RATE', defaultValue: '');
+    const profilingFlag = String.fromEnvironment('DASH0_PROFILING_ENABLED', defaultValue: '');
+    const httpOverridesFlag = String.fromEnvironment('DASH0_HTTP_OVERRIDES_ENABLED', defaultValue: '');
+    const propagateFlag = String.fromEnvironment('DASH0_PROPAGATE_TRACE_HEADERS', defaultValue: '');
+    const metricIntervalRaw = String.fromEnvironment('DASH0_METRIC_EXPORT_INTERVAL_SECONDS', defaultValue: '');
+
+    final replaySamplingRate = parseSamplingRate(replayRate);
+    final profilingEnabled = parseBoolFlag(profilingFlag, defaultValue: false);
+    // HttpOverrides only affect dart:io, so they do nothing on web.
+    final httpOverridesEnabled = !kIsWeb && parseBoolFlag(httpOverridesFlag, defaultValue: true);
+    // Cross-origin trace headers need CORS allow-listing on the backend, so
+    // they are off by default on web.
+    final propagateTraceHeaders = parseBoolFlag(propagateFlag, defaultValue: !kIsWeb);
+
+    final serviceName = resolveDash0ServiceName('train-with-joe-flutter', currentDash0Environment());
+
+    await Dash0.init(
+      Dash0Options(
+        serviceName: serviceName,
+        endpoint: Dash0Endpoint(
+          url: normalizeOtlpEndpoint(otlpEndpoint),
+          authToken: authToken,
+          dataset: extractDash0Dataset(headers),
+        ),
+        debug: kDebugMode,
+        // Reported as the resource attribute deployment.environment.name.
+        environment: currentDash0Environment(),
+        // Build info plus device model and OS version of native apps. The SDK
+        // adds app.client.type (web-desktop, web-mobile, ios, android, ...).
+        resourceAttributes: {
+          'app.version': AppVersion.commitId,
+          'app.build_number': AppVersion.buildNumber,
+          ...await loadDash0DeviceAttributes(),
+        },
+        enabled: true,
+        enabledInstrumentations: buildDash0Instrumentations(
+          httpOverrides: httpOverridesEnabled,
+          sessionReplay: replaySamplingRate > 0,
+          profiling: profilingEnabled,
+        ),
+        propagators: propagateTraceHeaders ? [Dash0Propagator.traceparent(dash0PropagationTargets)] : const [],
+        compression: Dash0Compression.gzip,
+        metricExportInterval: parseSeconds(metricIntervalRaw) ?? const Duration(seconds: 30),
+        sessionReplaySamplingRate: replaySamplingRate,
+      ),
+    );
+    debugPrint('Dash0 initialized');
+  } catch (e, stackTrace) {
+    // If the SDK fails to initialize, log but don't crash the app
+    debugPrint('Failed to initialize Dash0: $e');
+    debugPrint('Stack trace: $stackTrace');
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -105,7 +197,9 @@ class _MyAppState extends State<MyApp> {
       // Add plugins before configuring
       debugPrint('Adding Amplify plugins...');
       final auth = AmplifyAuthCognito();
-      final api = AmplifyAPI();
+      // Amplify has its own HTTP stack, so route it through Dash0 to get
+      // client spans for GraphQL requests.
+      final api = AmplifyAPI(options: dash0AmplifyApiOptions());
       await Amplify.addPlugins([auth, api]);
       debugPrint('Amplify plugins added successfully');
 
@@ -476,6 +570,7 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
     return GoRouter(
       initialLocation: authProvider.isAuthenticated ? '/home' : '/signin',
       refreshListenable: authProvider,
+      observers: [Dash0.navigatorObserver],
       redirect: (context, state) {
         final isAuthenticated = authProvider.isAuthenticated;
         final isAuthRoute = state.matchedLocation == '/signin' || 
@@ -500,6 +595,7 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
       routes: [
         GoRoute(
           path: '/signin',
+          name: 'signin',
           builder: (context, state) {
             final email = state.uri.queryParameters['email'];
             final registered = state.uri.queryParameters['registered'] == 'true';
@@ -508,6 +604,7 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
         ),
         GoRoute(
           path: '/auth/callback',
+          name: 'auth-callback',
           redirect: (context, state) {
             final email = state.uri.queryParameters['email'] ?? '';
             return '/signin?email=${Uri.encodeComponent(email)}&registered=true';
@@ -515,10 +612,12 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
         ),
         GoRoute(
           path: '/register',
+          name: 'register',
           builder: (context, state) => const RegisterScreen(),
         ),
         GoRoute(
           path: '/verify-email',
+          name: 'verify-email',
           builder: (context, state) {
             final email = state.uri.queryParameters['email'] ?? '';
             return VerifyEmailScreen(email: email);
@@ -526,6 +625,7 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
         ),
         GoRoute(
           path: '/reset-password',
+          name: 'reset-password',
           builder: (context, state) {
             final email = state.uri.queryParameters['email'] ?? '';
             return ResetPasswordScreen(initialEmail: email);
@@ -533,65 +633,80 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
         ),
         GoRoute(
           path: '/new-password',
+          name: 'new-password',
           builder: (context, state) => const NewPasswordScreen(),
         ),
         ShellRoute(
+          observers: [Dash0.createNavigatorObserver()],
           builder: (context, state, child) => AppShell(child: child),
           routes: [
             GoRoute(
               path: '/home',
+              name: 'home',
               builder: (context, state) => const HomeScreen(),
             ),
             GoRoute(
               path: '/subscription',
+              name: 'subscription',
               builder: (context, state) => const SubscriptionScreen(),
             ),
             GoRoute(
               path: '/vocabulary',
+              name: 'vocabulary',
               builder: (context, state) => const VocabularyListsScreen(),
             ),
             GoRoute(
               path: '/vocabulary/analyze',
+              name: 'vocabulary-analyze',
               builder: (context, state) => const ImageVocabularyScreen(),
             ),
             GoRoute(
               path: '/vocabulary/scan-translate',
+              name: 'vocabulary-scan-translate',
               builder: (context, state) => const ScanTranslateScreen(),
             ),
             GoRoute(
               path: '/vocabulary/:id',
+              name: 'vocabulary-detail',
               builder: (context, state) => VocabularyListDetailScreen(
                 listId: state.pathParameters['id']!,
               ),
             ),
             GoRoute(
               path: '/info',
+              name: 'info',
               builder: (context, state) => const InfoScreen(),
             ),
             GoRoute(
               path: '/settings',
+              name: 'settings',
               builder: (context, state) => const SettingsScreen(),
             ),
             GoRoute(
               path: '/impressum',
+              name: 'impressum',
               builder: (context, state) => const ImpressumScreen(),
             ),
             GoRoute(
               path: '/trainings',
+              name: 'trainings',
               builder: (context, state) => const TrainingListScreen(),
             ),
             GoRoute(
               path: '/trainings/create',
+              name: 'training-create',
               builder: (context, state) => const TrainingCreationScreen(),
             ),
             GoRoute(
               path: '/trainings/:id',
+              name: 'training-detail',
               builder: (context, state) => TrainingDetailScreen(
                 trainingId: state.pathParameters['id']!,
               ),
             ),
             GoRoute(
               path: '/trainings/:id/execute/:executionId',
+              name: 'training-execute',
               builder: (context, state) => TrainingExecutionScreen(
                 trainingId: state.pathParameters['id']!,
                 executionId: state.pathParameters['executionId']!,
@@ -599,6 +714,7 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
             ),
             GoRoute(
               path: '/trainings/:id/results/:executionId',
+              name: 'training-results',
               builder: (context, state) => TrainingResultsScreen(
                 trainingId: state.pathParameters['id']!,
                 executionId: state.pathParameters['executionId']!,
@@ -606,16 +722,19 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
             ),
             GoRoute(
               path: '/trainings/:id/history',
+              name: 'training-history',
               builder: (context, state) => TrainingHistoryScreen(
                 trainingId: state.pathParameters['id']!,
               ),
             ),
             GoRoute(
               path: '/statistics',
+              name: 'statistics',
               builder: (context, state) => const TrainingStatisticsScreen(),
             ),
             GoRoute(
               path: '/admin',
+              name: 'admin',
               builder: (context, state) => const AdminScreen(),
             ),
           ],

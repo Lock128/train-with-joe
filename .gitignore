@@ -161,3 +161,6 @@ TEST_FIXES_APPLIED.md
 test_run_output.txt
 test_output*.txt
 **/test_output*.txt
+
+# Generated OTLP config for flutter build (contains Dash0 token)
+otlp_config.json
