@@ -113,7 +113,7 @@ Authorization=Bearer <token>,Dash0-Dataset=<slug>
 
 Ingest-only, dataset-restricted tokens are safe to ship in web builds: they can write to one dataset and read nothing.
 They are still public, so rotate them if abused. Because this is a children's app, the privacy gate in section 7 stays:
-do not enable telemetry in production before the consent and privacy policy decisions listed there.
+do not enable telemetry in production before the privacy release gate listed there is complete.
 
 ## 2. GitHub Actions secrets
 
@@ -278,12 +278,18 @@ Train with Joe is used by children, so the integration is deliberately minimal:
   name or identifiers. Web builds keep the browser user agent.
 - Screen names are fixed route templates (for example `vocabulary-detail`), never ids or user text.
 
-Before enabling telemetry in production:
+Privacy release gate:
 
-- Decide whether consent is required (GDPR, ePrivacy, children's data rules, App Store and Google Play data safety
-  forms). The Cognito user id is a pseudonymous identifier and counts as personal data.
-- Update the privacy policy and the Impressum screen (`frontend/src/lib/screens/impressum_screen.dart`) and the store
-  declarations in `documentation/store-listing.md`. Dash0 should be listed as a processor, with the data region you chose.
+- The privacy policy (`join_page/src/app/pages/privacy.component.ts`, English and German) now discloses telemetry:
+  data categories, Dash0 as processor (EU, eu-west-1), retention (30 days, 13 months metrics), purpose, no advertising.
+  Deploy the policy (join_page) before or together with the first production build that uses the `PROD_` secrets.
+  The app only links to the hosted policy, so no app text needs to change.
+- Maintainers still need to update manually: App Store Connect "App Privacy" (kids category), and the Google Play
+  Data safety form and Families declarations. `documentation/store-listing.md` has the review note wording.
+- OPEN QUESTION for human and legal review (not decided here): the policy says children under 13 are not knowingly
+  covered without parental consent, and telemetry is linked to a pseudonymous user ID. Whether telemetry needs explicit
+  parental consent or an opt-in (COPPA, GDPR-K, ePrivacy), or whether it can run as legitimate interest or a
+  strictly necessary diagnostic, has not been decided. Resolve this before enabling production telemetry.
 - URLs are scrubbed in the app (`urlScrubber`): query strings and fragments, such as `?email=` on `/signin`, are replaced
   with `?REDACTED` in page views, HTTP spans, errors and logs.
 - Follow the Dash0 sensitive data guidance: do not put emails, names, tokens, vocabulary text or free text in span

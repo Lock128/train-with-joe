@@ -47,6 +47,17 @@ import { TranslationService } from '../services/translation.service';
               We may collect basic device information such as device type, operating system, and browser type to
               optimize your experience.
             </p>
+            <h3>Diagnostics and Performance Telemetry</h3>
+            <p>
+              The app sends diagnostics and performance telemetry to our service provider Dash0 so that we can keep the
+              app reliable and fix problems. This includes app usage and performance data, error reports, the screens
+              you open (page views, with any query string or fragment removed from web addresses), your device model,
+              operating system and version, and the app version. Telemetry is linked to a pseudonymous user ID generated
+              by our authentication service (AWS Cognito). We do not send your email address or name. Dash0 anonymizes
+              IP addresses and stores only an approximate, city-level location. Session replay (recording of your
+              screen) and profiling are turned off. We do not use this data for advertising, we do not sell it, and we
+              do not share it for advertising or behavioral advertising.
+            </p>
           </section>
 
           <section>
@@ -58,6 +69,7 @@ import { TranslationService } from '../services/translation.service';
               <li>Process subscriptions and payments</li>
               <li>Send account-related communications (e.g., email verification)</li>
               <li>Improve and develop new features</li>
+              <li>Monitor the diagnostics and reliability of the app and fix errors</li>
             </ul>
           </section>
 
@@ -84,6 +96,10 @@ import { TranslationService } from '../services/translation.service';
             <p>We use the following third-party services:</p>
             <ul>
               <li><strong>AWS (Amazon Web Services)</strong> — hosting, authentication, and data storage</li>
+              <li>
+                <strong>Dash0</strong> — processor for diagnostics and performance telemetry, with data stored in the EU
+                (AWS region eu-west-1)
+              </li>
               <li><strong>Stripe</strong> — payment processing for subscriptions</li>
               <li><strong>Apple App Store / Google Play Store</strong> — app distribution and in-app purchases</li>
             </ul>
@@ -94,7 +110,8 @@ import { TranslationService } from '../services/translation.service';
             <h2>7. Data Retention</h2>
             <p>
               We retain your account data for as long as your account is active. If you delete your account, we will
-              remove your personal data within 30 days, except where we are required to retain it by law.
+              remove your personal data within 30 days, except where we are required to retain it by law. Telemetry
+              stored at Dash0 is kept for 30 days (aggregated metrics for 13 months).
             </p>
           </section>
 
@@ -165,6 +182,18 @@ import { TranslationService } from '../services/translation.service';
               Wir können grundlegende Geräteinformationen wie Gerätetyp, Betriebssystem und Browsertyp erfassen, um Ihr
               Erlebnis zu optimieren.
             </p>
+            <h3>Diagnose- und Leistungstelemetrie</h3>
+            <p>
+              Die App sendet Diagnose- und Leistungstelemetrie an unseren Dienstleister Dash0, damit wir die App
+              zuverlässig betreiben und Fehler beheben können. Dazu gehören App-Nutzungs- und Leistungsdaten,
+              Fehlerberichte, die von Ihnen geöffneten Bildschirme (Seitenaufrufe, wobei Query-Strings und Fragmente aus
+              Webadressen entfernt werden), Ihr Gerätemodell, das Betriebssystem samt Version und die App-Version. Die
+              Telemetrie ist mit einer pseudonymen Nutzer-ID verknüpft, die von unserem Authentifizierungsdienst (AWS
+              Cognito) vergeben wird. Ihre E-Mail-Adresse und Ihren Namen senden wir nicht. Dash0 anonymisiert
+              IP-Adressen und speichert nur einen ungefähren Standort auf Stadtebene. Session Replay (Aufzeichnung Ihres
+              Bildschirms) und Profiling sind deaktiviert. Wir verwenden diese Daten nicht für Werbung, verkaufen sie
+              nicht und geben sie nicht für Werbezwecke oder verhaltensbasierte Werbung weiter.
+            </p>
           </section>
 
           <section>
@@ -176,6 +205,7 @@ import { TranslationService } from '../services/translation.service';
               <li>Abonnements und Zahlungen zu verarbeiten</li>
               <li>Kontobezogene Mitteilungen zu senden (z. B. E-Mail-Verifizierung)</li>
               <li>Neue Funktionen zu verbessern und zu entwickeln</li>
+              <li>Diagnose und Zuverlässigkeit der App zu überwachen und Fehler zu beheben</li>
             </ul>
           </section>
 
@@ -202,6 +232,10 @@ import { TranslationService } from '../services/translation.service';
             <p>Wir nutzen folgende Drittanbieter-Dienste:</p>
             <ul>
               <li><strong>AWS (Amazon Web Services)</strong> — Hosting, Authentifizierung und Datenspeicherung</li>
+              <li>
+                <strong>Dash0</strong> — Auftragsverarbeiter für Diagnose- und Leistungstelemetrie, Speicherung in der EU
+                (AWS-Region eu-west-1)
+              </li>
               <li><strong>Stripe</strong> — Zahlungsabwicklung für Abonnements</li>
               <li><strong>Apple App Store / Google Play Store</strong> — App-Vertrieb und In-App-Käufe</li>
             </ul>
@@ -213,7 +247,7 @@ import { TranslationService } from '../services/translation.service';
             <p>
               Wir bewahren Ihre Kontodaten auf, solange Ihr Konto aktiv ist. Wenn Sie Ihr Konto löschen, entfernen wir
               Ihre personenbezogenen Daten innerhalb von 30 Tagen, es sei denn, wir sind gesetzlich zur Aufbewahrung
-              verpflichtet.
+              verpflichtet. Bei Dash0 gespeicherte Telemetrie wird 30 Tage aufbewahrt (aggregierte Metriken 13 Monate).
             </p>
           </section>
 
