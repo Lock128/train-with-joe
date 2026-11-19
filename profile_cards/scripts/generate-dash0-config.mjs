@@ -106,7 +106,7 @@ if (invokedDirectly) {
   writeFileSync(out, renderConfigFile(config));
   console.log(
     config
-      ? `Dash0 web SDK: enabled (environment: ${config.environment ?? 'unset'}, dataset: ${config.dataset ?? 'default'})`
+      ? `Dash0 web SDK: enabled`
       : 'Dash0 web SDK: disabled (OTLP_ENDPOINT or the bearer token in OTLP_HEADERS is not set)',
   );
 }

@@ -684,3 +684,5 @@ Before every build or dev server start, `scripts/generate-dash0-config.mjs` writ
 | `DASH0_VCS_REVISION`, `DASH0_VCS_REF_NAME`, `DASH0_VCS_REPOSITORY_URL` | VCS resource attributes |
 
 Without `OTLP_ENDPOINT` and a bearer token the SDK stays disabled, so local development and builds without secrets are unaffected. The token is shipped in the browser bundle, so use a Dash0 token that can only ingest telemetry, never an admin token.
+
+**Deployment status:** no workflow in this repository builds or deploys `profile_cards` (`ci-cd.yml` only lists it in change detection). Whatever builds it must export the variables above before `npm run build`. Until then the SDK stays disabled in deployed builds.
