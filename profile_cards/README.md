@@ -669,3 +669,20 @@ For issues or questions:
 ## License
 
 Copyright © 2025 Train with Joe. All rights reserved.
+
+## Dash0 web SDK
+
+The app reports browser telemetry (page views, navigation, errors, web vitals) with [`@dash0/sdk-web`](https://github.com/dash0hq/dash0-sdk-web). `initDash0()` in `src/dash0.ts` runs before Angular bootstraps (`src/main.ts`).
+
+Before every build or dev server start, `scripts/generate-dash0-config.mjs` writes the gitignored `src/dash0-config.generated.ts` from these environment variables (the same ones the Flutter build uses):
+
+| Variable | Purpose |
+| --- | --- |
+| `OTLP_ENDPOINT` | Dash0 OTLP endpoint |
+| `OTLP_HEADERS` | `Authorization=Bearer <token>,Dash0-Dataset=<dataset>` (the dataset is required) |
+| `DASH0_ENVIRONMENT`, `DASH0_DEPLOYMENT_ID` | Deployment resource attributes |
+| `DASH0_VCS_REVISION`, `DASH0_VCS_REF_NAME`, `DASH0_VCS_REPOSITORY_URL` | VCS resource attributes |
+
+Without `OTLP_ENDPOINT` and a bearer token the SDK stays disabled, so local development and builds without secrets are unaffected. The token is shipped in the browser bundle, so use a Dash0 token that can only ingest telemetry, never an admin token.
+
+**Deployment status:** no workflow in this repository builds or deploys `profile_cards` (`ci-cd.yml` only lists it in change detection). Whatever builds it must export the variables above before `npm run build`. Until then the SDK stays disabled in deployed builds.

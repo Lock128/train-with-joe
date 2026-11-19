@@ -2,12 +2,19 @@
   "name": "profile-cards",
   "version": "1.0.0",
   "scripts": {
+    "prebuild": "node scripts/generate-dash0-config.mjs",
     "build": "ng build --configuration production",
+    "prebuild:sandbox": "node scripts/generate-dash0-config.mjs",
     "build:sandbox": "ng build --configuration sandbox",
+    "prebuild:beta": "node scripts/generate-dash0-config.mjs",
     "build:beta": "ng build --configuration beta",
+    "prebuild:production": "node scripts/generate-dash0-config.mjs",
     "build:production": "ng build --configuration production",
+    "predev": "node scripts/generate-dash0-config.mjs",
     "dev": "ng serve --port 4300",
+    "preserve": "node scripts/generate-dash0-config.mjs",
     "serve": "ng serve --port 4300 --proxy-config proxy.conf.json",
+    "prestart": "node scripts/generate-dash0-config.mjs",
     "start": "ng serve --port 4300",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -20,6 +27,7 @@
     "@angular/platform-browser": "^22.2.3",
     "@angular/platform-browser-dynamic": "^22.2.3",
     "@angular/router": "^22.2.3",
+    "@dash0/sdk-web": "^0.35.1",
     "rxjs": "^7.8.2",
     "tslib": "^2.8.1",
     "zone.js": "^0.16.3"
