@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Generated Dash0 web SDK config (scripts/generate-dash0-config.mjs)
+/src/dash0-config.generated.ts

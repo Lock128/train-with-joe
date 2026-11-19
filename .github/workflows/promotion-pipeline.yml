@@ -234,6 +234,15 @@ jobs:
         run: |
           npm ci
           npm run build
+        # Dash0 web SDK: reuses the Flutter OTLP secrets (headers must contain Dash0-Dataset=)
+        env:
+          OTLP_ENDPOINT: ${{ secrets.NONPROD_FLUTTER_OTLP_ENDPOINT || secrets.FLUTTER_OTLP_ENDPOINT }}
+          OTLP_HEADERS: ${{ secrets.NONPROD_FLUTTER_OTLP_HEADERS || secrets.FLUTTER_OTLP_HEADERS }}
+          DASH0_ENVIRONMENT: beta
+          DASH0_DEPLOYMENT_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          DASH0_VCS_REVISION: ${{ github.sha }}
+          DASH0_VCS_REF_NAME: ${{ github.ref_name }}
+          DASH0_VCS_REPOSITORY_URL: https://github.com/${{ github.repository }}
 
       - name: Patch robots.txt for non-production
         run: bash scripts/patch-robots-for-environment.sh beta
