@@ -4,6 +4,9 @@
 // Inputs (all optional, same variables the Flutter builds use):
 //   OTLP_ENDPOINT                 Dash0 OTLP endpoint (a trailing /v1/<signal> is removed)
 //   OTLP_HEADERS                  "Authorization=Bearer <token>,Dash0-Dataset=<dataset>"
+//   FLUTTER_OTLP_ENDPOINT         fallback for OTLP_ENDPOINT when that is unset or empty
+//   FLUTTER_OTLP_HEADERS          fallback for OTLP_HEADERS when that is unset or empty
+//                                 (a later deploy step that rebuilds the app may only have these)
 //   DASH0_ENVIRONMENT             deployment.environment.name (sandbox | beta | production)
 //   DASH0_DEPLOYMENT_NAME         defaults to "train-with-joe-<environment>"
 //   DASH0_DEPLOYMENT_ID           e.g. "<run_id>-<run_attempt>"
@@ -59,9 +62,35 @@ export function normalizeOtlpEndpoint(endpoint) {
   return url;
 }
 
+function firstNonEmpty(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value;
+  }
+  return '';
+}
+
+export function resolveOtlpInputs(env) {
+  return {
+    endpoint: normalizeOtlpEndpoint(firstNonEmpty(env.OTLP_ENDPOINT, env.FLUTTER_OTLP_ENDPOINT)),
+    rawHeaders: firstNonEmpty(env.OTLP_HEADERS, env.FLUTTER_OTLP_HEADERS),
+  };
+}
+
+// Returns why the SDK would be disabled, or undefined when the inputs are complete. Never includes values.
+export function disabledReason(env) {
+  const { endpoint, rawHeaders } = resolveOtlpInputs(env);
+  const missing = [];
+  if (!endpoint) missing.push('endpoint (OTLP_ENDPOINT or FLUTTER_OTLP_ENDPOINT is not set or empty)');
+  if (!rawHeaders) missing.push('headers (OTLP_HEADERS or FLUTTER_OTLP_HEADERS is not set or empty)');
+  else if (!extractBearerToken(parseOtlpHeaders(rawHeaders))) {
+    missing.push('bearer token (the headers have no non-empty Authorization=Bearer <token> entry)');
+  }
+  return missing.length ? `missing ${missing.join(' and ')}` : undefined;
+}
+
 export function buildConfig(env, deploymentPrefix) {
-  const endpoint = normalizeOtlpEndpoint(env.OTLP_ENDPOINT ?? '');
-  const headers = parseOtlpHeaders(env.OTLP_HEADERS ?? '');
+  const { endpoint, rawHeaders } = resolveOtlpInputs(env);
+  const headers = parseOtlpHeaders(rawHeaders);
   const authToken = extractBearerToken(headers);
   if (!endpoint || !authToken) return null;
 
@@ -93,18 +122,21 @@ export function renderConfigFile(config) {
 
 const invokedDirectly = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (invokedDirectly) {
-  if (process.env.OTLP_HEADERS && !extractDash0Dataset(parseOtlpHeaders(process.env.OTLP_HEADERS))) {
+  const { rawHeaders } = resolveOtlpInputs(process.env);
+  if (rawHeaders && !extractDash0Dataset(parseOtlpHeaders(rawHeaders))) {
     console.error(
-      'OTLP_HEADERS is set but has no Dash0-Dataset= entry. Expected: Authorization=Bearer <token>,Dash0-Dataset=<dataset>',
+      'OTLP headers are set but have no Dash0-Dataset= entry. Expected: Authorization=Bearer <token>,Dash0-Dataset=<dataset>',
     );
     process.exit(1);
   }
   const config = buildConfig(process.env, 'train-with-joe');
   const out = resolve(dirname(fileURLToPath(import.meta.url)), '../src/dash0-config.generated.ts');
   writeFileSync(out, renderConfigFile(config));
-  console.log(
-    config
-      ? `Dash0 web SDK: enabled`
-      : 'Dash0 web SDK: disabled (OTLP_ENDPOINT or the bearer token in OTLP_HEADERS is not set)',
-  );
+  if (config) {
+    console.log('Dash0 web SDK: enabled');
+  } else {
+    const reason = disabledReason(process.env);
+    console.log(`Dash0 web SDK: disabled (${reason})`);
+    if (process.env.GITHUB_ACTIONS === 'true') console.log(`::warning::Dash0 web SDK disabled: ${reason}`);
+  }
 }
