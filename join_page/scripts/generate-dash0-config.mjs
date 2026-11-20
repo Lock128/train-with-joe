@@ -101,10 +101,12 @@ export function resolveOtlpInputs(env) {
 export function disabledReason(env) {
   const { endpoint, rawHeaders } = resolveOtlpInputs(env);
   const missing = [];
-  if (!endpoint) missing.push(
+  if (!endpoint)
+    missing.push(
       'endpoint (OTLP_ENDPOINT or FLUTTER_OTLP_ENDPOINT, or NONPROD_/PROD_FLUTTER_OTLP_ENDPOINT together with the matching headers, is not set or empty)',
     );
-  if (!rawHeaders) missing.push(
+  if (!rawHeaders)
+    missing.push(
       'headers (OTLP_HEADERS or FLUTTER_OTLP_HEADERS, or NONPROD_/PROD_FLUTTER_OTLP_HEADERS together with the matching endpoint, is not set or empty)',
     );
   else if (!extractBearerToken(parseOtlpHeaders(rawHeaders))) {

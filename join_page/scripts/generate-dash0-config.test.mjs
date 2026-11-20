@@ -95,7 +95,12 @@ test('does not mix endpoint and headers across pairs', () => {
 
 test('preferred OTLP_* variables win over NONPROD_/PROD_ fallbacks', () => {
   const c = buildConfig(
-    { OTLP_ENDPOINT: 'https://a', OTLP_HEADERS: 'Authorization=Bearer a,Dash0-Dataset=x', ...PROD, DASH0_ENVIRONMENT: 'production' },
+    {
+      OTLP_ENDPOINT: 'https://a',
+      OTLP_HEADERS: 'Authorization=Bearer a,Dash0-Dataset=x',
+      ...PROD,
+      DASH0_ENVIRONMENT: 'production',
+    },
     'p',
   );
   assert.equal(c.endpointUrl, 'https://a');
