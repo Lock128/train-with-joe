@@ -686,3 +686,12 @@ Before every build or dev server start, `scripts/generate-dash0-config.mjs` writ
 Without `OTLP_ENDPOINT` and a bearer token the SDK stays disabled, so local development and builds without secrets are unaffected. The token is shipped in the browser bundle, so use a Dash0 token that can only ingest telemetry, never an admin token.
 
 **Deployment status:** no workflow in this repository builds or deploys `profile_cards` (`ci-cd.yml` only lists it in change detection). Whatever builds it must export the variables above before `npm run build`. Until then the SDK stays disabled in deployed builds.
+
+## OTLP secret fallback chain
+
+CI passes the first complete endpoint and headers pair (never mixed across pairs):
+
+- Non-production: `NONPROD_FLUTTER_OTLP_*`, then legacy `FLUTTER_OTLP_*`
+- Production: `PROD_FLUTTER_OTLP_*`
+
+Locally, `scripts/generate-dash0-config.mjs` also reads `PROD_FLUTTER_OTLP_*` (`DASH0_ENVIRONMENT` production, prod or teamcorner) or `NONPROD_FLUTTER_OTLP_*` (any other value) when `OTLP_*`, `FLUTTER_OTLP_*` and `OTEL_EXPORTER_OTLP_*` are empty. With `DASH0_ENVIRONMENT` unset it tries PROD_ first, then NONPROD_.

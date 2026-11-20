@@ -305,8 +305,11 @@ jobs:
             exit 1
           fi
         env:
-          OTLP_ENDPOINT: ${{ secrets.NONPROD_FLUTTER_OTLP_ENDPOINT || secrets.FLUTTER_OTLP_ENDPOINT }}
-          OTLP_HEADERS: ${{ secrets.NONPROD_FLUTTER_OTLP_HEADERS || secrets.FLUTTER_OTLP_HEADERS }}
+          # OTLP secret fallback chain: each preferred pair is used only when BOTH its endpoint and
+          # headers secrets are set, otherwise the next pair is tried, ending with the
+          # NONPROD_/PROD_FLUTTER_OTLP_* pair. Endpoint and headers always come from the same pair.
+          OTLP_ENDPOINT: ${{ (secrets.NONPROD_FLUTTER_OTLP_ENDPOINT && secrets.NONPROD_FLUTTER_OTLP_HEADERS) && secrets.NONPROD_FLUTTER_OTLP_ENDPOINT || secrets.FLUTTER_OTLP_ENDPOINT }}
+          OTLP_HEADERS: ${{ (secrets.NONPROD_FLUTTER_OTLP_HEADERS && secrets.NONPROD_FLUTTER_OTLP_ENDPOINT) && secrets.NONPROD_FLUTTER_OTLP_HEADERS || secrets.FLUTTER_OTLP_HEADERS }}
           DASH0_ENVIRONMENT: sandbox
           DASH0_DEPLOYMENT_ID: ${{ github.run_id }}-${{ github.run_attempt }}
           DASH0_VCS_REVISION: ${{ github.sha }}
@@ -330,8 +333,8 @@ jobs:
           npm run build
         # Dash0 web SDK: reuses the Flutter OTLP secrets (headers must contain Dash0-Dataset=)
         env:
-          OTLP_ENDPOINT: ${{ secrets.NONPROD_FLUTTER_OTLP_ENDPOINT || secrets.FLUTTER_OTLP_ENDPOINT }}
-          OTLP_HEADERS: ${{ secrets.NONPROD_FLUTTER_OTLP_HEADERS || secrets.FLUTTER_OTLP_HEADERS }}
+          OTLP_ENDPOINT: ${{ (secrets.NONPROD_FLUTTER_OTLP_ENDPOINT && secrets.NONPROD_FLUTTER_OTLP_HEADERS) && secrets.NONPROD_FLUTTER_OTLP_ENDPOINT || secrets.FLUTTER_OTLP_ENDPOINT }}
+          OTLP_HEADERS: ${{ (secrets.NONPROD_FLUTTER_OTLP_HEADERS && secrets.NONPROD_FLUTTER_OTLP_ENDPOINT) && secrets.NONPROD_FLUTTER_OTLP_HEADERS || secrets.FLUTTER_OTLP_HEADERS }}
           DASH0_ENVIRONMENT: sandbox
           DASH0_DEPLOYMENT_ID: ${{ github.run_id }}-${{ github.run_attempt }}
           DASH0_VCS_REVISION: ${{ github.sha }}

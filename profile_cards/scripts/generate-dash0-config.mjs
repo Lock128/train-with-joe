@@ -7,6 +7,10 @@
 //   FLUTTER_OTLP_ENDPOINT         fallback for OTLP_ENDPOINT when that is unset or empty
 //   FLUTTER_OTLP_HEADERS          fallback for OTLP_HEADERS when that is unset or empty
 //                                 (a later deploy step that rebuilds the app may only have these)
+//   NONPROD_FLUTTER_OTLP_ENDPOINT / last-resort pair, used only when none of the names above provide an
+//   NONPROD_FLUTTER_OTLP_HEADERS    endpoint or headers (endpoint and headers always come from the same pair)
+//   PROD_FLUTTER_OTLP_ENDPOINT /    pair choice follows DASH0_ENVIRONMENT: production, prod or *teamcorner* use PROD_*,
+//   PROD_FLUTTER_OTLP_HEADERS       any other value uses NONPROD_*, an unset value tries PROD_* then NONPROD_*
 //   DASH0_ENVIRONMENT             deployment.environment.name (sandbox | beta | production)
 //   DASH0_DEPLOYMENT_NAME         defaults to "train-with-joe-<environment>"
 //   DASH0_DEPLOYMENT_ID           e.g. "<run_id>-<run_attempt>"
@@ -69,19 +73,40 @@ function firstNonEmpty(...values) {
   return '';
 }
 
+function pairFrom(env, prefix) {
+  const endpoint = firstNonEmpty(env[`${prefix}_FLUTTER_OTLP_ENDPOINT`]);
+  const headers = firstNonEmpty(env[`${prefix}_FLUTTER_OTLP_HEADERS`]);
+  return endpoint && headers ? { endpoint, headers } : undefined;
+}
+
+// Last-resort pair (NONPROD_/PROD_FLUTTER_OTLP_*). Endpoint and headers are taken from the same pair.
+function fallbackPair(env) {
+  const environment = (env.DASH0_ENVIRONMENT ?? '').trim().toLowerCase();
+  if (!environment) return pairFrom(env, 'PROD') ?? pairFrom(env, 'NONPROD');
+  const productionLike = /^(production|prod)(-|$)/.test(environment) || environment.includes('teamcorner');
+  return pairFrom(env, productionLike ? 'PROD' : 'NONPROD');
+}
+
 export function resolveOtlpInputs(env) {
-  return {
-    endpoint: normalizeOtlpEndpoint(firstNonEmpty(env.OTLP_ENDPOINT, env.FLUTTER_OTLP_ENDPOINT)),
-    rawHeaders: firstNonEmpty(env.OTLP_HEADERS, env.FLUTTER_OTLP_HEADERS),
-  };
+  const endpoint = firstNonEmpty(env.OTLP_ENDPOINT, env.FLUTTER_OTLP_ENDPOINT);
+  const rawHeaders = firstNonEmpty(env.OTLP_HEADERS, env.FLUTTER_OTLP_HEADERS);
+  if (!endpoint && !rawHeaders) {
+    const pair = fallbackPair(env);
+    if (pair) return { endpoint: normalizeOtlpEndpoint(pair.endpoint), rawHeaders: pair.headers };
+  }
+  return { endpoint: normalizeOtlpEndpoint(endpoint), rawHeaders };
 }
 
 // Returns why the SDK would be disabled, or undefined when the inputs are complete. Never includes values.
 export function disabledReason(env) {
   const { endpoint, rawHeaders } = resolveOtlpInputs(env);
   const missing = [];
-  if (!endpoint) missing.push('endpoint (OTLP_ENDPOINT or FLUTTER_OTLP_ENDPOINT is not set or empty)');
-  if (!rawHeaders) missing.push('headers (OTLP_HEADERS or FLUTTER_OTLP_HEADERS is not set or empty)');
+  if (!endpoint) missing.push(
+      'endpoint (OTLP_ENDPOINT or FLUTTER_OTLP_ENDPOINT, or NONPROD_/PROD_FLUTTER_OTLP_ENDPOINT together with the matching headers, is not set or empty)',
+    );
+  if (!rawHeaders) missing.push(
+      'headers (OTLP_HEADERS or FLUTTER_OTLP_HEADERS, or NONPROD_/PROD_FLUTTER_OTLP_HEADERS together with the matching endpoint, is not set or empty)',
+    );
   else if (!extractBearerToken(parseOtlpHeaders(rawHeaders))) {
     missing.push('bearer token (the headers have no non-empty Authorization=Bearer <token> entry)');
   }

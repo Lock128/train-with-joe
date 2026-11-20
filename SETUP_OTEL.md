@@ -394,3 +394,22 @@ endpoint region matches the token, and (on web) the browser network tab for bloc
   (`backend/src/dash0-cdk` and `backend/DASH0_INTEGRATION.md`). If you do this, store the Dash0 API key in AWS Secrets
   Manager as `dash0/api-key` with the format `{"api_key":"Bearer auth_xxx"}`. This secret is not needed for the Flutter
   integration.
+
+## OTLP secret fallback chain
+
+Builds that need the Dash0 endpoint and headers (Angular `join_page` / `profile_cards` web SDK,
+Flutter, CDK deploy steps) pick them from the first complete pair in a chain. A pair is used only
+when both its endpoint and its headers are set, so endpoint and headers always come from the same
+Dash0 dataset.
+
+- Non-production: `NONPROD_FLUTTER_OTLP_*`, then legacy `FLUTTER_OTLP_*`
+- Production: `PROD_FLUTTER_OTLP_*`
+
+In GitHub workflows this is written as
+`${{ (secrets.A_ENDPOINT && secrets.A_HEADERS) && secrets.A_ENDPOINT || secrets.B_ENDPOINT }}` for the
+endpoint and the same condition returning the `_HEADERS` secret for the headers. The Angular generator
+(`scripts/generate-dash0-config.mjs`) applies the same rule to the environment: when `OTLP_*`,
+`FLUTTER_OTLP_*` and `OTEL_EXPORTER_OTLP_*` are all empty it reads `PROD_FLUTTER_OTLP_*` (for
+`DASH0_ENVIRONMENT` production, prod or teamcorner) or `NONPROD_FLUTTER_OTLP_*` (any other value). If
+`DASH0_ENVIRONMENT` is unset it tries the PROD_ pair, then the NONPROD_ pair.
+
