@@ -72,8 +72,7 @@ export function buildConfig(env, deploymentPrefix) {
     dataset: extractDash0Dataset(headers),
     environment: environment || undefined,
     deploymentName:
-      (env.DASH0_DEPLOYMENT_NAME ?? '').trim() ||
-      (environment ? `${deploymentPrefix}-${environment}` : undefined),
+      (env.DASH0_DEPLOYMENT_NAME ?? '').trim() || (environment ? `${deploymentPrefix}-${environment}` : undefined),
     deploymentId: (env.DASH0_DEPLOYMENT_ID ?? '').trim() || undefined,
     vcsRevision: (env.DASH0_VCS_REVISION ?? '').trim() || undefined,
     vcsRefName: (env.DASH0_VCS_REF_NAME ?? '').trim() || undefined,
@@ -92,8 +91,7 @@ export function renderConfigFile(config) {
   ].join('\n');
 }
 
-const invokedDirectly =
-  process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const invokedDirectly = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (invokedDirectly) {
   if (process.env.OTLP_HEADERS && !extractDash0Dataset(parseOtlpHeaders(process.env.OTLP_HEADERS))) {
     console.error(
