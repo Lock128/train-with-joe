@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Git tag or branch to deploy to production (use "main" for urgent deployments)'
-        required: true
+        description: 'Git tag or branch to deploy to production. Leave empty to deploy the latest generated deployment tag. Use "main" for urgent deployments.'
+        required: false
         type: string
       beta_url:
         description: 'Beta environment URL for reference'
@@ -95,6 +95,20 @@ jobs:
       can_deploy: ${{ steps.validate.outputs.can_deploy }}
       is_urgent: ${{ steps.validate.outputs.is_urgent }}
     steps:
+      - name: Debug inputs and dependencies
+        run: |
+          echo "🔍 Debugging deployment inputs..."
+          echo "Input ref: ${{ github.event.inputs.ref }}"
+          echo "Input urgent_deployment: ${{ github.event.inputs.urgent_deployment }}"
+          echo "create-deployment-tag result: ${{ needs.create-deployment-tag.result }}"
+          echo "create-deployment-tag outputs.deployment_tag: ${{ needs.create-deployment-tag.outputs.deployment_tag }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
       - name: Validate deployment inputs
         id: validate
         run: |
@@ -111,15 +125,44 @@ jobs:
               exit 1
             fi
           else
-            REF="${{ github.event.inputs.ref }}"
+            REQUESTED_REF="${{ github.event.inputs.ref }}"
             IS_URGENT="false"
-            
-            # Validate that ref is a tag (for non-urgent deployments)
-            if [[ ! "$REF" =~ ^(v[0-9]+\.|deploy-[0-9]{8}-[0-9]{6}-[a-f0-9]+|beta-|release-|prod-urgent-) ]]; then
-              echo "❌ Invalid ref format. Only tags are allowed for production deployment"
-              echo "💡 For urgent deployments from main, set urgent_deployment=true"
-              echo "📋 Provided ref: $REF"
-              exit 1
+
+            if [ -z "$REQUESTED_REF" ]; then
+              # No ref provided: auto-select the latest generated PRODUCTION deployment tag.
+              # Only origin-reachable tags are considered: the checkout above used
+              # fetch-depth:0 + fetch-tags:true, so the local tag namespace mirrors origin,
+              # and we additionally assert origin reachability below before using the tag.
+              # Ordering note: deployment tags created by the urgent path use `git tag -a`
+              # (annotated), so --sort=-creatordate orders them by tag-creation time. For any
+              # lightweight tags creatordate falls back to the commit date; the annotated
+              # deployment tags this pipeline generates keep the ordering deterministic.
+              # The auto-select set is intentionally narrower than the explicit-ref regex:
+              # only production/deploy-oriented tags (prod-urgent-, deploy-, v<major>.) are
+              # eligible, so an empty ref can never silently promote a beta-/release- tag.
+              LATEST_TAG=$(git for-each-ref --sort=-creatordate --format='%(refname:short)' 'refs/tags/*' | grep -E '^(v[0-9]+\.|deploy-[0-9]{8}-[0-9]{6}-[a-f0-9]+|prod-urgent-)' | head -n 1)
+              if [ -z "$LATEST_TAG" ]; then
+                echo "❌ No generated production deployment tag found matching the allowed naming conventions (v<major>., deploy-*, prod-urgent-); provide an explicit ref"
+                exit 1
+              fi
+              # Fail closed if the auto-selected tag is not present on origin, since
+              # downstream jobs check it out by name from origin.
+              if ! git ls-remote --tags origin "refs/tags/$LATEST_TAG" | grep -q "refs/tags/$LATEST_TAG"; then
+                echo "❌ Auto-selected tag '$LATEST_TAG' is not reachable on origin; provide an explicit ref"
+                exit 1
+              fi
+              REF="$LATEST_TAG"
+              echo "🏷️ No ref provided; auto-selected latest generated deployment tag: $REF"
+            else
+              REF="$REQUESTED_REF"
+
+              # Validate that ref is a tag (for non-urgent deployments)
+              if [[ ! "$REF" =~ ^(v[0-9]+\.|deploy-[0-9]{8}-[0-9]{6}-[a-f0-9]+|beta-|release-|prod-urgent-) ]]; then
+                echo "❌ Invalid ref format. Only tags are allowed for production deployment"
+                echo "💡 For urgent deployments from main, set urgent_deployment=true"
+                echo "📋 Provided ref: $REF"
+                exit 1
+              fi
             fi
           fi
           
