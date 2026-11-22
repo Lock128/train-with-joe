@@ -12,6 +12,7 @@ import 'models/app_version.dart';
 import 'utils/dash0_amplify_http_client.dart';
 import 'utils/dash0_config.dart';
 import 'utils/dash0_device.dart';
+import 'utils/dash0_diagnostics.dart';
 
 import 'models/amplifyconfiguration.dart';
 import 'providers/auth_provider.dart' as app;
@@ -29,6 +30,7 @@ import 'screens/scan_translate_screen.dart';
 import 'screens/vocabulary_lists_screen.dart';
 import 'screens/vocabulary_list_detail_screen.dart';
 import 'screens/info_screen.dart';
+import 'screens/dash0_diagnostics_screen.dart';
 import 'screens/training_list_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'screens/new_password_screen.dart';
@@ -91,7 +93,23 @@ Future<void> _initializeOpenTelemetry() async {
     final headers = parseOtlpHeaders(otlpHeaders);
     final authToken = extractBearerToken(headers);
 
+    // Release builds hide SDK logs. DASH0_SDK_DEBUG=true turns them on.
+    const sdkDebugFlag = String.fromEnvironment('DASH0_SDK_DEBUG', defaultValue: '');
+    final sdkDebug = parseBoolFlag(sdkDebugFlag, defaultValue: false);
+
+    final diagnostics = Dash0Diagnostics.instance;
+    diagnostics.recordConfig(
+      endpoint: otlpEndpoint,
+      authToken: authToken,
+      dataset: extractDash0Dataset(headers),
+      environment: currentDash0Environment(),
+      serviceName: resolveDash0ServiceName('train-with-joe-flutter', currentDash0Environment()),
+      serviceVersion: null,
+      sdkDebug: sdkDebug,
+    );
+
     if (otlpEndpoint.isEmpty || authToken == null) {
+      diagnostics.recordNotConfigured();
       debugPrint('Dash0: no OTLP endpoint or auth token, telemetry disabled');
       return;
     }
@@ -120,6 +138,13 @@ Future<void> _initializeOpenTelemetry() async {
       // The version is optional.
     }
 
+    diagnostics.serviceVersion = serviceVersion;
+    final instrumentations = buildDash0Instrumentations(
+      httpOverrides: httpOverridesEnabled,
+      sessionReplay: replaySamplingRate > 0,
+      profiling: profilingEnabled,
+    );
+
     await Dash0.init(
       Dash0Options(
         serviceName: serviceName,
@@ -132,7 +157,7 @@ Future<void> _initializeOpenTelemetry() async {
           authToken: authToken,
           dataset: extractDash0Dataset(headers),
         ),
-        debug: kDebugMode,
+        debug: kDebugMode || sdkDebug,
         // Reported as the resource attribute deployment.environment.name.
         environment: currentDash0Environment(),
         // Build info plus device model and OS version of native apps. The SDK
@@ -143,11 +168,7 @@ Future<void> _initializeOpenTelemetry() async {
           ...await loadDash0DeviceAttributes(),
         },
         enabled: true,
-        enabledInstrumentations: buildDash0Instrumentations(
-          httpOverrides: httpOverridesEnabled,
-          sessionReplay: replaySamplingRate > 0,
-          profiling: profilingEnabled,
-        ),
+        enabledInstrumentations: instrumentations,
         propagators: propagateTraceHeaders ? [Dash0Propagator.traceparent(dash0PropagationTargets)] : const [],
         compression: Dash0Compression.gzip,
         urlScrubber: scrubDash0Url,
@@ -155,8 +176,10 @@ Future<void> _initializeOpenTelemetry() async {
         sessionReplaySamplingRate: replaySamplingRate,
       ),
     );
+    diagnostics.recordInitialized(instrumentations: instrumentations, propagation: propagateTraceHeaders);
     debugPrint('Dash0 initialized');
   } catch (e, stackTrace) {
+    Dash0Diagnostics.instance.recordFailure(e);
     // If the SDK fails to initialize, log but don't crash the app
     debugPrint('Failed to initialize Dash0: $e');
     debugPrint('Stack trace: $stackTrace');
@@ -684,6 +707,13 @@ class _AuthenticatedAppState extends State<_AuthenticatedApp> {
               path: '/info',
               name: 'info',
               builder: (context, state) => const InfoScreen(),
+            ),
+            // Developer screen, only reachable through the parental gate on
+            // the info screen (long-press on the build number).
+            GoRoute(
+              path: '/info/dash0-diagnostics',
+              name: 'dash0-diagnostics',
+              builder: (context, state) => const Dash0DiagnosticsScreen(),
             ),
             GoRoute(
               path: '/settings',
