@@ -10,6 +10,7 @@
 #   DASH0_ENVIRONMENT                 production uses PROD_ only, anything else uses NONPROD_
 #   NONPROD_FLUTTER_OTLP_ENDPOINT / NONPROD_FLUTTER_OTLP_HEADERS
 #   PROD_FLUTTER_OTLP_ENDPOINT    / PROD_FLUTTER_OTLP_HEADERS
+#   DASH0_SDK_DEBUG (optional)        true makes release builds log SDK warnings with the '[dash0]' prefix
 #   BUILD_NUMBER, FCI_COMMIT, FCI_BRANCH, FCI_REPOSITORY_URL   (set by Codemagic)
 # Headers must contain Authorization=Bearer and Dash0-Dataset=. Header values are never printed.
 # If endpoint or headers are missing, a warning is shown and an empty {} config is written,
@@ -73,7 +74,14 @@ esac
 # Strip credentials (user:password@) from the repository URL.
 VCS_URL="$(printf '%s' "${FCI_REPOSITORY_URL:-}" | sed -E 's#^([A-Za-z][A-Za-z0-9+.-]*://)[^/@]*@#\1#')"
 
+# Optional keys: only written when the Codemagic variable is set and not empty.
+OPT_JSON='{}'
+if [ -n "${DASH0_SDK_DEBUG:-}" ]; then
+  OPT_JSON="$(jq -n --arg v "$DASH0_SDK_DEBUG" '{DASH0_SDK_DEBUG: $v}')"
+fi
+
 jq -n \
+  --argjson optional "$OPT_JSON" \
   --arg endpoint "$OTLP_ENDPOINT" \
   --arg headers "$OTLP_HEADERS" \
   --arg environment "$DASH0_ENV" \
@@ -91,6 +99,6 @@ jq -n \
     DASH0_VCS_REF_HEAD_REVISION: $vcs_revision,
     DASH0_VCS_REF_HEAD_NAME: $vcs_ref,
     DASH0_VCS_REPOSITORY_URL_FULL: $vcs_url
-  }' >"$OUT_FILE"
+  } + $optional' >"$OUT_FILE"
 chmod 600 "$OUT_FILE"
 echo "otlp_config.json written for '${DASH0_ENV:-non-production}' (endpoint set, headers not shown)"

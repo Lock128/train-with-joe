@@ -199,7 +199,12 @@ class _InfoScreenState extends State<InfoScreen> {
                         Text('Frontend', style: Theme.of(context).textTheme.titleMedium),
                         const Divider(),
                         _infoRow('Commit ID', AppVersion.commitId),
-                        _infoRow('Build Number', AppVersion.buildNumber),
+                        // Hidden entry to the Dash0 diagnostics screen, behind the parental gate.
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onLongPress: _openDash0Diagnostics,
+                          child: _infoRow('Build Number', AppVersion.buildNumber),
+                        ),
                       ],
                     ),
                   ),
@@ -313,6 +318,13 @@ class _InfoScreenState extends State<InfoScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _openDash0Diagnostics() async {
+    final passed = await showParentalGate(context);
+    if (passed && mounted) {
+      context.pushNamed('dash0-diagnostics');
+    }
   }
 
   Widget _linkRow(IconData icon, String label, String url) {

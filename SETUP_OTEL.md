@@ -286,6 +286,7 @@ All are read with `String.fromEnvironment` in `frontend/src/lib/main.dart`, `lib
 | `DASH0_VCS_REF_HEAD_NAME` | unset | Git ref name |
 | `DASH0_VCS_REPOSITORY_URL_FULL` | unset | Repository URL |
 | `DASH0_SESSION_REPLAY_SAMPLING_RATE` | `0` (off) | Percent of sessions to record, 0 to 100 |
+| `DASH0_SDK_DEBUG` | `false` | `true` enables SDK logging (`[dash0]` prefix) in release builds. Debug builds always log |
 | `DASH0_PROFILING_ENABLED` | `false` | Enable profiling |
 | `DASH0_HTTP_OVERRIDES_ENABLED` | `true` on native, ignored on web | Trace `dart:io` HTTP calls |
 | `DASH0_PROPAGATE_TRACE_HEADERS` | `true` on native, `false` on web | Send `traceparent` to AppSync |
@@ -385,6 +386,34 @@ After the first deploy with the secrets set, open the app and check, per environ
 
 If nothing arrives: check that the headers include `Dash0-Dataset=`, that the token is valid for that dataset, that the
 endpoint region matches the token, and (on web) the browser network tab for blocked OTLP requests.
+
+## 9a. Troubleshooting on a device
+
+Release builds hide SDK failures, and the SDK drops failed deliveries silently. A hidden diagnostics screen shows what
+the app was built with and can test delivery from the device. It contains no user data and never shows the full token.
+
+**Open it:** Info screen, long-press the `Build Number` row, solve the parental gate, and the "Dash0 diagnostics" screen
+opens. It is not part of the normal navigation and works when telemetry is not configured (it then shows
+`Init branch: no endpoint or token`).
+
+**Buttons:**
+
+- `Send test event` sends `dash0.diagnostics.test` through the SDK and flushes. It confirms the SDK accepted the event,
+  not that Dash0 received it.
+- `Test connection` posts one log record (service `<service name>-diagnostics`, body `diagnostics connection test`)
+  from the device to `<endpoint>/v1/logs` with the built-in token and dataset, with a 10 second timeout. It shows the
+  HTTP status and the first 200 characters of the body, or the exception. 2xx means endpoint, token and dataset work.
+  401 or 403 means the token is wrong or may not ingest. 404 means a wrong endpoint. An exception means the network or
+  TLS failed.
+- `Copy report` copies the fields and last results as plain text. The token is masked (first 7 characters and length).
+
+**SDK logs in release builds:** build with `DASH0_SDK_DEBUG=true` (a Codemagic variable, written to `otlp_config.json`
+by `scripts/codemagic-otel-prebuild.sh`, or `--dart-define=DASH0_SDK_DEBUG=true`). Then read the console for lines with
+`[dash0]`: Xcode (Window, Devices and Simulators, Open Console) or Console.app with the filter `[dash0]` on iOS, and
+`adb logcat | grep dash0` on Android. Turn it off again for store releases.
+
+**DASH0_ENVIRONMENT must be set in Codemagic.** Without it the release build has no `deployment.environment.name` and
+the prebuild script picks the `NONPROD_` pair. Set `production` for the `PROD_` pair, or `beta` for non-production.
 
 ## 10. Optional follow-ups (not part of this change)
 

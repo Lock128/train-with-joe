@@ -313,6 +313,7 @@ cat <<'EOF'
   DASH0_VCS_REF_HEAD_NAME                 $FCI_BRANCH                       Branch or tag name
   DASH0_VCS_REPOSITORY_URL_FULL           $FCI_REPOSITORY_URL (if set)      Repository URL
   DASH0_SESSION_REPLAY_SAMPLING_RATE      0                                 Session replay rate, 0 to 1. Keep 0 (off) for a children's app
+  DASH0_SDK_DEBUG                         false                             true logs SDK delivery warnings ('[dash0]') in release builds
   DASH0_PROFILING_ENABLED                 false                             Enable profiling
   DASH0_HTTP_OVERRIDES_ENABLED            true (native)                     Trace dart:io HTTP calls
   DASH0_PROPAGATE_TRACE_HEADERS           true (native)                     Send trace headers on API calls
