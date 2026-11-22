@@ -52,7 +52,7 @@ dependencies:
   dash0_flutter_sdk:
     git:
       url: https://github.com/Lock128/flutter-dash0-sdk.git
-      ref: v0.10.0
+      ref: v0.11.0
 
   package_info_plus: ^10.2.2
 

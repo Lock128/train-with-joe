@@ -343,7 +343,8 @@ Train with Joe is used by children, so the integration is deliberately minimal:
 - Session replay is off (`DASH0_SESSION_REPLAY_SAMPLING_RATE=0`). Do not enable it without a legal review, since replays
   can capture vocabulary content and on-screen text.
 - Native apps send a synthetic user agent built by the SDK from the platform and app version. It contains no device
-  name or identifiers. Web builds keep the browser user agent.
+  name or identifiers. Since SDK v0.11.0 the iOS and iPadOS user agent is parseable, so Dash0 shows the OS of iOS
+  sessions. Web builds keep the browser user agent.
 - Screen names are fixed route templates (for example `vocabulary-detail`), never ids or user text.
 
 Privacy release gate:
