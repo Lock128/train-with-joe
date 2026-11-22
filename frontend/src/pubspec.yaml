@@ -12,6 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   cupertino_icons: ^2.0.0
+  material_ui: ^1.7.0
   
   # AWS Amplify integration
   amplify_flutter: ^2.11.0

@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../l10n/generated/app_localizations.dart';
 
 /// A parental gate dialog that presents an adult-level task.

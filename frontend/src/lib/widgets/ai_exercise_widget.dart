@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Widget for displaying an AI-generated exercise during training
 class AIExerciseWidget extends StatelessWidget {
