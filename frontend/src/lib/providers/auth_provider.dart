@@ -28,9 +28,16 @@ class AuthProvider extends ChangeNotifier {
     _checkAuthStatus();
   }
 
-  /// Identifies the telemetry session with the Cognito user id only. This is a
-  /// children's app, so no email or name is sent. Never throws.
-  void _identifyTelemetryUser() => identifyDash0User(_currentUser?.userId);
+  /// Identifies the telemetry session with the Cognito user id. The login
+  /// email is passed only as a fallback name (see dash0_identity.dart); the
+  /// profile display name replaces it once the user profile loads. Never throws.
+  void _identifyTelemetryUser() {
+    final username = _currentUser?.username;
+    identifyDash0User(
+      _currentUser?.userId,
+      login: _cognitoEmail ?? ((username?.contains('@') ?? false) ? username : null),
+    );
+  }
 
   /// Check current authentication status
   Future<void> _checkAuthStatus() async {
