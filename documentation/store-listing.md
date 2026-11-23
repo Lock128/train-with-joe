@@ -84,7 +84,7 @@ No demo account is needed — any new sign-up will work. The app requires an int
 
 Privacy & Data Collection:
 - The app does not include any third-party advertising SDKs and does not use data for advertising, tracking or behavioral advertising. No data is sold or shared for advertising.
-- The app sends diagnostics and performance telemetry (usage and performance data, error reports, screen names/page views with query strings removed, device model, OS version, app version, and a pseudonymous Cognito user ID, no email or name) to Dash0 as a data processor, stored in the EU (AWS eu-west-1) for 30 days (metrics 13 months). IP addresses are anonymized and location is approximate (city level). Session replay and profiling are off. Purpose: diagnostics and reliability.
+- The app sends diagnostics and performance telemetry (usage and performance data, error reports, screen names/page views with query strings removed, device model, OS version, app version, and a pseudonymous Cognito user ID linked to the user name/display name, or the login email as the name only if no display name is set; the email is never sent as a separate field) to Dash0 as a data processor, stored in the EU (AWS eu-west-1) for 30 days (metrics 13 months). IP addresses are anonymized and location is approximate (city level). Session replay and profiling are off. Purpose: support, diagnostics and reliability. No advertising.
 - The app collects only the data necessary for its core functionality: email for authentication (via AWS Cognito), vocabulary lists, training progress, and subscription status. All data is stored securely in AWS (DynamoDB, S3) and is not used for any purpose beyond providing the app's features.
 
 ## Privacy Policy URL

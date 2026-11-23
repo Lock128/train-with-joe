@@ -3,6 +3,7 @@ import '../data/repositories/user_repository.dart';
 import '../domain/models/user.dart';
 import '../domain/result.dart';
 import '../providers/auth_provider.dart';
+import '../utils/dash0_identity.dart';
 
 /// Provider for managing user data.
 ///
@@ -69,6 +70,7 @@ class UserProvider extends ChangeNotifier {
         case Success(:final value):
           _user = value;
           _error = null;
+          setDash0DisplayName(value.name);
           await _autoRepairEmail();
         case Failure(:final error):
           _error = error;
@@ -96,6 +98,7 @@ class UserProvider extends ChangeNotifier {
         case Success(:final value):
           _user = value;
           _error = null;
+          setDash0DisplayName(value.name);
           _isLoading = false;
           notifyListeners();
           return true;

@@ -338,8 +338,9 @@ default.
 
 Train with Joe is used by children, so the integration is deliberately minimal:
 
-- The only identity sent is the Cognito user id (set after sign-in, cleared on sign-out). Email and names are never
-  sent.
+- The identity sent is the Cognito user id plus a user name (set after sign-in, cleared on sign-out). The name is the
+  profile display name once it loads. If the user has no display name, the login email is sent as `name` only (and in
+  `fullName` as `<name> (<id>)`), never as the Dash0 `email` field. Roles are never sent.
 - Session replay is off (`DASH0_SESSION_REPLAY_SAMPLING_RATE=0`). Do not enable it without a legal review, since replays
   can capture vocabulary content and on-screen text.
 - Native apps send a synthetic user agent built by the SDK from the platform and app version. It contains no device
@@ -355,6 +356,13 @@ Privacy release gate:
   The app only links to the hosted policy, so no app text needs to change.
 - Maintainers still need to update manually: App Store Connect "App Privacy" (kids category), and the Google Play
   Data safety form and Families declarations. `documentation/store-listing.md` has the review note wording.
+- The privacy policy, `documentation/store-listing.md` and `documentation/app-store-review-response.md` now state that
+  the user name/display name (or the login email when it is the only identifier) is linked to the pseudonymous id for
+  support and diagnostics, with no advertising. App Store Connect "App Privacy" must list Name (and Email Address for
+  the fallback) as linked to the user (Kids category), and the Google Play Data safety form and Families declarations
+  must be updated by hand.
+- Sending a child's name or login to a third-party processor raises the COPPA and GDPR-K question further than a
+  pseudonymous id alone. Keep this flagged for legal review before production.
 - OPEN QUESTION for human and legal review (not decided here): the policy says children under 13 are not knowingly
   covered without parental consent, and telemetry is linked to a pseudonymous user ID. Whether telemetry needs explicit
   parental consent or an opt-in (COPPA, GDPR-K, ePrivacy), or whether it can run as legitimate interest or a
@@ -381,7 +389,7 @@ After the first deploy with the secrets set, open the app and check, per environ
 - Page view events appear when you navigate between screens, with route template names.
 - HTTP spans appear for AppSync calls.
 - Trigger an error in a sandbox build and confirm it shows up as an error event.
-- After sign-in, the user id attribute is the Cognito `sub`, not an email.
+- After sign-in, the user id attribute is the Cognito `sub`; the user name shows the display name (or the login email if none is set).
 - Dash0 shows no data from builds without secrets (expected). In the build log, the step prints `set` or
   `EMPTY (telemetry disabled)` for endpoint and headers.
 
