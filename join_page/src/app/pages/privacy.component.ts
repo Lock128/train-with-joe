@@ -53,13 +53,12 @@ import { TranslationService } from '../services/translation.service';
               app reliable and fix problems. This includes app usage and performance data, error reports, the screens
               you open (page views, with any query string or fragment removed from web addresses), your device model,
               operating system and version, and the app version. Telemetry is linked to a pseudonymous user ID generated
-              by our authentication service (AWS Cognito), together with your user name (the display name in your profile) so
-              that we can recognize your sessions for support and diagnostics. If you have not set a display name, we
-              send your login (email address) as the user name instead. We do not send your email address in any other
-              way. Dash0 anonymizes
-              IP addresses and stores only an approximate, city-level location. Session replay (recording of your
-              screen) and profiling are turned off. We do not use this data for advertising, we do not sell it, and we
-              do not share it for advertising or behavioral advertising.
+              by our authentication service (AWS Cognito), together with your user name (the display name in your
+              profile) so that we can recognize your sessions for support and diagnostics. If you have not set a display
+              name, we send your login (email address) as the user name instead. We do not send your email address in
+              any other way. Dash0 anonymizes IP addresses and stores only an approximate, city-level location. Session
+              replay (recording of your screen) and profiling are turned off. We do not use this data for advertising,
+              we do not sell it, and we do not share it for advertising or behavioral advertising.
             </p>
           </section>
 
@@ -192,13 +191,13 @@ import { TranslationService } from '../services/translation.service';
               Fehlerberichte, die von Ihnen geöffneten Bildschirme (Seitenaufrufe, wobei Query-Strings und Fragmente aus
               Webadressen entfernt werden), Ihr Gerätemodell, das Betriebssystem samt Version und die App-Version. Die
               Telemetrie ist mit einer pseudonymen Nutzer-ID verknüpft, die von unserem Authentifizierungsdienst (AWS
-              Cognito) vergeben wird, zusammen mit Ihrem Benutzernamen (dem Anzeigenamen in Ihrem Profil), damit wir Ihre
-              Sitzungen für Support und Diagnose zuordnen können. Haben Sie keinen Anzeigenamen festgelegt, senden wir
-              stattdessen Ihre Anmeldekennung (E-Mail-Adresse) als Benutzernamen. Ihre E-Mail-Adresse senden wir
-              nicht auf andere Weise. Dash0 anonymisiert
-              IP-Adressen und speichert nur einen ungefähren Standort auf Stadtebene. Session Replay (Aufzeichnung Ihres
-              Bildschirms) und Profiling sind deaktiviert. Wir verwenden diese Daten nicht für Werbung, verkaufen sie
-              nicht und geben sie nicht für Werbezwecke oder verhaltensbasierte Werbung weiter.
+              Cognito) vergeben wird, zusammen mit Ihrem Benutzernamen (dem Anzeigenamen in Ihrem Profil), damit wir
+              Ihre Sitzungen für Support und Diagnose zuordnen können. Haben Sie keinen Anzeigenamen festgelegt, senden
+              wir stattdessen Ihre Anmeldekennung (E-Mail-Adresse) als Benutzernamen. Ihre E-Mail-Adresse senden wir
+              nicht auf andere Weise. Dash0 anonymisiert IP-Adressen und speichert nur einen ungefähren Standort auf
+              Stadtebene. Session Replay (Aufzeichnung Ihres Bildschirms) und Profiling sind deaktiviert. Wir verwenden
+              diese Daten nicht für Werbung, verkaufen sie nicht und geben sie nicht für Werbezwecke oder
+              verhaltensbasierte Werbung weiter.
             </p>
           </section>
 
