@@ -13,6 +13,7 @@ import 'utils/dash0_amplify_http_client.dart';
 import 'utils/dash0_config.dart';
 import 'utils/dash0_device.dart';
 import 'utils/dash0_diagnostics.dart';
+import 'utils/dash0_session_store.dart';
 
 import 'models/amplifyconfiguration.dart';
 import 'providers/auth_provider.dart' as app;
@@ -175,6 +176,8 @@ Future<void> _initializeOpenTelemetry() async {
         metricExportInterval: parseSeconds(metricIntervalRaw) ?? const Duration(seconds: 30),
         sessionReplaySamplingRate: replaySamplingRate,
       ),
+      // Persist the session id so reloads and resumes keep the same RUM session.
+      sessionStore: Dash0SessionStore(),
     );
     diagnostics.recordInitialized(instrumentations: instrumentations, propagation: propagateTraceHeaders);
     debugPrint('Dash0 initialized');

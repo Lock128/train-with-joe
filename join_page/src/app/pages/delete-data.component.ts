@@ -252,5 +252,15 @@ function resolveDeletionRequestUrl(): string {
   if (!url || url.startsWith('REPLACE_WITH_')) {
     return '';
   }
+  // Only accept an absolute http(s) endpoint with a path. A relative value or the bare site root would send the
+  // POST to the static site itself, which cannot handle it and fails.
+  try {
+    const parsed = new URL(url);
+    if ((parsed.protocol !== 'https:' && parsed.protocol !== 'http:') || parsed.pathname === '/') {
+      return '';
+    }
+  } catch {
+    return '';
+  }
   return url;
 }
