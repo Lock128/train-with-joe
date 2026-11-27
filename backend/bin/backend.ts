@@ -9,8 +9,12 @@ import { BedrockStack } from '../lib/bedrock-stack';
 import { SubscriptionStack } from '../lib/subscription-stack';
 import { DistributionStack } from '../lib/distribution-stack';
 import { CertificateStack } from '../lib/certificate-stack';
+import { LambdaServiceNameAspect } from '../lib/util/lambda-service-name-aspect';
 
 const app = new cdk.App();
+
+// Give every Lambda a service.name (the function name) for Dash0 telemetry
+cdk.Aspects.of(app).add(new LambdaServiceNameAspect());
 
 const namespace = process.env.NODE_ENV ?? `sandbox-${os.userInfo().username.replace('_', '-').toLowerCase()}`;
 
