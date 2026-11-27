@@ -227,7 +227,7 @@ jobs:
 
       - name: Build Flutter web app
         working-directory: frontend/src
-        run: flutter build web --release --dart-define=COMMIT_ID=${{ github.sha }} --dart-define=GITHUB_RUN_NUMBER=${{ github.run_number }} --dart-define-from-file=otlp_config.json
+        run: flutter build web --release --source-maps --dart-define=COMMIT_ID=${{ github.sha }} --dart-define=GITHUB_RUN_NUMBER=${{ github.run_number }} --dart-define-from-file=otlp_config.json
 
       - name: Inject join page config
         run: bash scripts/inject-join-page-config.sh beta ${{ env.AWS_REGION }}
