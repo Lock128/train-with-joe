@@ -87,7 +87,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) {
+      // Localizations not available yet (e.g. during locale switch).
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     final colorScheme = Theme.of(context).colorScheme;
     final localeProvider = context.watch<LocaleProvider>();
     final currentLocale = localeProvider.locale;

@@ -319,7 +319,15 @@ jobs:
       - name: Build Flutter web app
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         working-directory: frontend/src
-        run: flutter build web --release --dart-define=COMMIT_ID=${{ github.sha }} --dart-define=GITHUB_RUN_NUMBER=${{ github.run_number }} --dart-define-from-file=otlp_config.json
+        run: flutter build web --release --source-maps --dart-define=COMMIT_ID=${{ github.sha }} --dart-define=GITHUB_RUN_NUMBER=${{ github.run_number }} --dart-define-from-file=otlp_config.json
+
+      - name: Upload source maps to Dash0 and strip them from the build
+        if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+        run: bash scripts/upload-flutter-source-maps.sh frontend/src/build/web
+        env:
+          DASH0_AUTH_TOKEN: ${{ secrets.DASH0_AUTH_TOKEN }}
+          DASH0_API_URL: ${{ secrets.DASH0_API_URL }}
+          DASH0_DATASET: ${{ secrets.DASH0_DATASET }}
 
       - name: Inject join page config
         if: needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
@@ -374,7 +382,7 @@ jobs:
       - name: Deploy frontend to S3
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          aws s3 sync frontend/src/build/web "s3://${{ steps.cf-ids.outputs.frontend_bucket }}" --delete
+          aws s3 sync frontend/src/build/web "s3://${{ steps.cf-ids.outputs.frontend_bucket }}" --delete --exclude "*.map"
 
       - name: Deploy join page to S3
         if: needs.changes.outputs.join_page == 'true' || github.event_name == 'workflow_dispatch'
